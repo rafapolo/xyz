@@ -15,7 +15,7 @@ A seguir, a imagem não é uma foto de um avião ou satélite, é uma parte do R
 **Todas as Igrejas do País**  
 ![][image3]![][image4]![][image5]![][image6]![][image7]
 
-**Igreja pra Caralho\! Daria para integrar com a Base de Dados do TSE e relacionar com a votação.**  
+**Igreja pra dedéu\! Daria para integrar com a Base de Dados do TSE e relacionar com a votação.**  
 ![][image8]
 
 **Residenciais em Nova Friburgo com Altura relativa a número de moradores**  
