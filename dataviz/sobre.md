@@ -30,6 +30,7 @@ A imagem abaixo não é uma foto aérea: é uma representação visual do Rio de
 **![][image11]**
 
 **Experimento para Visualizar Confecçoes Abertas na Pandemia**
+
 **![][image12]**
 
 **Todas as Residências no Município de Nova Friburgo**
@@ -37,6 +38,7 @@ A imagem abaixo não é uma foto aérea: é uma representação visual do Rio de
 
 **Número de Entidades Religiosas supera o de Sindicatos no ano 2000**
 ![][image14]
+
 **Heatmap de registros de novas Empresas em Nova Friburgo**
 ![][image15]
 
