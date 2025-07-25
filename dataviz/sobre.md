@@ -53,8 +53,6 @@ A imagem abaixo não é uma foto aérea: é uma representação visual do Rio de
 ![][image19]
 
 ![][image20]
-**Número de Principais Áreas Comerciais de novas Empresas Abertas em Nova Friburgo**
-![][image21]
 
 **Que áreas econômicas fecharam depois de outras durante a pandemia?**
 ![][image22]
