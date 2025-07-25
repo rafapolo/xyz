@@ -56,6 +56,7 @@ A imagem abaixo não é uma foto aérea: é uma representação visual do Rio de
 
 **Que áreas econômicas fecharam depois de outras durante a pandemia?**
 ![][image22]
+
 **Relação Societária de Empresários Friburguenses com mais empresas**
 ![][image23]![][image24]
 
