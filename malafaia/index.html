@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Império Malafaia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        
+        #map {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background-color: #000;
+        }
+        
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1 !important;
+        }
+        
+        .deck-tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .company-stats {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            min-width: 500px;
+        }
+
+        .company-stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .company-list {
+            max-height: 300px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .company-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .company-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .company-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .company-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .company-list.collapsed {
+            display: none;
+        }
+
+        .company-stats h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #ffd700;
+        }
+
+        .company-stats ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .company-stats li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            line-height: 1.4;
+        }
+
+        .company-stats li strong {
+            flex: 1;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            margin-left: 0;
+        }
+
+        .company-stats li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .company-stats li:last-child {
+            border-bottom: none;
+        }
+
+        .company-stats li.active {
+            background-color: rgba(255, 215, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .company-stats li.inactive {
+            opacity: 0.3;
+        }
+
+        .color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .year-slider-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            /* left: 50%; */
+            /* transform: translateX(-50%); */
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            min-width: 500px;
+        }
+
+        .year-slider-container h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .year-display {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .year-range-display {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .year-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 5px;
+            border-radius: 5px;
+            background: linear-gradient(to right, 
+                rgb(139, 0, 0),       /* Dark Red (ember) */
+                rgb(255, 0, 0),       /* Pure Red (hottest) */
+                rgb(255, 69, 0),      /* Red-Orange */
+                rgb(255, 140, 0),     /* Flame Orange */
+                rgb(255, 215, 0),     /* Gold */
+                rgb(255, 255, 0)      /* Bright Yellow */
+            );
+            outline: none;
+            cursor: pointer;
+        }
+
+        .year-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            border: 1px solid black;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgb(255, 72, 0);
+            cursor: pointer;
+        }
+
+        .year-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgb(255, 215, 0);
+            cursor: pointer;
+            border: none;
+        }
+
+        .year-slider::-moz-range-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, 
+                rgb(139, 0, 0),       /* Dark Red (ember) */
+                rgb(255, 0, 0),       /* Pure Red (hottest) */
+                rgb(255, 69, 0),      /* Red-Orange */
+                rgb(255, 140, 0),     /* Flame Orange */
+                rgb(255, 215, 0),     /* Gold */
+                rgb(255, 255, 0)      /* Bright Yellow */
+            );
+            border: none;
+        }
+
+        .year-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        /* Intermediate tablet styles - prevent collision */
+        @media (max-width: 1100px) and (min-width: 769px) {
+            .company-stats {
+                min-width: 300px;
+                max-width: 40vw;
+                right: 15px;
+            }
+
+            .year-slider-container {
+                min-width: 350px;
+                max-width: 45vw;
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.4rem;
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                text-align: center;
+            }
+
+            .company-stats {
+                position: absolute;
+                bottom: 120px;
+                left: 15px;
+                right: 15px;
+                min-width: unset;
+                width: calc(100vw - 30px);
+                padding: 15px;
+                max-height: 40vh;
+                overflow: hidden;
+            }
+
+            .company-list {
+                max-height: calc(40vh - 60px);
+            }
+
+            .company-stats h2 {
+                font-size: 1.2rem;
+            }
+
+            .company-stats li {
+                font-size: 1rem;
+                padding: 10px 0;
+            }
+
+            .company-stats li strong {
+                font-size: 0.95rem;
+                line-height: 1.3;
+            }
+
+            .year-slider-container {
+                position: absolute;
+                bottom: 15px;
+                left: 50%;
+                /* transform: translateX(-50%); */
+                min-width: unset;
+                /* width: calc(100vw - 30px); */
+                padding: 15px;
+            }
+
+            .year-slider-container h3 {
+                font-size: 1.1rem;
+            }
+
+            .color-indicator {
+                width: 10px;
+                height: 10px;
+                margin-right: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2rem;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+
+            .company-stats {
+                bottom: 110px;
+                left: 10px;
+                right: 10px;
+                /* width: calc(100vw - 20px); */
+                padding: 12px;
+                /* max-height: 35vh; */
+            }
+
+            .company-list {
+                /* max-height: calc(35vh - 50px); */
+            }
+
+            .company-stats h2 {
+                font-size: 1.1rem;
+            }
+
+            .company-stats li {
+                font-size: 0.9rem;
+                padding: 8px 0;
+            }
+
+            .company-stats li strong {
+                font-size: 0.85rem;
+                line-height: 1.25;
+            }
+
+            .year-slider-container {
+                bottom: 10px;
+                left: 50%;
+                /* transform: translateX(-50%); */
+                /* width: calc(100vw - 20px); */
+                padding: 12px;
+            }
+
+            .toggle-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+
+            .color-indicator {
+                width: 8px;
+                height: 8px;
+                margin-right: 4px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <h1>O Império de Silas Malafaia no Brasil (1971-2025)</h1>
+    
+    <div class="company-stats">
+        <div class="year-display" id="yearDisplay">Ano 2025</div>
+        <div class="slider-wrapper">
+            <input type="range" min="1971" max="2025" value="2025" id="minYearSlider" class="year-slider">
+        </div>
+        <div class="year-labels">
+            <span>1971</span>
+            <span>2025</span>
+        </div>
+        <br>
+        <ul class="company-list">
+            <li data-company="ASSEMBLEIA DE DEUS VITORIA EM CRISTO">
+                <span class="color-indicator" style="background-color: rgb(255, 0, 0);"></span>
+                <strong>ASSEMBLEIA DE DEUS VITORIA EM CRISTO (152)</strong>
+            </li>
+            <li data-company="EDITORA CENTRAL GOSPEL LTDA">
+                <span class="color-indicator" style="background-color: rgb(255, 69, 0);"></span>
+                <strong>EDITORA CENTRAL GOSPEL LTDA (14)</strong>
+            </li>
+            <li data-company="TALLI EVENTOS E PRODUCOES GOSPEL LTDA">
+                <span class="color-indicator" style="background-color: rgb(255, 140, 0);"></span>
+                <strong>TALLI EVENTOS E PRODUCOES GOSPEL LTDA (2)</strong>
+            </li>            
+            <li data-company="EDITORA VIDA VITORIOSA LTDA">
+                <span class="color-indicator" style="background-color: rgb(255, 255, 0);"></span>
+                <strong>EDITORA VIDA VITORIOSA LTDA (1)</strong>
+            </li>
+            <li data-company="CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL">
+                <span class="color-indicator" style="background-color: rgb(255, 215, 0);"></span>
+                <strong>CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL (1)</strong>
+            </li>
+            <li data-company="ESM INVESTIMENTO E PARTICIPACOES LTDA">
+                <span class="color-indicator" style="background-color: rgb(139, 0, 0);"></span>
+                <strong>ESM INVESTIMENTO E PARTICIPACOES LTDA</strong>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Load required libraries from CDN -->
+    <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/d3-dsv@3.0.1/dist/d3-dsv.min.js"></script>
+    
+    <!-- Fallback for older browsers -->
+    <script>
+      // Check if deck.gl is loaded properly
+      if (typeof deck === 'undefined') {
+        console.error('deck.gl failed to load from CDN');
+      }
+    </script>
+    
+    <script>
+        // Company colors mapping - Enhanced Flame palette
+        const COMPANY_COLORS = {
+          'ASSEMBLEIA DE DEUS VITORIA EM CRISTO': [255, 0, 0, 255],       // Pure Red (hottest)
+          'EDITORA CENTRAL GOSPEL LTDA': [255, 69, 0, 255],              // Red-Orange
+          'TALLI EVENTOS E PRODUCOES GOSPEL LTDA': [255, 140, 0, 255],   // Flame Orange  
+          'CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL': [255, 215, 0, 255], // Gold
+          'EDITORA VIDA VITORIOSA LTDA': [255, 255, 0, 255],             // Bright Yellow
+          'ESM INVESTIMENTO E PARTICIPACOES LTDA': [139, 0, 0, 255]      // Dark Red (ember)
+        };
+
+        // Global state for filtering
+        let globalData = [];
+        let selectedCompany = null;
+        let selectedMinYear = 2025;
+        let baseMapLayer = null;
+        let isSliderActive = false;
+
+        // Ensure container is ready
+        const mapContainer = document.getElementById('map');
+
+        const deckgl = new deck.Deck({
+          container: mapContainer,
+          width: window.innerWidth,
+          height: window.innerHeight,
+          initialViewState: {
+            longitude: -43.2096, // Rio de Janeiro longitude
+            latitude: -22.9035,  // Rio de Janeiro latitude  
+            zoom: 10,            // Zoom level for ~15km view
+            pitch: 0,
+            bearing: 0           // 0 = North is up (default orientation)
+          },
+          controller: true, // Enable full 3D controls including rotation and pitch
+          canvas: null, // Let Deck.gl create its own canvas
+          onLoad: () => {
+            console.log('Deck.gl loaded successfully');
+          },
+          onError: (error) => {
+            console.error('Deck.gl error:', error);
+          },
+          onResize: ({width, height}) => {
+            console.log('Deck resized:', width, height);
+          }
+        });
+
+        // Handle window resize events to ensure map resizes to 100%
+        function handleResize() {
+          const newWidth = window.innerWidth;
+          const newHeight = window.innerHeight;
+          
+          deckgl.setProps({
+            width: newWidth,
+            height: newHeight
+          });
+        }
+
+        // Add resize event listener
+        window.addEventListener('resize', handleResize);
+
+        // Function to parse CSV data directly
+        function parseCSVData() {
+          // Embedded CSV data
+          const csvData = `razao_social,latitude,longitude,data_inicio_atividade
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.879054,-43.40509,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.845872,-43.280866,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.948262,-43.193123,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.81491,-43.426431,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.822084,-43.287188,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.961122,-43.166955,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848553,-43.28409,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.844975,-43.297484,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.856606,-43.242987,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.84423,-43.308163,1971-09-29
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.841506,-43.280409,1971-09-29
+EDITORA CENTRAL GOSPEL LTDA,-22.934624,-43.379412,1999-05-07
+EDITORA CENTRAL GOSPEL LTDA,-22.695794,-43.427371,2000-12-11
+CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL,-22.941436,-43.388765,2002-02-06
+TALLI EVENTOS E PRODUCOES GOSPEL LTDA,-22.940543,-43.388197,2002-05-22
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.636214,-43.286293,2002-06-14
+TALLI EVENTOS E PRODUCOES GOSPEL LTDA,-22.838997,-43.280759,2002-11-12
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.844945,-43.301197,2003-07-02
+EDITORA CENTRAL GOSPEL LTDA,-22.835822,-43.279319,2004-05-06
+EDITORA CENTRAL GOSPEL LTDA,-22.820391,-43.002272,2005-07-20
+EDITORA CENTRAL GOSPEL LTDA,-22.831033,-43.273678,2005-09-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.824745,-43.04769,2005-09-19
+EDITORA CENTRAL GOSPEL LTDA,-22.554753,-42.999793,2006-10-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-8.119932,-34.897135,2006-11-08
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.92902,-43.380143,2006-12-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.822437,-43.303502,2006-12-15
+EDITORA CENTRAL GOSPEL LTDA,-22.896251,-43.122914,2007-03-22
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.881436,-43.464199,2007-04-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.827742,-43.27903,2007-04-18
+EDITORA CENTRAL GOSPEL LTDA,-22.901291,-43.557849,2007-06-05
+EDITORA CENTRAL GOSPEL LTDA,-23.710165,-46.406354,2007-07-31
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.033398,-42.380113,2007-10-11
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.838071,-43.312083,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.830638,-43.313928,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.768581,-43.386648,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.850128,-43.469334,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.776577,-43.362035,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.872999,-43.372909,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.541562,-41.985493,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.843138,-43.283812,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.837416,-43.283456,2008-03-13
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.909672,-43.289971,2008-04-14
+EDITORA CENTRAL GOSPEL LTDA,-22.877805,-43.465591,2008-06-09
+EDITORA VIDA VITORIOSA LTDA,-22.934551,-43.379349,2008-07-10
+EDITORA CENTRAL GOSPEL LTDA,-22.787531,-43.285943,2008-09-25
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.758741,-43.303529,2008-11-06
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.769823,-43.283306,2008-11-06
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.61508,-43.234407,2008-11-06
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.734848,-43.310604,2008-11-06
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.869274,-43.341332,2008-11-06
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.532034,-41.973153,2009-01-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,0.0,0.0,2009-01-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-20.602065,-41.20493,2009-01-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.843658,-43.287068,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.808048,-43.302324,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.828763,-43.321568,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848155,-43.283597,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.862288,-43.334508,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.799677,-43.021646,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.846799,-43.278362,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.852717,-43.295498,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.888728,-43.362453,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.867526,-43.294101,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.994688,-43.240239,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.834935,-43.290749,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848725,-43.283299,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.668025,-43.133936,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-10.425861,-48.897076,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.01,-43.333975,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.81468,-43.018246,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.807655,-43.368855,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.845476,-43.293009,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.839886,-43.290144,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.821264,-43.271395,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848167,-43.283399,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-8.047648,-34.926673,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.816484,-43.296567,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.747505,-43.488572,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.853285,-43.283651,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.795755,-43.335589,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.881747,-43.336489,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848826,-43.287822,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.924919,-43.644413,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.396612,-41.787771,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.804967,-43.429346,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.964881,-43.182654,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.966035,-43.350025,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.66815,-43.133559,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.742692,-43.485556,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.509351,-41.93929,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.848494,-43.291735,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.69192,-43.238105,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.849955,-43.287388,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.715347,-43.631857,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.706747,-43.162961,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-8.125765,-34.899975,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.851261,-43.24384,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.875942,-43.554881,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.498537,-43.197445,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.851115,-43.281593,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.004184,-43.430005,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.528955,-44.197714,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.850645,-43.284788,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.86103,-43.491169,2010-07-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.864933,-42.345337,2010-09-09
+EDITORA CENTRAL GOSPEL LTDA,-23.000243,-43.338669,2010-11-17
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.681737,-42.001508,2010-11-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.865731,-42.309656,2011-01-14
+EDITORA CENTRAL GOSPEL LTDA,-22.81722,-42.972959,2011-03-22
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.784003,-43.542018,2011-04-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.860882,-42.329594,2011-04-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-25.556146,-49.351064,2011-04-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.688056,-43.559784,2011-04-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.768623,-43.429802,2011-04-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-26.228796,-52.685955,2013-04-24
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.740421,-43.493489,2013-04-24
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-26.482041,-49.09254,2014-03-07
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.837284,-43.276605,2014-10-27
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.738886,-43.45783,2015-04-30
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.91534,-43.623843,2015-07-03
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-5.755993,-35.241497,2016-03-11
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-21.181202,-42.105795,2016-03-11
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.036966,-42.166167,2016-03-28
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.974388,-43.656397,2016-05-31
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.894052,-43.53464,2016-05-31
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.949917,-43.389694,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.900256,-43.355303,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.939057,-43.384097,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.945769,-43.680904,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.881884,-43.369752,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.029001,-43.472896,2016-11-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.800956,-43.005783,2016-12-12
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.856859,-42.239391,2017-04-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.974388,-43.656397,2017-10-24
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.885555,-43.434237,2017-12-11
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-21.201763,-41.909191,2018-01-11
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.906404,-43.177204,2018-02-23
+ESM INVESTIMENTO E PARTICIPACOES L TDA,-22.999792,-43.347458,2018-04-02
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.971066,-43.187087,2019-01-30
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.341923,-41.754683,2019-03-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.734134,-42.832515,2019-05-30
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-7.23761,-35.883857,2019-07-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.480542,-46.540262,2019-12-12
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.480542,-46.540262,2020-02-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-8.342515,-36.416079,2020-08-14
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.428892,-43.76192,2020-09-15
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.036966,-42.166167,2020-11-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.597655,-46.484235,2020-12-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-21.376761,-42.683663,2021-02-10
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-8.117722,-34.941979,2021-02-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.479062,-46.661909,2021-03-18
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.81355,-43.41993,2021-06-23
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-29.242544,-51.549544,2021-10-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.219877,-44.752126,2021-10-19
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.0203,-43.466095,2021-11-17
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.506032,-47.482168,2022-03-22
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.036966,-42.166167,2022-04-27
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.036966,-42.166167,2022-04-27
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.83124,-42.03505,2022-05-01
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-23.013809,-45.560556,2022-05-25
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-9.576883,-35.770448,2022-07-08
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.920819,-43.093788,2022-08-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-7.84674,-35.240499,2022-10-04
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.592918,-43.186803,2022-11-10
+EDITORA CENTRAL GOSPEL LTDA,-8.14541,-34.919264,2022-11-28
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-7.452609,-35.239088,2023-01-02
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.928387,-42.960664,2023-08-09
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-7.246527,-35.916203,2023-10-02
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-9.735748,-36.674539,2024-01-03
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.831359,-43.010788,2024-04-24
+ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.859572,-42.343261,2024-05-13`;
+
+          const data = d3.dsvFormat(',').parse(csvData);
+          
+          // Filter out invalid coordinates and convert to numbers
+          const validData = data.filter(d => {
+            const lat = parseFloat(d.latitude);
+            const lng = parseFloat(d.longitude);
+            return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+          }).map(d => ({
+            razao_social: d.razao_social,
+            latitude: parseFloat(d.latitude),
+            longitude: parseFloat(d.longitude),
+            data_inicio_atividade: d.data_inicio_atividade,
+            year: parseInt(d.data_inicio_atividade.split('-')[0]),
+            coordinates: [parseFloat(d.longitude), parseFloat(d.latitude)]
+          }));
+
+          console.log(`Loaded ${validData.length} valid data points`);
+          return validData;
+        }
+
+        // Create Latin cross icon data using ✝ symbol with specific color
+        function createCrossIcon(color = '#FF3232') {
+          const canvas = document.createElement('canvas');
+          canvas.width = 24;
+          canvas.height = 24;
+          const ctx = canvas.getContext('2d');
+          
+          // Draw ✝ symbol with specified color
+          ctx.fillStyle = color;
+          ctx.font = '20px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('✝', 12, 12);
+          
+          return {
+            url: canvas.toDataURL(),
+            width: 24,
+            height: 24
+          };
+        }
+
+        // Create icon layer with cross symbols
+        function createIconLayer(data) {
+          // Create icon atlas with all company cross icons
+          const canvas = document.createElement('canvas');
+          const companies = Object.keys(COMPANY_COLORS);
+          canvas.width = 24;
+          canvas.height = 24 * companies.length;
+          const ctx = canvas.getContext('2d');
+          
+          const iconMapping = {};
+          companies.forEach((company, index) => {
+            const y = index * 24;
+            const rgbaColor = COMPANY_COLORS[company];
+            const color = `rgb(${rgbaColor[0]}, ${rgbaColor[1]}, ${rgbaColor[2]})`;
+            
+            // Draw cross for this company
+            ctx.fillStyle = color;
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✝', 12, y + 12);
+            
+            iconMapping[company] = {
+              x: 0,
+              y: y,
+              width: 24,
+              height: 24
+            };
+          });
+          
+          return new deck.IconLayer({
+            id: 'icon-layer',
+            data,
+            pickable: true,
+            iconAtlas: canvas.toDataURL(),
+            iconMapping: iconMapping,
+            getIcon: d => d.razao_social,
+            getPosition: d => d.coordinates,
+            getSize: 16, // Medium size
+            updateTriggers: {
+              getIcon: data,
+              getPosition: data
+            },
+            onClick: ({object, x, y}) => {
+              if (object) {
+                const tooltip = document.querySelector('.deck-tooltip') || createTooltip();
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+                tooltip.style.display = 'block';
+                tooltip.innerHTML = `
+                  <div><strong>Nome:</strong> ${object.razao_social}</div>
+                  <div><strong>Ano Início:</strong> ${object.data_inicio_atividade}</div>
+                `;
+              }
+            },
+            onHover: ({object, x, y}) => {
+              if (object) {
+                const tooltip = document.querySelector('.deck-tooltip') || createTooltip();
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+                tooltip.style.display = 'block';
+                tooltip.innerHTML = `
+                  <div><strong>Nome:</strong> ${object.razao_social}</div>
+                  <div><strong>Ano Início:</strong> ${object.data_inicio_atividade}</div>
+                `;
+              } else {
+                const tooltip = document.querySelector('.deck-tooltip');
+                if (tooltip) tooltip.style.display = 'none';
+              }
+            }
+          });
+        }
+
+        // Create text layer with year labels
+        function createTextLayer(data) {
+          return new deck.TextLayer({
+            id: 'text-layer',
+            data: isSliderActive ? data : [], // Only show data when slider is active
+            pickable: false,
+            getPosition: d => d.coordinates,
+            getText: d => d.year.toString(),
+            getSize: 10, // Smaller text size
+            getColor: d => {
+              // Get company color and return RGB array
+              const companyColor = COMPANY_COLORS[d.razao_social];
+              return companyColor ? companyColor : [255, 255, 255, 200]; // Fallback to white
+            },
+            getAngle: 0,
+            getTextAnchor: 'start',
+            getAlignmentBaseline: 'center',
+            getPixelOffset: [8, 0], // Closer offset to the right of the icon
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            getOutlineColor: [0, 0, 0, 255], // Black outline
+            getOutlineWidth: 1, // 1px border
+            billboard: true, // Keep labels upright regardless of 3D camera rotation
+            updateTriggers: {
+              getPosition: data,
+              getText: data,
+              getColor: data,
+              data: isSliderActive // Update when slider state changes
+            }
+          });
+        }
+
+        // Create tooltip element
+        function createTooltip() {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'deck-tooltip';
+          tooltip.style.position = 'absolute';
+          tooltip.style.display = 'none';
+          tooltip.style.pointerEvents = 'none';
+          tooltip.style.zIndex = '1001';
+          document.body.appendChild(tooltip);
+          return tooltip;
+        }
+
+        // Function to update map display
+        function updateMapDisplay() {
+          if (!globalData.length) return;
+          
+          // Filter data based on selected company and year
+          let filteredData = globalData;
+          
+          // Filter by year first
+          filteredData = filteredData.filter(d => d.year <= selectedMinYear);
+          
+          // Then filter by company
+          if (selectedCompany) {
+            filteredData = filteredData.filter(d => d.razao_social === selectedCompany);
+          }
+          
+          // Create new icon layer and text layer with filtered data
+          const iconLayer = createIconLayer(filteredData);
+          const textLayer = createTextLayer(filteredData);
+          
+          // Update deck with new layers
+          deckgl.setProps({
+            layers: [baseMapLayer, iconLayer, textLayer]
+          });
+          
+          // Update legend UI
+          const legendItems = document.querySelectorAll('.company-stats .company-list li');
+          legendItems.forEach(item => {
+            const company = item.dataset.company;
+            item.classList.remove('active', 'inactive');
+            
+            if (selectedCompany) {
+              if (company === selectedCompany) {
+                item.classList.add('active');
+              } else {
+                item.classList.add('inactive');
+              }
+            }
+          });
+          
+          // Update year display
+          updateYearDisplay();
+        }
+
+        // Function to update year display
+        function updateYearDisplay() {
+          const yearDisplay = document.getElementById('yearDisplay');
+          if (yearDisplay) {
+            yearDisplay.textContent = `Ano ${selectedMinYear}`;
+          }
+        }
+
+        // Setup legend click handlers
+        function setupLegendInteractivity() {
+          const legendItems = document.querySelectorAll('.company-stats .company-list li');
+          
+          legendItems.forEach((item) => {
+            item.addEventListener('click', () => {
+              const company = item.dataset.company;
+              
+              if (selectedCompany === company) {
+                // Deselect if clicking the same company
+                selectedCompany = null;
+              } else {
+                // Select the clicked company
+                selectedCompany = company;
+              }
+              
+              updateMapDisplay();
+            });
+          });
+        }
+
+        // Setup year slider functionality
+        function setupYearSlider() {
+          const slider = document.getElementById('minYearSlider');
+          
+          if (slider) {
+            // Show labels when slider interaction starts
+            slider.addEventListener('mousedown', () => {
+              isSliderActive = true;
+              updateMapDisplay();
+            });
+            
+            // Hide labels when slider interaction ends
+            slider.addEventListener('mouseup', () => {
+              isSliderActive = false;
+              updateMapDisplay();
+            });
+            
+            // Also hide labels when mouse leaves the slider while dragging
+            slider.addEventListener('mouseleave', () => {
+              if (isSliderActive) {
+                isSliderActive = false;
+                updateMapDisplay();
+              }
+            });
+            
+            // Update year value as slider moves
+            slider.addEventListener('input', (e) => {
+              selectedMinYear = parseInt(e.target.value);
+              updateMapDisplay();
+            });
+            
+            // Handle touch events for mobile
+            slider.addEventListener('touchstart', () => {
+              isSliderActive = true;
+              updateMapDisplay();
+            });
+            
+            slider.addEventListener('touchend', () => {
+              isSliderActive = false;
+              updateMapDisplay();
+            });
+          }
+          
+          // Initialize display
+          updateYearDisplay();
+        }
+
+        // Initialize visualization
+        async function init() {
+          const data = parseCSVData();
+          
+          if (data.length === 0) {
+            console.error('No valid data to display');
+            return;
+          }
+
+          globalData = data;
+          const iconLayer = createIconLayer(data);
+          const textLayer = createTextLayer(data);
+          
+          // Use CartoDB dark tiles which are more reliable
+          baseMapLayer = new deck.TileLayer({
+            id: 'base-map',
+            data: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+            minZoom: 0,
+            maxZoom: 18,
+            tileSize: 256,
+            renderSubLayers: props => {
+              const { west, south, east, north } = props.tile.bbox;
+              return new deck.BitmapLayer(props, {
+                data: null,
+                image: props.data,
+                bounds: [west, south, east, north]
+              });
+            }
+          });
+          
+          deckgl.setProps({
+            layers: [baseMapLayer, iconLayer, textLayer]
+          });
+          
+          // Setup legend interactivity
+          setupLegendInteractivity();
+          
+          // Setup year slider
+          setupYearSlider();
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
