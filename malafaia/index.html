@@ -1,523 +1,535 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Império Malafaia</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body, html {
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-        }
-        
-        #map {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            background-color: #000;
-        }
-        
-        h1 {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 2rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        canvas {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            z-index: 1 !important;
-        }
-        
-        .deck-tooltip {
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            pointer-events: none;
-        }
-
-        .company-stats {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            min-width: 500px;
-        }
-
-        .company-stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s ease;
-        }
-
-        .toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .company-list {
-            max-height: 300px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .company-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .company-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .company-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        .company-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .company-list.collapsed {
-            display: none;
-        }
-
-        .company-stats h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #ffd700;
-        }
-
-        .company-stats ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .company-stats li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            display: flex;
-            align-items: flex-start;
-            line-height: 1.4;
-        }
-
-        .company-stats li strong {
-            flex: 1;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
-            margin-left: 0;
-        }
-
-        .company-stats li:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .company-stats li:last-child {
-            border-bottom: none;
-        }
-
-        .company-stats li.active {
-            background-color: rgba(255, 215, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        .company-stats li.inactive {
-            opacity: 0.3;
-        }
-
-        .color-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .year-slider-container {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            /* left: 50%; */
-            /* transform: translateX(-50%); */
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            min-width: 500px;
-        }
-
-        .year-slider-container h3 {
-            margin: 0 0 10px 0;
-            text-align: center;
-        }
-
-        .year-display {
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .year-range-display {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .slider-wrapper {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 5px;
-        }
-
-        .year-slider {
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            height: 5px;
-            border-radius: 5px;
-            background: linear-gradient(to right, 
-                rgb(139, 0, 0),       /* Dark Red (ember) */
-                rgb(255, 0, 0),       /* Pure Red (hottest) */
-                rgb(255, 69, 0),      /* Red-Orange */
-                rgb(255, 140, 0),     /* Flame Orange */
-                rgb(255, 215, 0),     /* Gold */
-                rgb(255, 255, 0)      /* Bright Yellow */
-            );
-            outline: none;
-            cursor: pointer;
-        }
-
-        .year-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            border: 1px solid black;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: rgb(255, 72, 0);
-            cursor: pointer;
-        }
-
-        .year-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: rgb(255, 215, 0);
-            cursor: pointer;
-            border: none;
-        }
-
-        .year-slider::-moz-range-track {
-            width: 100%;
-            height: 10px;
-            border-radius: 5px;
-            background: linear-gradient(to right, 
-                rgb(139, 0, 0),       /* Dark Red (ember) */
-                rgb(255, 0, 0),       /* Pure Red (hottest) */
-                rgb(255, 69, 0),      /* Red-Orange */
-                rgb(255, 140, 0),     /* Flame Orange */
-                rgb(255, 215, 0),     /* Gold */
-                rgb(255, 255, 0)      /* Bright Yellow */
-            );
-            border: none;
-        }
-
-        .year-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-
-        /* Intermediate tablet styles - prevent collision */
-        @media (max-width: 1100px) and (min-width: 769px) {
-            .company-stats {
-                min-width: 300px;
-                max-width: 40vw;
-                right: 15px;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Império Malafaia</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
 
-            .year-slider-container {
-                min-width: 350px;
-                max-width: 45vw;
-            }
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.4rem;
-                top: 15px;
-                left: 15px;
-                right: 15px;
-                text-align: center;
-            }
-
-            .company-stats {
-                position: absolute;
-                bottom: 120px;
-                left: 15px;
-                right: 15px;
-                min-width: unset;
-                width: calc(100vw - 30px);
-                padding: 15px;
-                max-height: 40vh;
+            body,
+            html {
+                height: 100%;
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    sans-serif;
                 overflow: hidden;
             }
 
+            #map {
+                width: 100vw;
+                height: 100vh;
+                position: relative;
+                background-color: #000;
+            }
+
+            h1 {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                color: white;
+                font-size: 2rem;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                z-index: 10;
+                pointer-events: none;
+            }
+
+            canvas {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                z-index: 1 !important;
+            }
+
+            .deck-tooltip {
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                pointer-events: none;
+            }
+
+            .company-stats {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.4);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                backdrop-filter: blur(10px);
+                z-index: 10;
+                min-width: 500px;
+            }
+
+            .company-stats-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .toggle-btn {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: background-color 0.3s ease;
+            }
+
+            .toggle-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
             .company-list {
-                max-height: calc(40vh - 60px);
+                max-height: 300px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .company-list::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .company-list::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+            }
+
+            .company-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+            }
+
+            .company-list::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
+            }
+
+            .company-list.collapsed {
+                display: none;
             }
 
             .company-stats h2 {
-                font-size: 1.2rem;
+                margin: 0;
+                font-size: 1.5rem;
+                color: #ffd700;
+            }
+
+            .company-stats ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
             }
 
             .company-stats li {
-                font-size: 1rem;
-                padding: 10px 0;
+                padding: 8px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                font-size: 1.1rem;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                display: flex;
+                align-items: flex-start;
+                line-height: 1.4;
             }
 
             .company-stats li strong {
-                font-size: 0.95rem;
-                line-height: 1.3;
+                flex: 1;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+                margin-left: 0;
+            }
+
+            .company-stats li:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+
+            .company-stats li:last-child {
+                border-bottom: none;
+            }
+
+            .company-stats li.active {
+                background-color: rgba(255, 215, 0, 0.2);
+                border-radius: 4px;
+            }
+
+            .company-stats li.inactive {
+                opacity: 0.3;
+            }
+
+            .color-indicator {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                margin-right: 8px;
+                margin-top: 2px;
+                flex-shrink: 0;
             }
 
             .year-slider-container {
                 position: absolute;
-                bottom: 15px;
-                left: 50%;
+                bottom: 20px;
+                left: 20px;
+                /* left: 50%; */
                 /* transform: translateX(-50%); */
-                min-width: unset;
-                /* width: calc(100vw - 30px); */
-                padding: 15px;
+                background: rgba(0, 0, 0, 0.4);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                backdrop-filter: blur(10px);
+                z-index: 10;
+                min-width: 500px;
             }
 
             .year-slider-container h3 {
-                font-size: 1.1rem;
+                margin: 0 0 10px 0;
+                text-align: center;
             }
 
-            .color-indicator {
-                width: 10px;
+            .year-display {
+                text-align: center;
+                margin-bottom: 5px;
+            }
+
+            .year-range-display {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .slider-wrapper {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 5px;
+            }
+
+            .year-slider {
+                width: 100%;
+                -webkit-appearance: none;
+                appearance: none;
+                height: 5px;
+                border-radius: 5px;
+                background: linear-gradient(
+                    to right,
+                    rgb(139, 0, 0),
+                    /* Dark Red (ember) */ rgb(255, 0, 0),
+                    /* Pure Red (hottest) */ rgb(255, 69, 0),
+                    /* Red-Orange */ rgb(255, 140, 0),
+                    /* Flame Orange */ rgb(255, 215, 0),
+                    /* Gold */ rgb(255, 255, 0) /* Bright Yellow */
+                );
+                outline: none;
+                cursor: pointer;
+            }
+
+            .year-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                border: 1px solid black;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: rgb(255, 72, 0);
+                cursor: pointer;
+            }
+
+            .year-slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: rgb(255, 215, 0);
+                cursor: pointer;
+                border: none;
+            }
+
+            .year-slider::-moz-range-track {
+                width: 100%;
                 height: 10px;
-                margin-right: 6px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.2rem;
-                top: 10px;
-                left: 10px;
-                right: 10px;
-            }
-
-            .company-stats {
-                bottom: 110px;
-                left: 10px;
-                right: 10px;
-                /* width: calc(100vw - 20px); */
-                padding: 12px;
-                /* max-height: 35vh; */
+                border-radius: 5px;
+                background: linear-gradient(
+                    to right,
+                    rgb(139, 0, 0),
+                    /* Dark Red (ember) */ rgb(255, 0, 0),
+                    /* Pure Red (hottest) */ rgb(255, 69, 0),
+                    /* Red-Orange */ rgb(255, 140, 0),
+                    /* Flame Orange */ rgb(255, 215, 0),
+                    /* Gold */ rgb(255, 255, 0) /* Bright Yellow */
+                );
+                border: none;
             }
 
-            .company-list {
-                /* max-height: calc(35vh - 50px); */
-            }
-
-            .company-stats h2 {
-                font-size: 1.1rem;
-            }
-
-            .company-stats li {
+            .year-labels {
+                display: flex;
+                justify-content: space-between;
                 font-size: 0.9rem;
-                padding: 8px 0;
             }
 
-            .company-stats li strong {
-                font-size: 0.85rem;
-                line-height: 1.25;
+            /* Mobile Styles */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 1.4rem;
+                    top: 15px;
+                    left: 15px;
+                    right: 15px;
+                    text-align: center;
+                }
+
+                .company-stats {
+                    position: absolute;
+                    left: 15px;
+                    right: 15px;
+                    min-width: unset;
+                    width: calc(100vw - 30px);
+                    padding: 15px;
+                    max-height: 40vh;
+                    overflow: hidden;
+                }
+
+                .company-list {
+                    max-height: calc(40vh - 60px);
+                }
+
+                .company-stats h2 {
+                    font-size: 1.2rem;
+                }
+
+                .company-stats li {
+                    font-size: 1rem;
+                    padding: 10px 0;
+                }
+
+                .company-stats li strong {
+                    font-size: 0.95rem;
+                    line-height: 1.3;
+                }
+
+                .year-slider-container {
+                    position: absolute;
+                    bottom: 15px;
+                    left: 50%;
+                    /* transform: translateX(-50%); */
+                    min-width: unset;
+                    /* width: calc(100vw - 30px); */
+                    padding: 15px;
+                }
+
+                .year-slider-container h3 {
+                    font-size: 1.1rem;
+                }
+
+                .color-indicator {
+                    width: 10px;
+                    height: 10px;
+                    margin-right: 6px;
+                }
             }
 
-            .year-slider-container {
-                bottom: 10px;
-                left: 50%;
-                /* transform: translateX(-50%); */
-                /* width: calc(100vw - 20px); */
-                padding: 12px;
-            }
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 1.2rem;
+                    top: 10px;
+                    left: 10px;
+                    right: 10px;
+                }
 
-            .toggle-btn {
-                padding: 4px 8px;
-                font-size: 0.8rem;
-            }
+                .company-stats {
+                    left: 10px;
+                    right: 10px;
+                    /* width: calc(100vw - 20px); */
+                    padding: 12px;
+                    /* max-height: 35vh; */
+                }
 
-            .color-indicator {
-                width: 8px;
-                height: 8px;
-                margin-right: 4px;
-            }
-        }
+                .company-list {
+                    /* max-height: calc(35vh - 50px); */
+                }
 
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <h1>O Império de Silas Malafaia no Brasil (1971-2025)</h1>
-    
-    <div class="company-stats">
-        <div class="year-display" id="yearDisplay">Ano 2025</div>
-        <div class="slider-wrapper">
-            <input type="range" min="1971" max="2025" value="2025" id="minYearSlider" class="year-slider">
+                .company-stats h2 {
+                    font-size: 1.1rem;
+                }
+
+                .company-stats li {
+                    font-size: 0.9rem;
+                    padding: 8px 0;
+                }
+
+                .company-stats li strong {
+                    font-size: 0.85rem;
+                    line-height: 1.25;
+                }
+
+                .year-slider-container {
+                    bottom: 10px;
+                    left: 50%;
+                    /* transform: translateX(-50%); */
+                    /* width: calc(100vw - 20px); */
+                    padding: 12px;
+                }
+
+                .toggle-btn {
+                    padding: 4px 8px;
+                    font-size: 0.8rem;
+                }
+
+                .color-indicator {
+                    width: 8px;
+                    height: 8px;
+                    margin-right: 4px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <h1>O Império de Silas Malafaia (1971-2025)</h1>
+
+        <div class="company-stats">
+            <div class="year-display" id="yearDisplay">Ano 2025</div>
+            <div class="slider-wrapper">
+                <input
+                    type="range"
+                    min="1971"
+                    max="2025"
+                    value="2025"
+                    id="minYearSlider"
+                    class="year-slider"
+                />
+            </div>
+            <div class="year-labels">
+                <span>1971</span>
+                <span>2025</span>
+            </div>
+            <br />
+            <ul class="company-list">
+                <li data-company="ASSEMBLEIA DE DEUS VITORIA EM CRISTO">
+                    <span
+                        class="color-indicator"
+                        style="background-color: rgb(255, 0, 0)"
+                    ></span>
+                    <strong>ASSEMBLEIA DE DEUS VITORIA EM CRISTO (152)</strong>
+                </li>
+                <li data-company="EDITORA CENTRAL GOSPEL LTDA">
+                    <span
+                        class="color-indicator"
+                        style="background-color: rgb(255, 69, 0)"
+                    ></span>
+                    <strong>EDITORA CENTRAL GOSPEL LTDA (14)</strong>
+                </li>
+                <li data-company="TALLI EVENTOS E PRODUCOES GOSPEL LTDA">
+                    <span
+                        class="color-indicator"
+                        style="background-color: rgb(255, 140, 0)"
+                    ></span>
+                    <strong>TALLI EVENTOS E PRODUCOES GOSPEL LTDA (2)</strong>
+                </li>
+                <li data-company="EDITORA VIDA VITORIOSA LTDA">
+                    <span
+                        class="color-indicator"
+                        style="background-color: rgb(255, 255, 0)"
+                    ></span>
+                    <strong>EDITORA VIDA VITORIOSA LTDA (1)</strong>
+                </li>
+                <li
+                    data-company="CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL"
+                >
+                    <span
+                        class="color-indicator"
+                        style="background-color: rgb(255, 215, 0)"
+                    ></span>
+                    <strong
+                        >CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS
+                        DO BRASIL (1)</strong
+                    >
+                </li>
+            </ul>
         </div>
-        <div class="year-labels">
-            <span>1971</span>
-            <span>2025</span>
-        </div>
-        <br>
-        <ul class="company-list">
-            <li data-company="ASSEMBLEIA DE DEUS VITORIA EM CRISTO">
-                <span class="color-indicator" style="background-color: rgb(255, 0, 0);"></span>
-                <strong>ASSEMBLEIA DE DEUS VITORIA EM CRISTO (152)</strong>
-            </li>
-            <li data-company="EDITORA CENTRAL GOSPEL LTDA">
-                <span class="color-indicator" style="background-color: rgb(255, 69, 0);"></span>
-                <strong>EDITORA CENTRAL GOSPEL LTDA (14)</strong>
-            </li>
-            <li data-company="TALLI EVENTOS E PRODUCOES GOSPEL LTDA">
-                <span class="color-indicator" style="background-color: rgb(255, 140, 0);"></span>
-                <strong>TALLI EVENTOS E PRODUCOES GOSPEL LTDA (2)</strong>
-            </li>            
-            <li data-company="EDITORA VIDA VITORIOSA LTDA">
-                <span class="color-indicator" style="background-color: rgb(255, 255, 0);"></span>
-                <strong>EDITORA VIDA VITORIOSA LTDA (1)</strong>
-            </li>
-            <li data-company="CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL">
-                <span class="color-indicator" style="background-color: rgb(255, 215, 0);"></span>
-                <strong>CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL (1)</strong>
-            </li>
-            <li data-company="ESM INVESTIMENTO E PARTICIPACOES LTDA">
-                <span class="color-indicator" style="background-color: rgb(139, 0, 0);"></span>
-                <strong>ESM INVESTIMENTO E PARTICIPACOES LTDA</strong>
-            </li>
-        </ul>
-    </div>
-    
-    <!-- Load required libraries from CDN -->
-    <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
-    <script src="https://unpkg.com/d3-dsv@3.0.1/dist/d3-dsv.min.js"></script>
-    
-    <!-- Fallback for older browsers -->
-    <script>
-      // Check if deck.gl is loaded properly
-      if (typeof deck === 'undefined') {
-        console.error('deck.gl failed to load from CDN');
-      }
-    </script>
-    
-    <script>
-        // Company colors mapping - Enhanced Flame palette
-        const COMPANY_COLORS = {
-          'ASSEMBLEIA DE DEUS VITORIA EM CRISTO': [255, 0, 0, 255],       // Pure Red (hottest)
-          'EDITORA CENTRAL GOSPEL LTDA': [255, 69, 0, 255],              // Red-Orange
-          'TALLI EVENTOS E PRODUCOES GOSPEL LTDA': [255, 140, 0, 255],   // Flame Orange  
-          'CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL': [255, 215, 0, 255], // Gold
-          'EDITORA VIDA VITORIOSA LTDA': [255, 255, 0, 255],             // Bright Yellow
-          'ESM INVESTIMENTO E PARTICIPACOES LTDA': [139, 0, 0, 255]      // Dark Red (ember)
-        };
 
-        // Global state for filtering
-        let globalData = [];
-        let selectedCompany = null;
-        let selectedMinYear = 2025;
-        let baseMapLayer = null;
-        let isSliderActive = false;
+        <!-- Load required libraries from CDN -->
+        <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
+        <script src="https://unpkg.com/d3-dsv@3.0.1/dist/d3-dsv.min.js"></script>
 
-        // Ensure container is ready
-        const mapContainer = document.getElementById('map');
+        <!-- Fallback for older browsers -->
+        <script>
+            // Check if deck.gl is loaded properly
+            if (typeof deck === "undefined") {
+                console.error("deck.gl failed to load from CDN");
+            }
+        </script>
 
-        const deckgl = new deck.Deck({
-          container: mapContainer,
-          width: window.innerWidth,
-          height: window.innerHeight,
-          initialViewState: {
-            longitude: -43.2096, // Rio de Janeiro longitude
-            latitude: -22.9035,  // Rio de Janeiro latitude  
-            zoom: 10,            // Zoom level for ~15km view
-            pitch: 0,
-            bearing: 0           // 0 = North is up (default orientation)
-          },
-          controller: true, // Enable full 3D controls including rotation and pitch
-          canvas: null, // Let Deck.gl create its own canvas
-          onLoad: () => {
-            console.log('Deck.gl loaded successfully');
-          },
-          onError: (error) => {
-            console.error('Deck.gl error:', error);
-          },
-          onResize: ({width, height}) => {
-            console.log('Deck resized:', width, height);
-          }
-        });
+        <script>
+            // Company colors mapping - Enhanced Flame palette
+            const COMPANY_COLORS = {
+                "ASSEMBLEIA DE DEUS VITORIA EM CRISTO": [255, 0, 0, 255], // Pure Red (hottest)
+                "EDITORA CENTRAL GOSPEL LTDA": [255, 69, 0, 255], // Red-Orange
+                "TALLI EVENTOS E PRODUCOES GOSPEL LTDA": [255, 140, 0, 255], // Flame Orange
+                "CONSELHO INTERDENOMINACIONAL DE MINISTROS EVANGELICOS DO BRASIL":
+                    [255, 215, 0, 255], // Gold
+                "EDITORA VIDA VITORIOSA LTDA": [255, 255, 0, 255], // Bright Yellow
+                "ESM INVESTIMENTO E PARTICIPACOES LTDA": [139, 0, 0, 255], // Dark Red (ember)
+            };
 
-        // Handle window resize events to ensure map resizes to 100%
-        function handleResize() {
-          const newWidth = window.innerWidth;
-          const newHeight = window.innerHeight;
-          
-          deckgl.setProps({
-            width: newWidth,
-            height: newHeight
-          });
-        }
+            // Global state for filtering
+            let globalData = [];
+            let selectedCompany = null;
+            let selectedMinYear = 2025;
+            let baseMapLayer = null;
+            let isSliderActive = false;
 
-        // Add resize event listener
-        window.addEventListener('resize', handleResize);
+            // Ensure container is ready
+            const mapContainer = document.getElementById("map");
 
-        // Function to parse CSV data directly
-        function parseCSVData() {
-          // Embedded CSV data
-          const csvData = `razao_social,latitude,longitude,data_inicio_atividade
+            const deckgl = new deck.Deck({
+                container: mapContainer,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                initialViewState: {
+                    longitude: -43.2096, // Rio de Janeiro longitude
+                    latitude: -22.9035, // Rio de Janeiro latitude
+                    zoom: 10, // Zoom level for ~15km view
+                    pitch: 0,
+                    bearing: 0, // 0 = North is up (default orientation)
+                },
+                controller: true, // Enable full 3D controls including rotation and pitch
+                canvas: null, // Let Deck.gl create its own canvas
+                onLoad: () => {
+                    console.log("Deck.gl loaded successfully");
+                },
+                onError: (error) => {
+                    console.error("Deck.gl error:", error);
+                },
+                onResize: ({ width, height }) => {
+                    console.log("Deck resized:", width, height);
+                },
+            });
+
+            // Handle window resize events to ensure map resizes to 100%
+            function handleResize() {
+                const newWidth = window.innerWidth;
+                const newHeight = window.innerHeight;
+
+                deckgl.setProps({
+                    width: newWidth,
+                    height: newHeight,
+                });
+            }
+
+            // Add resize event listener
+            window.addEventListener("resize", handleResize);
+
+            // Function to parse CSV data directly
+            function parseCSVData() {
+                // Embedded CSV data
+                const csvData = `razao_social,latitude,longitude,data_inicio_atividade
 ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.879054,-43.40509,1971-09-29
 ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.845872,-43.280866,1971-09-29
 ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.948262,-43.193123,1971-09-29
@@ -690,326 +702,348 @@ ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-9.735748,-36.674539,2024-01-03
 ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.831359,-43.010788,2024-04-24
 ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.859572,-42.343261,2024-05-13`;
 
-          const data = d3.dsvFormat(',').parse(csvData);
-          
-          // Filter out invalid coordinates and convert to numbers
-          const validData = data.filter(d => {
-            const lat = parseFloat(d.latitude);
-            const lng = parseFloat(d.longitude);
-            return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
-          }).map(d => ({
-            razao_social: d.razao_social,
-            latitude: parseFloat(d.latitude),
-            longitude: parseFloat(d.longitude),
-            data_inicio_atividade: d.data_inicio_atividade,
-            year: parseInt(d.data_inicio_atividade.split('-')[0]),
-            coordinates: [parseFloat(d.longitude), parseFloat(d.latitude)]
-          }));
+                const data = d3.dsvFormat(",").parse(csvData);
 
-          console.log(`Loaded ${validData.length} valid data points`);
-          return validData;
-        }
+                // Filter out invalid coordinates and convert to numbers
+                const validData = data
+                    .filter((d) => {
+                        const lat = parseFloat(d.latitude);
+                        const lng = parseFloat(d.longitude);
+                        return (
+                            !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0
+                        );
+                    })
+                    .map((d) => ({
+                        razao_social: d.razao_social,
+                        latitude: parseFloat(d.latitude),
+                        longitude: parseFloat(d.longitude),
+                        data_inicio_atividade: d.data_inicio_atividade,
+                        year: parseInt(d.data_inicio_atividade.split("-")[0]),
+                        coordinates: [
+                            parseFloat(d.longitude),
+                            parseFloat(d.latitude),
+                        ],
+                    }));
 
-        // Create Latin cross icon data using ✝ symbol with specific color
-        function createCrossIcon(color = '#FF3232') {
-          const canvas = document.createElement('canvas');
-          canvas.width = 24;
-          canvas.height = 24;
-          const ctx = canvas.getContext('2d');
-          
-          // Draw ✝ symbol with specified color
-          ctx.fillStyle = color;
-          ctx.font = '20px Arial';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('✝', 12, 12);
-          
-          return {
-            url: canvas.toDataURL(),
-            width: 24,
-            height: 24
-          };
-        }
+                console.log(`Loaded ${validData.length} valid data points`);
+                return validData;
+            }
 
-        // Create icon layer with cross symbols
-        function createIconLayer(data) {
-          // Create icon atlas with all company cross icons
-          const canvas = document.createElement('canvas');
-          const companies = Object.keys(COMPANY_COLORS);
-          canvas.width = 24;
-          canvas.height = 24 * companies.length;
-          const ctx = canvas.getContext('2d');
-          
-          const iconMapping = {};
-          companies.forEach((company, index) => {
-            const y = index * 24;
-            const rgbaColor = COMPANY_COLORS[company];
-            const color = `rgb(${rgbaColor[0]}, ${rgbaColor[1]}, ${rgbaColor[2]})`;
-            
-            // Draw cross for this company
-            ctx.fillStyle = color;
-            ctx.font = '20px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('✝', 12, y + 12);
-            
-            iconMapping[company] = {
-              x: 0,
-              y: y,
-              width: 24,
-              height: 24
-            };
-          });
-          
-          return new deck.IconLayer({
-            id: 'icon-layer',
-            data,
-            pickable: true,
-            iconAtlas: canvas.toDataURL(),
-            iconMapping: iconMapping,
-            getIcon: d => d.razao_social,
-            getPosition: d => d.coordinates,
-            getSize: 16, // Medium size
-            updateTriggers: {
-              getIcon: data,
-              getPosition: data
-            },
-            onClick: ({object, x, y}) => {
-              if (object) {
-                const tooltip = document.querySelector('.deck-tooltip') || createTooltip();
-                tooltip.style.left = x + 'px';
-                tooltip.style.top = y + 'px';
-                tooltip.style.display = 'block';
-                tooltip.innerHTML = `
+            // Create Latin cross icon data using ✝ symbol with specific color
+            function createCrossIcon(color = "#FF3232") {
+                const canvas = document.createElement("canvas");
+                canvas.width = 24;
+                canvas.height = 24;
+                const ctx = canvas.getContext("2d");
+
+                // Draw ✝ symbol with specified color
+                ctx.fillStyle = color;
+                ctx.font = "20px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("✝", 12, 12);
+
+                return {
+                    url: canvas.toDataURL(),
+                    width: 24,
+                    height: 24,
+                };
+            }
+
+            // Create icon layer with cross symbols
+            function createIconLayer(data) {
+                // Create icon atlas with all company cross icons
+                const canvas = document.createElement("canvas");
+                const companies = Object.keys(COMPANY_COLORS);
+                canvas.width = 24;
+                canvas.height = 24 * companies.length;
+                const ctx = canvas.getContext("2d");
+
+                const iconMapping = {};
+                companies.forEach((company, index) => {
+                    const y = index * 24;
+                    const rgbaColor = COMPANY_COLORS[company];
+                    const color = `rgb(${rgbaColor[0]}, ${rgbaColor[1]}, ${rgbaColor[2]})`;
+
+                    // Draw cross for this company
+                    ctx.fillStyle = color;
+                    ctx.font = "20px Arial";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("✝", 12, y + 12);
+
+                    iconMapping[company] = {
+                        x: 0,
+                        y: y,
+                        width: 24,
+                        height: 24,
+                    };
+                });
+
+                return new deck.IconLayer({
+                    id: "icon-layer",
+                    data,
+                    pickable: true,
+                    iconAtlas: canvas.toDataURL(),
+                    iconMapping: iconMapping,
+                    getIcon: (d) => d.razao_social,
+                    getPosition: (d) => d.coordinates,
+                    getSize: 16, // Medium size
+                    updateTriggers: {
+                        getIcon: data,
+                        getPosition: data,
+                    },
+                    onClick: ({ object, x, y }) => {
+                        if (object) {
+                            const tooltip =
+                                document.querySelector(".deck-tooltip") ||
+                                createTooltip();
+                            tooltip.style.left = x + "px";
+                            tooltip.style.top = y + "px";
+                            tooltip.style.display = "block";
+                            tooltip.innerHTML = `
                   <div><strong>Nome:</strong> ${object.razao_social}</div>
                   <div><strong>Ano Início:</strong> ${object.data_inicio_atividade}</div>
                 `;
-              }
-            },
-            onHover: ({object, x, y}) => {
-              if (object) {
-                const tooltip = document.querySelector('.deck-tooltip') || createTooltip();
-                tooltip.style.left = x + 'px';
-                tooltip.style.top = y + 'px';
-                tooltip.style.display = 'block';
-                tooltip.innerHTML = `
+                        }
+                    },
+                    onHover: ({ object, x, y }) => {
+                        if (object) {
+                            const tooltip =
+                                document.querySelector(".deck-tooltip") ||
+                                createTooltip();
+                            tooltip.style.left = x + "px";
+                            tooltip.style.top = y + "px";
+                            tooltip.style.display = "block";
+                            tooltip.innerHTML = `
                   <div><strong>Nome:</strong> ${object.razao_social}</div>
                   <div><strong>Ano Início:</strong> ${object.data_inicio_atividade}</div>
                 `;
-              } else {
-                const tooltip = document.querySelector('.deck-tooltip');
-                if (tooltip) tooltip.style.display = 'none';
-              }
+                        } else {
+                            const tooltip =
+                                document.querySelector(".deck-tooltip");
+                            if (tooltip) tooltip.style.display = "none";
+                        }
+                    },
+                });
             }
-          });
-        }
 
-        // Create text layer with year labels
-        function createTextLayer(data) {
-          return new deck.TextLayer({
-            id: 'text-layer',
-            data: isSliderActive ? data : [], // Only show data when slider is active
-            pickable: false,
-            getPosition: d => d.coordinates,
-            getText: d => d.year.toString(),
-            getSize: 10, // Smaller text size
-            getColor: d => {
-              // Get company color and return RGB array
-              const companyColor = COMPANY_COLORS[d.razao_social];
-              return companyColor ? companyColor : [255, 255, 255, 200]; // Fallback to white
-            },
-            getAngle: 0,
-            getTextAnchor: 'start',
-            getAlignmentBaseline: 'center',
-            getPixelOffset: [8, 0], // Closer offset to the right of the icon
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold',
-            getOutlineColor: [0, 0, 0, 255], // Black outline
-            getOutlineWidth: 1, // 1px border
-            billboard: true, // Keep labels upright regardless of 3D camera rotation
-            updateTriggers: {
-              getPosition: data,
-              getText: data,
-              getColor: data,
-              data: isSliderActive // Update when slider state changes
+            // Create text layer with year labels
+            function createTextLayer(data) {
+                return new deck.TextLayer({
+                    id: "text-layer",
+                    data: isSliderActive ? data : [], // Only show data when slider is active
+                    pickable: false,
+                    getPosition: (d) => d.coordinates,
+                    getText: (d) => d.year.toString(),
+                    getSize: 10, // Smaller text size
+                    getColor: (d) => {
+                        // Get company color and return RGB array
+                        const companyColor = COMPANY_COLORS[d.razao_social];
+                        return companyColor
+                            ? companyColor
+                            : [255, 255, 255, 200]; // Fallback to white
+                    },
+                    getAngle: 0,
+                    getTextAnchor: "start",
+                    getAlignmentBaseline: "center",
+                    getPixelOffset: [8, 0], // Closer offset to the right of the icon
+                    fontFamily: "Arial, sans-serif",
+                    fontWeight: "bold",
+                    getOutlineColor: [0, 0, 0, 255], // Black outline
+                    getOutlineWidth: 1, // 1px border
+                    billboard: true, // Keep labels upright regardless of 3D camera rotation
+                    updateTriggers: {
+                        getPosition: data,
+                        getText: data,
+                        getColor: data,
+                        data: isSliderActive, // Update when slider state changes
+                    },
+                });
             }
-          });
-        }
 
-        // Create tooltip element
-        function createTooltip() {
-          const tooltip = document.createElement('div');
-          tooltip.className = 'deck-tooltip';
-          tooltip.style.position = 'absolute';
-          tooltip.style.display = 'none';
-          tooltip.style.pointerEvents = 'none';
-          tooltip.style.zIndex = '1001';
-          document.body.appendChild(tooltip);
-          return tooltip;
-        }
-
-        // Function to update map display
-        function updateMapDisplay() {
-          if (!globalData.length) return;
-          
-          // Filter data based on selected company and year
-          let filteredData = globalData;
-          
-          // Filter by year first
-          filteredData = filteredData.filter(d => d.year <= selectedMinYear);
-          
-          // Then filter by company
-          if (selectedCompany) {
-            filteredData = filteredData.filter(d => d.razao_social === selectedCompany);
-          }
-          
-          // Create new icon layer and text layer with filtered data
-          const iconLayer = createIconLayer(filteredData);
-          const textLayer = createTextLayer(filteredData);
-          
-          // Update deck with new layers
-          deckgl.setProps({
-            layers: [baseMapLayer, iconLayer, textLayer]
-          });
-          
-          // Update legend UI
-          const legendItems = document.querySelectorAll('.company-stats .company-list li');
-          legendItems.forEach(item => {
-            const company = item.dataset.company;
-            item.classList.remove('active', 'inactive');
-            
-            if (selectedCompany) {
-              if (company === selectedCompany) {
-                item.classList.add('active');
-              } else {
-                item.classList.add('inactive');
-              }
+            // Create tooltip element
+            function createTooltip() {
+                const tooltip = document.createElement("div");
+                tooltip.className = "deck-tooltip";
+                tooltip.style.position = "absolute";
+                tooltip.style.display = "none";
+                tooltip.style.pointerEvents = "none";
+                tooltip.style.zIndex = "1001";
+                document.body.appendChild(tooltip);
+                return tooltip;
             }
-          });
-          
-          // Update year display
-          updateYearDisplay();
-        }
 
-        // Function to update year display
-        function updateYearDisplay() {
-          const yearDisplay = document.getElementById('yearDisplay');
-          if (yearDisplay) {
-            yearDisplay.textContent = `Ano ${selectedMinYear}`;
-          }
-        }
+            // Function to update map display
+            function updateMapDisplay() {
+                if (!globalData.length) return;
 
-        // Setup legend click handlers
-        function setupLegendInteractivity() {
-          const legendItems = document.querySelectorAll('.company-stats .company-list li');
-          
-          legendItems.forEach((item) => {
-            item.addEventListener('click', () => {
-              const company = item.dataset.company;
-              
-              if (selectedCompany === company) {
-                // Deselect if clicking the same company
-                selectedCompany = null;
-              } else {
-                // Select the clicked company
-                selectedCompany = company;
-              }
-              
-              updateMapDisplay();
-            });
-          });
-        }
+                // Filter data based on selected company and year
+                let filteredData = globalData;
 
-        // Setup year slider functionality
-        function setupYearSlider() {
-          const slider = document.getElementById('minYearSlider');
-          
-          if (slider) {
-            // Show labels when slider interaction starts
-            slider.addEventListener('mousedown', () => {
-              isSliderActive = true;
-              updateMapDisplay();
-            });
-            
-            // Hide labels when slider interaction ends
-            slider.addEventListener('mouseup', () => {
-              isSliderActive = false;
-              updateMapDisplay();
-            });
-            
-            // Also hide labels when mouse leaves the slider while dragging
-            slider.addEventListener('mouseleave', () => {
-              if (isSliderActive) {
-                isSliderActive = false;
-                updateMapDisplay();
-              }
-            });
-            
-            // Update year value as slider moves
-            slider.addEventListener('input', (e) => {
-              selectedMinYear = parseInt(e.target.value);
-              updateMapDisplay();
-            });
-            
-            // Handle touch events for mobile
-            slider.addEventListener('touchstart', () => {
-              isSliderActive = true;
-              updateMapDisplay();
-            });
-            
-            slider.addEventListener('touchend', () => {
-              isSliderActive = false;
-              updateMapDisplay();
-            });
-          }
-          
-          // Initialize display
-          updateYearDisplay();
-        }
+                // Filter by year first
+                filteredData = filteredData.filter(
+                    (d) => d.year <= selectedMinYear,
+                );
 
-        // Initialize visualization
-        async function init() {
-          const data = parseCSVData();
-          
-          if (data.length === 0) {
-            console.error('No valid data to display');
-            return;
-          }
+                // Then filter by company
+                if (selectedCompany) {
+                    filteredData = filteredData.filter(
+                        (d) => d.razao_social === selectedCompany,
+                    );
+                }
 
-          globalData = data;
-          const iconLayer = createIconLayer(data);
-          const textLayer = createTextLayer(data);
-          
-          // Use CartoDB dark tiles which are more reliable
-          baseMapLayer = new deck.TileLayer({
-            id: 'base-map',
-            data: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
-            minZoom: 0,
-            maxZoom: 18,
-            tileSize: 256,
-            renderSubLayers: props => {
-              const { west, south, east, north } = props.tile.bbox;
-              return new deck.BitmapLayer(props, {
-                data: null,
-                image: props.data,
-                bounds: [west, south, east, north]
-              });
+                // Create new icon layer and text layer with filtered data
+                const iconLayer = createIconLayer(filteredData);
+                const textLayer = createTextLayer(filteredData);
+
+                // Update deck with new layers
+                deckgl.setProps({
+                    layers: [baseMapLayer, iconLayer, textLayer],
+                });
+
+                // Update legend UI
+                const legendItems = document.querySelectorAll(
+                    ".company-stats .company-list li",
+                );
+                legendItems.forEach((item) => {
+                    const company = item.dataset.company;
+                    item.classList.remove("active", "inactive");
+
+                    if (selectedCompany) {
+                        if (company === selectedCompany) {
+                            item.classList.add("active");
+                        } else {
+                            item.classList.add("inactive");
+                        }
+                    }
+                });
+
+                // Update year display
+                updateYearDisplay();
             }
-          });
-          
-          deckgl.setProps({
-            layers: [baseMapLayer, iconLayer, textLayer]
-          });
-          
-          // Setup legend interactivity
-          setupLegendInteractivity();
-          
-          // Setup year slider
-          setupYearSlider();
-        }
 
-        // Start the application
-        init();
-    </script>
-</body>
+            // Function to update year display
+            function updateYearDisplay() {
+                const yearDisplay = document.getElementById("yearDisplay");
+                if (yearDisplay) {
+                    yearDisplay.textContent = `Ano ${selectedMinYear}`;
+                }
+            }
+
+            // Setup legend click handlers
+            function setupLegendInteractivity() {
+                const legendItems = document.querySelectorAll(
+                    ".company-stats .company-list li",
+                );
+
+                legendItems.forEach((item) => {
+                    item.addEventListener("click", () => {
+                        const company = item.dataset.company;
+
+                        if (selectedCompany === company) {
+                            // Deselect if clicking the same company
+                            selectedCompany = null;
+                        } else {
+                            // Select the clicked company
+                            selectedCompany = company;
+                        }
+
+                        updateMapDisplay();
+                    });
+                });
+            }
+
+            // Setup year slider functionality
+            function setupYearSlider() {
+                const slider = document.getElementById("minYearSlider");
+
+                if (slider) {
+                    // Show labels when slider interaction starts
+                    slider.addEventListener("mousedown", () => {
+                        isSliderActive = true;
+                        updateMapDisplay();
+                    });
+
+                    // Hide labels when slider interaction ends
+                    slider.addEventListener("mouseup", () => {
+                        isSliderActive = false;
+                        updateMapDisplay();
+                    });
+
+                    // Also hide labels when mouse leaves the slider while dragging
+                    slider.addEventListener("mouseleave", () => {
+                        if (isSliderActive) {
+                            isSliderActive = false;
+                            updateMapDisplay();
+                        }
+                    });
+
+                    // Update year value as slider moves
+                    slider.addEventListener("input", (e) => {
+                        selectedMinYear = parseInt(e.target.value);
+                        updateMapDisplay();
+                    });
+
+                    // Handle touch events for mobile
+                    slider.addEventListener("touchstart", () => {
+                        isSliderActive = true;
+                        updateMapDisplay();
+                    });
+
+                    slider.addEventListener("touchend", () => {
+                        isSliderActive = false;
+                        updateMapDisplay();
+                    });
+                }
+
+                // Initialize display
+                updateYearDisplay();
+            }
+
+            // Initialize visualization
+            async function init() {
+                const data = parseCSVData();
+
+                if (data.length === 0) {
+                    console.error("No valid data to display");
+                    return;
+                }
+
+                globalData = data;
+                const iconLayer = createIconLayer(data);
+                const textLayer = createTextLayer(data);
+
+                // Use CartoDB dark tiles which are more reliable
+                baseMapLayer = new deck.TileLayer({
+                    id: "base-map",
+                    data: "https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
+                    minZoom: 0,
+                    maxZoom: 18,
+                    tileSize: 256,
+                    renderSubLayers: (props) => {
+                        const { west, south, east, north } = props.tile.bbox;
+                        return new deck.BitmapLayer(props, {
+                            data: null,
+                            image: props.data,
+                            bounds: [west, south, east, north],
+                        });
+                    },
+                });
+
+                deckgl.setProps({
+                    layers: [baseMapLayer, iconLayer, textLayer],
+                });
+
+                // Setup legend interactivity
+                setupLegendInteractivity();
+
+                // Setup year slider
+                setupYearSlider();
+            }
+
+            // Start the application
+            init();
+        </script>
+    </body>
 </html>
