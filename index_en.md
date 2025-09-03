@@ -19,174 +19,138 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 ### Rio de Janeiro Business Network
 > *Visual representation of Rio de Janeiro where each illuminated point represents a registered business establishment*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image1]![][image2]
-
-</div>
+---
 
 ### All Churches in the Country
 > *Comprehensive mapping of religious institutions across Brazil, showing distribution patterns and density*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image3]![][image4]![][image5]![][image6]![][image7]
-
-</div>
+---
 
 ### More Churches Than Schools 😔
 > *Comparative analysis revealing the disproportionate number of religious institutions versus educational facilities*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image8]
-
-</div>
+---
 
 ### Residential Areas in Nova Friburgo with Height Relative to Number of Residents
 > *3D visualization showing population density through building height representation in Nova Friburgo*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image9]
-
-</div>
+---
 
 🔗 **[Interactive 3D Map: Nova Friburgo Population](https://xn--2dk.xyz/dataviz/friba/pop_3d)**
 
 ### Distribution of Garment Companies
 > *Mapping of textile and clothing companies based on active business registrations (CNPJs)*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image10]
 
 ![][image11]
-
-</div>
+---
 
 ### Garment Companies Opened and Closed During Pandemic
 > *Analysis of business dynamics in the intimate apparel industry hub during COVID-19*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image12]
-
-</div>
+---
 
 ### All Residences in Nova Friburgo Municipality
 > *Complete residential mapping showing housing distribution patterns across the city*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image13]
-
-</div>
+---
 
 ### Religious Entities Outnumber Labor Unions in 2000
 > *Historical comparison showing the predominance of religious organizations over workers' unions*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image14]
-
-</div>
+---
 
 ### Heatmap of New Business Registrations in Nova Friburgo
 > *Temporal and spatial analysis of entrepreneurial activity and business creation patterns*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image15]
-
-</div>
+---
 
 ### Religious Affiliation by Municipality
 > *The more yellow, the more Catholic a municipality. Purple tends to be Evangelical*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image16]
 
 ![][image17]
-
-</div>
+---
 
 ### 81.5% of Brazilian States Have Double the Religious Establishments Compared to Health Units
 > *Stark comparison highlighting the imbalance between religious institutions and healthcare facilities*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image18]
-
-</div>
+---
 
 ### Distribution of School Types in Rio (Primary, Secondary...)
 > *Educational infrastructure mapping showing the distribution of different educational levels*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image19]
 
 ![][image20]
-
-</div>
+---
 
 ### Which Economic Sectors Closed After Others During the Pandemic?
 > *Sequential analysis of business closures by economic sector during COVID-19*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image22]
-
-</div>
+---
 
 ### Corporate Relationships of Friburgo Entrepreneurs with Multiple Companies
 > *Network analysis revealing business interconnections and corporate relationships*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image23]![][image24]
-
-</div>
+---
 
 ### Heat Map of Areas with Most Residences
 > *Density visualization highlighting residential concentration zones*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image25]
-
-</div>
+---
 
 ### Companies and Partners of the "Tiger Game" Owner
 > *Corporate network analysis of gambling platform ownership structures*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image26]![][image27]![][image28]![][image29]
-
-</div>
+---
 
 🔗 **[Detailed Network Analysis: Tiger Game Footprints](https://tinyurl.com/pegadas-tigrim)**
 
 ### Corporate Structure Visualization of a Specific Senator
 > *Political-business network mapping showing corporate connections and influence patterns*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image30]
-
-</div>
+---
 
 ### Swiss Companies with Headquarters in Brazil
 > *International business presence analysis showing foreign investment patterns*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
-
+---
 ![][image31]
-
-</div>
+---
 
 🔗 **[Swiss-Brazilian Business Network](https://tinyurl.com/swiss-brazilian-network)**
 
@@ -244,13 +208,12 @@ sankey-beta
   Cond Outra condicao,Tipo Duravel,1353801
   Cond Nao classificado,Tipo Rustico,16
 ```
-
-</div>
+---
 
 ### 1980 Housing Census
 > *Beginning of major urbanization: emergence of apartment living and shift from rural to urban settlements*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+---
 
 ```mermaid
 ---
@@ -304,13 +267,12 @@ sankey-beta
   Proprio ja pago,Apartamento,115652
   Proprio ja pago,Casa,3484304
 ```
-
-</div>
+---
 
 ### 1990 Housing Census
 > *Democratic transition period: diversification of housing types and expansion of urban settlements including indigenous housing recognition*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+---
 
 ```mermaid
 ---
@@ -421,13 +383,12 @@ sankey-beta
   Sit Proprio ja pago,Tipo Unidade em predio nao residencial loja galpao etc,147814
   Sit Proprio ja pago,Tipo Unidade improvisada barraco tenda etc,2294
 ```
-
-</div>
+---
 
 ### 2000 Housing Census
 > *Millennium era: simplified urban/rural classification showing the consolidation of urban living and apartment culture*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+---
 
 ```mermaid
 ---
@@ -472,13 +433,12 @@ sankey-beta
   Proprio pago,Casa,13508004
   Proprio pago,Comodo,70590
 ```
-
-</div>
+---
 
 ### 2010 Housing Census
 > *Modern era: introduction of condominiums, significant reduction in rental housing, and recognition of diverse housing situations including institutional living*
 
-<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+---
 
 ```mermaid
 ---
@@ -541,8 +501,7 @@ sankey-beta
   Proprio quitado,Habitacao em comodo ou cortico,7180
   Proprio quitado,Oca maloca indigena,2119
 ```
-
-</div>
+---
 
 ### Key Insights from Four Decades of Housing Evolution
 
