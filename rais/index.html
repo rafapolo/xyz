@@ -1,0 +1,311 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>500 Empresas com mais contratos diretos</title>
+        <link href="https://fonts.googleapis.com/css?family=Monda" rel="stylesheet" type="text/css">
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+        <script src="data_500.js"></script>
+        <style>
+            body {
+                font-family: 'Monda', sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: rgb(254,244,231);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .bubble {
+                stroke: #fff;
+                stroke-width: 0.5px;
+                opacity: 0.85;
+            }
+
+            text {
+                font: 12px 'Monda', sans-serif;
+                pointer-events: none;
+                text-anchor: middle;
+                fill: black;
+                font-weight: bold;
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 5px;
+                font-size: 24px;
+            }
+
+            .subtitle {
+                text-align: center;
+                color: #666;
+                margin-bottom: 15px;
+                font-style: italic;
+                font-size: 14px;
+            }
+
+            #chart {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .legend {
+                text-align: center;
+                margin: 15px 0;
+            }
+
+            .legend-item {
+                display: inline-block;
+                margin: 3px 10px;
+            }
+
+            .legend-color {
+                display: inline-block;
+                width: 16px;
+                height: 16px;
+                border: 1px solid white;
+                vertical-align: middle;
+                margin-right: 6px;
+            }
+
+            .legend-text {
+                vertical-align: middle;
+                font-size: 11px;
+                color: #333;
+            }
+
+            .tooltip {
+                position: absolute;
+                text-align: center;
+                padding: 8px;
+                font: 12px 'Monda', sans-serif;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                border: 0px;
+                border-radius: 4px;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>500 Empresas com mais Contratos Diretos</h1>
+        <div class="legend">
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #1f77b4"
+                ></span>
+                <span class="legend-text">Órgão Público Estadual/DF</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #ff7f0e"
+                ></span>
+                <span class="legend-text">Órgão Público Municipal</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #2ca02c"
+                ></span>
+                <span class="legend-text">Setor Público</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #d62728"
+                ></span>
+                <span class="legend-text">Empresas Privadas</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #9467bd"
+                ></span>
+                <span class="legend-text">Poder Judiciário</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #8c564b"
+                ></span>
+                <span class="legend-text">Autarquias</span>
+            </div>
+            <div class="legend-item">
+                <span
+                    class="legend-color"
+                    style="background-color: #17becf"
+                ></span>
+                <span class="legend-text">Outros</span>
+            </div>
+        </div>
+
+        <div id="chart"></div>
+
+        <script>
+            var diameter = 1200,
+                format = d3.format(",d");
+
+            // Color mapping for natureza juridica
+            var colorMap = {
+                "Órgão Público Estadual/DF": "#1f77b4",
+                "Órgão Público Municipal": "#ff7f0e",
+                "Setor Público": "#2ca02c",
+                "Empresas Privadas": "#d62728",
+                "Poder Judiciário Estadual": "#9467bd",
+                "Autarquia Estadual/DF": "#8c564b",
+                "Autarquia Federal": "#8c564b",
+                "Autarquia Municipal": "#8c564b",
+                "Órgão Público Federal": "#2ca02c",
+                "Poder Legislativo Federal": "#9467bd",
+                "Poder Legislativo Estadual/DF": "#9467bd",
+                "Poder Legislativo Municipal": "#9467bd",
+                "Poder Judiciário Federal": "#9467bd",
+                "Entidades Privadas sem Fins Lucrativos": "#e377c2",
+                "Pessoas Jurídicas de Direito Privado": "#bcbd22",
+                "Organizações Internacionais": "#7f7f7f",
+                "Fundação Privada": "#e377c2",
+                "Associação Privada": "#e377c2",
+                "Sociedade Empresária Limitada": "#d62728",
+                "Sociedade Anônima Fechada": "#d62728",
+                "Sociedade Anônima Aberta": "#d62728",
+                "Sociedade Empresária em Comandita por Ações": "#d62728",
+                "Empresa Pública": "#2ca02c",
+                "Fundação Pública Federal": "#2ca02c",
+                "Fundação Pública Estadual/DF": "#2ca02c",
+                "Fundação Pública Municipal": "#2ca02c",
+                "Órgão Público do Poder Executivo Municipal": "#ff7f0e",
+                "Órgão Público do Poder Executivo Estadual/DF": "#1f77b4",
+                "Setor Público (Outros)": "#2ca02c",
+                "Empresas Privadas (Outros)": "#d62728",
+                "Entidades sem Fins Lucrativos": "#e377c2",
+                "Não informada": "#cccccc",
+            };
+
+            var bubble = d3.layout
+                .pack()
+                .sort(null)
+                .size([diameter, diameter])
+                .padding(1);
+
+            var svg = d3
+                .select("#chart")
+                .append("svg")
+                .attr("width", diameter)
+                .attr("height", diameter)
+                .attr("class", "bubble");
+
+            // Create tooltip
+            var tooltip = d3
+                .select("body")
+                .append("div")
+                .attr("class", "tooltip");
+
+            var node = svg
+                .selectAll(".node")
+                .data(
+                    bubble.nodes({ children: data }).filter(function (d) {
+                        return !d.children;
+                    }),
+                )
+                .enter()
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                });
+
+            node.append("circle")
+                .attr("r", function (d) {
+                    return d.r;
+                })
+                .style("fill", function (d) {
+                    return colorMap[d.natureza] || "#17becf";
+                })
+                .attr("class", "bubble")
+                .on("mouseover", function (d) {
+                    d3.select(this)
+                        .style("stroke", "#333")
+                        .style("stroke-width", "2px");
+                    tooltip.transition().duration(200).style("opacity", 0.9);
+                    tooltip
+                        .html(
+                            d.name +
+                                "<br/>Contratos: " +
+                                d.value +
+                                "<br/>Natureza: " +
+                                d.natureza,
+                        )
+                        .style("left", d3.event.pageX + 10 + "px")
+                        .style("top", d3.event.pageY - 28 + "px");
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this)
+                        .style("stroke", "#fff")
+                        .style("stroke-width", "0.5px");
+                    tooltip.transition().duration(500).style("opacity", 0);
+                });
+
+            // Only show text on larger bubbles to avoid overcrowding
+            var textNodes = node
+                .filter(function (d) {
+                    return d.r > 20; // Increased threshold for better readability
+                })
+                .append("text")
+                .attr("dy", ".3em")
+                .style("text-anchor", "middle")
+                .style("fill", "black")
+                .style("font-size", function (d) {
+                    return Math.min(d.r / 3.5, 12) + "px"; // Adjusted for better fit
+                })
+                .style("font-weight", "bold")
+                .text(function (d) {
+                    // Smart truncation based on bubble size
+                    var maxLength = Math.floor(d.r / 3.5);
+                    var fullText = d.name + " (" + d.value + ")";
+                    if (fullText.length > maxLength) {
+                        return fullText.substring(0, maxLength - 3) + "...";
+                    }
+                    return fullText;
+                });
+
+            // Simple collision detection - hide overlapping text
+            textNodes.each(function (d, i) {
+                var current = d3.select(this);
+                var currentBounds = this.getBBox();
+                var currentX = d.x;
+                var currentY = d.y;
+
+                textNodes.each(function (d2, j) {
+                    if (i !== j) {
+                        var otherBounds = this.getBBox();
+                        var otherX = d2.x;
+                        var otherY = d2.y;
+
+                        // Check if texts overlap
+                        var distance = Math.sqrt(
+                            Math.pow(currentX - otherX, 2) +
+                                Math.pow(currentY - otherY, 2),
+                        );
+                        var minDistance =
+                            (currentBounds.width + otherBounds.width) / 4;
+
+                        if (distance < minDistance && d.r < d2.r) {
+                            // Hide smaller bubble's text if overlapping with larger one
+                            current.style("display", "none");
+                        }
+                    }
+                });
+            });
+
+            d3.select(self.frameElement).style("height", diameter + "px");
+        </script>
+    </body>
+</html>
