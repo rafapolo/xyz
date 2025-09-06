@@ -19,8 +19,8 @@
             }
 
             .bubble {
-                stroke: #fff;
-                stroke-width: 0.5px;
+                stroke: none;
+                stroke-width: 0;
                 opacity: 0.85;
             }
 
@@ -248,8 +248,8 @@
                 })
                 .on("mouseout", function (d) {
                     d3.select(this)
-                        .style("stroke", "#fff")
-                        .style("stroke-width", "0.5px");
+                        .style("stroke", "none")
+                        .style("stroke-width", "0");
                     tooltip.transition().duration(500).style("opacity", 0);
                 });
 
