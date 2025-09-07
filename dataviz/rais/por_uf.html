@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>Empresas Privadas com +1000 Vínculos por UF - Treemap</title>
+        <title>Empresas com +1000 Vínculos por UF</title>
         <link
             href="https://fonts.googleapis.com/css?family=Monda"
             rel="stylesheet"
@@ -40,7 +40,6 @@
                 font-weight: bold;
             }
 
-
             .subtitle {
                 text-align: center;
                 color: #ccc;
@@ -58,10 +57,6 @@
                 left: 0;
             }
 
-
-
-
-
             .tooltip {
                 position: fixed;
                 text-align: center;
@@ -70,7 +65,7 @@
                 font-size: 12px;
                 background: rgba(0, 0, 0, 0.9);
                 color: white;
-                border: 1px solid #FFD600;
+                border: 1px solid #ffd600;
                 border-radius: 4px;
                 pointer-events: none;
                 opacity: 0;
@@ -86,7 +81,7 @@
 
             .company-value {
                 font-size: 8px;
-                fill: #FFD600;
+                fill: #ffd600;
                 font-weight: normal;
             }
         </style>
@@ -102,7 +97,7 @@
             // State code to name mapping
             var stateMap = {
                 11: "Rondônia",
-                12: "Acre", 
+                12: "Acre",
                 13: "Amazonas",
                 14: "Roraima",
                 15: "Pará",
@@ -127,21 +122,41 @@
                 50: "Mato Grosso do Sul",
                 51: "Mato Grosso",
                 52: "Goiás",
-                53: "Distrito Federal"
+                53: "Distrito Federal",
             };
 
             // Diverse Brazilian flag colors palette - alternating between lighter green, yellow, lighter blue tones
             var treemapColors = [
-                "#90EE90", "#FFEB66", "#87CEEB",    // Light Green, Yellow, Sky Blue
-                "#98FB98", "#FDD835", "#ADD8E6",    // Pale Green, Yellow, Light Blue
-                "#B3E6B3", "#FFEB3B", "#B0E0E6",    // Very Light Green, Bright Yellow, Powder Blue
-                "#C8E6C9", "#FFF59D", "#E0F6FF",    // Mint Green, Pale Yellow, Alice Blue
-                "#90EE90", "#F9A825", "#87CEFA",    // Light Green, Gold, Light Sky Blue
-                "#E8F5E8", "#FFFDE7", "#F0F8FF",    // Honeydew, Cream, Azure
-                "#B3E6B3", "#FFD54F", "#B6D7FF",    // Very Light Green, Amber, Light Periwinkle
-                "#F0FFF0", "#FFFACD", "#E6F3FF",    // Mint Cream, Light Cream, Very Light Blue
-                "#CCFFCC", "#FFCC02", "#CCE7FF",    // Very Pale Green, Orange Yellow, Light Blue
-                "#E8FFE8", "#FFF8E1", "#DAE8FC"     // Very Light Mint, Ivory, Very Light Blue
+                "#90EE90",
+                "#FFEB66",
+                "#87CEEB", // Light Green, Yellow, Sky Blue
+                "#98FB98",
+                "#FDD835",
+                "#ADD8E6", // Pale Green, Yellow, Light Blue
+                "#B3E6B3",
+                "#FFEB3B",
+                "#B0E0E6", // Very Light Green, Bright Yellow, Powder Blue
+                "#C8E6C9",
+                "#FFF59D",
+                "#E0F6FF", // Mint Green, Pale Yellow, Alice Blue
+                "#90EE90",
+                "#F9A825",
+                "#87CEFA", // Light Green, Gold, Light Sky Blue
+                "#E8F5E8",
+                "#FFFDE7",
+                "#F0F8FF", // Honeydew, Cream, Azure
+                "#B3E6B3",
+                "#FFD54F",
+                "#B6D7FF", // Very Light Green, Amber, Light Periwinkle
+                "#F0FFF0",
+                "#FFFACD",
+                "#E6F3FF", // Mint Cream, Light Cream, Very Light Blue
+                "#CCFFCC",
+                "#FFCC02",
+                "#CCE7FF", // Very Pale Green, Orange Yellow, Light Blue
+                "#E8FFE8",
+                "#FFF8E1",
+                "#DAE8FC", // Very Light Mint, Ivory, Very Light Blue
             ];
 
             // Function to ensure color diversity by avoiding similar adjacent colors
@@ -150,128 +165,156 @@
                 var colorIndex = (index * 7) % treemapColors.length;
                 return treemapColors[colorIndex];
             }
-            
-            var colorScale = d3.scale.ordinal()
-                .domain(Object.keys(stateMap))
-                .range(Object.keys(stateMap).map(function(key, index) {
-                    return getDistributedColor(index, Object.keys(stateMap).length);
-                }));
 
-            var treemap = d3.layout.treemap()
+            var colorScale = d3.scale
+                .ordinal()
+                .domain(Object.keys(stateMap))
+                .range(
+                    Object.keys(stateMap).map(function (key, index) {
+                        return getDistributedColor(
+                            index,
+                            Object.keys(stateMap).length,
+                        );
+                    }),
+                );
+
+            var treemap = d3.layout
+                .treemap()
                 .size([width, height])
                 .sticky(true)
-                .value(function(d) { return d.value; });
+                .value(function (d) {
+                    return d.value;
+                });
 
             // Track selected UF
             var selectedUF = null;
 
             // Text measurement function for dynamic font sizing
-            function calculateOptimalFontSize(text, maxWidth, maxHeight, minFontSize, maxFontSize) {
+            function calculateOptimalFontSize(
+                text,
+                maxWidth,
+                maxHeight,
+                minFontSize,
+                maxFontSize,
+            ) {
                 // Create a temporary canvas for text measurement
-                var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-                
+                var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+
                 minFontSize = minFontSize || 6;
                 maxFontSize = maxFontSize || 24;
-                
+
                 // Binary search for optimal font size
                 var fontSize = maxFontSize;
                 var bestSize = minFontSize;
-                
+
                 while (fontSize >= minFontSize) {
-                    context.font = fontSize + 'px Monda, sans-serif';
-                    
+                    context.font = fontSize + "px Monda, sans-serif";
+
                     // Handle multi-line text by splitting on spaces
-                    var words = text.split(' ');
+                    var words = text.split(" ");
                     var lines = [];
-                    var currentLine = '';
-                    
+                    var currentLine = "";
+
                     for (var i = 0; i < words.length; i++) {
-                        var testLine = currentLine + words[i] + ' ';
+                        var testLine = currentLine + words[i] + " ";
                         var metrics = context.measureText(testLine);
-                        
-                        if (metrics.width > maxWidth && currentLine !== '') {
+
+                        if (metrics.width > maxWidth && currentLine !== "") {
                             lines.push(currentLine.trim());
-                            currentLine = words[i] + ' ';
+                            currentLine = words[i] + " ";
                         } else {
                             currentLine = testLine;
                         }
                     }
                     lines.push(currentLine.trim());
-                    
+
                     // Check if text fits within height constraints
                     var lineHeight = fontSize * 1.1;
                     var totalHeight = lines.length * lineHeight;
-                    
+
                     // Check width of longest line
                     var maxLineWidth = 0;
                     for (var j = 0; j < lines.length; j++) {
                         var lineWidth = context.measureText(lines[j]).width;
                         maxLineWidth = Math.max(maxLineWidth, lineWidth);
                     }
-                    
+
                     if (totalHeight <= maxHeight && maxLineWidth <= maxWidth) {
                         bestSize = fontSize;
                         break;
                     }
-                    
+
                     fontSize -= 0.5;
                 }
-                
+
                 return bestSize;
             }
 
             // Function to wrap text based on available width
             function wrapText(text, maxWidth, fontSize) {
-                var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-                context.font = fontSize + 'px Monda, sans-serif';
-                
-                var words = text.split(' ');
+                var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+                context.font = fontSize + "px Monda, sans-serif";
+
+                var words = text.split(" ");
                 var lines = [];
-                var currentLine = '';
-                
+                var currentLine = "";
+
                 for (var i = 0; i < words.length; i++) {
-                    var testLine = currentLine + words[i] + ' ';
+                    var testLine = currentLine + words[i] + " ";
                     var metrics = context.measureText(testLine);
-                    
-                    if (metrics.width > maxWidth && currentLine !== '') {
+
+                    if (metrics.width > maxWidth && currentLine !== "") {
                         lines.push(currentLine.trim());
-                        currentLine = words[i] + ' ';
+                        currentLine = words[i] + " ";
                     } else {
                         currentLine = testLine;
                     }
                 }
                 lines.push(currentLine.trim());
-                
+
                 return lines;
             }
 
             // Function to convert hex color to RGB
             function hexToRgb(hex) {
-                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                return result ? {
-                    r: parseInt(result[1], 16),
-                    g: parseInt(result[2], 16),
-                    b: parseInt(result[3], 16)
-                } : null;
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+                    hex,
+                );
+                return result
+                    ? {
+                          r: parseInt(result[1], 16),
+                          g: parseInt(result[2], 16),
+                          b: parseInt(result[3], 16),
+                      }
+                    : null;
             }
 
             // Function to calculate relative luminance of a color
             function getLuminance(hex) {
                 var rgb = hexToRgb(hex);
                 if (!rgb) return 0;
-                
+
                 // Convert RGB to relative luminance using W3C formula
                 var r = rgb.r / 255;
                 var g = rgb.g / 255;
                 var b = rgb.b / 255;
-                
+
                 // Apply gamma correction
-                r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-                g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-                b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-                
+                r =
+                    r <= 0.03928
+                        ? r / 12.92
+                        : Math.pow((r + 0.055) / 1.055, 2.4);
+                g =
+                    g <= 0.03928
+                        ? g / 12.92
+                        : Math.pow((g + 0.055) / 1.055, 2.4);
+                b =
+                    b <= 0.03928
+                        ? b / 12.92
+                        : Math.pow((b + 0.055) / 1.055, 2.4);
+
                 return 0.2126 * r + 0.7152 * g + 0.0722 * b;
             }
 
@@ -279,10 +322,12 @@
             function getOptimalTextColor(backgroundColor) {
                 var luminance = getLuminance(backgroundColor);
                 // Use threshold of 0.5 - lighter colors get black text, darker colors get white text
-                return luminance > 0.5 ? 'black' : 'white';
+                return luminance > 0.5 ? "black" : "white";
             }
 
-            var div = d3.select("#chart").append("div")
+            var div = d3
+                .select("#chart")
+                .append("div")
                 .style("position", "absolute")
                 .style("top", "0px")
                 .style("left", "0px")
@@ -290,135 +335,204 @@
                 .style("height", height + "px");
 
             // Create tooltip
-            var tooltip = d3.select("body")
+            var tooltip = d3
+                .select("body")
                 .append("div")
                 .attr("class", "tooltip");
 
             // Process loaded data and group by UF
-            var processedData = data.map(function(d) {
+            var processedData = data.map(function (d) {
                 return {
                     name: d.name,
                     value: d.value,
                     uf: d.uf,
                     uf_name: stateMap[d.uf] || "Desconhecido",
-                    natureza: d.natureza
+                    natureza: d.natureza,
                 };
             });
 
             // Group data by UF
-            var groupedByUF = d3.nest()
-                .key(function(d) { return d.uf; })
+            var groupedByUF = d3
+                .nest()
+                .key(function (d) {
+                    return d.uf;
+                })
                 .entries(processedData);
 
             // Create hierarchical structure for treemap
             var allData = {
                 name: "root",
-                children: groupedByUF.map(function(uf) {
+                children: groupedByUF.map(function (uf) {
                     return {
                         name: stateMap[uf.key] || "Desconhecido",
                         uf: +uf.key,
-                        children: uf.values
+                        children: uf.values,
                     };
-                })
+                }),
             };
 
             function getFilteredData() {
                 if (!selectedUF) return allData;
-                
-                var filteredUF = allData.children.find(function(uf) {
+
+                var filteredUF = allData.children.find(function (uf) {
                     return uf.uf === selectedUF;
                 });
-                
-                return filteredUF ? {
-                    name: "root",
-                    children: [filteredUF]
-                } : allData;
+
+                return filteredUF
+                    ? {
+                          name: "root",
+                          children: [filteredUF],
+                      }
+                    : allData;
             }
 
             function redrawTreemap() {
                 var currentData = getFilteredData();
-                
+
                 // Clear existing nodes
                 div.selectAll(".node").remove();
-                
+
                 // Create new nodes
-                var node = div.datum(currentData).selectAll(".node")
+                var node = div
+                    .datum(currentData)
+                    .selectAll(".node")
                     .data(treemap.nodes)
-                  .enter().append("div")
-                .attr("class", "node")
-                .call(position)
-                .style("background", function(d) { 
-                    if (d.depth === 0) return null; // root
-                    if (d.depth === 1) return colorScale(d.uf); // UF groups
-                    return d3.rgb(colorScale(d.parent.uf)).darker(0.3); // companies
-                })
-                .style("border", "none")
-                .on("mouseover", function(d) {
-                    // Make color more vibrant on hover
-                    if (d.depth === 1) {
-                        d3.select(this).style("background", d3.rgb(colorScale(d.uf)).brighter(0.8));
-                    } else if (d.depth === 2) {
-                        d3.select(this).style("background", d3.rgb(colorScale(d.parent.uf)).brighter(0.5));
-                    }
-                    
-                    // Clear any existing tooltip first
-                    tooltip.style("opacity", 0);
-                    
-                    if (d.depth === 2) { // Only show tooltip for companies
-                        tooltip.transition().duration(100).style("opacity", 0.95);
-                        tooltip.html(
-                            "<strong>" + d.name + "</strong>" + 
-                            "<br/>Vínculos: " + format(d.value) +
-                            "<br/>UF: " + d.parent.name
-                        )
-                        .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
-                        .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
-                    } else if (d.depth === 1) { // UF groups
-                        tooltip.transition().duration(100).style("opacity", 0.95);
-                        tooltip.html(
-                            "<strong>" + d.name + "</strong>" + 
-                            "<br/>" + d.children.length + " empresas"
-                        )
-                        .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
-                        .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
-                    }
-                })
-                .on("mouseout", function(d) {
-                    // Restore original color
-                    if (d.depth === 1) {
-                        d3.select(this).style("background", colorScale(d.uf));
-                    } else if (d.depth === 2) {
-                        d3.select(this).style("background", d3.rgb(colorScale(d.parent.uf)).darker(0.3));
-                    }
-                    
-                    tooltip.transition().duration(300).style("opacity", 0);
-                })
-                .on("mousemove", function(d) {
-                    // Update tooltip position on mouse move
-                    if (tooltip.style("opacity") > 0) {
-                        tooltip
-                            .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
-                            .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
-                    }
-                })
-                .on("click", function(d) {
-                    d3.event.stopPropagation();
-                    
-                    if (d.depth === 1) { // UF group clicked
-                        selectedUF = selectedUF === d.uf ? null : d.uf;
-                        redrawTreemap();
-                    }
-                });
+                    .enter()
+                    .append("div")
+                    .attr("class", "node")
+                    .call(position)
+                    .style("background", function (d) {
+                        if (d.depth === 0) return null; // root
+                        if (d.depth === 1) return colorScale(d.uf); // UF groups
+                        return d3.rgb(colorScale(d.parent.uf)).darker(0.3); // companies
+                    })
+                    .style("border", "none")
+                    .on("mouseover", function (d) {
+                        // Make color more vibrant on hover
+                        if (d.depth === 1) {
+                            d3.select(this).style(
+                                "background",
+                                d3.rgb(colorScale(d.uf)).brighter(0.8),
+                            );
+                        } else if (d.depth === 2) {
+                            d3.select(this).style(
+                                "background",
+                                d3.rgb(colorScale(d.parent.uf)).brighter(0.5),
+                            );
+                        }
+
+                        // Clear any existing tooltip first
+                        tooltip.style("opacity", 0);
+
+                        if (d.depth === 2) {
+                            // Only show tooltip for companies
+                            tooltip
+                                .transition()
+                                .duration(100)
+                                .style("opacity", 0.95);
+                            tooltip
+                                .html(
+                                    "<strong>" +
+                                        d.name +
+                                        "</strong>" +
+                                        "<br/>Vínculos: " +
+                                        format(d.value) +
+                                        "<br/>UF: " +
+                                        d.parent.name,
+                                )
+                                .style(
+                                    "left",
+                                    Math.min(
+                                        d3.event.pageX + 15,
+                                        window.innerWidth - 220,
+                                    ) + "px",
+                                )
+                                .style(
+                                    "top",
+                                    Math.max(d3.event.pageY - 35, 15) + "px",
+                                );
+                        } else if (d.depth === 1) {
+                            // UF groups
+                            tooltip
+                                .transition()
+                                .duration(100)
+                                .style("opacity", 0.95);
+                            tooltip
+                                .html(
+                                    "<strong>" +
+                                        d.name +
+                                        "</strong>" +
+                                        "<br/>" +
+                                        d.children.length +
+                                        " empresas",
+                                )
+                                .style(
+                                    "left",
+                                    Math.min(
+                                        d3.event.pageX + 15,
+                                        window.innerWidth - 220,
+                                    ) + "px",
+                                )
+                                .style(
+                                    "top",
+                                    Math.max(d3.event.pageY - 35, 15) + "px",
+                                );
+                        }
+                    })
+                    .on("mouseout", function (d) {
+                        // Restore original color
+                        if (d.depth === 1) {
+                            d3.select(this).style(
+                                "background",
+                                colorScale(d.uf),
+                            );
+                        } else if (d.depth === 2) {
+                            d3.select(this).style(
+                                "background",
+                                d3.rgb(colorScale(d.parent.uf)).darker(0.3),
+                            );
+                        }
+
+                        tooltip.transition().duration(300).style("opacity", 0);
+                    })
+                    .on("mousemove", function (d) {
+                        // Update tooltip position on mouse move
+                        if (tooltip.style("opacity") > 0) {
+                            tooltip
+                                .style(
+                                    "left",
+                                    Math.min(
+                                        d3.event.pageX + 15,
+                                        window.innerWidth - 220,
+                                    ) + "px",
+                                )
+                                .style(
+                                    "top",
+                                    Math.max(d3.event.pageY - 35, 15) + "px",
+                                );
+                        }
+                    })
+                    .on("click", function (d) {
+                        d3.event.stopPropagation();
+
+                        if (d.depth === 1) {
+                            // UF group clicked
+                            selectedUF = selectedUF === d.uf ? null : d.uf;
+                            redrawTreemap();
+                        }
+                    });
 
                 // Add text labels to UF groups
-                node.filter(function(d) { return d.depth === 1; })
+                node.filter(function (d) {
+                    return d.depth === 1;
+                })
                     .append("div")
                     .style("position", "absolute")
                     .style("top", "2px")
                     .style("left", "2px")
                     .style("right", "2px")
                     .style("color", "black")
-                    .style("font-size", function(d) {
+                    .style("font-size", function (d) {
                         var area = d.dx * d.dy;
                         if (area > 50000) return "22px";
                         else if (area > 30000) return "20px";
@@ -427,17 +541,24 @@
                     })
                     .style("font-weight", "bold")
                     .style("text-align", "center")
-                    .html(function(d) {
+                    .html(function (d) {
                         var area = d.dx * d.dy;
                         if (area > 10000) {
-                            return d.name + "<br><span style='font-size: 10px;'>" + d.children.length + " empresas</span>";
+                            return (
+                                d.name +
+                                "<br><span style='font-size: 10px;'>" +
+                                d.children.length +
+                                " empresas</span>"
+                            );
                         } else {
-                            return d.name.split(' ')[0]; // First word only for small areas
+                            return d.name.split(" ")[0]; // First word only for small areas
                         }
                     });
 
                 // Add text labels to company rectangles
-                node.filter(function(d) { return d.depth === 2; })
+                node.filter(function (d) {
+                    return d.depth === 2;
+                })
                     .append("div")
                     .style("position", "absolute")
                     .style("top", "2px")
@@ -453,40 +574,54 @@
                     .style("justify-content", "center")
                     .style("text-align", "center")
                     .style("word-break", "break-word")
-                    .each(function(d) {
+                    .each(function (d) {
                         var element = d3.select(this);
                         var availableWidth = Math.max(0, d.dx - 8); // Account for padding
                         var availableHeight = Math.max(0, d.dy - 8);
-                        
+
                         // Calculate optimal font size for company name
-                        var optimalSize = calculateOptimalFontSize(d.name, availableWidth, availableHeight * 0.7, 6, 20);
-                        
-                        if (optimalSize >= 6) { // Only show text if readable
+                        var optimalSize = calculateOptimalFontSize(
+                            d.name,
+                            availableWidth,
+                            availableHeight * 0.7,
+                            6,
+                            20,
+                        );
+
+                        if (optimalSize >= 6) {
+                            // Only show text if readable
                             var textColor = "black";
-                            
+
                             // Wrap the company name text
-                            var wrappedLines = wrapText(d.name, availableWidth, optimalSize);
-                            
+                            var wrappedLines = wrapText(
+                                d.name,
+                                availableWidth,
+                                optimalSize,
+                            );
+
                             // Create company name div
-                            var nameDiv = element.append("div")
+                            var nameDiv = element
+                                .append("div")
                                 .style("font-size", optimalSize + "px")
                                 .style("font-weight", "bold")
                                 .style("line-height", "1.1")
                                 .style("margin-bottom", "2px")
                                 .style("color", "black");
-                            
+
                             // Add each line of the wrapped text
-                            wrappedLines.forEach(function(line) {
+                            wrappedLines.forEach(function (line) {
                                 nameDiv.append("div").text(line);
                             });
-                            
+
                             // Add vínculos info if there's space
-                            var usedHeight = wrappedLines.length * optimalSize * 1.1;
+                            var usedHeight =
+                                wrappedLines.length * optimalSize * 1.1;
                             var remainingHeight = availableHeight - usedHeight;
-                            
+
                             if (remainingHeight > 12 && availableWidth > 60) {
                                 var valueSize = Math.min(optimalSize * 0.6, 10);
-                                element.append("div")
+                                element
+                                    .append("div")
                                     .style("font-size", valueSize + "px")
                                     .style("font-weight", "normal")
                                     .style("color", "black")
@@ -497,20 +632,26 @@
                     });
             }
 
-
             function position() {
-                this.style("left", function(d) { return d.x + "px"; })
-                    .style("top", function(d) { return d.y + "px"; })
-                    .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
-                    .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+                this.style("left", function (d) {
+                    return d.x + "px";
+                })
+                    .style("top", function (d) {
+                        return d.y + "px";
+                    })
+                    .style("width", function (d) {
+                        return Math.max(0, d.dx - 1) + "px";
+                    })
+                    .style("height", function (d) {
+                        return Math.max(0, d.dy - 1) + "px";
+                    });
             }
-
 
             // Initial draw
             redrawTreemap();
-            
+
             // Add background click handler to reset selection
-            d3.select("body").on("click", function() {
+            d3.select("body").on("click", function () {
                 if (selectedUF !== null) {
                     selectedUF = null;
                     redrawTreemap();
@@ -518,15 +659,14 @@
             });
 
             // Handle window resize
-            window.addEventListener('resize', function() {
+            window.addEventListener("resize", function () {
                 width = window.innerWidth;
                 height = window.innerHeight;
-                
+
                 treemap.size([width, height]);
-                
-                div.style("width", width + "px")
-                   .style("height", height + "px");
-                   
+
+                div.style("width", width + "px").style("height", height + "px");
+
                 redrawTreemap();
             });
         </script>
