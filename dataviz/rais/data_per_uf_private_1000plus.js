@@ -108,7 +108,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "PETROLEO BRASILEIRO S A PETROBRAS",
+    name: "PETROLEO BRASILEIRO PETROBRAS",
     value: 8441,
     uf: 33,
     natureza: "2038",
@@ -144,7 +144,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "WHIRLPOOL S.A",
+    name: "WHIRLPOOL",
     value: 7258,
     uf: 42,
     natureza: "2046",
@@ -186,7 +186,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "USINAS SIDERURGICAS DE MINAS GERAIS S/A. USIMINAS",
+    name: "USINAS SIDERURGICAS DE MINAS GERAIS USIMINAS",
     value: 6536,
     uf: 31,
     natureza: "2046",
@@ -216,7 +216,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "STONE INSTITUICAO DE PAGAMENTO S.A",
+    name: "STONE INSTITUICAO DE PAGAMENTO",
     value: 6270,
     uf: 33,
     natureza: "2054",
@@ -258,7 +258,7 @@ var data = [
     natureza: "2011",
   },
   {
-    name: "CITROSUCO S/A AGROINDUSTRIA",
+    name: "CITROSUCO AGROINDUSTRIA",
     value: 5758,
     uf: 35,
     natureza: "2054",
@@ -312,7 +312,7 @@ var data = [
     natureza: "2143",
   },
   {
-    name: "AERIS INDUSTRIA E COMERCIO DE EQUIPAMENTOS PARA GERACAO DE ENERGIA S.A",
+    name: "AERIS INDUSTRIA E COMERCIO DE EQUIPAMENTOS PARA GERACAO DE ENERGIA",
     value: 5275,
     uf: 23,
     natureza: "2046",
@@ -612,7 +612,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "USINA ALTO ALEGRE S/A - ACUCAR E ALCOOL",
+    name: "USINA ALTO ALEGRE - ACUCAR E ALCOOL",
     value: 3264,
     uf: 41,
     natureza: "2054",
@@ -678,7 +678,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "INDUSTRIAL PORTO RICO S A - EM RECUPERACAO JUDICIAL",
+    name: "INDUSTRIAL PORTO RICO - EM RECUPERACAO JUDICIAL",
     value: 3023,
     uf: 27,
     natureza: "2054",
@@ -714,7 +714,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "USINA SANTA CLOTILDE S/A - EM RECUPERACAO JUDICIAL",
+    name: "USINA SANTA CLOTILDE - EM RECUPERACAO JUDICIAL",
     value: 2937,
     uf: 27,
     natureza: "2054",
@@ -768,7 +768,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "HOSPITAL SAO RAFAEL S.A",
+    name: "HOSPITAL SAO RAFAEL",
     value: 2852,
     uf: 29,
     natureza: "2054",
@@ -840,7 +840,7 @@ var data = [
     natureza: "2046",
   },
   {
-    name: "GRUPO MULTI S.A",
+    name: "GRUPO MULTI",
     value: 2658,
     uf: 31,
     natureza: "2046",
@@ -1002,7 +1002,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "CONSTRUTORA APIA S/A.",
+    name: "CONSTRUTORA APIA",
     value: 2306,
     uf: 15,
     natureza: "2054",
@@ -1098,7 +1098,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "IRMAOS PASSAURA S.A",
+    name: "IRMAOS PASSAURA",
     value: 2051,
     uf: 41,
     natureza: "2054",
@@ -1428,7 +1428,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "TAUA BRASIL PALMA S.A",
+    name: "TAUA BRASIL PALMA",
     value: 1488,
     uf: 15,
     natureza: "2054",
@@ -1530,7 +1530,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "SOCIEDADE DE EDUCACAO TIRADENTES S.A",
+    name: "SOCIEDADE DE EDUCACAO TIRADENTES",
     value: 1346,
     uf: 28,
     natureza: "2054",
@@ -1698,7 +1698,7 @@ var data = [
     natureza: "2054",
   },
   {
-    name: "RAIZEN CENTRO-SUL S.A",
+    name: "RAIZEN CENTRO-SUL",
     value: 1084,
     uf: 50,
     natureza: "2054",
@@ -1716,7 +1716,7 @@ var data = [
     natureza: "2062",
   },
   {
-    name: "ENERGISA SERGIPE - DISTRIBUIDORA DE ENERGIA S.A",
+    name: "ENERGISA SERGIPE - DISTRIBUIDORA DE ENERGIA",
     value: 1041,
     uf: 28,
     natureza: "2046",
