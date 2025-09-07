@@ -1,0 +1,534 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Empresas Privadas com +1000 Vínculos por UF - Treemap</title>
+        <link
+            href="https://fonts.googleapis.com/css?family=Monda"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+        <script src="data_per_uf_private_1000plus.js"></script>
+        <style>
+            body {
+                font-family: "Monda", sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: rgb(40, 34, 26);
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .node {
+                box-sizing: border-box;
+                line-height: 1.2;
+                overflow: hidden;
+                position: absolute;
+                text-indent: 2px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            text {
+                font-family: "Monda", sans-serif;
+                font-size: 12px;
+                pointer-events: none;
+                text-anchor: middle;
+                fill: white;
+                font-weight: bold;
+            }
+
+
+            .subtitle {
+                text-align: center;
+                color: #ccc;
+                margin-bottom: 15px;
+                font-style: italic;
+                font-size: 14px;
+                font-family: "Monda", sans-serif;
+            }
+
+            #chart {
+                width: 100vw;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+
+
+
+
+
+            .tooltip {
+                position: fixed;
+                text-align: center;
+                padding: 8px;
+                font-family: "Monda", sans-serif;
+                font-size: 12px;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                border: 1px solid #FFD600;
+                border-radius: 4px;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: 1002;
+            }
+
+            .company-name {
+                font-size: 10px;
+                fill: white;
+                font-weight: bold;
+            }
+
+            .company-value {
+                font-size: 8px;
+                fill: #FFD600;
+                font-weight: normal;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="chart"></div>
+
+        <script>
+            var width = window.innerWidth,
+                height = window.innerHeight,
+                format = d3.format(",d");
+
+            // State code to name mapping
+            var stateMap = {
+                11: "Rondônia",
+                12: "Acre", 
+                13: "Amazonas",
+                14: "Roraima",
+                15: "Pará",
+                16: "Amapá",
+                17: "Tocantins",
+                21: "Maranhão",
+                22: "Piauí",
+                23: "Ceará",
+                24: "Rio Grande do Norte",
+                25: "Paraíba",
+                26: "Pernambuco",
+                27: "Alagoas",
+                28: "Sergipe",
+                29: "Bahia",
+                31: "Minas Gerais",
+                32: "Espírito Santo",
+                33: "Rio de Janeiro",
+                35: "São Paulo",
+                41: "Paraná",
+                42: "Santa Catarina",
+                43: "Rio Grande do Sul",
+                50: "Mato Grosso do Sul",
+                51: "Mato Grosso",
+                52: "Goiás",
+                53: "Distrito Federal"
+            };
+
+            // Diverse Brazilian flag colors palette - alternating between lighter green, yellow, lighter blue tones
+            var treemapColors = [
+                "#90EE90", "#FFEB66", "#87CEEB",    // Light Green, Yellow, Sky Blue
+                "#98FB98", "#FDD835", "#ADD8E6",    // Pale Green, Yellow, Light Blue
+                "#B3E6B3", "#FFEB3B", "#B0E0E6",    // Very Light Green, Bright Yellow, Powder Blue
+                "#C8E6C9", "#FFF59D", "#E0F6FF",    // Mint Green, Pale Yellow, Alice Blue
+                "#90EE90", "#F9A825", "#87CEFA",    // Light Green, Gold, Light Sky Blue
+                "#E8F5E8", "#FFFDE7", "#F0F8FF",    // Honeydew, Cream, Azure
+                "#B3E6B3", "#FFD54F", "#B6D7FF",    // Very Light Green, Amber, Light Periwinkle
+                "#F0FFF0", "#FFFACD", "#E6F3FF",    // Mint Cream, Light Cream, Very Light Blue
+                "#CCFFCC", "#FFCC02", "#CCE7FF",    // Very Pale Green, Orange Yellow, Light Blue
+                "#E8FFE8", "#FFF8E1", "#DAE8FC"     // Very Light Mint, Ivory, Very Light Blue
+            ];
+
+            // Function to ensure color diversity by avoiding similar adjacent colors
+            function getDistributedColor(index, totalItems) {
+                // Use a prime number step to distribute colors more evenly
+                var colorIndex = (index * 7) % treemapColors.length;
+                return treemapColors[colorIndex];
+            }
+            
+            var colorScale = d3.scale.ordinal()
+                .domain(Object.keys(stateMap))
+                .range(Object.keys(stateMap).map(function(key, index) {
+                    return getDistributedColor(index, Object.keys(stateMap).length);
+                }));
+
+            var treemap = d3.layout.treemap()
+                .size([width, height])
+                .sticky(true)
+                .value(function(d) { return d.value; });
+
+            // Track selected UF
+            var selectedUF = null;
+
+            // Text measurement function for dynamic font sizing
+            function calculateOptimalFontSize(text, maxWidth, maxHeight, minFontSize, maxFontSize) {
+                // Create a temporary canvas for text measurement
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                
+                minFontSize = minFontSize || 6;
+                maxFontSize = maxFontSize || 24;
+                
+                // Binary search for optimal font size
+                var fontSize = maxFontSize;
+                var bestSize = minFontSize;
+                
+                while (fontSize >= minFontSize) {
+                    context.font = fontSize + 'px Monda, sans-serif';
+                    
+                    // Handle multi-line text by splitting on spaces
+                    var words = text.split(' ');
+                    var lines = [];
+                    var currentLine = '';
+                    
+                    for (var i = 0; i < words.length; i++) {
+                        var testLine = currentLine + words[i] + ' ';
+                        var metrics = context.measureText(testLine);
+                        
+                        if (metrics.width > maxWidth && currentLine !== '') {
+                            lines.push(currentLine.trim());
+                            currentLine = words[i] + ' ';
+                        } else {
+                            currentLine = testLine;
+                        }
+                    }
+                    lines.push(currentLine.trim());
+                    
+                    // Check if text fits within height constraints
+                    var lineHeight = fontSize * 1.1;
+                    var totalHeight = lines.length * lineHeight;
+                    
+                    // Check width of longest line
+                    var maxLineWidth = 0;
+                    for (var j = 0; j < lines.length; j++) {
+                        var lineWidth = context.measureText(lines[j]).width;
+                        maxLineWidth = Math.max(maxLineWidth, lineWidth);
+                    }
+                    
+                    if (totalHeight <= maxHeight && maxLineWidth <= maxWidth) {
+                        bestSize = fontSize;
+                        break;
+                    }
+                    
+                    fontSize -= 0.5;
+                }
+                
+                return bestSize;
+            }
+
+            // Function to wrap text based on available width
+            function wrapText(text, maxWidth, fontSize) {
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                context.font = fontSize + 'px Monda, sans-serif';
+                
+                var words = text.split(' ');
+                var lines = [];
+                var currentLine = '';
+                
+                for (var i = 0; i < words.length; i++) {
+                    var testLine = currentLine + words[i] + ' ';
+                    var metrics = context.measureText(testLine);
+                    
+                    if (metrics.width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine.trim());
+                        currentLine = words[i] + ' ';
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                lines.push(currentLine.trim());
+                
+                return lines;
+            }
+
+            // Function to convert hex color to RGB
+            function hexToRgb(hex) {
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+
+            // Function to calculate relative luminance of a color
+            function getLuminance(hex) {
+                var rgb = hexToRgb(hex);
+                if (!rgb) return 0;
+                
+                // Convert RGB to relative luminance using W3C formula
+                var r = rgb.r / 255;
+                var g = rgb.g / 255;
+                var b = rgb.b / 255;
+                
+                // Apply gamma correction
+                r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+                g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+                b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+                
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            }
+
+            // Function to determine optimal text color based on background
+            function getOptimalTextColor(backgroundColor) {
+                var luminance = getLuminance(backgroundColor);
+                // Use threshold of 0.5 - lighter colors get black text, darker colors get white text
+                return luminance > 0.5 ? 'black' : 'white';
+            }
+
+            var div = d3.select("#chart").append("div")
+                .style("position", "absolute")
+                .style("top", "0px")
+                .style("left", "0px")
+                .style("width", width + "px")
+                .style("height", height + "px");
+
+            // Create tooltip
+            var tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip");
+
+            // Process loaded data and group by UF
+            var processedData = data.map(function(d) {
+                return {
+                    name: d.name,
+                    value: d.value,
+                    uf: d.uf,
+                    uf_name: stateMap[d.uf] || "Desconhecido",
+                    natureza: d.natureza
+                };
+            });
+
+            // Group data by UF
+            var groupedByUF = d3.nest()
+                .key(function(d) { return d.uf; })
+                .entries(processedData);
+
+            // Create hierarchical structure for treemap
+            var allData = {
+                name: "root",
+                children: groupedByUF.map(function(uf) {
+                    return {
+                        name: stateMap[uf.key] || "Desconhecido",
+                        uf: +uf.key,
+                        children: uf.values
+                    };
+                })
+            };
+
+            function getFilteredData() {
+                if (!selectedUF) return allData;
+                
+                var filteredUF = allData.children.find(function(uf) {
+                    return uf.uf === selectedUF;
+                });
+                
+                return filteredUF ? {
+                    name: "root",
+                    children: [filteredUF]
+                } : allData;
+            }
+
+            function redrawTreemap() {
+                var currentData = getFilteredData();
+                
+                // Clear existing nodes
+                div.selectAll(".node").remove();
+                
+                // Create new nodes
+                var node = div.datum(currentData).selectAll(".node")
+                    .data(treemap.nodes)
+                  .enter().append("div")
+                .attr("class", "node")
+                .call(position)
+                .style("background", function(d) { 
+                    if (d.depth === 0) return null; // root
+                    if (d.depth === 1) return colorScale(d.uf); // UF groups
+                    return d3.rgb(colorScale(d.parent.uf)).darker(0.3); // companies
+                })
+                .style("border", "none")
+                .on("mouseover", function(d) {
+                    // Make color more vibrant on hover
+                    if (d.depth === 1) {
+                        d3.select(this).style("background", d3.rgb(colorScale(d.uf)).brighter(0.8));
+                    } else if (d.depth === 2) {
+                        d3.select(this).style("background", d3.rgb(colorScale(d.parent.uf)).brighter(0.5));
+                    }
+                    
+                    // Clear any existing tooltip first
+                    tooltip.style("opacity", 0);
+                    
+                    if (d.depth === 2) { // Only show tooltip for companies
+                        tooltip.transition().duration(100).style("opacity", 0.95);
+                        tooltip.html(
+                            "<strong>" + d.name + "</strong>" + 
+                            "<br/>Vínculos: " + format(d.value) +
+                            "<br/>UF: " + d.parent.name
+                        )
+                        .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
+                        .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
+                    } else if (d.depth === 1) { // UF groups
+                        tooltip.transition().duration(100).style("opacity", 0.95);
+                        tooltip.html(
+                            "<strong>" + d.name + "</strong>" + 
+                            "<br/>" + d.children.length + " empresas"
+                        )
+                        .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
+                        .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
+                    }
+                })
+                .on("mouseout", function(d) {
+                    // Restore original color
+                    if (d.depth === 1) {
+                        d3.select(this).style("background", colorScale(d.uf));
+                    } else if (d.depth === 2) {
+                        d3.select(this).style("background", d3.rgb(colorScale(d.parent.uf)).darker(0.3));
+                    }
+                    
+                    tooltip.transition().duration(300).style("opacity", 0);
+                })
+                .on("mousemove", function(d) {
+                    // Update tooltip position on mouse move
+                    if (tooltip.style("opacity") > 0) {
+                        tooltip
+                            .style("left", Math.min(d3.event.pageX + 15, window.innerWidth - 220) + "px")
+                            .style("top", Math.max(d3.event.pageY - 35, 15) + "px");
+                    }
+                })
+                .on("click", function(d) {
+                    d3.event.stopPropagation();
+                    
+                    if (d.depth === 1) { // UF group clicked
+                        selectedUF = selectedUF === d.uf ? null : d.uf;
+                        redrawTreemap();
+                    }
+                });
+
+                // Add text labels to UF groups
+                node.filter(function(d) { return d.depth === 1; })
+                    .append("div")
+                    .style("position", "absolute")
+                    .style("top", "2px")
+                    .style("left", "2px")
+                    .style("right", "2px")
+                    .style("color", "black")
+                    .style("font-size", function(d) {
+                        var area = d.dx * d.dy;
+                        if (area > 50000) return "22px";
+                        else if (area > 30000) return "20px";
+                        else if (area > 15000) return "18px";
+                        else return "16px";
+                    })
+                    .style("font-weight", "bold")
+                    .style("text-align", "center")
+                    .html(function(d) {
+                        var area = d.dx * d.dy;
+                        if (area > 10000) {
+                            return d.name + "<br><span style='font-size: 10px;'>" + d.children.length + " empresas</span>";
+                        } else {
+                            return d.name.split(' ')[0]; // First word only for small areas
+                        }
+                    });
+
+                // Add text labels to company rectangles
+                node.filter(function(d) { return d.depth === 2; })
+                    .append("div")
+                    .style("position", "absolute")
+                    .style("top", "2px")
+                    .style("left", "2px")
+                    .style("right", "2px")
+                    .style("bottom", "2px")
+                    .style("overflow", "hidden")
+                    .style("color", "black")
+                    .style("font-weight", "bold")
+                    .style("line-height", "1.1")
+                    .style("display", "flex")
+                    .style("flex-direction", "column")
+                    .style("justify-content", "center")
+                    .style("text-align", "center")
+                    .style("word-break", "break-word")
+                    .each(function(d) {
+                        var element = d3.select(this);
+                        var availableWidth = Math.max(0, d.dx - 8); // Account for padding
+                        var availableHeight = Math.max(0, d.dy - 8);
+                        
+                        // Calculate optimal font size for company name
+                        var optimalSize = calculateOptimalFontSize(d.name, availableWidth, availableHeight * 0.7, 6, 20);
+                        
+                        if (optimalSize >= 6) { // Only show text if readable
+                            var textColor = "black";
+                            
+                            // Wrap the company name text
+                            var wrappedLines = wrapText(d.name, availableWidth, optimalSize);
+                            
+                            // Create company name div
+                            var nameDiv = element.append("div")
+                                .style("font-size", optimalSize + "px")
+                                .style("font-weight", "bold")
+                                .style("line-height", "1.1")
+                                .style("margin-bottom", "2px")
+                                .style("color", "black");
+                            
+                            // Add each line of the wrapped text
+                            wrappedLines.forEach(function(line) {
+                                nameDiv.append("div").text(line);
+                            });
+                            
+                            // Add vínculos info if there's space
+                            var usedHeight = wrappedLines.length * optimalSize * 1.1;
+                            var remainingHeight = availableHeight - usedHeight;
+                            
+                            if (remainingHeight > 12 && availableWidth > 60) {
+                                var valueSize = Math.min(optimalSize * 0.6, 10);
+                                element.append("div")
+                                    .style("font-size", valueSize + "px")
+                                    .style("font-weight", "normal")
+                                    .style("color", "black")
+                                    .style("margin-top", "2px")
+                                    .text(format(d.value) + " vínculos");
+                            }
+                        }
+                    });
+            }
+
+
+            function position() {
+                this.style("left", function(d) { return d.x + "px"; })
+                    .style("top", function(d) { return d.y + "px"; })
+                    .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+                    .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+            }
+
+
+            // Initial draw
+            redrawTreemap();
+            
+            // Add background click handler to reset selection
+            d3.select("body").on("click", function() {
+                if (selectedUF !== null) {
+                    selectedUF = null;
+                    redrawTreemap();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                
+                treemap.size([width, height]);
+                
+                div.style("width", width + "px")
+                   .style("height", height + "px");
+                   
+                redrawTreemap();
+            });
+        </script>
+    </body>
+</html>
