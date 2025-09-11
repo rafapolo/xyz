@@ -170,13 +170,6 @@ The image below is not an aerial photo: it is a visual representation of Rio de 
 <div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
 
 ```mermaid
----
-config:
- sankey:
-  showValues: false
-  width: 1200
-  height: 600
----
 sankey
     Sit_Urbano,Cond_sem_declaracao,1168
     Sit_Suburbano,Cond_sem_declaracao,26
@@ -223,13 +216,6 @@ sankey
 <div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
 
 ```mermaid
----
-config:
- sankey:
-  showValues: false
-  width: 1200
-  height: 600
----
 sankey
     Aglomerado_rural,Alugado,19572
     Aglomerado_rural,Cedido_por_empregador,13165
@@ -285,13 +271,6 @@ sankey
 <div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
 
 ```mermaid
----
-config:
- sankey:
-  showValues: false
-  width: 1200
-  height: 600
----
 sankey
     Rural,Alugado,67876
     Rural,Cedido_de_outra_forma,334512
