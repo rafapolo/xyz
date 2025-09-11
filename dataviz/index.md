@@ -204,12 +204,15 @@ sankey-beta
     Cond Outra condicao,Tipo Duravel,1353801
     Cond Nao classificado,Tipo Rustico,16
 ```
+
+</div>
+
 ---
 
 **1980 Housing Census**
 > *Beginning of major urbanization: emergence of apartment living and shift from rural to urban settlements*
 
----
+<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
 
 ```mermaid
 sankey-beta
@@ -256,6 +259,9 @@ sankey-beta
     Proprio ja pago,Apartamento,115652
     Proprio ja pago,Casa,3484304
 ```
+
+</div>
+
 ---
 
 **Key Insights from Four Decades of Housing Evolution**
@@ -273,7 +279,7 @@ sankey-beta
 
 **Data Sources:**
 - IBGE Census (Brazilian Institute of Geography and Statistics)
-- CNEFE (National Registry of Addresses for Statistical Purposes)    
+- CNEFE (National Registry of Addresses for Statistical Purposes)
 - Federal Revenue Registry
 - TSE (Superior Electoral Court)
 - Chamber of Deputies Expense Records
@@ -303,7 +309,6 @@ sankey-beta
 [image8]: /images/image8.png
 [image9]: /images/image9.png
 [image10]: /images/image10.png
-[image11]: /images/image11.png
 [image12]: /images/image12.png
 [image13]: /images/image13.png
 [image14]: /images/image14.png
@@ -311,12 +316,9 @@ sankey-beta
 [image16]: /images/image16.png
 [image17]: /images/image17.png
 [image18]: /images/image18.png
-[image19]: /images/image19.png
 [image20]: /images/image20.png
-[image21]: /images/image21.png
 [image22]: /images/image22.png
 [image23]: /images/image23.png
-[image24]: /images/image24.png
 [image25]: /images/image25.png
 [image26]: /images/image26.png
 [image27]: /images/image27.png
