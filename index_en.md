@@ -1,43 +1,37 @@
-# 🗺️ Exploring New Cartographic Technologies
+**🗺️ Exploring New Cartographic Technologies**
 
 Today, through a screen, an individual can interrelate, interact, represent and navigate among millions of data points. Technological advances have drastically expanded our capacity to map territories, networks and flows.
 
-We experiment with visualizing public data, integrating IBGE Census, CNEFE and Federal Revenue Registry, involving:
-
-- Population data by religious profile, education, race, age...
-- Companies with economic activities, societies, religious organizations, battalions, city halls, quilombola communities, banks... most with geographical location
-- Potentially correlated with TSE, Chamber Expenses, Parliamentary Groups, PIX Amendments...
-
-In leaps, the image below is not an aerial photo: it is a visual representation of Rio de Janeiro, where each illuminated point is a Legal Entity establishment.
+The image below is not an aerial photo: it is a visual representation of Rio de Janeiro, where each illuminated point is a Legal Entity establishment.
 
 🔗 **[Interactive Map: Rio de Janeiro Establishments](https://xn--2dk.xyz/dataviz/rio/ibge)**
 
 ---
 
-## 📊 Data Visualizations
+**📊 Data Visualizations**
 
-### Rio de Janeiro Business Network
+**Rio de Janeiro Business Network**
 > *Visual representation of Rio de Janeiro where each illuminated point represents a registered business establishment*
 
 ---
 ![][image1]![][image2]
 ---
 
-### All Churches in the Country
+**All Churches in the Country**
 > *Comprehensive mapping of religious institutions across Brazil, showing distribution patterns and density*
 
 ---
 ![][image3]![][image4]![][image5]![][image6]![][image7]
 ---
 
-### More Churches Than Schools 😔
+**More Churches Than Schools 😔**
 > *Comparative analysis revealing the disproportionate number of religious institutions versus educational facilities*
 
 ---
 ![][image8]
 ---
 
-### Residential Areas in Nova Friburgo with Height Relative to Number of Residents
+**Residential Areas in Nova Friburgo with Height Relative to Number of Residents**
 > *3D visualization showing population density through building height representation in Nova Friburgo*
 
 ---
@@ -46,7 +40,7 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 
 🔗 **[Interactive 3D Map: Nova Friburgo Population](https://xn--2dk.xyz/dataviz/friba/pop_3d)**
 
-### Distribution of Garment Companies
+**Distribution of Garment Companies**
 > *Mapping of textile and clothing companies based on active business registrations (CNPJs)*
 
 ---
@@ -55,35 +49,35 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 ![][image11]
 ---
 
-### Garment Companies Opened and Closed During Pandemic
+**Garment Companies Opened and Closed During Pandemic**
 > *Analysis of business dynamics in the intimate apparel industry hub during COVID-19*
 
 ---
 ![][image12]
 ---
 
-### All Residences in Nova Friburgo Municipality
+**All Residences in Nova Friburgo Municipality**
 > *Complete residential mapping showing housing distribution patterns across the city*
 
 ---
 ![][image13]
 ---
 
-### Religious Entities Outnumber Labor Unions in 2000
+**Religious Entities Outnumber Labor Unions in 2000**
 > *Historical comparison showing the predominance of religious organizations over workers' unions*
 
 ---
 ![][image14]
 ---
 
-### Heatmap of New Business Registrations in Nova Friburgo
+**Heatmap of New Business Registrations in Nova Friburgo**
 > *Temporal and spatial analysis of entrepreneurial activity and business creation patterns*
 
 ---
 ![][image15]
 ---
 
-### Religious Affiliation by Municipality
+**Religious Affiliation by Municipality**
 > *The more yellow, the more Catholic a municipality. Purple tends to be Evangelical*
 
 ---
@@ -92,14 +86,14 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 ![][image17]
 ---
 
-### 81.5% of Brazilian States Have Double the Religious Establishments Compared to Health Units
+**81.5% of Brazilian States Have Double the Religious Establishments Compared to Health Units**
 > *Stark comparison highlighting the imbalance between religious institutions and healthcare facilities*
 
 ---
 ![][image18]
 ---
 
-### Distribution of School Types in Rio (Primary, Secondary...)
+**Distribution of School Types in Rio (Primary, Secondary...)**
 > *Educational infrastructure mapping showing the distribution of different educational levels*
 
 ---
@@ -108,28 +102,28 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 ![][image20]
 ---
 
-### Which Economic Sectors Closed After Others During the Pandemic?
+**Which Economic Sectors Closed After Others During the Pandemic?**
 > *Sequential analysis of business closures by economic sector during COVID-19*
 
 ---
 ![][image22]
 ---
 
-### Corporate Relationships of Friburgo Entrepreneurs with Multiple Companies
+**Corporate Relationships of Friburgo Entrepreneurs with Multiple Companies**
 > *Network analysis revealing business interconnections and corporate relationships*
 
 ---
 ![][image23]![][image24]
 ---
 
-### Heat Map of Areas with Most Residences
+**Heat Map of Areas with Most Residences**
 > *Density visualization highlighting residential concentration zones*
 
 ---
 ![][image25]
 ---
 
-### Companies and Partners of the "Tiger Game" Owner
+**Companies and Partners of the "Tiger Game" Owner**
 > *Corporate network analysis of gambling platform ownership structures*
 
 ---
@@ -138,14 +132,14 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 
 🔗 **[Detailed Network Analysis: Tiger Game Footprints](https://tinyurl.com/pegadas-tigrim)**
 
-### Corporate Structure Visualization of a Specific Senator
+**Corporate Structure Visualization of a Specific Senator**
 > *Political-business network mapping showing corporate connections and influence patterns*
 
 ---
 ![][image30]
 ---
 
-### Swiss Companies with Headquarters in Brazil
+**Swiss Companies with Headquarters in Brazil**
 > *International business presence analysis showing foreign investment patterns*
 
 ---
@@ -156,11 +150,11 @@ In leaps, the image below is not an aerial photo: it is a visual representation 
 
 ---
 
-## 📈 IBGE Housing Census Data: Four Decades of Evolution (1970-2010)
+**📈 IBGE Housing Census Data: Four Decades of Evolution (1970-2010)**
 
 > *Comprehensive Sankey flow diagrams showing Brazilian housing patterns across five census periods, revealing the transformation of housing ownership, urbanization trends, and dwelling characteristics over 40 years*
 
-### 1970 Housing Census
+**1970 Housing Census**
 > *Post-industrialization era housing patterns showing the dominance of rural owned properties and rustic housing types*
 
 <div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
@@ -210,7 +204,7 @@ sankey-beta
 ```
 ---
 
-### 1980 Housing Census
+**1980 Housing Census**
 > *Beginning of major urbanization: emergence of apartment living and shift from rural to urban settlements*
 
 ---
@@ -269,7 +263,7 @@ sankey-beta
 ```
 ---
 
-### 1990 Housing Census
+**1990 Housing Census**
 > *Democratic transition period: diversification of housing types and expansion of urban settlements including indigenous housing recognition*
 
 ---
@@ -385,7 +379,7 @@ sankey-beta
 ```
 ---
 
-### 2000 Housing Census
+**2000 Housing Census**
 > *Millennium era: simplified urban/rural classification showing the consolidation of urban living and apartment culture*
 
 ---
@@ -435,7 +429,7 @@ sankey-beta
 ```
 ---
 
-### 2010 Housing Census
+**2010 Housing Census**
 > *Modern era: introduction of condominiums, significant reduction in rental housing, and recognition of diverse housing situations including institutional living*
 
 ---
@@ -503,7 +497,7 @@ sankey-beta
 ```
 ---
 
-### Key Insights from Four Decades of Housing Evolution
+**Key Insights from Four Decades of Housing Evolution**
 
 **Major Trends Observed:**
 - **Urbanization Acceleration**: Massive shift from rural to urban housing (1970-2010)
@@ -516,7 +510,7 @@ sankey-beta
 
 ---
 
-## 🔧 Technical Stack & Data Sources
+**🔧 Technical Stack & Data Sources**
 
 **Data Sources:**
 - IBGE Census (Brazilian Institute of Geography and Statistics)
@@ -537,3 +531,37 @@ sankey-beta
 **ミ**
 
 **~2025**
+
+
+
+[image1]: images/image1.png
+[image2]: images/image2.png
+[image3]: images/image3.png
+[image4]: images/image4.png
+[image5]: images/image5.png
+[image6]: images/image6.png
+[image7]: images/image7.png
+[image8]: images/image8.png
+[image9]: images/image9.png
+[image10]: images/image10.png
+[image11]: images/image11.png
+[image12]: images/image12.png
+[image13]: images/image13.png
+[image14]: images/image14.png
+[image15]: images/image15.png
+[image16]: images/image16.png
+[image17]: images/image17.png
+[image18]: images/image18.png
+[image19]: images/image19.png
+[image20]: images/image20.png
+[image21]: images/image21.png
+[image22]: images/image22.png
+[image23]: images/image23.png
+[image24]: images/image24.png
+[image25]: images/image25.png
+[image26]: images/image26.png
+[image27]: images/image27.png
+[image28]: images/image28.png
+[image29]: images/image29.png
+[image30]: images/image30.png
+[image31]: images/image31.png
