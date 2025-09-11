@@ -101,11 +101,12 @@ The image below is not an aerial photo: it is a visual representation of Rio de 
 ---
 
 ![][image20]
-**Biggest companies in the Country per State?**
+
+**Biggest companies in the Country per State**
 🔗 [Interactive Treemap](https://xn--2dk.xyz/dataviz/rais/por_uf)
 ![][pvt_por_uf]
 
-**Investigating Societal relations?**
+**Investigating Societal relations**
 🔗 [Interactive Societal Investigation](https://rafapolo.github.io/fincrime/)
 ![][reag-viz]
 
@@ -170,39 +171,39 @@ The image below is not an aerial photo: it is a visual representation of Rio de 
 
 ```mermaid
 sankey-beta
-    Sit Urbano,Cond sem declaracao,1168
-    Sit Suburbano,Cond sem declaracao,26
-    Sit Rural,Cond sem declaracao,775
-    Sit Urbano,Cond Proprio ja pago,6602220
-    Sit Suburbano,Cond Proprio ja pago,345236
-    Sit Rural,Cond Proprio ja pago,6514120
-    Sit Urbano,Cond Proprio em aquisicao,1021044
-    Sit Suburbano,Cond Proprio em aquisicao,33202
-    Sit Rural,Cond Proprio em aquisicao,111461
-    Sit Urbano,Cond Alugado,3575026
-    Sit Suburbano,Cond Alugado,109313
-    Sit Rural,Cond Alugado,300507
-    Sit Nao classificado,Cond Alugado,2
-    Sit Urbano,Cond Cedido,906408
-    Sit Suburbano,Cond Cedido,40742
-    Sit Rural,Cond Cedido,920018
-    Sit Urbano,Cond Outra condicao,139868
-    Sit Suburbano,Cond Outra condicao,13135
-    Sit Rural,Cond Outra condicao,2859867
-    Sit Urbano,Cond Nao classificado,16
-    Cond sem declaracao,Tipo Rustico,1434
-    Cond sem declaracao,Tipo Duravel,535
-    Cond Proprio ja pago,Tipo Rustico,9912955
-    Cond Proprio ja pago,Tipo Duravel,3548621
-    Cond Proprio em aquisicao,Tipo Rustico,1032172
-    Cond Proprio em aquisicao,Tipo Duravel,133535
-    Cond Alugado,Tipo Rustico,3465003
-    Cond Alugado,Tipo Duravel,519845
-    Cond Cedido,Tipo Rustico,1235874
-    Cond Cedido,Tipo Duravel,631294
-    Cond Outra condicao,Tipo Rustico,1659069
-    Cond Outra condicao,Tipo Duravel,1353801
-    Cond Nao classificado,Tipo Rustico,16
+    "Sit Urbano","Cond sem declaracao",1168
+    "Sit Suburbano","Cond sem declaracao",26
+    "Sit Rural","Cond sem declaracao",775
+    "Sit Urbano","Cond Proprio ja pago",6602220
+    "Sit Suburbano","Cond Proprio ja pago",345236
+    "Sit Rural","Cond Proprio ja pago",6514120
+    "Sit Urbano","Cond Proprio em aquisicao",1021044
+    "Sit Suburbano","Cond Proprio em aquisicao",33202
+    "Sit Rural","Cond Proprio em aquisicao",111461
+    "Sit Urbano","Cond Alugado",3575026
+    "Sit Suburbano","Cond Alugado",109313
+    "Sit Rural","Cond Alugado",300507
+    "Sit Nao classificado","Cond Alugado",2
+    "Sit Urbano","Cond Cedido",906408
+    "Sit Suburbano","Cond Cedido",40742
+    "Sit Rural","Cond Cedido",920018
+    "Sit Urbano","Cond Outra condicao",139868
+    "Sit Suburbano","Cond Outra condicao",13135
+    "Sit Rural","Cond Outra condicao",2859867
+    "Sit Urbano","Cond Nao classificado",16
+    "Cond sem declaracao","Tipo Rustico",1434
+    "Cond sem declaracao","Tipo Duravel",535
+    "Cond Proprio ja pago","Tipo Rustico",9912955
+    "Cond Proprio ja pago","Tipo Duravel",3548621
+    "Cond Proprio em aquisicao","Tipo Rustico",1032172
+    "Cond Proprio em aquisicao","Tipo Duravel",133535
+    "Cond Alugado","Tipo Rustico",3465003
+    "Cond Alugado","Tipo Duravel",519845
+    "Cond Cedido","Tipo Rustico",1235874
+    "Cond Cedido","Tipo Duravel",631294
+    "Cond Outra condicao","Tipo Rustico",1659069
+    "Cond Outra condicao","Tipo Duravel",1353801
+    "Cond Nao classificado","Tipo Rustico",16
 ```
 
 </div>
@@ -216,48 +217,48 @@ sankey-beta
 
 ```mermaid
 sankey-beta
-    Aglomerado rural,Alugado,19572
-    Aglomerado rural,Cedido por empregador,13165
-    Aglomerado rural,Cedido por particular,8836
-    Aglomerado rural,ignorado,437
-    Aglomerado rural,Outra condicao,3330
-    Aglomerado rural,Proprio em aquisicao,11155
-    Aglomerado rural,Proprio ja pago,124728
-    Area urbana isolada,Alugado,6098
-    Area urbana isolada,Cedido por empregador,1893
-    Area urbana isolada,Cedido por particular,1910
-    Area urbana isolada,ignorado,38
-    Area urbana isolada,Outra condicao,342
-    Area urbana isolada,Proprio em aquisicao,1212
-    Area urbana isolada,Proprio ja pago,15536
-    Cidade ou Vila,Alugado,1343492
-    Cidade ou Vila,Cedido por empregador,96021
-    Cidade ou Vila,Cedido por particular,277264
-    Cidade ou Vila,ignorado,6427
-    Cidade ou Vila,Outra condicao,54910
-    Cidade ou Vila,Proprio em aquisicao,344477
-    Cidade ou Vila,Proprio ja pago,2334531
-    Zona rural,Alugado,34671
-    Zona rural,Cedido por empregador,429076
-    Zona rural,Cedido por particular,170478
-    Zona rural,ignorado,3637
-    Zona rural,Outra condicao,46914
-    Zona rural,Proprio em aquisicao,8230
-    Zona rural,Proprio ja pago,1125161
-    Alugado,Apartamento,192360
-    Alugado,Casa,1211473
-    Cedido por empregador,Apartamento,15897
-    Cedido por empregador,Casa,524258
-    Cedido por particular,Apartamento,15198
-    Cedido por particular,Casa,443290
-    ignorado,Apartamento,1420
-    ignorado,Casa,9119
-    Outra condicao,Apartamento,3131
-    Outra condicao,Casa,102365
-    Proprio em aquisicao,Apartamento,107008
-    Proprio em aquisicao,Casa,258066
-    Proprio ja pago,Apartamento,115652
-    Proprio ja pago,Casa,3484304
+    "Aglomerado rural","Alugado",19572
+    "Aglomerado rural","Cedido por empregador",13165
+    "Aglomerado rural","Cedido por particular",8836
+    "Aglomerado rural","ignorado",437
+    "Aglomerado rural","Outra condicao",3330
+    "Aglomerado rural","Proprio em aquisicao",11155
+    "Aglomerado rural","Proprio ja pago",124728
+    "Area urbana isolada","Alugado",6098
+    "Area urbana isolada","Cedido por empregador",1893
+    "Area urbana isolada","Cedido por particular",1910
+    "Area urbana isolada","ignorado",38
+    "Area urbana isolada","Outra condicao",342
+    "Area urbana isolada","Proprio em aquisicao",1212
+    "Area urbana isolada","Proprio ja pago",15536
+    "Cidade ou Vila","Alugado",1343492
+    "Cidade ou Vila","Cedido por empregador",96021
+    "Cidade ou Vila","Cedido por particular",277264
+    "Cidade ou Vila","ignorado",6427
+    "Cidade ou Vila","Outra condicao",54910
+    "Cidade ou Vila","Proprio em aquisicao",344477
+    "Cidade ou Vila","Proprio ja pago",2334531
+    "Zona rural","Alugado",34671
+    "Zona rural","Cedido por empregador",429076
+    "Zona rural","Cedido por particular",170478
+    "Zona rural","ignorado",3637
+    "Zona rural","Outra condicao",46914
+    "Zona rural","Proprio em aquisicao",8230
+    "Zona rural","Proprio ja pago",1125161
+    "Alugado","Apartamento",192360
+    "Alugado","Casa",1211473
+    "Cedido por empregador","Apartamento",15897
+    "Cedido por empregador","Casa",524258
+    "Cedido por particular","Apartamento",15198
+    "Cedido por particular","Casa",443290
+    "ignorado","Apartamento",1420
+    "ignorado","Casa",9119
+    "Outra condicao","Apartamento",3131
+    "Outra condicao","Casa",102365
+    "Proprio em aquisicao","Apartamento",107008
+    "Proprio em aquisicao","Casa",258066
+    "Proprio ja pago","Apartamento",115652
+    "Proprio ja pago","Casa",3484304
 ```
 
 </div>
