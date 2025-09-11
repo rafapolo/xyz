@@ -88,39 +88,39 @@ Demonstrando em pulos, a imagem abaixo não é uma foto aérea: é uma represent
 
 ```mermaid
 sankey
-    Sit_Urbano,Cond_sem_declaracao,1168
-    Sit_Suburbano,Cond_sem_declaracao,26
-    Sit_Rural,Cond_sem_declaracao,775
-    Sit_Urbano,Cond_Proprio_ja_pago,6602220
-    Sit_Suburbano,Cond_Proprio_ja_pago,345236
-    Sit_Rural,Cond_Proprio_ja_pago,6514120
-    Sit_Urbano,Cond_Proprio_em_aquisicao,1021044
-    Sit_Suburbano,Cond_Proprio_em_aquisicao,33202
-    Sit_Rural,Cond_Proprio_em_aquisicao,111461
-    Sit_Urbano,Cond_Alugado,3575026
-    Sit_Suburbano,Cond_Alugado,109313
-    Sit_Rural,Cond_Alugado,300507
-    Sit_Nao_classificado,Cond_Alugado,2
-    Sit_Urbano,Cond_Cedido,906408
-    Sit_Suburbano,Cond_Cedido,40742
-    Sit_Rural,Cond_Cedido,920018
-    Sit_Urbano,Cond_Outra_condicao,139868
-    Sit_Suburbano,Cond_Outra_condicao,13135
-    Sit_Rural,Cond_Outra_condicao,2859867
-    Sit_Urbano,Cond_Nao_classificado,16
-    Cond_sem_declaracao,Tipo_Rustico,1434
-    Cond_sem_declaracao,Tipo_Duravel,535
-    Cond_Proprio_ja_pago,Tipo_Rustico,9912955
-    Cond_Proprio_ja_pago,Tipo_Duravel,3548621
-    Cond_Proprio_em_aquisicao,Tipo_Rustico,1032172
-    Cond_Proprio_em_aquisicao,Tipo_Duravel,133535
-    Cond_Alugado,Tipo_Rustico,3465003
-    Cond_Alugado,Tipo_Duravel,519845
-    Cond_Cedido,Tipo_Rustico,1235874
-    Cond_Cedido,Tipo_Duravel,631294
-    Cond_Outra_condicao,Tipo_Rustico,1659069
-    Cond_Outra_condicao,Tipo_Duravel,1353801
-    Cond_Nao_classificado,Tipo_Rustico,16
+Sit_Urbano,Cond_sem_declaracao,1168
+Sit_Suburbano,Cond_sem_declaracao,26
+Sit_Rural,Cond_sem_declaracao,775
+Sit_Urbano,Cond_Proprio_ja_pago,6602220
+Sit_Suburbano,Cond_Proprio_ja_pago,345236
+Sit_Rural,Cond_Proprio_ja_pago,6514120
+Sit_Urbano,Cond_Proprio_em_aquisicao,1021044
+Sit_Suburbano,Cond_Proprio_em_aquisicao,33202
+Sit_Rural,Cond_Proprio_em_aquisicao,111461
+Sit_Urbano,Cond_Alugado,3575026
+Sit_Suburbano,Cond_Alugado,109313
+Sit_Rural,Cond_Alugado,300507
+Sit_Nao_classificado,Cond_Alugado,2
+Sit_Urbano,Cond_Cedido,906408
+Sit_Suburbano,Cond_Cedido,40742
+Sit_Rural,Cond_Cedido,920018
+Sit_Urbano,Cond_Outra_condicao,139868
+Sit_Suburbano,Cond_Outra_condicao,13135
+Sit_Rural,Cond_Outra_condicao,2859867
+Sit_Urbano,Cond_Nao_classificado,16
+Cond_sem_declaracao,Tipo_Rustico,1434
+Cond_sem_declaracao,Tipo_Duravel,535
+Cond_Proprio_ja_pago,Tipo_Rustico,9912955
+Cond_Proprio_ja_pago,Tipo_Duravel,3548621
+Cond_Proprio_em_aquisicao,Tipo_Rustico,1032172
+Cond_Proprio_em_aquisicao,Tipo_Duravel,133535
+Cond_Alugado,Tipo_Rustico,3465003
+Cond_Alugado,Tipo_Duravel,519845
+Cond_Cedido,Tipo_Rustico,1235874
+Cond_Cedido,Tipo_Duravel,631294
+Cond_Outra_condicao,Tipo_Rustico,1659069
+Cond_Outra_condicao,Tipo_Duravel,1353801
+Cond_Nao_classificado,Tipo_Rustico,16
 ```
 
 </div>
@@ -133,48 +133,48 @@ sankey
 
 ```mermaid
 sankey
-    Aglomerado_rural,Alugado,19572
-    Aglomerado_rural,Cedido_por_empregador,13165
-    Aglomerado_rural,Cedido_por_particular,8836
-    Aglomerado_rural,ignorado,437
-    Aglomerado_rural,Outra_condicao,3330
-    Aglomerado_rural,Proprio_em_aquisicao,11155
-    Aglomerado_rural,Proprio_ja_pago,124728
-    Area_urbana_isolada,Alugado,6098
-    Area_urbana_isolada,Cedido_por_empregador,1893
-    Area_urbana_isolada,Cedido_por_particular,1910
-    Area_urbana_isolada,ignorado,38
-    Area_urbana_isolada,Outra_condicao,342
-    Area_urbana_isolada,Proprio_em_aquisicao,1212
-    Area_urbana_isolada,Proprio_ja_pago,15536
-    Cidade_ou_Vila,Alugado,1343492
-    Cidade_ou_Vila,Cedido_por_empregador,96021
-    Cidade_ou_Vila,Cedido_por_particular,277264
-    Cidade_ou_Vila,ignorado,6427
-    Cidade_ou_Vila,Outra_condicao,54910
-    Cidade_ou_Vila,Proprio_em_aquisicao,344477
-    Cidade_ou_Vila,Proprio_ja_pago,2334531
-    Zona_rural,Alugado,34671
-    Zona_rural,Cedido_por_empregador,429076
-    Zona_rural,Cedido_por_particular,170478
-    Zona_rural,ignorado,3637
-    Zona_rural,Outra_condicao,46914
-    Zona_rural,Proprio_em_aquisicao,8230
-    Zona_rural,Proprio_ja_pago,1125161
-    Alugado,Apartamento,192360
-    Alugado,Casa,1211473
-    Cedido_por_empregador,Apartamento,15897
-    Cedido_por_empregador,Casa,524258
-    Cedido_por_particular,Apartamento,15198
-    Cedido_por_particular,Casa,443290
-    ignorado,Apartamento,1420
-    ignorado,Casa,9119
-    Outra_condicao,Apartamento,3131
-    Outra_condicao,Casa,102365
-    Proprio_em_aquisicao,Apartamento,107008
-    Proprio_em_aquisicao,Casa,258066
-    Proprio_ja_pago,Apartamento,115652
-    Proprio_ja_pago,Casa,3484304
+Aglomerado_rural,Alugado,19572
+Aglomerado_rural,Cedido_por_empregador,13165
+Aglomerado_rural,Cedido_por_particular,8836
+Aglomerado_rural,ignorado,437
+Aglomerado_rural,Outra_condicao,3330
+Aglomerado_rural,Proprio_em_aquisicao,11155
+Aglomerado_rural,Proprio_ja_pago,124728
+Area_urbana_isolada,Alugado,6098
+Area_urbana_isolada,Cedido_por_empregador,1893
+Area_urbana_isolada,Cedido_por_particular,1910
+Area_urbana_isolada,ignorado,38
+Area_urbana_isolada,Outra_condicao,342
+Area_urbana_isolada,Proprio_em_aquisicao,1212
+Area_urbana_isolada,Proprio_ja_pago,15536
+Cidade_ou_Vila,Alugado,1343492
+Cidade_ou_Vila,Cedido_por_empregador,96021
+Cidade_ou_Vila,Cedido_por_particular,277264
+Cidade_ou_Vila,ignorado,6427
+Cidade_ou_Vila,Outra_condicao,54910
+Cidade_ou_Vila,Proprio_em_aquisicao,344477
+Cidade_ou_Vila,Proprio_ja_pago,2334531
+Zona_rural,Alugado,34671
+Zona_rural,Cedido_por_empregador,429076
+Zona_rural,Cedido_por_particular,170478
+Zona_rural,ignorado,3637
+Zona_rural,Outra_condicao,46914
+Zona_rural,Proprio_em_aquisicao,8230
+Zona_rural,Proprio_ja_pago,1125161
+Alugado,Apartamento,192360
+Alugado,Casa,1211473
+Cedido_por_empregador,Apartamento,15897
+Cedido_por_empregador,Casa,524258
+Cedido_por_particular,Apartamento,15198
+Cedido_por_particular,Casa,443290
+ignorado,Apartamento,1420
+ignorado,Casa,9119
+Outra_condicao,Apartamento,3131
+Outra_condicao,Casa,102365
+Proprio_em_aquisicao,Apartamento,107008
+Proprio_em_aquisicao,Casa,258066
+Proprio_ja_pago,Apartamento,115652
+Proprio_ja_pago,Casa,3484304
 ```
 
 </div>
@@ -187,39 +187,39 @@ sankey
 
 ```mermaid
 sankey
-    Rural,Alugado,67876
-    Rural,Cedido_de_outra_forma,334512
-    Rural,Cedido_por_empregador,776836
-    Rural,ignorado,70761
-    Rural,Outra_condicao,68061
-    Rural,Proprio_em_aquisicao,78000
-    Rural,Proprio_pago,3476050
-    Urbano,Alugado,2206025
-    Urbano,Cedido_de_outra_forma,855342
-    Urbano,Cedido_por_empregador,207996
-    Urbano,ignorado,108024
-    Urbano,Outra_condicao,170945
-    Urbano,Proprio_em_aquisicao,1146742
-    Urbano,Proprio_pago,10707242
-    Alugado,Apartamento,315423
-    Alugado,Casa,1907731
-    Alugado,Comodo,50747
-    Cedido_de_outra_forma,Apartamento,35972
-    Cedido_de_outra_forma,Casa,1124609
-    Cedido_de_outra_forma,Comodo,29273
-    Cedido_por_empregador,Apartamento,21095
-    Cedido_por_empregador,Casa,956863
-    Cedido_por_empregador,Comodo,6874
-    ignorado,OutroNIU,178785
-    Outra_condicao,Apartamento,8251
-    Outra_condicao,Casa,222231
-    Outra_condicao,Comodo,8524
-    Proprio_em_aquisicao,Apartamento,287630
-    Proprio_em_aquisicao,Casa,933642
-    Proprio_em_aquisicao,Comodo,3470
-    Proprio_pago,Apartamento,604698
-    Proprio_pago,Casa,13508004
-    Proprio_pago,Comodo,70590
+Rural,Alugado,67876
+Rural,Cedido_de_outra_forma,334512
+Rural,Cedido_por_empregador,776836
+Rural,ignorado,70761
+Rural,Outra_condicao,68061
+Rural,Proprio_em_aquisicao,78000
+Rural,Proprio_pago,3476050
+Urbano,Alugado,2206025
+Urbano,Cedido_de_outra_forma,855342
+Urbano,Cedido_por_empregador,207996
+Urbano,ignorado,108024
+Urbano,Outra_condicao,170945
+Urbano,Proprio_em_aquisicao,1146742
+Urbano,Proprio_pago,10707242
+Alugado,Apartamento,315423
+Alugado,Casa,1907731
+Alugado,Comodo,50747
+Cedido_de_outra_forma,Apartamento,35972
+Cedido_de_outra_forma,Casa,1124609
+Cedido_de_outra_forma,Comodo,29273
+Cedido_por_empregador,Apartamento,21095
+Cedido_por_empregador,Casa,956863
+Cedido_por_empregador,Comodo,6874
+ignorado,OutroNIU,178785
+Outra_condicao,Apartamento,8251
+Outra_condicao,Casa,222231
+Outra_condicao,Comodo,8524
+Proprio_em_aquisicao,Apartamento,287630
+Proprio_em_aquisicao,Casa,933642
+Proprio_em_aquisicao,Comodo,3470
+Proprio_pago,Apartamento,604698
+Proprio_pago,Casa,13508004
+Proprio_pago,Comodo,70590
 ```
 
 </div>
