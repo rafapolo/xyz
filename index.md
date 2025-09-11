@@ -94,7 +94,7 @@ config:
   width: 1200
   height: 600
 ---
-sankey-beta
+sankey
     Sit_Urbano,Cond_sem_declaracao,1168
     Sit_Suburbano,Cond_sem_declaracao,26
     Sit_Rural,Cond_sem_declaracao,775
@@ -146,7 +146,7 @@ config:
   width: 1200
   height: 600
 ---
-sankey-beta
+sankey
     Aglomerado_rural,Alugado,19572
     Aglomerado_rural,Cedido_por_empregador,13165
     Aglomerado_rural,Cedido_por_particular,8836
@@ -207,7 +207,7 @@ config:
   width: 1200
   height: 600
 ---
-sankey-beta
+sankey
     Rural,Alugado,67876
     Rural,Cedido_de_outra_forma,334512
     Rural,Cedido_por_empregador,776836

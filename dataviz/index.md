@@ -177,7 +177,7 @@ config:
   width: 1200
   height: 600
 ---
-sankey-beta
+sankey
     Sit_Urbano,Cond_sem_declaracao,1168
     Sit_Suburbano,Cond_sem_declaracao,26
     Sit_Rural,Cond_sem_declaracao,775
@@ -230,7 +230,7 @@ config:
   width: 1200
   height: 600
 ---
-sankey-beta
+sankey
     Aglomerado_rural,Alugado,19572
     Aglomerado_rural,Cedido_por_empregador,13165
     Aglomerado_rural,Cedido_por_particular,8836
@@ -273,6 +273,59 @@ sankey-beta
     Proprio_em_aquisicao,Casa,258066
     Proprio_ja_pago,Apartamento,115652
     Proprio_ja_pago,Casa,3484304
+```
+
+</div>
+
+---
+
+**2000 Housing Census**
+> *Millennium era: simplified urban/rural classification showing the consolidation of urban living and apartment culture*
+
+<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+
+```mermaid
+---
+config:
+ sankey:
+  showValues: false
+  width: 1200
+  height: 600
+---
+sankey
+    Rural,Alugado,67876
+    Rural,Cedido_de_outra_forma,334512
+    Rural,Cedido_por_empregador,776836
+    Rural,ignorado,70761
+    Rural,Outra_condicao,68061
+    Rural,Proprio_em_aquisicao,78000
+    Rural,Proprio_pago,3476050
+    Urbano,Alugado,2206025
+    Urbano,Cedido_de_outra_forma,855342
+    Urbano,Cedido_por_empregador,207996
+    Urbano,ignorado,108024
+    Urbano,Outra_condicao,170945
+    Urbano,Proprio_em_aquisicao,1146742
+    Urbano,Proprio_pago,10707242
+    Alugado,Apartamento,315423
+    Alugado,Casa,1907731
+    Alugado,Comodo,50747
+    Cedido_de_outra_forma,Apartamento,35972
+    Cedido_de_outra_forma,Casa,1124609
+    Cedido_de_outra_forma,Comodo,29273
+    Cedido_por_empregador,Apartamento,21095
+    Cedido_por_empregador,Casa,956863
+    Cedido_por_empregador,Comodo,6874
+    ignorado,OutroNIU,178785
+    Outra_condicao,Apartamento,8251
+    Outra_condicao,Casa,222231
+    Outra_condicao,Comodo,8524
+    Proprio_em_aquisicao,Apartamento,287630
+    Proprio_em_aquisicao,Casa,933642
+    Proprio_em_aquisicao,Comodo,3470
+    Proprio_pago,Apartamento,604698
+    Proprio_pago,Casa,13508004
+    Proprio_pago,Comodo,70590
 ```
 
 </div>
