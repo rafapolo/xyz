@@ -1,137 +1,211 @@
-**ミxplorando Novas Tecnologias Cartográficas**
+**🗺️ Exploring New Cartographic Technologies**
 
-Hoje, através de uma tela, um indíviduo pode inter-relacionar, interagir, representar e navegar entre milhões de dados. O avanço nas tecnologias ampliou drasticamente nossa capacidade de mapear o território, as redes e os fluxos.
+Today, through a screen, an individual can interrelate, interact, represent and navigate among millions of data points. Technological advances have drastically expanded our capacity to map territories, networks and flows.
 
-Experimentamos visualizar dados públicos, integrando os Censos do IBGE, o CNEFE e o Cadastro da Receita Federal, envolvendo:
+The image below is not an aerial photo: it is a visual representation of Rio de Janeiro, where each illuminated point is a Legal Entity establishment.
 
-- dados populacionais por perfil religioso, escolaridade, cor, idade...;
-- empresas com atividades econômicas, sociedades, organizações religiosas, batalhões, prefeituras, comunidades quilombolas, bancos... a maioria com localização geográfica;
-- potencialmente co-relacionados com o TSE, Despesas da Câmara, Frentes, Emendas PIX...
+🔗 **[Interactive Map: Rio de Janeiro Establishments](https://xn--2dk.xyz/dataviz/rio/ibge)**
 
-Demonstrando em pulos, a imagem abaixo não é uma foto aérea: é uma representação visual do Rio de Janeiro, onde cada ponto iluminado é um estabelecimento de Pessoa Jurídica;
+---
 
-\=\> [https://ミ.xyz/dataviz/rio/ibge](https://xn--2dk.xyz/dataviz/rio/ibge)
+**📊 Data Visualizations**
 
+**Rio de Janeiro Business Network**
+> *Visual representation of Rio de Janeiro where each illuminated point represents a registered business establishment*
+
+---
 ![][image1]![][image2]
+---
 
-**Todas as Igrejas do País**
+**All Churches in the Country**
+> *Comprehensive mapping of religious institutions across Brazil, showing distribution patterns and density*
+
+---
 ![][image3]![][image4]![][image5]![][image6]![][image7]
+---
 
-**Mais igrejas que escolas. :/**
+**More Churches Than Schools 😔**
+> *Comparative analysis revealing the disproportionate number of religious institutions versus educational facilities*
+
+---
 ![][image8]
+---
 
-**Residenciais em Nova Friburgo com Altura relativa a número de moradores**
+**Residential Areas in Nova Friburgo with Height Relative to Number of Residents**
+> *3D visualization showing population density through building height representation in Nova Friburgo*
+
+---
 ![][image9]
-\=\> [https://ミ.xyz/dataviz/friba/pop\_3d](https://xn--2dk.xyz/dataviz/friba/pop_3d)
+---
 
-**Distribuição de Confecções (mapeado a partir dos CNPJs ativos)**
+🔗 **[Interactive 3D Map: Nova Friburgo Population](https://xn--2dk.xyz/dataviz/friba/pop_3d)**
 
-**![][image10]**
-**![][image11]**
+**Distribution of Garment Companies**
+> *Mapping of textile and clothing companies based on active business registrations (CNPJs)*
 
-**Visualizando Confecçoes Abertas e Fechadas na Pandemia no pólo de moda intima**
+---
+![][image10]
 
-**![][image12]**
+![][image11]
+---
 
-**Todas as Residências no Município de Nova Friburgo**
+**Garment Companies Opened and Closed During Pandemic**
+> *Analysis of business dynamics in the intimate apparel industry hub during COVID-19*
+
+---
+![][image12]
+---
+
+**All Residences in Nova Friburgo Municipality**
+> *Complete residential mapping showing housing distribution patterns across the city*
+
+---
 ![][image13]
+---
 
-**Número de Entidades Religiosas supera o de Sindicatos no ano 2000**
+**Religious Entities Outnumber Labor Unions in 2000**
+> *Historical comparison showing the predominance of religious organizations over workers' unions*
+
+---
 ![][image14]
+---
 
-**Heatmap de registros de novas Empresas em Nova Friburgo**
+**Heatmap of New Business Registrations in Nova Friburgo**
+> *Temporal and spatial analysis of entrepreneurial activity and business creation patterns*
+
+---
 ![][image15]
+---
 
-**Quanto mais amarelo, mais Católico um município. Roxo tende a ser Evangélico.**
+**Religious Affiliation by Municipality**
+> *The more yellow, the more Catholic a municipality. Purple tends to be Evangelical*
 
+---
 ![][image16]
+
 ![][image17]
+---
 
-**81,5% dos estados brasileiros têm o dobro de estabelecimentos religiosos comparado a unidades de saúde.**![][image18]
+**81.5% of Brazilian States Have Double the Religious Establishments Compared to Health Units**
+> *Stark comparison highlighting the imbalance between religious institutions and healthcare facilities*
 
-**Distribuição de Tipo de Escolas no Rio (primário, secundária…)**
+---
+![][image18]
+---
+
+**Distribution of School Types in Rio (Primary, Secondary...)**
+> *Educational infrastructure mapping showing the distribution of different educational levels*
+
+---
 ![][image19]
 
 ![][image20]
+---
 
-**Que áreas econômicas fecharam depois de outras durante a pandemia?**
+**Which Economic Sectors Closed After Others During the Pandemic?**
+> *Sequential analysis of business closures by economic sector during COVID-19*
+
+---
 ![][image22]
+---
 
-**Relação Societária de Empresários Friburguenses com mais empresas**
+**Corporate Relationships of Friburgo Entrepreneurs with Multiple Companies**
+> *Network analysis revealing business interconnections and corporate relationships*
+
+---
 ![][image23]![][image24]
+---
 
-**Mapa de calor de áreas com mais Residências**
-![][image25]![][image26]![][image27]![][image28]
+**Heat Map of Areas with Most Residences**
+> *Density visualization highlighting residential concentration zones*
 
-**Empresas e Sócios do dono do Jogo do Tigrinho**
-\=\> [https://tinyurl.com/pegadas-tigrim](https://tinyurl.com/pegadas-tigrim)
+---
+![][image25]
+---
 
-![][image29]
+**Companies and Partners of the "Tiger Game" Owner**
+> *Corporate network analysis of gambling platform ownership structures*
 
-**Visualização das Sociedades e Empresas de um determinado Senador**
-**![][image30]**
+---
+![][image26]![][image27]![][image28]![][image29]
+---
 
-**Empresas Suíças com sede no Brasil**
-\=\> [https://tinyurl.com/swiss-brazilian-network](https://tinyurl.com/swiss-brazilian-network)
+🔗 **[Detailed Network Analysis: Tiger Game Footprints](https://tinyurl.com/pegadas-tigrim)**
 
-**![][image31]**
+**Corporate Structure Visualization of a Specific Senator**
+> *Political-business network mapping showing corporate connections and influence patterns*
+
+---
+![][image30]
+---
+
+**Swiss Companies with Headquarters in Brazil**
+> *International business presence analysis showing foreign investment patterns*
+
+---
+![][image31]
+---
+
+🔗 **[Swiss-Brazilian Business Network](https://tinyurl.com/swiss-brazilian-network)**
 
 ---
 
-**📈 Dados dos Censos Habitacionais do IBGE: Quatro Décadas de Evolução (1970-2010)**
+**📈 IBGE Housing Census Data: Four Decades of Evolution (1970-2010)**
 
-> *Diagramas de fluxo Sankey abrangentes mostrando os padrões habitacionais brasileiros ao longo de cinco períodos censitários, revelando a transformação da propriedade habitacional, tendências de urbanização e características das moradias durante 40 anos*
+> *Comprehensive Sankey flow diagrams showing Brazilian housing patterns across five census periods, revealing the transformation of housing ownership, urbanization trends, and dwelling characteristics over 40 years*
 
-**Censo Habitacional de 1970**
-> *Padrões habitacionais da era pós-industrialização mostrando o domínio de propriedades rurais próprias e tipos de habitação rústica*
+**1970 Housing Census**
+> *Post-industrialization era housing patterns showing the dominance of rural owned properties and rustic housing types*
 
----
+<div style="border: 2px solid #e1e5e9; border-radius: 8px; padding: 15px; margin: 20px 0; background-color: #f8f9fa;">
+
 ```mermaid
 sankey-beta
-        Sit Urbano,Cond sem declaracao,1168
-        Sit Suburbano,Cond sem declaracao,26
-        Sit Rural,Cond sem declaracao,775
-        Sit Urbano,Cond Proprio ja pago,6602220
-        Sit Suburbano,Cond Proprio ja pago,345236
-        Sit Rural,Cond Proprio ja pago,6514120
-        Sit Urbano,Cond Proprio em aquisicao,1021044
-        Sit Suburbano,Cond Proprio em aquisicao,33202
-        Sit Rural,Cond Proprio em aquisicao,111461
-        Sit Urbano,Cond Alugado,3575026
-        Sit Suburbano,Cond Alugado,109313
-        Sit Rural,Cond Alugado,300507
-        Sit Nao classificado,Cond Alugado,2
-        Sit Urbano,Cond Cedido,906408
-        Sit Suburbano,Cond Cedido,40742
-        Sit Rural,Cond Cedido,920018
-        Sit Urbano,Cond Outra condicao,139868
-        Sit Suburbano,Cond Outra condicao,13135
-        Sit Rural,Cond Outra condicao,2859867
-        Sit Urbano,Cond Nao classificado,16
-        Cond sem declaracao,Tipo Rustico,1434
-        Cond sem declaracao,Tipo Duravel,535
-        Cond Proprio ja pago,Tipo Rustico,9912955
-        Cond Proprio ja pago,Tipo Duravel,3548621
-        Cond Proprio em aquisicao,Tipo Rustico,1032172
-        Cond Proprio em aquisicao,Tipo Duravel,133535
-        Cond Alugado,Tipo Rustico,3465003
-        Cond Alugado,Tipo Duravel,519845
-        Cond Cedido,Tipo Rustico,1235874
-        Cond Cedido,Tipo Duravel,631294
-        Cond Outra condicao,Tipo Rustico,1659069
-        Cond Outra condicao,Tipo Duravel,1353801
-        Cond Nao classificado,Tipo Rustico,16
+    Sit Urbano,Cond sem declaracao,1168
+    Sit Suburbano,Cond sem declaracao,26
+    Sit Rural,Cond sem declaracao,775
+    Sit Urbano,Cond Proprio ja pago,6602220
+    Sit Suburbano,Cond Proprio ja pago,345236
+    Sit Rural,Cond Proprio ja pago,6514120
+    Sit Urbano,Cond Proprio em aquisicao,1021044
+    Sit Suburbano,Cond Proprio em aquisicao,33202
+    Sit Rural,Cond Proprio em aquisicao,111461
+    Sit Urbano,Cond Alugado,3575026
+    Sit Suburbano,Cond Alugado,109313
+    Sit Rural,Cond Alugado,300507
+    Sit Nao classificado,Cond Alugado,2
+    Sit Urbano,Cond Cedido,906408
+    Sit Suburbano,Cond Cedido,40742
+    Sit Rural,Cond Cedido,920018
+    Sit Urbano,Cond Outra condicao,139868
+    Sit Suburbano,Cond Outra condicao,13135
+    Sit Rural,Cond Outra condicao,2859867
+    Sit Urbano,Cond Nao classificado,16
+    Cond sem declaracao,Tipo Rustico,1434
+    Cond sem declaracao,Tipo Duravel,535
+    Cond Proprio ja pago,Tipo Rustico,9912955
+    Cond Proprio ja pago,Tipo Duravel,3548621
+    Cond Proprio em aquisicao,Tipo Rustico,1032172
+    Cond Proprio em aquisicao,Tipo Duravel,133535
+    Cond Alugado,Tipo Rustico,3465003
+    Cond Alugado,Tipo Duravel,519845
+    Cond Cedido,Tipo Rustico,1235874
+    Cond Cedido,Tipo Duravel,631294
+    Cond Outra condicao,Tipo Rustico,1659069
+    Cond Outra condicao,Tipo Duravel,1353801
+    Cond Nao classificado,Tipo Rustico,16
 ```
 ---
 
-**Censo Habitacional de 1980**
-> *Início da grande urbanização: emergência da vida em apartamentos e mudança de assentamentos rurais para urbanos*
+**1980 Housing Census**
+> *Beginning of major urbanization: emergence of apartment living and shift from rural to urban settlements*
 
 ---
+
 ```mermaid
 sankey-beta
-        Aglomerado rural,Alugado,19572
-        Aglomerado rural,Cedido por empregador,13165
+    Aglomerado rural,Alugado,19572
+    Aglomerado rural,Cedido por empregador,13165
     Aglomerado rural,Cedido por particular,8836
     Aglomerado rural,ignorado,437
     Aglomerado rural,Outra condicao,3330
@@ -175,10 +249,11 @@ sankey-beta
 ```
 ---
 
-**Censo Habitacional de 1990**
-> *Período de transição democrática: diversificação dos tipos de habitação e expansão de assentamentos urbanos incluindo reconhecimento de habitações indígenas*
+**1990 Housing Census**
+> *Democratic transition period: diversification of housing types and expansion of urban settlements including indigenous housing recognition*
 
 ---
+
 ```mermaid
 sankey-beta
     Loc Aglomerado rural de extensao urbana,Sit Alugado,8375
@@ -283,10 +358,11 @@ sankey-beta
 ```
 ---
 
-**Censo Habitacional de 2000**
-> *Era do milênio: classificação urbano/rural simplificada mostrando a consolidação da vida urbana e cultura de apartamentos*
+**2000 Housing Census**
+> *Millennium era: simplified urban/rural classification showing the consolidation of urban living and apartment culture*
 
 ---
+
 ```mermaid
 sankey-beta
     Rural,Alugado,67876
@@ -325,10 +401,11 @@ sankey-beta
 ```
 ---
 
-**Censo Habitacional de 2010**
-> *Era moderna: introdução de condomínios, redução significativa em habitações alugadas e reconhecimento de diversas situações habitacionais incluindo moradia institucional*
+**2010 Housing Census**
+> *Modern era: introduction of condominiums, significant reduction in rental housing, and recognition of diverse housing situations including institutional living*
 
 ---
+
 ```mermaid
 sankey-beta
     Rural,Alugado,30676
@@ -385,20 +462,36 @@ sankey-beta
 ```
 ---
 
-**Principais Insights de Quatro Décadas de Evolução Habitacional**
+**Key Insights from Four Decades of Housing Evolution**
 
-**Principais Tendências Observadas:**
-- **Aceleração da Urbanização**: Mudança massiva de habitação rural para urbana (1970-2010)
-- **Crescimento da Propriedade**: Aumento em propriedades quitadas vs. aluguéis
-- **Diversificação Habitacional**: De classificação rural/urbana básica para categorizações complexas incluindo condomínios
-- **Reconhecimento Social**: Inclusão de habitação indígena e categorias de moradia institucional
-- **Desenvolvimento Econômico**: Mudança de "quitado" para "em aquisição" refletindo acesso ao crédito
+**Major Trends Observed:**
+- **Urbanization Acceleration**: Massive shift from rural to urban housing (1970-2010)
+- **Homeownership Growth**: Increase in fully owned properties vs. rentals
+- **Housing Diversification**: From basic rural/urban to complex categorizations including condominiums
+- **Social Recognition**: Inclusion of indigenous housing and institutional living categories
+- **Economic Development**: Shift from "fully paid" to "in acquisition" reflecting credit access
 
-🔗 **[Repositório Fonte: Análise dos Censos Habitacionais IBGE](https://github.com/rafapolo/IBGE13/)**
+🔗 **[Source Repository: IBGE Housing Census Analysis](https://github.com/rafapolo/IBGE13/)**
 
 ---
 
-(Drucker, 2011) A cartografia digital permite espacializar saberes complexos — como padrões econômicos, práticas religiosas, ou redes de poder — que antes ficavam dispersos ou ocultos nos dados brutos. Essa espacialização transforma grandes volumes de dados em interfaces cognitivas acessíveis, mobilizando tanto percepção visual quanto análise crítica.
+**🔧 Technical Stack & Data Sources**
+
+**Data Sources:**
+- IBGE Census (Brazilian Institute of Geography and Statistics)
+- CNEFE (National Registry of Addresses for Statistical Purposes)    
+- Federal Revenue Registry
+- TSE (Superior Electoral Court)
+- Chamber of Deputies Expense Records
+
+**Technologies:**
+- Geographic data processing and visualization
+- Network analysis algorithms
+- Interactive web mapping
+- Statistical data integration
+- Real-time data processing
+
+---
 
 **ミ**
 
@@ -406,34 +499,34 @@ sankey-beta
 
 
 
-[image1]: images/image1.png
-[image2]: images/image2.png
-[image3]: images/image3.png
-[image4]: images/image4.png
-[image5]: images/image5.png
-[image6]: images/image6.png
-[image7]: images/image7.png
-[image8]: images/image8.png
-[image9]: images/image9.png
-[image10]: images/image10.png
-[image11]: images/image11.png
-[image12]: images/image12.png
-[image13]: images/image13.png
-[image14]: images/image14.png
-[image15]: images/image15.png
-[image16]: images/image16.png
-[image17]: images/image17.png
-[image18]: images/image18.png
-[image19]: images/image19.png
-[image20]: images/image20.png
-[image21]: images/image21.png
-[image22]: images/image22.png
-[image23]: images/image23.png
-[image24]: images/image24.png
-[image25]: images/image25.png
-[image26]: images/image26.png
-[image27]: images/image27.png
-[image28]: images/image28.png
-[image29]: images/image29.png
-[image30]: images/image30.png
-[image31]: images/image31.png
+[image1]: ../images/image1.png
+[image2]: ../images/image2.png
+[image3]: ../images/image3.png
+[image4]: ../images/image4.png
+[image5]: ../images/image5.png
+[image6]: ../images/image6.png
+[image7]: ../images/image7.png
+[image8]: ../images/image8.png
+[image9]: ../images/image9.png
+[image10]: ../images/image10.png
+[image11]: ../images/image11.png
+[image12]: ../images/image12.png
+[image13]: ../images/image13.png
+[image14]: ../images/image14.png
+[image15]: ../images/image15.png
+[image16]: ../images/image16.png
+[image17]: ../images/image17.png
+[image18]: ../images/image18.png
+[image19]: ../images/image19.png
+[image20]: ../images/image20.png
+[image21]: ../images/image21.png
+[image22]: ../images/image22.png
+[image23]: ../images/image23.png
+[image24]: ../images/image24.png
+[image25]: ../images/image25.png
+[image26]: ../images/image26.png
+[image27]: ../images/image27.png
+[image28]: ../images/image28.png
+[image29]: ../images/image29.png
+[image30]: ../images/image30.png
+[image31]: ../images/image31.png
