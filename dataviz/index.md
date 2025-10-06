@@ -2,11 +2,12 @@
 
 Today, through a screen, an individual can interrelate, interact, represent and navigate among millions of data points. Technological advances have drastically expanded our capacity to map territories, networks and flows.
 
-The image below is not an aerial photo: it is a visual representation of Rio de Janeiro, where each illuminated point is a Legal Entity establishment.
-
 ---
 
 **📊 Data Visualizations**
+
+The image below is not an aerial photo: it is a visual representation of Rio de Janeiro, where each illuminated point is a Legal Entity establishment.
+
 
 **Rio de Janeiro Business Network**
 
@@ -33,6 +34,14 @@ The image below is not an aerial photo: it is a visual representation of Rio de 
 ---
 ![][image8]
 ---
+
+**Distribution of School Types in Rio (Primary, Secondary...)**
+> *Educational infrastructure mapping showing the distribution of different educational levels*
+
+---
+![][image18]
+---
+
 
 **Residential Areas in Nova Friburgo with Height Relative to Number of Residents**
 > *3D visualization showing population density through building height representation in Nova Friburgo*
@@ -90,13 +99,6 @@ The image below is not an aerial photo: it is a visual representation of Rio de 
 
 **81.5% of Brazilian States Have Double the Religious Establishments Compared to Health Units**
 > *Stark comparison highlighting the imbalance between religious institutions and healthcare facilities*
-
----
-![][image18]
----
-
-**Distribution of School Types in Rio (Primary, Secondary...)**
-> *Educational infrastructure mapping showing the distribution of different educational levels*
 
 ---
 
