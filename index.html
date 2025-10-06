@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ミxplorando Novas Tecnologias Cartográficas</title>
+
+        <!-- Mermaid for Sankey diagrams -->
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+        <script>
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: "default",
+            });
+        </script>
+
+        <style>
+            /* Import Fonts */
+            @import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap");
+            @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+            /* Reset & Base */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Albertus Nova", "Crimson Pro", Georgia, serif;
+                font-size: 19px;
+                line-height: 1.7;
+                color: #1a1a1a;
+                background-color: rgb(246, 243, 240);
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                padding: 2rem;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
+                font-weight: 600;
+                line-height: 1.3;
+                margin-bottom: 1rem;
+                letter-spacing: -0.01em;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-top: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin-top: 3rem;
+            }
+
+            h3 {
+                font-size: 1.25rem;
+                margin-top: 2rem;
+            }
+
+            p {
+                margin-bottom: 1.5rem;
+            }
+
+            a {
+                color: rgb(120, 50, 56);
+                text-decoration: none;
+                transition: color 0.2s ease;
+            }
+
+            a:hover {
+                color: rgb(188, 84, 92);
+            }
+
+            ul,
+            ol {
+                margin-bottom: 1.5rem;
+                padding-left: 2rem;
+            }
+
+            li {
+                margin-bottom: 0.5rem;
+            }
+
+            img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 2rem 0;
+                border-radius: 2px;
+            }
+
+            hr {
+                border: none;
+                border-top: 1px solid rgba(0, 0, 0, 0.15);
+                margin: 3rem 0;
+            }
+
+            blockquote {
+                border-left: 3px solid rgb(188, 84, 92);
+                padding-left: 1.5rem;
+                margin: 2rem 0;
+                font-style: italic;
+                color: #666;
+            }
+
+            /* Content sections */
+            .content-section {
+            }
+
+            .content-section:not(:last-child) {
+            }
+
+            /* Sankey diagram containers */
+            .sankey-container {
+                border: 2px solid #e1e5e9;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 20px 0;
+                background-color: #f8f9fa;
+                display: inline-block;
+            }
+
+            .mermaid {
+                margin: 2rem 0;
+                text-align: center;
+            }
+
+            strong {
+                font-weight: 600;
+            }
+
+            @media (max-width: 768px) {
+                body {
+                    font-size: 17px;
+                    padding: 1.5rem;
+                }
+
+                h1 {
+                    font-size: 1.75rem;
+                }
+                h2 {
+                    font-size: 1.35rem;
+                }
+                h3 {
+                    font-size: 1.15rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>ミxplorando Novas Tecnologias Cartográficas</h1>
+
+        <p>
+            Hoje, através de uma tela, um indíviduo pode inter-relacionar,
+            interagir, representar e navegar entre milhões de dados. O avanço
+            nas tecnologias ampliou drasticamente nossa capacidade de mapear o
+            território, as redes e os fluxos.
+        </p>
+
+        <p>
+            Experimentamos visualizar dados públicos, integrando os Censos do
+            IBGE, o CNEFE e o Cadastro da Receita Federal, envolvendo:
+        </p>
+
+        <ul>
+            <li>
+                dados populacionais por perfil religioso, escolaridade, cor,
+                idade...;
+            </li>
+            <li>
+                empresas com atividades econômicas, sociedades, organizações
+                religiosas, batalhões, prefeituras, comunidades quilombolas,
+                bancos... a maioria com localização geográfica;
+            </li>
+            <li>
+                potencialmente co-relacionados com o TSE, Despesas da Câmara,
+                Frentes, Emendas PIX...
+            </li>
+        </ul>
+
+        <p>
+            Demonstrando em pulos, a imagem abaixo não é uma foto aérea: é uma
+            representação visual do Rio de Janeiro, onde cada ponto iluminado é
+            um estabelecimento de Pessoa Jurídica;
+        </p>
+
+        <p>
+            =>
+            <a href="https://xn--2dk.xyz/dataviz/rio/ibge"
+                >https://ミ.xyz/dataviz/rio/ibge</a
+            >
+        </p>
+
+        <div class="content-section">
+            <img src="images/image1.png" alt="Visualização Rio de Janeiro" />
+            <img src="images/image2.png" alt="Visualização Rio de Janeiro" />
+        </div>
+
+        <div class="content-section">
+            <h2>Todas as Igrejas do País</h2>
+
+            <img src="images/image3.png" alt="Igrejas" />
+            <img src="images/image4.png" alt="Igrejas" />
+            <img src="images/image5.png" alt="Igrejas" />
+            <img src="images/image6.png" alt="Igrejas" />
+            <img src="images/image7.png" alt="Igrejas" />
+
+            <h3>Mais igrejas que escolas. :/</h3>
+
+            <img src="images/image8.png" alt="Comparação igrejas e escolas" />
+
+            <h3>
+                Quanto mais amarelo, mais Católico um município. Roxo tende a
+                ser Evangélico.
+            </h3>
+
+            <img src="images/image16.png" alt="Mapa religioso" />
+            <img src="images/image17.png" alt="Mapa religioso" />
+
+            <h3>
+                81,5% dos estados brasileiros têm o dobro de estabelecimentos
+                religiosos comparado a unidades de saúde.
+            </h3>
+
+            <img
+                src="images/image18.png"
+                alt="Comparação religiosos vs saúde"
+            />
+
+            <h3>
+                Número de Entidades Religiosas supera o de Sindicatos no ano
+                2000
+            </h3>
+
+            <img src="images/image14.png" alt="Religiosas vs Sindicatos" />
+
+            <h3>
+                Distribuição de Tipo de Escolas no Rio (primário, secundária…)
+            </h3>
+
+            <img src="images/image19.png" alt="Escolas Rio" />
+            <img src="images/image20.png" alt="Escolas Rio" />
+        </div>
+
+        <div class="content-section">
+            <h3>
+                Residenciais em Nova Friburgo com Altura relativa a número de
+                moradores
+            </h3>
+
+            <img src="images/image9.png" alt="Nova Friburgo 3D" />
+
+            <p>
+                =>
+                <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d"
+                    >https://ミ.xyz/dataviz/friba/pop_3d</a
+                >
+            </p>
+
+            <h3>Todas as Residências no Município de Nova Friburgo</h3>
+
+            <img src="images/image13.png" alt="Residências Nova Friburgo" />
+
+            <h3>Mapa de calor de áreas com mais Residências</h3>
+
+            <img src="images/image25.png" alt="Heatmap residências" />
+            <img src="images/image26.png" alt="Heatmap residências" />
+            <img src="images/image27.png" alt="Heatmap residências" />
+            <img src="images/image28.png" alt="Heatmap residências" />
+
+            <h3>Heatmap de registros de novas Empresas em Nova Friburgo</h3>
+
+            <img src="images/image15.png" alt="Heatmap empresas" />
+        </div>
+
+        <div class="content-section">
+            <h3>
+                Distribuição de Confecções (mapeado a partir dos CNPJs ativos)
+            </h3>
+
+            <img src="images/image10.png" alt="Confecções" />
+
+            <h3>
+                Visualizando Confecçoes Abertas e Fechadas na Pandemia no pólo
+                de moda intima
+            </h3>
+
+            <img src="images/image12.png" alt="Confecções pandemia" />
+
+            <h3>
+                Que áreas econômicas fecharam depois de outras durante a
+                pandemia?
+            </h3>
+
+            <img src="images/image22.png" alt="Áreas econômicas pandemia" />
+        </div>
+
+        <div class="content-section">
+            <h3>
+                Relação Societária de Empresários Friburguenses com mais
+                empresas
+            </h3>
+
+            <img src="images/image23.png" alt="Redes societárias" />
+
+            <h3>Empresas e Sócios do dono do Jogo do Tigrinho</h3>
+
+            <p>
+                =>
+                <a href="https://tinyurl.com/pegadas-tigrim"
+                    >https://tinyurl.com/pegadas-tigrim</a
+                >
+            </p>
+
+            <img src="images/image29.png" alt="Rede Tigrinho" />
+
+            <h3>
+                Visualização das Sociedades e Empresas de um determinado Senador
+            </h3>
+
+            <img src="images/image30.png" alt="Rede Senador" />
+
+            <h3>Empresas Suíças com sede no Brasil</h3>
+
+            <p>
+                =>
+                <a href="https://tinyurl.com/swiss-brazilian-network"
+                    >https://tinyurl.com/swiss-brazilian-network</a
+                >
+            </p>
+
+            <img src="images/image31.png" alt="Empresas Suíças" />
+        </div>
+
+        <hr />
+
+        <h2>
+            📈 Dados dos Censos Habitacionais do IBGE: Quatro Décadas de
+            Evolução (1970-2010)
+        </h2>
+
+        <blockquote>
+            <em
+                >Diagramas de fluxo Sankey abrangentes mostrando os padrões
+                habitacionais brasileiros ao longo de cinco períodos
+                censitários, revelando a transformação da propriedade
+                habitacional, tendências de urbanização e características das
+                moradias durante 40 anos</em
+            >
+        </blockquote>
+
+        <h3>Censo Habitacional de 1970</h3>
+        <blockquote>
+            <em
+                >Padrões habitacionais da era pós-industrialização mostrando o
+                domínio de propriedades rurais próprias e tipos de habitação
+                rústica</em
+            >
+        </blockquote>
+
+        <div class="sankey-container">
+            <pre class="mermaid">
+---
+config:
+  sankey:
+    showValues: false
+    width: 1200
+    height: 600
+---
+sankey-beta
+  Sit Urbano,Cond sem declaracao,1168
+  Sit Suburbano,Cond sem declaracao,26
+  Sit Rural,Cond sem declaracao,775
+  Sit Urbano,Cond Proprio ja pago,6602220
+  Sit Suburbano,Cond Proprio ja pago,345236
+  Sit Rural,Cond Proprio ja pago,6514120
+  Sit Urbano,Cond Proprio em aquisicao,1021044
+  Sit Suburbano,Cond Proprio em aquisicao,33202
+  Sit Rural,Cond Proprio em aquisicao,111461
+  Sit Urbano,Cond Alugado,3575026
+  Sit Suburbano,Cond Alugado,109313
+  Sit Rural,Cond Alugado,300507
+  Sit Nao classificado,Cond Alugado,2
+  Sit Urbano,Cond Cedido,906408
+  Sit Suburbano,Cond Cedido,40742
+  Sit Rural,Cond Cedido,920018
+  Sit Urbano,Cond Outra condicao,139868
+  Sit Suburbano,Cond Outra condicao,13135
+  Sit Rural,Cond Outra condicao,2859867
+  Sit Urbano,Cond Nao classificado,16
+  Cond sem declaracao,Tipo Rustico,1434
+  Cond sem declaracao,Tipo Duravel,535
+  Cond Proprio ja pago,Tipo Rustico,9912955
+  Cond Proprio ja pago,Tipo Duravel,3548621
+  Cond Proprio em aquisicao,Tipo Rustico,1032172
+  Cond Proprio em aquisicao,Tipo Duravel,133535
+  Cond Alugado,Tipo Rustico,3465003
+  Cond Alugado,Tipo Duravel,519845
+  Cond Cedido,Tipo Rustico,1235874
+  Cond Cedido,Tipo Duravel,631294
+  Cond Outra condicao,Tipo Rustico,1659069
+  Cond Outra condicao,Tipo Duravel,1353801
+  Cond Nao classificado,Tipo Rustico,16
+</pre
+            >
+        </div>
+
+        <hr />
+
+        <h3>Censo Habitacional de 1980</h3>
+        <blockquote>
+            <em
+                >Início da grande urbanização: emergência da vida em
+                apartamentos e mudança de assentamentos rurais para urbanos</em
+            >
+        </blockquote>
+
+        <div class="sankey-container">
+            <pre class="mermaid">
+---
+config:
+  sankey:
+    showValues: false
+    width: 1200
+    height: 600
+---
+sankey-beta
+  Aglomerado rural,Alugado,19572
+  Aglomerado rural,Cedido por empregador,13165
+  Aglomerado rural,Cedido por particular,8836
+  Aglomerado rural,ignorado,437
+  Aglomerado rural,Outra condicao,3330
+  Aglomerado rural,Proprio em aquisicao,11155
+  Aglomerado rural,Proprio ja pago,124728
+  Area urbana isolada,Alugado,6098
+  Area urbana isolada,Cedido por empregador,1893
+  Area urbana isolada,Cedido por particular,1910
+  Area urbana isolada,ignorado,38
+  Area urbana isolada,Outra condicao,342
+  Area urbana isolada,Proprio em aquisicao,1212
+  Area urbana isolada,Proprio ja pago,15536
+  Cidade ou Vila,Alugado,1343492
+  Cidade ou Vila,Cedido por empregador,96021
+  Cidade ou Vila,Cedido por particular,277264
+  Cidade ou Vila,ignorado,6427
+  Cidade ou Vila,Outra condicao,54910
+  Cidade ou Vila,Proprio em aquisicao,344477
+  Cidade ou Vila,Proprio ja pago,2334531
+  Zona rural,Alugado,34671
+  Zona rural,Cedido por empregador,429076
+  Zona rural,Cedido por particular,170478
+  Zona rural,ignorado,3637
+  Zona rural,Outra condicao,46914
+  Zona rural,Proprio em aquisicao,8230
+  Zona rural,Proprio ja pago,1125161
+  Alugado,Apartamento,192360
+  Alugado,Casa,1211473
+  Cedido por empregador,Apartamento,15897
+  Cedido por empregador,Casa,524258
+  Cedido por particular,Apartamento,15198
+  Cedido por particular,Casa,443290
+  ignorado,Apartamento,1420
+  ignorado,Casa,9119
+  Outra condicao,Apartamento,3131
+  Outra condicao,Casa,102365
+  Proprio em aquisicao,Apartamento,107008
+  Proprio em aquisicao,Casa,258066
+  Proprio ja pago,Apartamento,115652
+  Proprio ja pago,Casa,3484304
+</pre
+            >
+        </div>
+
+        <hr />
+
+        <h3>Censo Habitacional de 2000</h3>
+        <blockquote>
+            <em
+                >Era do milênio: classificação urbano/rural simplificada
+                mostrando a consolidação da vida urbana e cultura de
+                apartamentos</em
+            >
+        </blockquote>
+
+        <div class="sankey-container">
+            <pre class="mermaid">
+---
+config:
+  sankey:
+    showValues: false
+    width: 1200
+    height: 600
+---
+sankey-beta
+  Rural,Alugado,67876
+  Rural,Cedido de outra forma,334512
+  Rural,Cedido por empregador,776836
+  Rural,ignorado,70761
+  Rural,Outra condicao,68061
+  Rural,Proprio em aquisicao,78000
+  Rural,Proprio pago,3476050
+  Urbano,Alugado,2206025
+  Urbano,Cedido de outra forma,855342
+  Urbano,Cedido por empregador,207996
+  Urbano,ignorado,108024
+  Urbano,Outra condicao,170945
+  Urbano,Proprio em aquisicao,1146742
+  Urbano,Proprio pago,10707242
+  Alugado,Apartamento,315423
+  Alugado,Casa,1907731
+  Alugado,Comodo,50747
+  Cedido de outra forma,Apartamento,35972
+  Cedido de outra forma,Casa,1124609
+  Cedido de outra forma,Comodo,29273
+  Cedido por empregador,Apartamento,21095
+  Cedido por empregador,Casa,956863
+  Cedido por empregador,Comodo,6874
+  ignorado,OutroNIU,178785
+  Outra condicao,Apartamento,8251
+  Outra condicao,Casa,222231
+  Outra condicao,Comodo,8524
+  Proprio em aquisicao,Apartamento,287630
+  Proprio em aquisicao,Casa,933642
+  Proprio em aquisicao,Comodo,3470
+  Proprio pago,Apartamento,604698
+  Proprio pago,Casa,13508004
+  Proprio pago,Comodo,70590
+</pre
+            >
+        </div>
+
+        <hr />
+
+        <h3>Principais Insights de Quatro Décadas de Evolução Habitacional</h3>
+
+        <p><strong>Principais Tendências Observadas:</strong></p>
+        <ul>
+            <li>
+                <strong>Aceleração da Urbanização:</strong> Mudança massiva de
+                habitação rural para urbana (1970-2010)
+            </li>
+            <li>
+                <strong>Crescimento da Propriedade:</strong> Aumento em
+                propriedades quitadas vs. aluguéis
+            </li>
+            <li>
+                <strong>Diversificação Habitacional:</strong> De classificação
+                rural/urbana básica para categorizações complexas incluindo
+                condomínios
+            </li>
+            <li>
+                <strong>Reconhecimento Social:</strong> Inclusão de habitação
+                indígena e categorias de moradia institucional
+            </li>
+            <li>
+                <strong>Desenvolvimento Econômico:</strong> Mudança de "quitado"
+                para "em aquisição" refletindo acesso ao crédito
+            </li>
+        </ul>
+
+        <p>
+            🔗
+            <strong
+                ><a href="https://github.com/rafapolo/IBGE13/"
+                    >Repositório Fonte: Análise dos Censos Habitacionais IBGE</a
+                ></strong
+            >
+        </p>
+
+        <hr />
+
+        <p>
+            (Drucker, 2011) A cartografia digital permite espacializar saberes
+            complexos — como padrões econômicos, práticas religiosas, ou redes
+            de poder — que antes ficavam dispersos ou ocultos nos dados brutos.
+            Essa espacialização transforma grandes volumes de dados em
+            interfaces cognitivas acessíveis, mobilizando tanto percepção visual
+            quanto análise crítica.
+        </p>
+
+        <p><strong>ミ ~ 2025</strong></p>
+    </body>
+</html>
