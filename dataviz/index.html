@@ -12,6 +12,15 @@
                 startOnLoad: true,
                 theme: "default",
             });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                document
+                    .querySelectorAll("img:not([loading])")
+                    .forEach((img) => {
+                        img.loading = "lazy";
+                        img.decoding = "async";
+                    });
+            });
         </script>
 
         <style>
@@ -296,8 +305,8 @@
             </h3>
             <blockquote>
                 <em
-                    >3D visualization showing population density through building
-                    height representation in Nova Friburgo</em
+                    >3D visualization showing population density through
+                    building height representation in Nova Friburgo</em
                 >
             </blockquote>
 
@@ -344,7 +353,10 @@
                 >
             </blockquote>
 
-            <img src="../images/image15.png" alt="Business registrations heatmap" />
+            <img
+                src="../images/image15.png"
+                alt="Business registrations heatmap"
+            />
         </div>
 
         <hr />
@@ -358,7 +370,10 @@
                 >
             </blockquote>
 
-            <img src="../images/image10.png" alt="Garment companies distribution" />
+            <img
+                src="../images/image10.png"
+                alt="Garment companies distribution"
+            />
 
             <h3>Garment Companies Opened and Closed During Pandemic</h3>
             <blockquote>
@@ -370,7 +385,9 @@
 
             <img src="../images/image12.png" alt="Pandemic garment industry" />
 
-            <h3>Which Economic Sectors Closed After Others During the Pandemic?</h3>
+            <h3>
+                Which Economic Sectors Closed After Others During the Pandemic?
+            </h3>
             <blockquote>
                 <em
                     >Sequential analysis of business closures by economic sector
@@ -378,7 +395,10 @@
                 >
             </blockquote>
 
-            <img src="../images/image22.png" alt="Economic sectors pandemic closures" />
+            <img
+                src="../images/image22.png"
+                alt="Economic sectors pandemic closures"
+            />
         </div>
 
         <hr />
@@ -393,7 +413,10 @@
                 >
             </p>
 
-            <img src="../images/pvt_por_uf.png" alt="Companies per state treemap" />
+            <img
+                src="../images/pvt_por_uf.png"
+                alt="Companies per state treemap"
+            />
 
             <h3>Investigating Societal Relations</h3>
 
@@ -404,7 +427,10 @@
                 >
             </p>
 
-            <img src="../images/reag-viz.png" alt="Societal relations investigation" />
+            <img
+                src="../images/reag-viz.png"
+                alt="Societal relations investigation"
+            />
 
             <h3>
                 Corporate Relationships of Friburgo Entrepreneurs with Multiple
@@ -417,7 +443,10 @@
                 >
             </blockquote>
 
-            <img src="../images/image23.png" alt="Corporate relationships network" />
+            <img
+                src="../images/image23.png"
+                alt="Corporate relationships network"
+            />
 
             <h3>Companies and Partners of the "Tiger Game" Owner</h3>
             <blockquote>
@@ -539,7 +568,8 @@ sankey-beta
   Cond Outra condicao,Tipo Rustico,1659069
   Cond Outra condicao,Tipo Duravel,1353801
   Cond Nao classificado,Tipo Rustico,16
-</pre>
+</pre
+            >
         </div>
 
         <hr />
@@ -604,7 +634,8 @@ sankey-beta
   Proprio em aquisicao,Casa,258066
   Proprio ja pago,Apartamento,115652
   Proprio ja pago,Casa,3484304
-</pre>
+</pre
+            >
         </div>
 
         <hr />
@@ -660,7 +691,8 @@ sankey-beta
   Proprio pago,Apartamento,604698
   Proprio pago,Casa,13508004
   Proprio pago,Comodo,70590
-</pre>
+</pre
+            >
         </div>
 
         <hr />
@@ -696,7 +728,9 @@ sankey-beta
         <h2>🔧 Data Sources</h2>
 
         <ul>
-            <li>IBGE Census (Brazilian Institute of Geography and Statistics)</li>
+            <li>
+                IBGE Census (Brazilian Institute of Geography and Statistics)
+            </li>
             <li>
                 CNEFE (National Registry of Addresses for Statistical Purposes)
             </li>
