@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eleições 2026 - Mapa de Portugal por Município</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="header">
+        <h1>Portugal - Eleições Presidenciais 2026</h1>
+        <p>Mapa por vencedor local. Clique numa localidade para ver os detalhes.</p>
+      </header>
+
+      <footer class="legend-card">
+        <div id="legend"></div>
+      </footer>
+
+      <section class="map-card">
+        <div class="maps-grid">
+          <div class="map-panel">
+            <h3 id="mainland-title">Continente</h3>
+            <svg id="map-mainland" aria-label="Mapa do Continente"></svg>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a href="https://ミ.xyz" target="_blank" rel="noopener noreferrer">made by ミ.xyz</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+  </html>
