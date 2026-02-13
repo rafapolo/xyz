@@ -5,6 +5,7 @@ const svgConfigs = [
   { selector: "#map-mainland", nuts1: "Continente", width: 840, height: 620 },
 ];
 const INITIAL_ZOOM = 1.2;
+const INITIAL_LOCALITY = "Lisboa";
 
 const NO_DATA_COLOR = "#4b5563";
 const SPECIAL_REGION_MAP = {
@@ -63,9 +64,7 @@ Promise.all([d3.json("./data/municipalities.geojson"), d3.csv("./votos_portugal_
       );
 
     const latestAno = d3.max(cleanRows, (d) => d.ano) || "2026";
-    d3.select(".header p").text(
-      `Mapa por vencedor local (${latestAno}). Clique numa localidade para ver os detalhes.`
-    );
+    d3.select(".header p").text("Mapa colorido por distribuiçao dos votos. Clique numa localidade.");
 
     const groupedByRegion = d3.group(cleanRows, (d) => resolveCsvRegionToMapRegion(d.region));
     const electionByRegion = new Map();
@@ -131,6 +130,13 @@ Promise.all([d3.json("./data/municipalities.geojson"), d3.csv("./votos_portugal_
         .interpolate(d3.interpolateRgb);
 
     let renderSelection = () => {};
+    const selectLocality = (locality, election) => {
+      d3.selectAll(".municipality").classed("active", false);
+      d3.selectAll(`.municipality[data-region-key="${CSS.escape(locality)}"]`)
+        .classed("active", true)
+        .raise();
+      renderSelection(locality, election);
+    };
 
     geojson.features.forEach((feature) => {
       const regionKey = feature.properties.region_key;
@@ -201,13 +207,7 @@ Promise.all([d3.json("./data/municipalities.geojson"), d3.csv("./votos_portugal_
         .on("click", function (_, d) {
           const locality = d.properties.region_key;
           const election = d.properties.results;
-
-          d3.selectAll(".municipality").classed("active", false);
-          d3.selectAll(`.municipality[data-region-key="${CSS.escape(locality)}"]`)
-            .classed("active", true)
-            .raise();
-
-          renderSelection(locality, election);
+          selectLocality(locality, election);
         })
         .append("title")
         .text((d) => {
@@ -233,8 +233,8 @@ Promise.all([d3.json("./data/municipalities.geojson"), d3.csv("./votos_portugal_
           </div>
           <div class="mix-legend-bar-wrap">
             <div class="mix-legend-bar" style="background: linear-gradient(to right, ${color(candidateB)} 0%, ${color(candidateA)} 100%);"></div>
-            <div class="mix-pointer" id="mix-pointer-b" style="left:0%"></div>
-            <div class="mix-pointer" id="mix-pointer-a" style="left:100%"></div>
+            <div class="mix-pointer mix-pointer-b" id="mix-pointer-b" style="left:0%;background:${color(candidateB)};"></div>
+            <div class="mix-pointer mix-pointer-a" id="mix-pointer-a" style="left:100%;background:${color(candidateA)};"></div>
           </div>
           <div class="mix-legend-ticks">
             <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
@@ -291,6 +291,14 @@ Promise.all([d3.json("./data/municipalities.geojson"), d3.csv("./votos_portugal_
         .html((d) => `<span class="legend-swatch" style="background:${d.color}"></span><span>${d.label}</span>`);
 
       renderSelection = () => {};
+    }
+
+    const initialFeature =
+      geojson.features.find(
+        (f) => normalize(f?.properties?.region_key) === normalize(INITIAL_LOCALITY)
+      ) || null;
+    if (initialFeature) {
+      selectLocality(initialFeature.properties.region_key, initialFeature.properties.results);
     }
 
   })
