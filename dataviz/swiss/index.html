@@ -51,11 +51,20 @@
                 overflow: hidden;
             }
 
-            h1 {
+            #hud {
                 position: fixed;
                 top: var(--panel-top);
                 left: var(--panel-left);
+                right: var(--panel-right);
                 z-index: 10;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--panel-gap);
+                pointer-events: none;
+            }
+
+            h1 {
                 max-width: min(
                     920px,
                     calc(100vw - var(--panel-left) - var(--panel-right))
@@ -75,14 +84,9 @@
                 pointer-events: none;
             }
 
-            #status {
-                position: fixed;
-                top: calc(
-                    var(--panel-top) + clamp(34px, 4.8vw, 52px) +
-                        var(--panel-gap)
-                );
-                left: var(--panel-left);
-                z-index: 10;
+            #status,
+            #selectionStatus,
+            #selectedStatus {
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
@@ -97,41 +101,19 @@
                 box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(8px);
                 -webkit-backdrop-filter: blur(8px);
-                font-size: 13px;
+                font-size: 14px;
                 line-height: 1.2;
                 color: rgba(227, 242, 233, 0.94);
                 pointer-events: none;
             }
 
             #selectionStatus {
-                position: fixed;
-                top: calc(
-                    var(--panel-top) + clamp(34px, 4.8vw, 52px) +
-                        var(--panel-gap) + clamp(40px, 4.8vw, 58px) +
-                        var(--panel-gap)
-                );
-                left: var(--panel-left);
-                z-index: 10;
                 display: none;
-                max-width: min(
-                    760px,
-                    calc(100vw - var(--panel-left) - var(--panel-right))
-                );
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                font-size: clamp(13px, 1.7vw, 17px);
-                line-height: 1.2;
-                font-weight: 600;
-                color: rgba(235, 248, 255, 0.96);
-                background: rgba(74, 144, 226, 0.2);
-                border: 1px solid rgba(74, 144, 226, 0.32);
-                border-radius: var(--panel-radius);
-                padding: clamp(8px, 1vw, 12px) clamp(14px, 1.5vw, 20px);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                pointer-events: none;
+                color: rgba(220, 255, 235, 0.92);
+                border-color: rgba(46, 204, 113, 0.22);
             }
 
             #status.loading {
@@ -175,41 +157,29 @@
                 }
 
                 h1 {
-                    max-width: calc(
-                        100vw - var(--panel-left) - var(--panel-right)
-                    );
                     font-size: 16px;
                     line-height: 1.18;
                     padding: 8px 11px;
                 }
 
-                #status {
-                    top: calc(var(--panel-top) + 36px + var(--panel-gap));
+                #status,
+                #selectionStatus,
+                #selectedStatus {
                     max-width: calc(
                         100vw - var(--panel-left) - var(--panel-right)
                     );
                     padding: 7px 11px;
-                    font-size: 13px;
-                }
-
-                #selectionStatus {
-                    top: calc(
-                        var(--panel-top) + 36px + var(--panel-gap) + 34px +
-                            var(--panel-gap)
-                    );
-                    max-width: calc(
-                        100vw - var(--panel-left) - var(--panel-right)
-                    );
-                    font-size: 13px;
-                    padding: 7px 11px;
+                    font-size: 14px;
                 }
             }
         </style>
     </head>
         <body>
-            <h1>View All Swiss Domains and Nameservers</h1>
-            <div id="status"></div>
-            <div id="selectionStatus"></div>
+            <div id="hud">
+                <h1>View All Swiss Domains and Nameservers</h1>
+                <div id="status"></div>
+                <div id="selectionStatus"></div>
+            </div>
             <div id="cosmograph"></div>
 
         <script type="module">
@@ -230,6 +200,13 @@
             let fitMethodName = null;
 
             const urlParams = new URLSearchParams(location.search);
+            const precomputedModeRaw = (
+                urlParams.get("precomputed") || ""
+            ).trim().toLowerCase();
+            const precomputedMode =
+                precomputedModeRaw === "1" ||
+                precomputedModeRaw === "true" ||
+                precomputedModeRaw === "yes";
             // Force-layout controls (off by default; enable with ?sim=1)
             // Tip: keep max modest when sim=1 to avoid WebGL context loss.
             const simEnabled = (urlParams.get("sim") || "").trim() === "1";
@@ -293,7 +270,11 @@
             let baseStatusText = "";
             let labelByRow = null; // Array<string|null>, index = compact row index
             let labelByNodeIdx = null; // Map<number, string|null>, key = node idx
+            let pointDataByNodeIdx = null; // Map<number, {idx,index,id,label}>
+            let nodeIdxByLabel = null; // Map<string, number>, first node idx by label text
             let lastClickedName = "";
+            let hoveredPointData = null;
+            let pointClickHandled = false;
             let labelsEnabled = (urlParams.get("labels") || "").trim() !== "0";
             let finalFitTimeout = null;
 
@@ -305,11 +286,13 @@
                 return new Uint8Array(buf);
             }
 
-            function getLabelsConfig(enabled) {
+            function getLabelsConfig(enabled, showLabelsFor = []) {
                 if (!enabled) {
                     return {
                         showLabels: false,
+                        showLabelsFor: [],
                         showHoveredPointLabel: false,
+                        showHoveredNodeLabel: false,
                         showFocusedPointLabel: false,
                         showTopLabels: false,
                         showDynamicLabels: false,
@@ -322,17 +305,17 @@
                 // and always allow hover + focused label.
                 return {
                     pointLabelBy: "label",
-                    pointLabelWeightBy: "degree",
+                    pointLabelWeightBy: "labelWeight",
                     showLabels: true,
-                    showHoveredPointLabel: true,
-                    showFocusedPointLabel: true,
-                    showTopLabels: true,
-                    showTopLabelsLimit: 40,
-                    showDynamicLabels: true,
-                    showDynamicLabelsLimit: 40,
-                    showUnselectedPointLabels: true,
-                    showSelectedLabels: true,
-                    selectedPointLabelsLimit: 200,
+                    // Keep labels deterministic and skip empty-label nodes entirely.
+                    showLabelsFor,
+                    showTopLabels: false,
+                    showDynamicLabels: false,
+                    showUnselectedPointLabels: false,
+                    showSelectedLabels: false,
+                    showHoveredPointLabel: false,
+                    showHoveredNodeLabel: false,
+                    showFocusedPointLabel: false,
                 };
             }
 
@@ -358,6 +341,188 @@
                 if (labelByRow && index >= 0 && index < labelByRow.length)
                     return labelByRow[index];
                 return "";
+            }
+
+            function getPointDataByIndex(index) {
+                if (!Number.isInteger(index)) return null;
+                if (pointDataByNodeIdx && pointDataByNodeIdx.has(index))
+                    return pointDataByNodeIdx.get(index);
+                return {
+                    idx: index,
+                    index,
+                    id: index,
+                    label: getNameForSelectionIndex(index) || "",
+                };
+            }
+
+            function getPointDataByLabel(label) {
+                if (typeof label !== "string") return null;
+                const trimmed = label.trim();
+                if (!trimmed) return null;
+                if (!nodeIdxByLabel || !nodeIdxByLabel.has(trimmed)) return null;
+                return getPointDataByIndex(nodeIdxByLabel.get(trimmed));
+            }
+
+            function toIntegerMaybe(value) {
+                if (Number.isInteger(value)) return value;
+                if (typeof value !== "string") return null;
+                const trimmed = value.trim();
+                if (!trimmed) return null;
+                const n = Number(trimmed);
+                return Number.isInteger(n) ? n : null;
+            }
+
+            function normalizePointData(point) {
+                if (!point || typeof point !== "object") return null;
+                const candidates = [point];
+                if (point.data && typeof point.data === "object")
+                    candidates.push(point.data);
+                if (point.point && typeof point.point === "object")
+                    candidates.push(point.point);
+                if (point.node && typeof point.node === "object")
+                    candidates.push(point.node);
+                if (point.detail && typeof point.detail === "object") {
+                    if (point.detail.point && typeof point.detail.point === "object")
+                        candidates.push(point.detail.point);
+                    if (point.detail.node && typeof point.detail.node === "object")
+                        candidates.push(point.detail.node);
+                }
+
+                for (const candidate of candidates) {
+                    if (!candidate || typeof candidate !== "object") continue;
+                    const hasIndex =
+                        toIntegerMaybe(candidate.idx) != null ||
+                        toIntegerMaybe(candidate.index) != null ||
+                        toIntegerMaybe(candidate.id) != null;
+                    const hasLabel = typeof candidate.label === "string";
+                    if (hasIndex || hasLabel) return candidate;
+                }
+
+                return candidates[0] || null;
+            }
+
+            function resolvePointFromEventArgs(args) {
+                for (const arg of args || []) {
+                    if (arg == null) continue;
+
+                    const asIndex = toIntegerMaybe(arg);
+                    if (asIndex != null) {
+                        const byIndex = getPointDataByIndex(asIndex);
+                        if (byIndex) return byIndex;
+                    }
+
+                    if (typeof arg === "string") {
+                        const byLabel = getPointDataByLabel(arg);
+                        if (byLabel) return byLabel;
+                    }
+
+                    if (Array.isArray(arg)) {
+                        const nested = resolvePointFromEventArgs(arg);
+                        if (nested) return nested;
+                        continue;
+                    }
+
+                    if (typeof arg !== "object") continue;
+                    const p = normalizePointData(arg);
+                    if (!p) continue;
+                    const idx = getPointIndexFromData(p);
+                    if (idx != null) {
+                        const byIndex = getPointDataByIndex(idx);
+                        if (byIndex) return byIndex;
+                        return p;
+                    }
+                    if (typeof p.label === "string") {
+                        const byLabel = getPointDataByLabel(p.label);
+                        if (byLabel) return byLabel;
+                    }
+                }
+                return null;
+            }
+
+            function getPointIndexFromData(pointData) {
+                if (!pointData || typeof pointData !== "object") return null;
+                const idx =
+                    toIntegerMaybe(pointData.idx) ??
+                    toIntegerMaybe(pointData.index) ??
+                    toIntegerMaybe(pointData.id);
+                if (idx != null) return idx;
+                return null;
+            }
+
+            function rememberClickedPointName(point) {
+                if (Number.isInteger(point)) {
+                    lastClickedName = getNameForSelectionIndex(point);
+                    return;
+                }
+                const p = normalizePointData(point);
+                if (!p) {
+                    lastClickedName = "";
+                    return;
+                }
+                const label =
+                    typeof p.label === "string" ? p.label.trim() : "";
+                const idx = getPointIndexFromData(p);
+                lastClickedName =
+                    label || (idx != null ? getNameForSelectionIndex(idx) : "");
+            }
+
+            function callFirstMethod(target, methodNames, args = []) {
+                for (const name of methodNames) {
+                    if (typeof target?.[name] === "function") {
+                        try {
+                            target[name](...args);
+                            return true;
+                        } catch {
+                            // try next candidate
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function applyPointClickShortcut(point) {
+                const p = normalizePointData(point);
+                if (!p || !cosmograph) return false;
+                const idx = getPointIndexFromData(p);
+                if (!Number.isInteger(idx)) return false;
+
+                const selected = callFirstMethod(
+                    cosmograph,
+                    [
+                        "clickPoint",
+                        "selectPoint",
+                        "selectPointByIndex",
+                        "setSelectedPointIndex",
+                        "setSelectedPointIndices",
+                        "setSelectedPointIndexes",
+                        "setSelectedPoints",
+                    ],
+                    [idx],
+                ) || callFirstMethod(
+                    cosmograph,
+                    ["setSelectedPointIndices", "setSelectedPointIndexes", "setSelectedPoints"],
+                    [[idx]],
+                );
+
+                const focused = callFirstMethod(
+                    cosmograph,
+                    ["focusPoint", "focusPointByIndex", "setFocusedPointIndex", "setFocusedPoint"],
+                    [idx],
+                );
+
+                return selected || focused;
+            }
+
+            function activatePointShortcut(point) {
+                rememberClickedPointName(point);
+                applyPointClickShortcut(point);
+            }
+
+            function activatePointShortcutFromArgs(...args) {
+                const point =
+                    resolvePointFromEventArgs(args) || hoveredPointData || null;
+                if (!point) return;
+                activatePointShortcut(point);
             }
 
             function maybeFitView(options = {}) {
@@ -420,7 +585,7 @@
                 }
             }
 
-            async function makeCompactIpc(nodesBytes, edgesBytes) {
+            async function makeCompactIpc(nodesBytes, edgesBytes, useFixedXY) {
                 const nodesTable = tableFromIPC(nodesBytes);
                 const edgesTable = tableFromIPC(edgesBytes);
 
@@ -435,6 +600,11 @@
                 if (!hasCols(edgeCols, ["sourceidx", "targetidx"])) {
                     throw new Error(
                         `edges.arrow missing required columns "sourceidx"/"targetidx" (found: ${edgeCols.join(", ")})`,
+                    );
+                }
+                if (useFixedXY && !hasCols(nodeCols, ["x", "y"])) {
+                    throw new Error(
+                        `precomputed mode requires nodes x/y columns (found: ${nodeCols.join(", ")})`,
                     );
                 }
 
@@ -452,14 +622,29 @@
                 for (let i = 0; i < cap; i++) ids[i] = String(idxSub[i]);
                 const labelVec = nodesTable.getChild("label");
                 const labels = new Array(cap);
+                const labelWeight = new Int32Array(cap);
                 if (labelVec) {
                     for (let i = 0; i < cap; i++) {
                         const raw = labelVec.get(i);
                         const trimmed = raw == null ? "" : String(raw).trim();
-                        labels[i] = trimmed ? trimmed : null;
+                        const hasLabel = trimmed.length > 0;
+                        labels[i] = hasLabel ? trimmed : null;
+                        labelWeight[i] = hasLabel ? 1 : 0;
                     }
                 } else {
-                    for (let i = 0; i < cap; i++) labels[i] = null;
+                    for (let i = 0; i < cap; i++) {
+                        labels[i] = null;
+                        labelWeight[i] = 0;
+                    }
+                }
+
+                let xSub = null;
+                let ySub = null;
+                if (useFixedXY) {
+                    const xVec = nodesTable.getChild("x");
+                    const yVec = nodesTable.getChild("y");
+                    xSub = xVec.toArray().subarray(0, cap);
+                    ySub = yVec.toArray().subarray(0, cap);
                 }
                 // Filter edges by idx bounds.
                 // Avoid per-edge JS array pushes: count first, allocate typed arrays, then fill.
@@ -507,8 +692,10 @@
                     id: ids,
                     idx: idxSub,
                     degree: degrees,
+                    labelWeight,
                     hub,
                     label: labels,
+                    ...(useFixedXY ? { x: xSub, y: ySub } : {}),
                 });
 
                 const edgesCompact = tableFromArrays({
@@ -516,10 +703,19 @@
                     targetidx: tgtOut,
                 });
 
+                const topLabelIds = [];
+                for (let i = 0; i < cap; i++) {
+                    if (labels[i]) topLabelIds.push(i);
+                }
+                topLabelIds.sort((a, b) => degrees[b] - degrees[a]);
+                const labelIds = topLabelIds.slice(0, 80).map((i) => ids[i]);
+
                 return {
                     nodesIpc: await tableToIPC(nodesCompact, "file"),
                     edgesIpc: await tableToIPC(edgesCompact, "file"),
+                    ids,
                     labels,
+                    labelIds,
                     idxSub,
                     cap,
                     originalNodes: n,
@@ -537,39 +733,64 @@
                     }
                     setStatus(
                         maxPoints > 0
-                            ? `Loading (max=${maxPoints.toLocaleString()})...`
-                            : "Loading (max=all)...",
+                            ? `Loading ${precomputedMode ? "precomputed" : "dynamic"} (max=${maxPoints.toLocaleString()})...`
+                            : `Loading ${precomputedMode ? "precomputed" : "dynamic"} (max=all)...`,
                         "loading",
                     );
 
                     const [nodesBytes, edgesBytes] = await Promise.all([
-                        fetchBytes("./nodes.arrow"),
-                        fetchBytes("./edges.arrow"),
+                        fetchBytes(
+                            precomputedMode ? "./nodes_xy.arrow" : "./nodes.arrow",
+                        ),
+                        fetchBytes(
+                            precomputedMode ? "./edges_xy.arrow" : "./edges.arrow",
+                        ),
                     ]);
 
                     // Reduce memory pressure by dropping string columns and (optionally) capping points.
                     const {
                         nodesIpc,
                         edgesIpc,
+                        ids,
                         labels,
+                        labelIds,
                         idxSub,
                         cap,
                         originalNodes,
                         originalEdges,
                         filteredEdges,
-                    } = await makeCompactIpc(nodesBytes, edgesBytes);
+                    } = await makeCompactIpc(
+                        nodesBytes,
+                        edgesBytes,
+                        precomputedMode,
+                    );
 
                     labelByRow = labels;
                     labelByNodeIdx = new Map();
+                    pointDataByNodeIdx = new Map();
+                    nodeIdxByLabel = new Map();
                     for (let i = 0; i < cap; i++) {
-                        labelByNodeIdx.set(Number(idxSub[i]), labels[i]);
+                        const idx = Number(idxSub[i]);
+                        const label = labels[i] || "";
+                        const pointData = {
+                            idx,
+                            index: idx,
+                            id: ids[i],
+                            label,
+                        };
+                        labelByNodeIdx.set(idx, label);
+                        pointDataByNodeIdx.set(idx, pointData);
+                        if (label && !nodeIdxByLabel.has(label))
+                            nodeIdxByLabel.set(label, idx);
                     }
                     lastClickedName = "";
+                    hoveredPointData = null;
                     setSelectionStatus("");
 
                     const enableSimulation =
                         simEnabled ||
-                        (autoLayoutEnabled &&
+                        (!precomputedMode &&
+                            autoLayoutEnabled &&
                             autoLayoutStepsBase > 0 &&
                             cap <= autoLayoutCap);
                     // Passing a fixed spaceSize makes the layout feel like it's inside a box.
@@ -589,34 +810,37 @@
                         simulationLinkSpring,
                         simulationFriction,
                         ...(shouldSetSpaceSize ? { spaceSize } : {}),
-                        ...getLabelsConfig(labelsEnabled),
+                        ...getLabelsConfig(labelsEnabled, labelIds),
                         // Click a point to select it + its neighbors; click empty canvas to clear.
                         selectPointOnClick: true,
                         resetSelectionOnEmptyCanvasClick: true,
                         focusPointOnClick: true,
-                        onPointClick: (point) => {
-                            if (point && typeof point === "object") {
-                                const p = point.data && typeof point.data === "object"
-                                    ? point.data
-                                    : point;
-                                const label =
-                                    typeof p.label === "string"
-                                        ? p.label.trim()
-                                        : "";
-                                const idx =
-                                    Number.isInteger(p.idx) ||
-                                    Number.isInteger(p.index)
-                                        ? Number(p.idx ?? p.index)
-                                        : null;
-                                lastClickedName =
-                                    label || (idx != null ? getNameForSelectionIndex(idx) : "");
-                                return;
-                            }
-                            if (Number.isInteger(point)) {
-                                lastClickedName = getNameForSelectionIndex(point);
-                                return;
-                            }
-                            lastClickedName = "";
+                        onPointHover: (...args) => {
+                            hoveredPointData = resolvePointFromEventArgs(args);
+                        },
+                        onPointClick: (...args) => {
+                            pointClickHandled = true;
+                            const point = resolvePointFromEventArgs(args);
+                            if (point) rememberClickedPointName(point);
+                        },
+                        // Cosmograph API naming differs by version; support common label-click hooks.
+                        onPointLabelClick: (...args) => {
+                            activatePointShortcutFromArgs(...args);
+                        },
+                        onLabelClick: (...args) => {
+                            activatePointShortcutFromArgs(...args);
+                        },
+                        onNodeLabelClick: (...args) => {
+                            activatePointShortcutFromArgs(...args);
+                        },
+                        onPointLabelHover: (...args) => {
+                            hoveredPointData = resolvePointFromEventArgs(args);
+                        },
+                        onLabelHover: (...args) => {
+                            hoveredPointData = resolvePointFromEventArgs(args);
+                        },
+                        onNodeLabelHover: (...args) => {
+                            hoveredPointData = resolvePointFromEventArgs(args);
                         },
                         onPointsFiltered: (
                             _filteredPoints,
@@ -647,7 +871,7 @@
                             }
 
                             setSelectionStatus(
-                                `${name}  •  ${relations.toLocaleString()} relations`,
+                                `${name}  •  ${relations.toLocaleString()} domains`,
                             );
                         },
                         points: nodesIpc,
@@ -660,6 +884,12 @@
                         linkSourceIndexBy: "sourceidx",
                         linkTargetBy: "targetidx",
                         linkTargetIndexBy: "targetidx",
+                        ...(precomputedMode
+                            ? {
+                                  pointXBy: "x",
+                                  pointYBy: "y",
+                              }
+                            : {}),
                         pointSizeBy: "degree",
                         // Size by number of connections, constrained to a tight visual range.
                         pointSizeRange: [1, 6],
@@ -723,6 +953,7 @@
                             scheduleFinalFit(delay);
                         }
                     } else if (
+                        !precomputedMode &&
                         autoLayoutEnabled &&
                         autoLayoutStepsBase > 0 &&
                         cap <= autoLayoutCap
@@ -736,10 +967,25 @@
                     }
 
                     setStatus(
-                        `showing ${cap.toLocaleString()} out of ${originalNodes.toLocaleString()} domains`,
+                        `${precomputedMode ? "precomputed" : "dynamic"}: showing ${cap.toLocaleString()} out of ${originalNodes.toLocaleString()} domains`,
                         "success",
                     );
                     baseStatusText = status.textContent || "";
+
+                    // Label text can be slightly offset from the node hit area.
+                    // If click lands on label but misses the node hit test, promote hovered point as a click shortcut.
+                    if (!container.dataset.labelClickShortcutBound) {
+                        container.addEventListener("click", () => {
+                            if (pointClickHandled) {
+                                pointClickHandled = false;
+                                return;
+                            }
+                            if (!hoveredPointData) return;
+                            rememberClickedPointName(hoveredPointData);
+                            applyPointClickShortcut(hoveredPointData);
+                        });
+                        container.dataset.labelClickShortcutBound = "1";
+                    }
                 } catch (error) {
                     console.error("Error loading from server:", error);
                     setStatus(`Error: ${error.message}`, "error");
