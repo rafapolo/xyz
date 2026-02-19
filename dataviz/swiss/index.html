@@ -3,13 +3,17 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Swiss Domains Visualization</title>
-        <link rel="icon" href="data:," />
+        <title>Swiss Domains Explorer</title>
+        <link
+            rel="shortcut icon"
+            type="image/x-icon"
+            href="https://extrapolo.com/favicon.ico"
+        />
         <link rel="preconnect" href="https://esm.sh" crossorigin />
         <style>
             :root {
-                --bg0: #0a0e27;
-                --bg1: #141a3a;
+                --bg0: #080c20;
+                --bg1: #111736;
                 --text: rgba(255, 255, 255, 0.92);
                 --muted: rgba(255, 255, 255, 0.68);
                 --hairline: rgba(255, 255, 255, 0.1);
@@ -18,6 +22,11 @@
                 --blue: #4a90e2;
                 --green: #2ecc71;
                 --red: #e74c3c;
+                --panel-left: calc(20px + env(safe-area-inset-left, 0px));
+                --panel-right: calc(20px + env(safe-area-inset-right, 0px));
+                --panel-top: calc(18px + env(safe-area-inset-top, 0px));
+                --panel-gap: 12px;
+                --panel-radius: 18px;
             }
 
             * {
@@ -44,133 +53,85 @@
 
             h1 {
                 position: fixed;
-                top: calc(14px + env(safe-area-inset-top, 0px));
-                left: calc(16px + env(safe-area-inset-left, 0px));
+                top: var(--panel-top);
+                left: var(--panel-left);
                 z-index: 10;
-                font-size: 13px;
+                max-width: min(
+                    920px,
+                    calc(100vw - var(--panel-left) - var(--panel-right))
+                );
+                font-size: 16px;
+                line-height: 1.15;
                 font-weight: 650;
-                letter-spacing: 0.3px;
+                letter-spacing: 0.2px;
                 color: var(--text);
-                padding: 8px 10px;
-                border-radius: 999px;
+                padding: clamp(10px, 1.1vw, 16px) clamp(14px, 1.6vw, 24px);
+                border-radius: var(--panel-radius);
                 border: 1px solid var(--hairline);
-                background: var(--glass);
-                box-shadow: var(--shadow);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+                background: rgba(12, 18, 46, 0.62);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
                 pointer-events: none;
             }
 
             #status {
                 position: fixed;
-                top: calc(60px + env(safe-area-inset-top, 0px));
-                left: calc(16px + env(safe-area-inset-left, 0px));
+                top: calc(
+                    var(--panel-top) + clamp(34px, 4.8vw, 52px) +
+                        var(--panel-gap)
+                );
+                left: var(--panel-left);
                 z-index: 10;
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                padding: 7px 10px;
-                border-radius: 999px;
+                max-width: min(
+                    760px,
+                    calc(100vw - var(--panel-left) - var(--panel-right))
+                );
+                padding: clamp(8px, 1vw, 12px) clamp(14px, 1.5vw, 20px);
+                border-radius: var(--panel-radius);
                 border: 1px solid var(--hairline);
-                background: var(--glass);
-                box-shadow: var(--shadow);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                font-size: 12px;
-                color: var(--muted);
+                background: rgba(14, 26, 52, 0.54);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                font-size: 13px;
+                line-height: 1.2;
+                color: rgba(227, 242, 233, 0.94);
                 pointer-events: none;
             }
 
             #selectionStatus {
                 position: fixed;
-                top: calc(94px + env(safe-area-inset-top, 0px));
-                left: calc(16px + env(safe-area-inset-left, 0px));
+                top: calc(
+                    var(--panel-top) + clamp(34px, 4.8vw, 52px) +
+                        var(--panel-gap) + clamp(40px, 4.8vw, 58px) +
+                        var(--panel-gap)
+                );
+                left: var(--panel-left);
                 z-index: 10;
                 display: none;
-                max-width: min(820px, calc(100vw - 32px));
+                max-width: min(
+                    760px,
+                    calc(100vw - var(--panel-left) - var(--panel-right))
+                );
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                font-size: 12px;
+                font-size: clamp(13px, 1.7vw, 17px);
+                line-height: 1.2;
                 font-weight: 600;
                 color: rgba(235, 248, 255, 0.96);
-                background: rgba(74, 144, 226, 0.18);
+                background: rgba(74, 144, 226, 0.2);
                 border: 1px solid rgba(74, 144, 226, 0.32);
-                border-radius: 999px;
-                padding: 6px 10px;
-                box-shadow: var(--shadow);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+                border-radius: var(--panel-radius);
+                padding: clamp(8px, 1vw, 12px) clamp(14px, 1.5vw, 20px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
                 pointer-events: none;
-            }
-
-            #controls {
-                position: fixed;
-                top: calc(14px + env(safe-area-inset-top, 0px));
-                right: calc(16px + env(safe-area-inset-right, 0px));
-                z-index: 10;
-                align-items: center;
-                display: inline-flex;
-                padding: 8px 10px;
-                border-radius: 999px;
-                border: 1px solid var(--hairline);
-                background: var(--glass);
-                box-shadow: var(--shadow);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                font-size: 12px;
-                color: var(--muted);
-                user-select: none;
-                pointer-events: auto;
-            }
-
-            #controls label {
-                display: inline-flex;
-                gap: 10px;
-                align-items: center;
-                cursor: pointer;
-            }
-
-            #controls input[type="checkbox"] {
-                appearance: none;
-                -webkit-appearance: none;
-                width: 34px;
-                height: 20px;
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.14);
-                position: relative;
-                outline: none;
-                cursor: pointer;
-                transition:
-                    background 160ms ease,
-                    border-color 160ms ease;
-            }
-
-            #controls input[type="checkbox"]::before {
-                content: "";
-                position: absolute;
-                top: 50%;
-                left: 2px;
-                transform: translateY(-50%);
-                width: 16px;
-                height: 16px;
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.86);
-                box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-                transition:
-                    left 160ms ease,
-                    background 160ms ease;
-            }
-
-            #controls input[type="checkbox"]:checked {
-                background: rgba(74, 144, 226, 0.45);
-                border-color: rgba(74, 144, 226, 0.55);
-            }
-
-            #controls input[type="checkbox"]:checked::before {
-                left: 16px;
-                background: rgba(235, 248, 255, 0.95);
             }
 
             #status.loading {
@@ -191,18 +152,7 @@
             #cosmograph {
                 position: absolute;
                 inset: 0;
-                background:
-                    radial-gradient(
-                        1200px 800px at 18% 12%,
-                        rgba(74, 144, 226, 0.12),
-                        rgba(0, 0, 0, 0) 55%
-                    ),
-                    radial-gradient(
-                        1000px 700px at 88% 22%,
-                        rgba(46, 204, 113, 0.08),
-                        rgba(0, 0, 0, 0) 60%
-                    ),
-                    linear-gradient(135deg, var(--bg0) 0%, var(--bg1) 100%);
+                background: var(--bg0);
                 touch-action: none;
                 overscroll-behavior: none;
                 contain: layout paint size;
@@ -214,19 +164,53 @@
                 width: 100%;
                 height: 100%;
             }
+
+            @media (max-width: 640px) {
+                :root {
+                    --panel-left: calc(12px + env(safe-area-inset-left, 0px));
+                    --panel-right: calc(12px + env(safe-area-inset-right, 0px));
+                    --panel-top: calc(10px + env(safe-area-inset-top, 0px));
+                    --panel-gap: 8px;
+                    --panel-radius: 14px;
+                }
+
+                h1 {
+                    max-width: calc(
+                        100vw - var(--panel-left) - var(--panel-right)
+                    );
+                    font-size: 16px;
+                    line-height: 1.18;
+                    padding: 8px 11px;
+                }
+
+                #status {
+                    top: calc(var(--panel-top) + 36px + var(--panel-gap));
+                    max-width: calc(
+                        100vw - var(--panel-left) - var(--panel-right)
+                    );
+                    padding: 7px 11px;
+                    font-size: 13px;
+                }
+
+                #selectionStatus {
+                    top: calc(
+                        var(--panel-top) + 36px + var(--panel-gap) + 34px +
+                            var(--panel-gap)
+                    );
+                    max-width: calc(
+                        100vw - var(--panel-left) - var(--panel-right)
+                    );
+                    font-size: 13px;
+                    padding: 7px 11px;
+                }
+            }
         </style>
     </head>
-    <body>
-        <h1>Analyses of all Swiss domains and nameservers</h1>
-        <div id="controls">
-            <label>
-                <input type="checkbox" id="labelsToggle" checked />
-                Show labels
-            </label>
-        </div>
-        <div id="status"></div>
-        <div id="selectionStatus"></div>
-        <div id="cosmograph"></div>
+        <body>
+            <h1>View All Swiss Domains and Nameservers</h1>
+            <div id="status"></div>
+            <div id="selectionStatus"></div>
+            <div id="cosmograph"></div>
 
         <script type="module">
             import { Cosmograph } from "https://esm.sh/@cosmograph/cosmograph@2.1.0";
@@ -239,15 +223,15 @@
             const container = document.getElementById("cosmograph");
             const status = document.getElementById("status");
             const selectionStatus = document.getElementById("selectionStatus");
-            const labelsToggle = document.getElementById("labelsToggle");
 
             let cosmograph = null;
             let currentConfig = null;
             let isLoading = false;
+            let fitMethodName = null;
 
             const urlParams = new URLSearchParams(location.search);
             // Force-layout controls (off by default; enable with ?sim=1)
-            // Tip: keep maxPoints modest when sim=1 to avoid WebGL context loss.
+            // Tip: keep max modest when sim=1 to avoid WebGL context loss.
             const simEnabled = (urlParams.get("sim") || "").trim() === "1";
             const simSteps = Number(urlParams.get("steps") || "0"); // 0 = run continuously
             // More dispersion by default when simulation is enabled.
@@ -265,18 +249,20 @@
             );
             const spaceSize = Number(urlParams.get("spaceSize") || "16384");
 
-            // Default behavior: render the full dataset unless the user sets ?maxPoints=...
-            const maxPointsParamRaw = urlParams.get("maxPoints");
-            const maxPointsParam = (maxPointsParamRaw || "")
+            // Default behavior: render the full dataset unless the user sets ?max=...
+            // Backward-compatible: still accepts legacy ?maxPoints=...
+            const maxParamRaw =
+                urlParams.get("max") ?? urlParams.get("maxPoints");
+            const maxParam = (maxParamRaw || "")
                 .trim()
                 .toLowerCase();
             const defaultMaxPoints = 0;
             const maxPoints = (() => {
-                if (maxPointsParamRaw == null || maxPointsParam === "")
+                if (maxParamRaw == null || maxParam === "")
                     return defaultMaxPoints;
-                if (maxPointsParam === "all" || maxPointsParam === "0")
+                if (maxParam === "all" || maxParam === "0")
                     return 0;
-                const n = Number(maxPointsParam);
+                const n = Number(maxParam);
                 return Number.isFinite(n) && n >= 0 ? n : defaultMaxPoints;
             })();
 
@@ -305,24 +291,11 @@
             }
 
             let baseStatusText = "";
-            let labelByIdx = null; // Array<string>, index = idx
+            let labelByRow = null; // Array<string|null>, index = compact row index
+            let labelByNodeIdx = null; // Map<number, string|null>, key = node idx
+            let lastClickedName = "";
             let labelsEnabled = (urlParams.get("labels") || "").trim() !== "0";
-
-            labelsToggle.checked = labelsEnabled;
-            labelsToggle.addEventListener("change", async () => {
-                labelsEnabled = !!labelsToggle.checked;
-                // Cosmograph's setConfig behaves like a replace, not a merge. Always keep points/links.
-                if (!cosmograph || !currentConfig || isLoading) return;
-                try {
-                    currentConfig = {
-                        ...currentConfig,
-                        ...getLabelsConfig(labelsEnabled),
-                    };
-                    await cosmograph.setConfig(currentConfig);
-                } catch (e) {
-                    console.warn("Failed to toggle labels:", e);
-                }
-            });
+            let finalFitTimeout = null;
 
             async function fetchBytes(url) {
                 const res = await fetch(url);
@@ -345,7 +318,7 @@
                     };
                 }
 
-                // "Show labels" in a scalable way: show a limited amount of top + dynamic labels,
+                // Label rendering strategy: show a limited amount of top + dynamic labels,
                 // and always allow hover + focused label.
                 return {
                     pointLabelBy: "label",
@@ -378,26 +351,48 @@
                 selectionStatus.style.display = "inline-flex";
             }
 
-            function maybeFitView() {
+            function getNameForSelectionIndex(index) {
+                if (!Number.isInteger(index)) return "";
+                if (labelByNodeIdx && labelByNodeIdx.has(index))
+                    return labelByNodeIdx.get(index);
+                if (labelByRow && index >= 0 && index < labelByRow.length)
+                    return labelByRow[index];
+                return "";
+            }
+
+            function maybeFitView(options = {}) {
                 // Cosmograph API surface differs a bit across versions/builds; feature-detect.
                 const cg = cosmograph;
                 if (!cg) return;
-                const candidates = [
-                    "fitView",
-                    "zoomToFit",
-                    "fitToScreen",
-                    "fitToViewport",
-                ];
-                for (const m of candidates) {
+                if (!fitMethodName) {
+                    const candidates = [
+                        "fitView",
+                        "zoomToFit",
+                        "fitToScreen",
+                        "fitToViewport",
+                    ];
+                    fitMethodName =
+                        candidates.find((m) => typeof cg[m] === "function") ||
+                        null;
+                }
+                if (!fitMethodName) return;
+                try {
+                    cg[fitMethodName](options);
+                } catch {
                     try {
-                        if (typeof cg[m] === "function") {
-                            cg[m]();
-                            return;
-                        }
+                        cg[fitMethodName]();
                     } catch {
                         // ignore
                     }
                 }
+            }
+
+            function scheduleFinalFit(delayMs = 2600) {
+                if (finalFitTimeout) clearTimeout(finalFitTimeout);
+                finalFitTimeout = window.setTimeout(() => {
+                    // Single final fit with safe padding so all nodes remain in frame.
+                    maybeFitView({ padding: 0.08 });
+                }, delayMs);
             }
 
             async function waitForStatsReady(deadlineMs = 120_000) {
@@ -455,14 +450,16 @@
                 // Keep a compact, stable string id to avoid the labels renderer crashing.
                 const ids = new Array(cap);
                 for (let i = 0; i < cap; i++) ids[i] = String(idxSub[i]);
-                const labelVec =
-                    nodesTable.getChild("label") || nodesTable.getChild("id");
+                const labelVec = nodesTable.getChild("label");
                 const labels = new Array(cap);
                 if (labelVec) {
-                    for (let i = 0; i < cap; i++)
-                        labels[i] = String(labelVec.get(i) ?? "");
+                    for (let i = 0; i < cap; i++) {
+                        const raw = labelVec.get(i);
+                        const trimmed = raw == null ? "" : String(raw).trim();
+                        labels[i] = trimmed ? trimmed : null;
+                    }
                 } else {
-                    for (let i = 0; i < cap; i++) labels[i] = String(idxSub[i]);
+                    for (let i = 0; i < cap; i++) labels[i] = null;
                 }
                 // Filter edges by idx bounds.
                 // Avoid per-edge JS array pushes: count first, allocate typed arrays, then fill.
@@ -523,6 +520,7 @@
                     nodesIpc: await tableToIPC(nodesCompact, "file"),
                     edgesIpc: await tableToIPC(edgesCompact, "file"),
                     labels,
+                    idxSub,
                     cap,
                     originalNodes: n,
                     originalEdges: edgesTable.numRows,
@@ -533,10 +531,14 @@
             async function loadDefaultGraph() {
                 try {
                     isLoading = true;
+                    if (finalFitTimeout) {
+                        clearTimeout(finalFitTimeout);
+                        finalFitTimeout = null;
+                    }
                     setStatus(
                         maxPoints > 0
-                            ? `Loading (maxPoints=${maxPoints.toLocaleString()})...`
-                            : "Loading (maxPoints=all)...",
+                            ? `Loading (max=${maxPoints.toLocaleString()})...`
+                            : "Loading (max=all)...",
                         "loading",
                     );
 
@@ -550,13 +552,19 @@
                         nodesIpc,
                         edgesIpc,
                         labels,
+                        idxSub,
                         cap,
                         originalNodes,
                         originalEdges,
                         filteredEdges,
                     } = await makeCompactIpc(nodesBytes, edgesBytes);
 
-                    labelByIdx = labels;
+                    labelByRow = labels;
+                    labelByNodeIdx = new Map();
+                    for (let i = 0; i < cap; i++) {
+                        labelByNodeIdx.set(Number(idxSub[i]), labels[i]);
+                    }
+                    lastClickedName = "";
                     setSelectionStatus("");
 
                     const enableSimulation =
@@ -572,6 +580,7 @@
                     const config = {
                         disableLogging: true,
                         statusIndicatorMode: false,
+                        fitViewOnInit: false,
                         // If sim=1: run simulation as requested.
                         // Else: optionally run a short auto-settle burst after load for small-ish graphs.
                         enableSimulation,
@@ -585,6 +594,30 @@
                         selectPointOnClick: true,
                         resetSelectionOnEmptyCanvasClick: true,
                         focusPointOnClick: true,
+                        onPointClick: (point) => {
+                            if (point && typeof point === "object") {
+                                const p = point.data && typeof point.data === "object"
+                                    ? point.data
+                                    : point;
+                                const label =
+                                    typeof p.label === "string"
+                                        ? p.label.trim()
+                                        : "";
+                                const idx =
+                                    Number.isInteger(p.idx) ||
+                                    Number.isInteger(p.index)
+                                        ? Number(p.idx ?? p.index)
+                                        : null;
+                                lastClickedName =
+                                    label || (idx != null ? getNameForSelectionIndex(idx) : "");
+                                return;
+                            }
+                            if (Number.isInteger(point)) {
+                                lastClickedName = getNameForSelectionIndex(point);
+                                return;
+                            }
+                            lastClickedName = "";
+                        },
                         onPointsFiltered: (
                             _filteredPoints,
                             selectedPointIndices,
@@ -595,6 +628,7 @@
                                 !Array.isArray(selectedPointIndices) ||
                                 selectedPointIndices.length === 0
                             ) {
+                                lastClickedName = "";
                                 setSelectionStatus("");
                                 return;
                             }
@@ -605,12 +639,12 @@
                                 selectedPointIndices.length - 1,
                             );
                             const name =
-                                labelByIdx &&
-                                Number.isInteger(clicked) &&
-                                clicked >= 0 &&
-                                clicked < labelByIdx.length
-                                    ? labelByIdx[clicked]
-                                    : String(clicked);
+                                lastClickedName ||
+                                getNameForSelectionIndex(clicked);
+                            if (!name || !name.trim()) {
+                                setSelectionStatus("");
+                                return;
+                            }
 
                             setSelectionStatus(
                                 `${name}  •  ${relations.toLocaleString()} relations`,
@@ -638,6 +672,11 @@
                             1: "#ff4fa3",
                             2: "#ff8c00",
                         },
+                        // Force readable links on a lighter canvas.
+                        renderLinks: true,
+                        linkColor: "#cfe1ffff",
+                        linkOpacity: 0.95,
+                        linkWidth: 1.8,
                     };
                     currentConfig = config;
 
@@ -671,28 +710,33 @@
                         `Loaded ${stats.pointsCount} nodes, ${stats.linksCount} edges (from ${originalNodes} nodes, ${originalEdges} edges; using ${cap} nodes, ${filteredEdges} edges).`,
                     );
 
-                    // Fit the camera to the graph, then let the user pan/zoom freely.
-                    maybeFitView();
-
                     // Run force layout if enabled.
                     if (simEnabled) {
                         // If steps>0, run a fixed number of steps then stop.
                         cosmograph.start(simSteps || undefined);
-                        if (simSteps > 0) cosmograph.pause();
+                        // Recenter once near the end of finite simulations.
+                        if (simSteps > 0) {
+                            const delay = Math.max(
+                                1200,
+                                Math.min(12000, Math.round(simSteps * 16)),
+                            );
+                            scheduleFinalFit(delay);
+                        }
                     } else if (
                         autoLayoutEnabled &&
                         autoLayoutStepsBase > 0 &&
                         cap <= autoLayoutCap
                     ) {
-                        // Short burst to spread points out, then pause. This keeps interaction stable.
+                        // Short burst to spread points out; Cosmograph stops automatically after N steps.
                         cosmograph.start(autoLayoutStepsForCap(cap));
-                        cosmograph.pause();
+                        scheduleFinalFit(2200);
+                    } else {
+                        // No simulation: perform a single fit once data is ready.
+                        scheduleFinalFit(120);
                     }
 
                     setStatus(
-                        maxPoints > 0
-                            ? `${stats.pointsCount.toLocaleString()} nodes (showing ${cap.toLocaleString()} of ${originalNodes.toLocaleString()})`
-                            : `${stats.pointsCount.toLocaleString()} nodes`,
+                        `showing ${cap.toLocaleString()} out of ${originalNodes.toLocaleString()} domains`,
                         "success",
                     );
                     baseStatusText = status.textContent || "";
@@ -713,7 +757,7 @@
                 (e) => {
                     e.preventDefault?.();
                     setStatus(
-                        "Error: WebGL context lost. This usually means GPU memory pressure (too many points/links). Try ?maxPoints=200000 or ?maxPoints=all on a stronger GPU.",
+                        "Error: WebGL context lost. This usually means GPU memory pressure (too many points/links). Try ?max=200000 or ?max=all on a stronger GPU.",
                         "error",
                     );
                 },
