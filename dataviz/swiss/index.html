@@ -3,17 +3,13 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Swiss Domains Explorer</title>
-        <link
-            rel="shortcut icon"
-            type="image/x-icon"
-            href="https://extrapolo.com/favicon.ico"
-        />
+        <title>helvetiscan</title>
+        <link rel="icon" href="data:," />
         <link rel="preconnect" href="https://esm.sh" crossorigin />
         <style>
             :root {
-                --bg0: #080c20;
-                --bg1: #111736;
+                --bg0: #0a0e27;
+                --bg1: #141a3a;
                 --text: rgba(255, 255, 255, 0.92);
                 --muted: rgba(255, 255, 255, 0.68);
                 --hairline: rgba(255, 255, 255, 0.1);
@@ -22,11 +18,6 @@
                 --blue: #4a90e2;
                 --green: #2ecc71;
                 --red: #e74c3c;
-                --panel-left: calc(20px + env(safe-area-inset-left, 0px));
-                --panel-right: calc(20px + env(safe-area-inset-right, 0px));
-                --panel-top: calc(18px + env(safe-area-inset-top, 0px));
-                --panel-gap: 12px;
-                --panel-radius: 18px;
             }
 
             * {
@@ -51,69 +42,140 @@
                 overflow: hidden;
             }
 
-            #hud {
-                position: fixed;
-                top: var(--panel-top);
-                left: var(--panel-left);
-                right: var(--panel-right);
-                z-index: 10;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--panel-gap);
-                pointer-events: none;
-            }
-
             h1 {
-                max-width: min(
-                    920px,
-                    calc(100vw - var(--panel-left) - var(--panel-right))
-                );
-                font-size: 16px;
-                line-height: 1.15;
+                position: fixed;
+                top: calc(14px + env(safe-area-inset-top, 0px));
+                left: calc(16px + env(safe-area-inset-left, 0px));
+                z-index: 10;
+                font-size: 13px;
                 font-weight: 650;
-                letter-spacing: 0.2px;
+                letter-spacing: 0.3px;
                 color: var(--text);
-                padding: clamp(10px, 1.1vw, 16px) clamp(14px, 1.6vw, 24px);
-                border-radius: var(--panel-radius);
+                padding: 8px 10px;
+                border-radius: 999px;
                 border: 1px solid var(--hairline);
-                background: rgba(12, 18, 46, 0.62);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                background: var(--glass);
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 pointer-events: none;
+                /* prevent overlap with controls on any screen width */
+                max-width: calc(100vw - 200px);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            #status,
-            #selectionStatus,
-            #selectedStatus {
+            #status {
+                position: fixed;
+                top: calc(60px + env(safe-area-inset-top, 0px));
+                left: calc(16px + env(safe-area-inset-left, 0px));
+                z-index: 10;
                 display: inline-flex;
                 align-items: center;
                 gap: 8px;
-                max-width: min(
-                    760px,
-                    calc(100vw - var(--panel-left) - var(--panel-right))
-                );
-                padding: clamp(8px, 1vw, 12px) clamp(14px, 1.5vw, 20px);
-                border-radius: var(--panel-radius);
+                padding: 7px 10px;
+                border-radius: 999px;
                 border: 1px solid var(--hairline);
-                background: rgba(14, 26, 52, 0.54);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                font-size: 14px;
-                line-height: 1.2;
-                color: rgba(227, 242, 233, 0.94);
+                background: var(--glass);
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                font-size: 12px;
+                color: var(--muted);
                 pointer-events: none;
             }
 
             #selectionStatus {
+                position: fixed;
+                top: calc(94px + env(safe-area-inset-top, 0px));
+                left: calc(16px + env(safe-area-inset-left, 0px));
+                z-index: 10;
                 display: none;
+                max-width: min(820px, calc(100vw - 32px));
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                color: rgba(220, 255, 235, 0.92);
-                border-color: rgba(46, 204, 113, 0.22);
+                font-size: 12px;
+                font-weight: 600;
+                color: rgba(235, 248, 255, 0.96);
+                background: rgba(74, 144, 226, 0.18);
+                border: 1px solid rgba(74, 144, 226, 0.32);
+                border-radius: 999px;
+                padding: 6px 10px;
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                pointer-events: none;
+            }
+
+            #controls {
+                position: fixed;
+                top: calc(14px + env(safe-area-inset-top, 0px));
+                right: calc(16px + env(safe-area-inset-right, 0px));
+                z-index: 10;
+                align-items: center;
+                display: inline-flex;
+                padding: 8px 10px;
+                border-radius: 999px;
+                border: 1px solid var(--hairline);
+                background: var(--glass);
+                box-shadow: var(--shadow);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                font-size: 12px;
+                color: var(--muted);
+                user-select: none;
+                pointer-events: auto;
+            }
+
+            #controls label {
+                display: inline-flex;
+                gap: 10px;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            #controls input[type="checkbox"] {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 34px;
+                height: 20px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.14);
+                position: relative;
+                outline: none;
+                cursor: pointer;
+                transition:
+                    background 160ms ease,
+                    border-color 160ms ease;
+            }
+
+            #controls input[type="checkbox"]::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 2px;
+                transform: translateY(-50%);
+                width: 16px;
+                height: 16px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, 0.86);
+                box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+                transition:
+                    left 160ms ease,
+                    background 160ms ease;
+            }
+
+            #controls input[type="checkbox"]:checked {
+                background: rgba(74, 144, 226, 0.45);
+                border-color: rgba(74, 144, 226, 0.55);
+            }
+
+            #controls input[type="checkbox"]:checked::before {
+                left: 16px;
+                background: rgba(235, 248, 255, 0.95);
             }
 
             #status.loading {
@@ -134,7 +196,18 @@
             #cosmograph {
                 position: absolute;
                 inset: 0;
-                background: var(--bg0);
+                background:
+                    radial-gradient(
+                        1200px 800px at 18% 12%,
+                        rgba(74, 144, 226, 0.12),
+                        rgba(0, 0, 0, 0) 55%
+                    ),
+                    radial-gradient(
+                        1000px 700px at 88% 22%,
+                        rgba(46, 204, 113, 0.08),
+                        rgba(0, 0, 0, 0) 60%
+                    ),
+                    linear-gradient(135deg, var(--bg0) 0%, var(--bg1) 100%);
                 touch-action: none;
                 overscroll-behavior: none;
                 contain: layout paint size;
@@ -148,39 +221,64 @@
             }
 
             @media (max-width: 640px) {
-                :root {
-                    --panel-left: calc(12px + env(safe-area-inset-left, 0px));
-                    --panel-right: calc(12px + env(safe-area-inset-right, 0px));
-                    --panel-top: calc(10px + env(safe-area-inset-top, 0px));
-                    --panel-gap: 8px;
-                    --panel-radius: 14px;
-                }
-
                 h1 {
-                    font-size: 16px;
-                    line-height: 1.18;
-                    padding: 8px 11px;
+                    font-size: 11px;
+                    /* full width minus padding — controls have moved to the bottom */
+                    max-width: calc(100vw - 32px);
                 }
 
-                #status,
-                #selectionStatus,
-                #selectedStatus {
-                    max-width: calc(
-                        100vw - var(--panel-left) - var(--panel-right)
-                    );
-                    padding: 7px 11px;
-                    font-size: 14px;
+                /* Move controls to bottom-right for thumb reach */
+                #controls {
+                    top: auto;
+                    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+                    right: calc(16px + env(safe-area-inset-right, 0px));
+                    /* larger touch target */
+                    padding: 10px 14px;
+                    font-size: 13px;
+                }
+
+                /* Grow the toggle thumb area */
+                #controls input[type="checkbox"] {
+                    width: 40px;
+                    height: 24px;
+                }
+
+                #controls input[type="checkbox"]::before {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                #controls input[type="checkbox"]:checked::before {
+                    left: 18px;
+                }
+
+                /* Status pills: tighter stacking under the title */
+                #status {
+                    top: calc(52px + env(safe-area-inset-top, 0px));
+                    font-size: 11px;
+                }
+
+                #selectionStatus {
+                    top: calc(82px + env(safe-area-inset-top, 0px));
+                    font-size: 11px;
+                    /* allow wrapping on very small screens */
+                    white-space: normal;
+                    max-width: calc(100vw - 32px);
                 }
             }
         </style>
     </head>
-        <body>
-            <div id="hud">
-                <h1>View All Swiss Domains and Nameservers</h1>
-                <div id="status"></div>
-                <div id="selectionStatus"></div>
-            </div>
-            <div id="cosmograph"></div>
+    <body>
+        <h1>Analyses of all Swiss domains and nameservers</h1>
+        <div id="controls">
+            <label>
+                <input type="checkbox" id="labelsToggle" checked />
+                Show labels
+            </label>
+        </div>
+        <div id="status"></div>
+        <div id="selectionStatus"></div>
+        <div id="cosmograph"></div>
 
         <script type="module">
             import { Cosmograph } from "https://esm.sh/@cosmograph/cosmograph@2.1.0";
@@ -193,23 +291,16 @@
             const container = document.getElementById("cosmograph");
             const status = document.getElementById("status");
             const selectionStatus = document.getElementById("selectionStatus");
+            const labelsToggle = document.getElementById("labelsToggle");
 
             let cosmograph = null;
             let currentConfig = null;
             let isLoading = false;
-            let fitMethodName = null;
 
             const urlParams = new URLSearchParams(location.search);
-            const precomputedModeRaw = (
-                urlParams.get("precomputed") || ""
-            ).trim().toLowerCase();
-            const precomputedMode =
-                precomputedModeRaw === "1" ||
-                precomputedModeRaw === "true" ||
-                precomputedModeRaw === "yes";
-            // Force-layout controls (off by default; enable with ?sim=1)
-            // Tip: keep max modest when sim=1 to avoid WebGL context loss.
-            const simEnabled = (urlParams.get("sim") || "").trim() === "1";
+            // Force-layout controls (on by default; disable with ?sim=0)
+            // Tip: keep maxPoints modest when sim=1 to avoid WebGL context loss.
+            const simEnabled = (urlParams.get("sim") || "1").trim() !== "0";
             const simSteps = Number(urlParams.get("steps") || "0"); // 0 = run continuously
             // More dispersion by default when simulation is enabled.
             const simulationRepulsion = Number(
@@ -226,57 +317,41 @@
             );
             const spaceSize = Number(urlParams.get("spaceSize") || "16384");
 
-            // Default behavior: render the full dataset unless the user sets ?max=...
-            // Backward-compatible: still accepts legacy ?maxPoints=...
-            const maxParamRaw =
-                urlParams.get("max") ?? urlParams.get("maxPoints");
-            const maxParam = (maxParamRaw || "")
+            // Default behavior: render the full dataset unless the user sets ?maxPoints=...
+            const maxPointsParamRaw = urlParams.get("maxPoints");
+            const maxPointsParam = (maxPointsParamRaw || "")
                 .trim()
                 .toLowerCase();
-            const defaultMaxPoints = 0;
+            const defaultMaxPoints = 25000;
             const maxPoints = (() => {
-                if (maxParamRaw == null || maxParam === "")
+                if (maxPointsParamRaw == null || maxPointsParam === "")
                     return defaultMaxPoints;
-                if (maxParam === "all" || maxParam === "0")
+                if (maxPointsParam === "all" || maxPointsParam === "0")
                     return 0;
-                const n = Number(maxParam);
+                const n = Number(maxPointsParam);
                 return Number.isFinite(n) && n >= 0 ? n : defaultMaxPoints;
             })();
 
-            // Auto-settle (short simulation burst) to increase dispersion without running forever.
-            // Off by default because simulation uses a finite square space (can look like a "box").
-            // Enable with ?autolayout=1. You can tune with ?autosteps=200&autocap=500000.
-            const autoLayoutEnabled =
-                (urlParams.get("autolayout") || "").trim() === "1";
-            const autoLayoutStepsBase = Math.max(
-                0,
-                Number(urlParams.get("autosteps") || "200"),
-            );
-            const autoLayoutCap = Math.max(
-                0,
-                Number(urlParams.get("autocap") || "500000"),
-            );
-
-            function autoLayoutStepsForCap(cap) {
-                // Keep the burst short for very large caps; force steps are O(n + m) per tick
-                // and can easily trigger GPU/CPU pressure. For <=200k keep full steps.
-                if (!Number.isFinite(cap) || cap <= 0)
-                    return autoLayoutStepsBase;
-                if (cap <= 200000) return autoLayoutStepsBase;
-                const scaled = Math.round(autoLayoutStepsBase * (200000 / cap));
-                return Math.max(25, Math.min(autoLayoutStepsBase, scaled));
-            }
 
             let baseStatusText = "";
-            let labelByRow = null; // Array<string|null>, index = compact row index
-            let labelByNodeIdx = null; // Map<number, string|null>, key = node idx
-            let pointDataByNodeIdx = null; // Map<number, {idx,index,id,label}>
-            let nodeIdxByLabel = null; // Map<string, number>, first node idx by label text
-            let lastClickedName = "";
-            let hoveredPointData = null;
-            let pointClickHandled = false;
+            let labelByIdx = null; // Array<string>, index = idx
             let labelsEnabled = (urlParams.get("labels") || "").trim() !== "0";
-            let finalFitTimeout = null;
+
+            labelsToggle.checked = labelsEnabled;
+            labelsToggle.addEventListener("change", async () => {
+                labelsEnabled = !!labelsToggle.checked;
+                // Cosmograph's setConfig behaves like a replace, not a merge. Always keep points/links.
+                if (!cosmograph || !currentConfig || isLoading) return;
+                try {
+                    currentConfig = {
+                        ...currentConfig,
+                        ...getLabelsConfig(labelsEnabled),
+                    };
+                    await cosmograph.setConfig(currentConfig);
+                } catch (e) {
+                    console.warn("Failed to toggle labels:", e);
+                }
+            });
 
             async function fetchBytes(url) {
                 const res = await fetch(url);
@@ -286,13 +361,11 @@
                 return new Uint8Array(buf);
             }
 
-            function getLabelsConfig(enabled, showLabelsFor = []) {
+            function getLabelsConfig(enabled) {
                 if (!enabled) {
                     return {
                         showLabels: false,
-                        showLabelsFor: [],
                         showHoveredPointLabel: false,
-                        showHoveredNodeLabel: false,
                         showFocusedPointLabel: false,
                         showTopLabels: false,
                         showDynamicLabels: false,
@@ -301,21 +374,21 @@
                     };
                 }
 
-                // Label rendering strategy: show a limited amount of top + dynamic labels,
+                // "Show labels" in a scalable way: show a limited amount of top + dynamic labels,
                 // and always allow hover + focused label.
                 return {
                     pointLabelBy: "label",
-                    pointLabelWeightBy: "labelWeight",
+                    pointLabelWeightBy: "degree",
                     showLabels: true,
-                    // Keep labels deterministic and skip empty-label nodes entirely.
-                    showLabelsFor,
-                    showTopLabels: false,
-                    showDynamicLabels: false,
-                    showUnselectedPointLabels: false,
-                    showSelectedLabels: false,
-                    showHoveredPointLabel: false,
-                    showHoveredNodeLabel: false,
-                    showFocusedPointLabel: false,
+                    showHoveredPointLabel: true,
+                    showFocusedPointLabel: true,
+                    showTopLabels: true,
+                    showTopLabelsLimit: 40,
+                    showDynamicLabels: true,
+                    showDynamicLabelsLimit: 40,
+                    showUnselectedPointLabels: true,
+                    showSelectedLabels: true,
+                    selectedPointLabelsLimit: 200,
                 };
             }
 
@@ -334,230 +407,26 @@
                 selectionStatus.style.display = "inline-flex";
             }
 
-            function getNameForSelectionIndex(index) {
-                if (!Number.isInteger(index)) return "";
-                if (labelByNodeIdx && labelByNodeIdx.has(index))
-                    return labelByNodeIdx.get(index);
-                if (labelByRow && index >= 0 && index < labelByRow.length)
-                    return labelByRow[index];
-                return "";
-            }
-
-            function getPointDataByIndex(index) {
-                if (!Number.isInteger(index)) return null;
-                if (pointDataByNodeIdx && pointDataByNodeIdx.has(index))
-                    return pointDataByNodeIdx.get(index);
-                return {
-                    idx: index,
-                    index,
-                    id: index,
-                    label: getNameForSelectionIndex(index) || "",
-                };
-            }
-
-            function getPointDataByLabel(label) {
-                if (typeof label !== "string") return null;
-                const trimmed = label.trim();
-                if (!trimmed) return null;
-                if (!nodeIdxByLabel || !nodeIdxByLabel.has(trimmed)) return null;
-                return getPointDataByIndex(nodeIdxByLabel.get(trimmed));
-            }
-
-            function toIntegerMaybe(value) {
-                if (Number.isInteger(value)) return value;
-                if (typeof value !== "string") return null;
-                const trimmed = value.trim();
-                if (!trimmed) return null;
-                const n = Number(trimmed);
-                return Number.isInteger(n) ? n : null;
-            }
-
-            function normalizePointData(point) {
-                if (!point || typeof point !== "object") return null;
-                const candidates = [point];
-                if (point.data && typeof point.data === "object")
-                    candidates.push(point.data);
-                if (point.point && typeof point.point === "object")
-                    candidates.push(point.point);
-                if (point.node && typeof point.node === "object")
-                    candidates.push(point.node);
-                if (point.detail && typeof point.detail === "object") {
-                    if (point.detail.point && typeof point.detail.point === "object")
-                        candidates.push(point.detail.point);
-                    if (point.detail.node && typeof point.detail.node === "object")
-                        candidates.push(point.detail.node);
-                }
-
-                for (const candidate of candidates) {
-                    if (!candidate || typeof candidate !== "object") continue;
-                    const hasIndex =
-                        toIntegerMaybe(candidate.idx) != null ||
-                        toIntegerMaybe(candidate.index) != null ||
-                        toIntegerMaybe(candidate.id) != null;
-                    const hasLabel = typeof candidate.label === "string";
-                    if (hasIndex || hasLabel) return candidate;
-                }
-
-                return candidates[0] || null;
-            }
-
-            function resolvePointFromEventArgs(args) {
-                for (const arg of args || []) {
-                    if (arg == null) continue;
-
-                    const asIndex = toIntegerMaybe(arg);
-                    if (asIndex != null) {
-                        const byIndex = getPointDataByIndex(asIndex);
-                        if (byIndex) return byIndex;
-                    }
-
-                    if (typeof arg === "string") {
-                        const byLabel = getPointDataByLabel(arg);
-                        if (byLabel) return byLabel;
-                    }
-
-                    if (Array.isArray(arg)) {
-                        const nested = resolvePointFromEventArgs(arg);
-                        if (nested) return nested;
-                        continue;
-                    }
-
-                    if (typeof arg !== "object") continue;
-                    const p = normalizePointData(arg);
-                    if (!p) continue;
-                    const idx = getPointIndexFromData(p);
-                    if (idx != null) {
-                        const byIndex = getPointDataByIndex(idx);
-                        if (byIndex) return byIndex;
-                        return p;
-                    }
-                    if (typeof p.label === "string") {
-                        const byLabel = getPointDataByLabel(p.label);
-                        if (byLabel) return byLabel;
-                    }
-                }
-                return null;
-            }
-
-            function getPointIndexFromData(pointData) {
-                if (!pointData || typeof pointData !== "object") return null;
-                const idx =
-                    toIntegerMaybe(pointData.idx) ??
-                    toIntegerMaybe(pointData.index) ??
-                    toIntegerMaybe(pointData.id);
-                if (idx != null) return idx;
-                return null;
-            }
-
-            function rememberClickedPointName(point) {
-                if (Number.isInteger(point)) {
-                    lastClickedName = getNameForSelectionIndex(point);
-                    return;
-                }
-                const p = normalizePointData(point);
-                if (!p) {
-                    lastClickedName = "";
-                    return;
-                }
-                const label =
-                    typeof p.label === "string" ? p.label.trim() : "";
-                const idx = getPointIndexFromData(p);
-                lastClickedName =
-                    label || (idx != null ? getNameForSelectionIndex(idx) : "");
-            }
-
-            function callFirstMethod(target, methodNames, args = []) {
-                for (const name of methodNames) {
-                    if (typeof target?.[name] === "function") {
-                        try {
-                            target[name](...args);
-                            return true;
-                        } catch {
-                            // try next candidate
-                        }
-                    }
-                }
-                return false;
-            }
-
-            function applyPointClickShortcut(point) {
-                const p = normalizePointData(point);
-                if (!p || !cosmograph) return false;
-                const idx = getPointIndexFromData(p);
-                if (!Number.isInteger(idx)) return false;
-
-                const selected = callFirstMethod(
-                    cosmograph,
-                    [
-                        "clickPoint",
-                        "selectPoint",
-                        "selectPointByIndex",
-                        "setSelectedPointIndex",
-                        "setSelectedPointIndices",
-                        "setSelectedPointIndexes",
-                        "setSelectedPoints",
-                    ],
-                    [idx],
-                ) || callFirstMethod(
-                    cosmograph,
-                    ["setSelectedPointIndices", "setSelectedPointIndexes", "setSelectedPoints"],
-                    [[idx]],
-                );
-
-                const focused = callFirstMethod(
-                    cosmograph,
-                    ["focusPoint", "focusPointByIndex", "setFocusedPointIndex", "setFocusedPoint"],
-                    [idx],
-                );
-
-                return selected || focused;
-            }
-
-            function activatePointShortcut(point) {
-                rememberClickedPointName(point);
-                applyPointClickShortcut(point);
-            }
-
-            function activatePointShortcutFromArgs(...args) {
-                const point =
-                    resolvePointFromEventArgs(args) || hoveredPointData || null;
-                if (!point) return;
-                activatePointShortcut(point);
-            }
-
-            function maybeFitView(options = {}) {
+            function maybeFitView() {
                 // Cosmograph API surface differs a bit across versions/builds; feature-detect.
                 const cg = cosmograph;
                 if (!cg) return;
-                if (!fitMethodName) {
-                    const candidates = [
-                        "fitView",
-                        "zoomToFit",
-                        "fitToScreen",
-                        "fitToViewport",
-                    ];
-                    fitMethodName =
-                        candidates.find((m) => typeof cg[m] === "function") ||
-                        null;
-                }
-                if (!fitMethodName) return;
-                try {
-                    cg[fitMethodName](options);
-                } catch {
+                const candidates = [
+                    "fitView",
+                    "zoomToFit",
+                    "fitToScreen",
+                    "fitToViewport",
+                ];
+                for (const m of candidates) {
                     try {
-                        cg[fitMethodName]();
+                        if (typeof cg[m] === "function") {
+                            cg[m]();
+                            return;
+                        }
                     } catch {
                         // ignore
                     }
                 }
-            }
-
-            function scheduleFinalFit(delayMs = 2600) {
-                if (finalFitTimeout) clearTimeout(finalFitTimeout);
-                finalFitTimeout = window.setTimeout(() => {
-                    // Single final fit with safe padding so all nodes remain in frame.
-                    maybeFitView({ padding: 0.08 });
-                }, delayMs);
             }
 
             async function waitForStatsReady(deadlineMs = 120_000) {
@@ -585,7 +454,7 @@
                 }
             }
 
-            async function makeCompactIpc(nodesBytes, edgesBytes, useFixedXY) {
+            async function makeCompactIpc(nodesBytes, edgesBytes) {
                 const nodesTable = tableFromIPC(nodesBytes);
                 const edgesTable = tableFromIPC(edgesBytes);
 
@@ -602,11 +471,6 @@
                         `edges.arrow missing required columns "sourceidx"/"targetidx" (found: ${edgeCols.join(", ")})`,
                     );
                 }
-                if (useFixedXY && !hasCols(nodeCols, ["x", "y"])) {
-                    throw new Error(
-                        `precomputed mode requires nodes x/y columns (found: ${nodeCols.join(", ")})`,
-                    );
-                }
 
                 const n = nodesTable.numRows;
                 const cap = maxPoints > 0 ? Math.min(maxPoints, n) : n;
@@ -620,31 +484,14 @@
                 // Keep a compact, stable string id to avoid the labels renderer crashing.
                 const ids = new Array(cap);
                 for (let i = 0; i < cap; i++) ids[i] = String(idxSub[i]);
-                const labelVec = nodesTable.getChild("label");
+                const labelVec =
+                    nodesTable.getChild("label") || nodesTable.getChild("id");
                 const labels = new Array(cap);
-                const labelWeight = new Int32Array(cap);
                 if (labelVec) {
-                    for (let i = 0; i < cap; i++) {
-                        const raw = labelVec.get(i);
-                        const trimmed = raw == null ? "" : String(raw).trim();
-                        const hasLabel = trimmed.length > 0;
-                        labels[i] = hasLabel ? trimmed : null;
-                        labelWeight[i] = hasLabel ? 1 : 0;
-                    }
+                    for (let i = 0; i < cap; i++)
+                        labels[i] = String(labelVec.get(i) ?? "");
                 } else {
-                    for (let i = 0; i < cap; i++) {
-                        labels[i] = null;
-                        labelWeight[i] = 0;
-                    }
-                }
-
-                let xSub = null;
-                let ySub = null;
-                if (useFixedXY) {
-                    const xVec = nodesTable.getChild("x");
-                    const yVec = nodesTable.getChild("y");
-                    xSub = xVec.toArray().subarray(0, cap);
-                    ySub = yVec.toArray().subarray(0, cap);
+                    for (let i = 0; i < cap; i++) labels[i] = String(idxSub[i]);
                 }
                 // Filter edges by idx bounds.
                 // Avoid per-edge JS array pushes: count first, allocate typed arrays, then fill.
@@ -692,10 +539,8 @@
                     id: ids,
                     idx: idxSub,
                     degree: degrees,
-                    labelWeight,
                     hub,
                     label: labels,
-                    ...(useFixedXY ? { x: xSub, y: ySub } : {}),
                 });
 
                 const edgesCompact = tableFromArrays({
@@ -703,20 +548,10 @@
                     targetidx: tgtOut,
                 });
 
-                const topLabelIds = [];
-                for (let i = 0; i < cap; i++) {
-                    if (labels[i]) topLabelIds.push(i);
-                }
-                topLabelIds.sort((a, b) => degrees[b] - degrees[a]);
-                const labelIds = topLabelIds.slice(0, 80).map((i) => ids[i]);
-
                 return {
                     nodesIpc: await tableToIPC(nodesCompact, "file"),
                     edgesIpc: await tableToIPC(edgesCompact, "file"),
-                    ids,
                     labels,
-                    labelIds,
-                    idxSub,
                     cap,
                     originalNodes: n,
                     originalEdges: edgesTable.numRows,
@@ -727,72 +562,33 @@
             async function loadDefaultGraph() {
                 try {
                     isLoading = true;
-                    if (finalFitTimeout) {
-                        clearTimeout(finalFitTimeout);
-                        finalFitTimeout = null;
-                    }
                     setStatus(
                         maxPoints > 0
-                            ? `Loading ${precomputedMode ? "precomputed" : "dynamic"} (max=${maxPoints.toLocaleString()})...`
-                            : `Loading ${precomputedMode ? "precomputed" : "dynamic"} (max=all)...`,
+                            ? `Loading (maxPoints=${maxPoints.toLocaleString()})...`
+                            : "Loading (maxPoints=all)...",
                         "loading",
                     );
 
                     const [nodesBytes, edgesBytes] = await Promise.all([
-                        fetchBytes(
-                            precomputedMode ? "./nodes_xy.arrow" : "./nodes.arrow",
-                        ),
-                        fetchBytes(
-                            precomputedMode ? "./edges_xy.arrow" : "./edges.arrow",
-                        ),
+                        fetchBytes("./nodes.arrow"),
+                        fetchBytes("./edges.arrow"),
                     ]);
 
                     // Reduce memory pressure by dropping string columns and (optionally) capping points.
                     const {
                         nodesIpc,
                         edgesIpc,
-                        ids,
                         labels,
-                        labelIds,
-                        idxSub,
                         cap,
                         originalNodes,
                         originalEdges,
                         filteredEdges,
-                    } = await makeCompactIpc(
-                        nodesBytes,
-                        edgesBytes,
-                        precomputedMode,
-                    );
+                    } = await makeCompactIpc(nodesBytes, edgesBytes);
 
-                    labelByRow = labels;
-                    labelByNodeIdx = new Map();
-                    pointDataByNodeIdx = new Map();
-                    nodeIdxByLabel = new Map();
-                    for (let i = 0; i < cap; i++) {
-                        const idx = Number(idxSub[i]);
-                        const label = labels[i] || "";
-                        const pointData = {
-                            idx,
-                            index: idx,
-                            id: ids[i],
-                            label,
-                        };
-                        labelByNodeIdx.set(idx, label);
-                        pointDataByNodeIdx.set(idx, pointData);
-                        if (label && !nodeIdxByLabel.has(label))
-                            nodeIdxByLabel.set(label, idx);
-                    }
-                    lastClickedName = "";
-                    hoveredPointData = null;
+                    labelByIdx = labels;
                     setSelectionStatus("");
 
-                    const enableSimulation =
-                        simEnabled ||
-                        (!precomputedMode &&
-                            autoLayoutEnabled &&
-                            autoLayoutStepsBase > 0 &&
-                            cap <= autoLayoutCap);
+                    const enableSimulation = simEnabled;
                     // Passing a fixed spaceSize makes the layout feel like it's inside a box.
                     // Only set it when we actually run a simulation (or if user explicitly requests it).
                     const shouldSetSpaceSize =
@@ -801,7 +597,6 @@
                     const config = {
                         disableLogging: true,
                         statusIndicatorMode: false,
-                        fitViewOnInit: false,
                         // If sim=1: run simulation as requested.
                         // Else: optionally run a short auto-settle burst after load for small-ish graphs.
                         enableSimulation,
@@ -810,38 +605,11 @@
                         simulationLinkSpring,
                         simulationFriction,
                         ...(shouldSetSpaceSize ? { spaceSize } : {}),
-                        ...getLabelsConfig(labelsEnabled, labelIds),
+                        ...getLabelsConfig(labelsEnabled),
                         // Click a point to select it + its neighbors; click empty canvas to clear.
                         selectPointOnClick: true,
                         resetSelectionOnEmptyCanvasClick: true,
                         focusPointOnClick: true,
-                        onPointHover: (...args) => {
-                            hoveredPointData = resolvePointFromEventArgs(args);
-                        },
-                        onPointClick: (...args) => {
-                            pointClickHandled = true;
-                            const point = resolvePointFromEventArgs(args);
-                            if (point) rememberClickedPointName(point);
-                        },
-                        // Cosmograph API naming differs by version; support common label-click hooks.
-                        onPointLabelClick: (...args) => {
-                            activatePointShortcutFromArgs(...args);
-                        },
-                        onLabelClick: (...args) => {
-                            activatePointShortcutFromArgs(...args);
-                        },
-                        onNodeLabelClick: (...args) => {
-                            activatePointShortcutFromArgs(...args);
-                        },
-                        onPointLabelHover: (...args) => {
-                            hoveredPointData = resolvePointFromEventArgs(args);
-                        },
-                        onLabelHover: (...args) => {
-                            hoveredPointData = resolvePointFromEventArgs(args);
-                        },
-                        onNodeLabelHover: (...args) => {
-                            hoveredPointData = resolvePointFromEventArgs(args);
-                        },
                         onPointsFiltered: (
                             _filteredPoints,
                             selectedPointIndices,
@@ -852,7 +620,6 @@
                                 !Array.isArray(selectedPointIndices) ||
                                 selectedPointIndices.length === 0
                             ) {
-                                lastClickedName = "";
                                 setSelectionStatus("");
                                 return;
                             }
@@ -863,15 +630,15 @@
                                 selectedPointIndices.length - 1,
                             );
                             const name =
-                                lastClickedName ||
-                                getNameForSelectionIndex(clicked);
-                            if (!name || !name.trim()) {
-                                setSelectionStatus("");
-                                return;
-                            }
+                                labelByIdx &&
+                                Number.isInteger(clicked) &&
+                                clicked >= 0 &&
+                                clicked < labelByIdx.length
+                                    ? labelByIdx[clicked]
+                                    : String(clicked);
 
                             setSelectionStatus(
-                                `${name}  •  ${relations.toLocaleString()} domains`,
+                                `${name}  •  ${relations.toLocaleString()} relations`,
                             );
                         },
                         points: nodesIpc,
@@ -884,12 +651,6 @@
                         linkSourceIndexBy: "sourceidx",
                         linkTargetBy: "targetidx",
                         linkTargetIndexBy: "targetidx",
-                        ...(precomputedMode
-                            ? {
-                                  pointXBy: "x",
-                                  pointYBy: "y",
-                              }
-                            : {}),
                         pointSizeBy: "degree",
                         // Size by number of connections, constrained to a tight visual range.
                         pointSizeRange: [1, 6],
@@ -902,11 +663,6 @@
                             1: "#ff4fa3",
                             2: "#ff8c00",
                         },
-                        // Force readable links on a lighter canvas.
-                        renderLinks: true,
-                        linkColor: "#cfe1ffff",
-                        linkOpacity: 0.95,
-                        linkWidth: 1.8,
                     };
                     currentConfig = config;
 
@@ -940,52 +696,23 @@
                         `Loaded ${stats.pointsCount} nodes, ${stats.linksCount} edges (from ${originalNodes} nodes, ${originalEdges} edges; using ${cap} nodes, ${filteredEdges} edges).`,
                     );
 
+                    // Fit the camera to the graph, then let the user pan/zoom freely.
+                    maybeFitView();
+
                     // Run force layout if enabled.
                     if (simEnabled) {
                         // If steps>0, run a fixed number of steps then stop.
                         cosmograph.start(simSteps || undefined);
-                        // Recenter once near the end of finite simulations.
-                        if (simSteps > 0) {
-                            const delay = Math.max(
-                                1200,
-                                Math.min(12000, Math.round(simSteps * 16)),
-                            );
-                            scheduleFinalFit(delay);
-                        }
-                    } else if (
-                        !precomputedMode &&
-                        autoLayoutEnabled &&
-                        autoLayoutStepsBase > 0 &&
-                        cap <= autoLayoutCap
-                    ) {
-                        // Short burst to spread points out; Cosmograph stops automatically after N steps.
-                        cosmograph.start(autoLayoutStepsForCap(cap));
-                        scheduleFinalFit(2200);
-                    } else {
-                        // No simulation: perform a single fit once data is ready.
-                        scheduleFinalFit(120);
+                        if (simSteps > 0) cosmograph.pause();
                     }
 
                     setStatus(
-                        `${precomputedMode ? "precomputed" : "dynamic"}: showing ${cap.toLocaleString()} out of ${originalNodes.toLocaleString()} domains`,
+                        maxPoints > 0
+                            ? `${stats.pointsCount.toLocaleString()} nodes (showing ${cap.toLocaleString()} of ${originalNodes.toLocaleString()})`
+                            : `${stats.pointsCount.toLocaleString()} nodes`,
                         "success",
                     );
                     baseStatusText = status.textContent || "";
-
-                    // Label text can be slightly offset from the node hit area.
-                    // If click lands on label but misses the node hit test, promote hovered point as a click shortcut.
-                    if (!container.dataset.labelClickShortcutBound) {
-                        container.addEventListener("click", () => {
-                            if (pointClickHandled) {
-                                pointClickHandled = false;
-                                return;
-                            }
-                            if (!hoveredPointData) return;
-                            rememberClickedPointName(hoveredPointData);
-                            applyPointClickShortcut(hoveredPointData);
-                        });
-                        container.dataset.labelClickShortcutBound = "1";
-                    }
                 } catch (error) {
                     console.error("Error loading from server:", error);
                     setStatus(`Error: ${error.message}`, "error");
@@ -1003,7 +730,7 @@
                 (e) => {
                     e.preventDefault?.();
                     setStatus(
-                        "Error: WebGL context lost. This usually means GPU memory pressure (too many points/links). Try ?max=200000 or ?max=all on a stronger GPU.",
+                        "Error: WebGL context lost. This usually means GPU memory pressure (too many points/links). Try ?maxPoints=200000 or ?maxPoints=all on a stronger GPU.",
                         "error",
                     );
                 },
