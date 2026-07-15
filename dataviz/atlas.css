@@ -399,7 +399,6 @@ html, body {
   .panel.open, #legend.open { transform: translateY(0); }
 
   #legend {
-    bottom: auto !important;
     max-width: none !important;
     padding: 14px 16px;
     overflow-y: auto;
