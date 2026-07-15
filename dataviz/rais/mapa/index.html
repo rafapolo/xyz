@@ -17,7 +17,12 @@
     .filter-item .color-dot { width: 12px; height: 12px; border-radius: 3px; }
     .metric-pills { justify-content: center; }
     /* legenda alinhada e com a mesma largura do painel de controles */
-    #legend { width: 285px; max-width: 285px; left: 16px; }
+    @media (min-width: 981px) {
+      #legend { width: 285px; max-width: 285px; left: 16px; }
+    }
+    @media (max-width: 980px) {
+      #legend { left: 12px; right: 12px; width: auto; max-width: none; }
+    }
     #legend .gradient-bar { width: 100%; }
     .panel-section {
       margin-top: 12px; padding-top: 10px;
@@ -207,24 +212,28 @@ FROM salarios GROUP BY id_municipio, sigla_uf, ano`;
 const METRICS = {
   salario_medio: {
     label: 'Salário médio',
+    desc: 'Remuneração média mensal dos vínculos formais do município.',
     palette: ATLAS.SEQUENTIAL_BLUE,
     format: ATLAS.fmtMoney,
     getValue: (d) => d.salario_medio,
   },
   salario_stddev: {
     label: 'Desvio padrão',
+    desc: 'Quanto os salários se espalham em torno da média — quanto maior, mais desiguais os salários dentro do município.',
     palette: ATLAS.SEQUENTIAL_RED,
     format: ATLAS.fmtMoney,
     getValue: (d) => d.salario_stddev,
   },
   coef_variacao: {
     label: 'Coef. variação',
+    desc: 'Desvio padrão dividido pela média: mede a desigualdade salarial em termos relativos, comparável entre municípios de rendas diferentes.',
     palette: ATLAS.SEQUENTIAL_RED,
     format: (v) => ATLAS.fmtNum(v, 3),
     getValue: (d) => (d.salario_stddev != null && d.salario_medio > 0) ? d.salario_stddev / d.salario_medio : null,
   },
   range_p75_p25: {
     label: 'Range P75-P25',
+    desc: 'Diferença entre o salário que separa os 25% mais altos (P75) e os 25% mais baixos (P25) — a largura do “miolo” da distribuição salarial.',
     palette: ATLAS.SEQUENTIAL_RED,
     format: ATLAS.fmtMoney,
     getValue: (d) => (d.p75 != null && d.p25 != null) ? d.p75 - d.p25 : null,
@@ -276,19 +285,22 @@ function getShareState() {
   return currentState;
 }
 
-function buildLookup(salarios) {
-  const map = {};
-  for (const [ano, setores] of Object.entries(salarios)) {
-    for (const [setor, entries] of Object.entries(setores)) {
-      for (const e of entries) {
-        if (e.id_municipio == null) continue;
-        if (!map[e.id_municipio]) map[e.id_municipio] = {};
-        if (!map[e.id_municipio][ano]) map[e.id_municipio][ano] = {};
-        map[e.id_municipio][ano][setor] = e;
-      }
+// dados por ano ficam em arquivos separados (dados/salarios_<ano>.json)
+// para o primeiro carregamento ser leve; anos são buscados sob demanda
+const loadedYears = new Set();
+
+async function ensureYear(ano) {
+  if (loadedYears.has(ano)) return;
+  const setores = await ATLAS.loadJSON(`dados/salarios_${ano}.json`);
+  for (const [setor, entries] of Object.entries(setores)) {
+    for (const e of entries) {
+      if (e.id_municipio == null) continue;
+      if (!salaryLookup[e.id_municipio]) salaryLookup[e.id_municipio] = {};
+      if (!salaryLookup[e.id_municipio][ano]) salaryLookup[e.id_municipio][ano] = {};
+      salaryLookup[e.id_municipio][ano][setor] = e;
     }
   }
-  return map;
+  loadedYears.add(ano);
 }
 
 function updateMap() {
@@ -465,6 +477,7 @@ function updateLegend(values, metricDef) {
       minLabel: metricDef.format(values[0]),
       maxLabel: metricDef.format(values[values.length - 1]),
     },
+    footer: metricDef.desc,
   });
 }
 
@@ -500,9 +513,10 @@ function updateStats(values, merged) {
   document.getElementById('stat-municipios').textContent = ATLAS.fmtNum(values.length, 0);
 }
 
-function onFilterChange() {
+async function onFilterChange() {
   currentState.setor = document.getElementById('select-setor').value;
   currentState.ano = document.getElementById('select-ano').value;
+  await ensureYear(currentState.ano);
   updateMap();
   updateUrlState();
 }
@@ -586,20 +600,18 @@ function fitBrazil(map, animate) {
     el.addEventListener('click', () => onMetricChange(el.dataset.metric));
   });
 
-  // Load data (relative to HTML file location)
-  const [geojson, salarios, nomes] = await Promise.all([
+  // aplicar estado da URL antes de decidir qual ano baixar
+  applyUrlState();
+
+  salaryLookup = {};
+  const [geojson, nomes] = await Promise.all([
     ATLAS.loadJSON('dados/municipios.geojson'),
-    ATLAS.loadJSON('dados/salarios.json'),
     ATLAS.loadJSON('dados/id_municipio_nome.json'),
+    ensureYear(currentState.ano),
   ]);
 
   geoData = geojson;
   window.municipioNome = nomes; // lookup id_municipio → nome
-
-  // Build lookup: Map<id, { ano: { setor: entry } }>
-  salaryLookup = buildLookup(salarios);
-
-  applyUrlState();
 
   ATLAS.hideLoading();
   updateMap();

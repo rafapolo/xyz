@@ -7,8 +7,13 @@ Usage:
   BEELINK_HOST=custom-host python extrai_dados.py
 
 Output:
-  dados/municipios.geojson  # GeoJSON FeatureCollection (5.570 polygons)
-  dados/salarios.json       # { ano: { setor: [{ id_municipio, salario_medio, ... }] } }
+  dados/municipios.geojson      # GeoJSON FeatureCollection (5.570 polygons)
+  dados/salarios_<ano>.json     # { setor: [{ id_municipio, salario_medio, ... }] } por ano
+                                # (arquivos por ano para o mapa carregar sob demanda)
+
+Após extrair, simplifique as geometrias (43MB → ~6MB, obrigatório para a web):
+  npx mapshaper dados/municipios.geojson -simplify 8% keep-shapes -clean \\
+    -o precision=0.0001 force dados/municipios.geojson
 """
 
 import json, os, subprocess, sys
@@ -139,17 +144,18 @@ def main():
     salarios = build_salarios(salary_rows)
     geojson = build_geojson(geo_rows)
 
-    salarios_path = OUT_DIR / "salarios.json"
     geojson_path = OUT_DIR / "municipios.geojson"
-
-    with open(salarios_path, "w") as f:
-        json.dump(salarios, f, ensure_ascii=False)
     with open(geojson_path, "w") as f:
         json.dump(geojson, f, ensure_ascii=False)
 
     print(f"[viz28]  Done!")
-    print(f"  {salarios_path}  ({salarios_path.stat().st_size / 1e6:.1f} MB)")
+    for ano, setores in sorted(salarios.items()):
+        path = OUT_DIR / f"salarios_{ano}.json"
+        with open(path, "w") as f:
+            json.dump(setores, f, ensure_ascii=False)
+        print(f"  {path}  ({path.stat().st_size / 1e6:.1f} MB)")
     print(f"  {geojson_path}  ({geojson_path.stat().st_size / 1e6:.1f} MB)")
+    print("  Lembre de simplificar o geojson com mapshaper (ver docstring).")
 
 
 if __name__ == "__main__":

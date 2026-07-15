@@ -218,6 +218,12 @@ html, body {
   font-size: 10px; color: var(--text-muted);
   font-family: 'JetBrains Mono', monospace;
 }
+#legend .legend-footer {
+  margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border-item);
+  font-size: 11px; line-height: 1.45;
+  color: var(--text-secondary);
+}
 
 /* --- Tooltip (3.8) --- */
 #tooltip {

@@ -83,6 +83,7 @@ const ATLAS = (() => {
           <span>${minLabel}</span>
           <span>${maxLabel}</span>
         </div>
+        ${opts.footer ? `<div class="legend-footer">${opts.footer}</div>` : ''}
       `;
     } else if (opts.type === 'categorical' && opts.items) {
       el.innerHTML = `
