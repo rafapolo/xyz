@@ -59,6 +59,9 @@ const ATLAS = (() => {
     } else {
       tooltipEl.style.left = '';
       tooltipEl.style.top = '';
+      document.querySelectorAll('.panel, #legend').forEach(p => p.classList.remove('open'));
+      const bd = document.getElementById('sheet-backdrop');
+      if (bd) bd.classList.remove('visible');
     }
   }
 
@@ -287,6 +290,7 @@ const ATLAS = (() => {
       if (!panel) return;
       const isOpen = panel.classList.contains('open');
       closeAll();
+      hideTooltip();
       if (!isOpen) {
         panel.classList.add('open');
         if (backdrop) backdrop.classList.add('visible');
