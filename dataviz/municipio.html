@@ -1138,7 +1138,7 @@ async function init() {
   // Pop evolution list
   const popEvolList = document.getElementById('popEvolList');
   if (popEvolList) {
-    const selYears = [1970, 1980, 1991, 2000, 2010, 2022];
+    const selYears = [1991, 2000, 2010, 2022];
     popEvolList.innerHTML = selYears.map(y => {
       const it = find(popSerie, 'ano', y);
       return '<li><span>' + y + '</span><span>' + (it ? Math.round(it.populacao / 1000) + 'k' : '-') + '</span></li>';
@@ -1151,7 +1151,7 @@ async function init() {
 
   // Pop evolution chart
   if (document.getElementById('popEvolChart')) {
-    const selYears = [1970, 1980, 1991, 2000, 2010, 2022];
+    const selYears = [1991, 2000, 2010, 2022];
     const yearLabels = selYears.map(String);
     const popData = selYears.map(y => { const it = find(popSerie, 'ano', y); return it ? it.populacao : 0; });
     new Chart(document.getElementById('popEvolChart'), {
@@ -1245,11 +1245,16 @@ async function init() {
         type: 'line', data: {
           labels: serie.map(r => r.ano),
           datasets: [
-            { label: 'Desmatado acum. (km²)', data: serie.map(r => r.desmatado), borderColor: C.s6, backgroundColor: 'rgba(217,89,38,.10)', fill: true, pointBackgroundColor: C.s6, ...lineStyle },
-            { label: 'Vegetação natural (km²)', data: serie.map(r => r.vegetacao_natural), borderColor: C.s5, backgroundColor: 'rgba(25,158,112,.10)', fill: true, pointBackgroundColor: C.s5, ...lineStyle },
+            { label: 'Desmatado acum. (km²)', data: serie.map(r => r.desmatado), borderColor: C.s6, backgroundColor: 'rgba(217,89,38,.45)', fill: 'origin', pointRadius: 0, borderWidth: 1.5, tension: .25 },
+            { label: 'Vegetação natural (km²)', data: serie.map(r => r.vegetacao_natural), borderColor: C.s5, backgroundColor: 'rgba(25,158,112,.35)', fill: '-1', pointRadius: 0, borderWidth: 1.5, tension: .25 },
           ]
         },
-        options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } } } }
+        options: { ...chartOpts,
+          scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+                    y: { stacked: true, ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } } },
+          plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum1(ctx.parsed.y) + ' km²' } } }
+        }
       });
     }
   }
@@ -1762,14 +1767,15 @@ async function init() {
     const eleit = pol.eleitorado || {};
     document.getElementById('polEleitList').innerHTML =
       '<li><span>Eleitores aptos</span><span>' + fNum(eleit.aptos || 0) + '</span></li>' +
-      '<li><span>Seções</span><span>' + (eleit.secoes || 0) + '</span></li>' +
+      '<li><span>Biometria coletada</span><span>' + (eleit.aptos ? (eleit.biometria / eleit.aptos * 100).toFixed(1) + '%' : '—') + '</span></li>' +
       '<li><span>Zonas eleitorais</span><span>' + (eleit.zonas || 0) + '</span></li>';
 
+    // Códigos TSE: genero 2 = feminino, 4 = masculino
     const gen = pol.genero || {};
     const totalGen = (gen['2'] || 0) + (gen['4'] || 0);
     document.getElementById('polPerfilList').innerHTML =
-      '<li><span>Feminino</span><span>' + (totalGen > 0 ? ((gen['4'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>' +
-      '<li><span>Masculino</span><span>' + (totalGen > 0 ? ((gen['2'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>';
+      '<li><span>Feminino</span><span>' + (totalGen > 0 ? ((gen['2'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>' +
+      '<li><span>Masculino</span><span>' + (totalGen > 0 ? ((gen['4'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>';
 
     const pref = pol.prefeito || {};
     const eletPref = g(D, 'secoes.politica.eleitorado');
