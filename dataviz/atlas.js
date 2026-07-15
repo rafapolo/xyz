@@ -46,16 +46,20 @@ const ATLAS = (() => {
     }
     tooltipEl.innerHTML = html;
     tooltipEl.style.display = 'block';
-    // constrain to viewport
-    const w = tooltipEl.offsetWidth;
-    const h = tooltipEl.offsetHeight;
-    let l = x + 14, t = y + 14;
-    if (l + w > window.innerWidth - 10)  l = x - w - 14;
-    if (t + h > window.innerHeight - 10) t = y - h - 14;
-    if (l < 10) l = 10;
-    if (t < 10) t = 10;
-    tooltipEl.style.left = l + 'px';
-    tooltipEl.style.top  = t + 'px';
+    if (window.innerWidth > 980) {
+      const w = tooltipEl.offsetWidth;
+      const h = tooltipEl.offsetHeight;
+      let l = x + 14, t = y + 14;
+      if (l + w > window.innerWidth - 10)  l = x - w - 14;
+      if (t + h > window.innerHeight - 10) t = y - h - 14;
+      if (l < 10) l = 10;
+      if (t < 10) t = 10;
+      tooltipEl.style.left = l + 'px';
+      tooltipEl.style.top  = t + 'px';
+    } else {
+      tooltipEl.style.left = '';
+      tooltipEl.style.top = '';
+    }
   }
 
   function hideTooltip() {

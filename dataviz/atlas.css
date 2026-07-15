@@ -414,7 +414,27 @@ html, body {
   }
   #sheet-backdrop.visible { display: block; }
 
-  #tooltip { left: 10px !important; right: 10px !important; max-width: none; }
+  #tooltip {
+    position: fixed !important;
+    top: auto !important; bottom: 0 !important;
+    left: 0 !important; right: 0 !important;
+    max-width: none !important;
+    border-radius: 16px 16px 0 0 !important;
+    z-index: 20;
+    min-width: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+  }
+  #tooltip::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: -12px auto 12px;
+    pointer-events: none;
+  }
   #stats-panel { display: none; }
   #map-actions { bottom: 16px; }
 }
