@@ -270,21 +270,33 @@ const ATLAS = (() => {
     const toggleLeft = document.getElementById('toggle-left');
     const toggleRight = document.getElementById('toggle-right');
     const leftPanel = document.getElementById('control-panel');
-    const rightPanel = document.getElementById('stats-panel');
+    const rightPanel = document.getElementById('legend');
+    const backdrop = document.getElementById('sheet-backdrop');
+    const panels = [leftPanel, rightPanel].filter(Boolean);
 
-    function togglePanel(panel, btn) {
+    function closeAll() {
+      panels.forEach(p => p.classList.remove('open'));
+      if (backdrop) backdrop.classList.remove('visible');
+    }
+
+    function togglePanel(panel) {
       if (!panel) return;
       const isOpen = panel.classList.contains('open');
-      // close all
-      [leftPanel, rightPanel].forEach(p => { if (p) p.classList.remove('open'); });
-      if (!isOpen) panel.classList.add('open');
+      closeAll();
+      if (!isOpen) {
+        panel.classList.add('open');
+        if (backdrop) backdrop.classList.add('visible');
+      }
     }
 
     if (toggleLeft && leftPanel) {
-      toggleLeft.addEventListener('click', () => togglePanel(leftPanel, toggleLeft));
+      toggleLeft.addEventListener('click', () => togglePanel(leftPanel));
     }
     if (toggleRight && rightPanel) {
-      toggleRight.addEventListener('click', () => togglePanel(rightPanel, toggleRight));
+      toggleRight.addEventListener('click', () => togglePanel(rightPanel));
+    }
+    if (backdrop) {
+      backdrop.addEventListener('click', closeAll);
     }
   }
 
