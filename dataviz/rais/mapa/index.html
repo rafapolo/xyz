@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlas Brasil — Salário Médio RAIS</title>
+  <title>Atlas Salarial do Brasil — remuneração do emprego formal por município (RAIS 2020–2024)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,6 +15,10 @@
   <style>
     #control-panel { max-height: calc(100vh - 80px); }
     .filter-item .color-dot { width: 12px; height: 12px; border-radius: 3px; }
+    .metric-pills { justify-content: center; }
+    /* legenda alinhada e com a mesma largura do painel de controles */
+    #legend { width: 285px; max-width: 285px; left: 16px; }
+    #legend .gradient-bar { width: 100%; }
     .panel-section {
       margin-top: 12px; padding-top: 10px;
       border-top: 1px solid var(--border-subtle);
@@ -32,13 +36,60 @@
       font-family: 'JetBrains Mono', monospace;
     }
     #toggle-right { display: none !important; }
+    @media (max-width: 720px) {
+      #atlas-nav span:nth-child(2), #atlas-nav span:nth-child(3) { display: none; }
+      #atlas-nav a { margin-left: auto; }
+    }
+
+    /* --- Tooltip redesign --- */
+    #tooltip { padding: 12px 14px; min-width: 260px; max-width: 320px; }
+    #tooltip .tt-cell .v { white-space: nowrap; }
+    #tooltip .tt-head {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    }
+    #tooltip .tt-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle); border-radius: 3px;
+      padding: 1px 5px; flex-shrink: 0;
+    }
+    #tooltip .tt-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+    #tooltip .tt-metric { font-size: 20px; font-weight: 600; line-height: 1.2; font-family: 'JetBrains Mono', monospace; }
+    #tooltip .tt-metric-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px; }
+    #tooltip .tt-range { margin: 2px 0 10px; }
+    #tooltip .tt-range-head {
+      display: flex; justify-content: space-between;
+      font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 3px;
+    }
+    #tooltip .tt-range-bar { position: relative; height: 5px; border-radius: 3px; }
+    #tooltip .tt-range-marker {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #fff; border: 2px solid rgba(10,14,26,0.9);
+      box-shadow: 0 0 4px rgba(0,0,0,0.6);
+    }
+    #tooltip .tt-range-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace; margin-top: 3px;
+    }
+    #tooltip .tt-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3px 14px;
+      padding-top: 8px; border-top: 1px solid var(--border-item);
+    }
+    #tooltip .tt-cell { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; }
+    #tooltip .tt-cell .k { color: var(--text-muted); }
+    #tooltip .tt-cell .v { font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
   </style>
 </head>
 <body>
 
 <nav id="atlas-nav">
-  <span style="color:var(--text-muted)">Salário Médio RAIS</span>
-  <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">Vínculos formais 2020-2024</span>
+  <span style="color:var(--text-primary);font-weight:600">Atlas Salarial do Brasil</span>
+  <span style="color:var(--text-muted)">· quanto paga o emprego formal em cada município</span>
+  <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">RAIS · vínculos ativos 2020–2024</span>
+  <a href="https://ミ.xyz/" style="font-size:11px">todos dataviz</a>
 </nav>
 
 <div id="app">
@@ -196,6 +247,26 @@ let geoData = null;       // raw GeoJSON
 let salaryLookup = null;  // Map<id_municipio, { ano: { setor: {...} } }>
 let choroplethLayer = null;
 let currentState = { ano: '2024', setor: 'privado', metrica: 'salario_medio' };
+let currentDist = null; // { sorted, min, max, avg } da métrica atual, para o tooltip
+
+function paletteStops(pal) {
+  const stops = [];
+  pal.forEach((c, i) => {
+    const a = (i / pal.length * 100).toFixed(1);
+    const b = ((i + 1) / pal.length * 100).toFixed(1);
+    stops.push(`rgb(${c.join(',')}) ${a}%`, `rgb(${c.join(',')}) ${b}%`);
+  });
+  return stops;
+}
+
+function percentileOf(sorted, v) {
+  let lo = 0, hi = sorted.length;
+  while (lo < hi) {
+    const m = (lo + hi) >> 1;
+    if (sorted[m] <= v) lo = m + 1; else hi = m;
+  }
+  return sorted.length > 1 ? (lo - 1) / (sorted.length - 1) : 0.5;
+}
 
 function getActiveSql() {
   return SQL_TEMPLATE;
@@ -249,6 +320,14 @@ function updateMap() {
   }
 
   const merged = { type: 'FeatureCollection', features };
+
+  const sorted = [...values].sort((a, b) => a - b);
+  currentDist = {
+    sorted,
+    min: sorted[0] ?? null,
+    max: sorted[sorted.length - 1] ?? null,
+    avg: sorted.length ? sorted.reduce((s, v) => s + v, 0) / sorted.length : null,
+  };
 
   const colorScale = ATLAS.quantileScale(values, metricDef.palette);
   const getFillColor = (d) => {
@@ -307,50 +386,65 @@ function handleHover(info) {
     return;
   }
 
-  const avgAll = ATLAS.fmtMoney(p.salario_medio);
-  const stdAll = ATLAS.fmtMoney(p.salario_stddev);
-  const p25v = ATLAS.fmtMoney(p.p25);
-  const p75v = ATLAS.fmtMoney(p.p75);
-  const cov = p.salario_medio ? (p.salario_stddev / p.salario_medio).toFixed(3) : '—';
+  const cov = (p.salario_stddev != null && p.salario_medio > 0) ? ATLAS.fmtNum(p.salario_stddev / p.salario_medio, 3) : '—';
   const rangeVal = (p.p75 != null && p.p25 != null) ? ATLAS.fmtMoney(p.p75 - p.p25) : '—';
 
-  const compareHtml = buildComparisonHtml(p._metricValue, metrica);
+  // posição do município entre o mín e o máx nacional da métrica atual
+  let rangeHtml = '';
+  if (p._metricValue != null && currentDist && currentDist.sorted.length > 1 && currentDist.max > currentDist.min) {
+    const pct = percentileOf(currentDist.sorted, p._metricValue);
+    // P100 só para quem é de fato o máximo; a barra é em espaço de quantis,
+    // então o marcador usa o percentil (casa com as cores do mapa)
+    const pShown = p._metricValue >= currentDist.max ? 100 : Math.min(99, Math.round(pct * 100));
+    rangeHtml = `
+      <div class="tt-range">
+        <div class="tt-range-head">
+          <span>mín · máx nacional</span>
+          <span>P${pShown} de ${ATLAS.fmtNum(currentDist.sorted.length, 0)} mun.</span>
+        </div>
+        <div class="tt-range-bar" style="background: linear-gradient(to right, ${paletteStops(metricDef.palette).join(', ')});">
+          <div class="tt-range-marker" style="left:${(Math.min(1, Math.max(0, pct)) * 100).toFixed(1)}%;"></div>
+        </div>
+        <div class="tt-range-labels">
+          <span>${metricDef.format(currentDist.min)}</span>
+          <span>${metricDef.format(currentDist.max)}</span>
+        </div>
+      </div>`;
+  }
+
+  const cells = [
+    ['Média', ATLAS.fmtMoney(p.salario_medio)],
+    ['Desvio', ATLAS.fmtMoney(p.salario_stddev)],
+    ['P25', ATLAS.fmtMoney(p.p25)],
+    ['P75', ATLAS.fmtMoney(p.p75)],
+    ['Coef. var.', cov],
+    ['P75−P25', rangeVal],
+  ];
 
   ATLAS.showTooltip(info.x, info.y, `
-    <div class="tt-name">${nomeMun}</div>
-    <div class="tt-uf">${p.sigla_uf || ufFromId(p.id_municipio)}</div>
-    <div class="tt-metric">${metricDef.format(p._metricValue)}</div>
-    <div class="tt-detail">
-      Média: ${avgAll}<br>
-      Desv. pad.: ${stdAll}<br>
-      P25: ${p25v} &nbsp;|&nbsp; P75: ${p75v}<br>
-      Coef. var.: ${cov} &nbsp;|&nbsp; Range: ${rangeVal}<br>
-      Vínculos: ${ATLAS.fmtNum(p.n_vinculos, 0)}
+    <div class="tt-head">
+      <span class="tt-name">${nomeMun}</span>
+      <span class="tt-badge">${p.sigla_uf || ufFromId(p.id_municipio)}</span>
     </div>
-    ${compareHtml}
+    <div class="tt-sub">${ATLAS.fmtNum(p.n_vinculos, 0)} vínculos formais</div>
+    <div class="tt-metric">${metricDef.format(p._metricValue)}</div>
+    <div class="tt-metric-label">${metricDef.label} · ${ano} · ${SETOR_LABELS[setor] || setor}</div>
+    ${rangeHtml}
+    <div class="tt-grid">
+      ${cells.map(([k, v]) => `<div class="tt-cell"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+    </div>
+    ${buildComparisonHtml(p._metricValue, metrica)}
   `);
 }
 
 function buildComparisonHtml(val, metrica) {
-  if (val == null) return '';
-  const { ano, setor } = currentState;
-  if (!salaryLookup) return '';
-
-  const allValues = [];
-  for (const years of Object.values(salaryLookup)) {
-    const entry = years[ano]?.[setor];
-    if (entry) {
-      const v = METRICS[metrica].getValue(entry);
-      if (v != null) allValues.push(v);
-    }
-  }
-  if (allValues.length === 0) return '';
-  const avg = allValues.reduce((s, v) => s + v, 0) / allValues.length;
+  if (val == null || !currentDist || currentDist.avg == null) return '';
+  const avg = currentDist.avg;
   const diff = val - avg;
   const pct = avg > 0 ? (diff / avg) : 0;
   const cls = diff >= 0 ? 'above' : 'below';
   const sign = diff >= 0 ? '+' : '';
-  return `<div class="tt-compare ${cls}">${sign}${(pct * 100).toFixed(1)}% ${diff >= 0 ? 'acima' : 'abaixo'} da média dos municípios</div>`;
+  return `<div class="tt-compare ${cls}">${sign}${ATLAS.fmtNum(pct * 100, 1)}% ${diff >= 0 ? 'acima' : 'abaixo'} da média dos municípios</div>`;
 }
 
 function updateLegend(values, metricDef) {
@@ -360,13 +454,7 @@ function updateLegend(values, metricDef) {
   }
   values.sort((a, b) => a - b);
   // hard color steps: the map uses discrete quantile bins, not a smooth ramp
-  const pal = metricDef.palette;
-  const stops = [];
-  pal.forEach((c, i) => {
-    const a = (i / pal.length * 100).toFixed(1);
-    const b = ((i + 1) / pal.length * 100).toFixed(1);
-    stops.push(`rgb(${c.join(',')}) ${a}%`, `rgb(${c.join(',')}) ${b}%`);
-  });
+  const stops = paletteStops(metricDef.palette);
 
   ATLAS.buildLegend({
     type: 'gradient',
