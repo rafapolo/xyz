@@ -745,11 +745,11 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
-     "1": 24,
-     "9": 10,
      "2": 66,
+     "9": 10,
      "3": 316,
-     "4": 1419
+     "4": 1419,
+     "1": 24
     }
    },
    "dengue": {
@@ -762,9 +762,9 @@
     "notificados_ano_anterior": 5350,
     "classificacao_bruta": {
      "10|9": 5,
+     "12|1": 2,
      "10|1": 363,
      "10|None": 2,
-     "12|1": 2,
      "8 |None": 18,
      "11|1": 9
     }
@@ -940,6 +940,176 @@
       "desmatado": 290.2,
       "vegetacao_natural": 637.7
      }
+    ],
+    "serie": [
+     {
+      "ano": 2000,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 273.6,
+      "vegetacao_natural": 654.3
+     },
+     {
+      "ano": 2001,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 274.9,
+      "vegetacao_natural": 653.0
+     },
+     {
+      "ano": 2002,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 276.2,
+      "vegetacao_natural": 651.7
+     },
+     {
+      "ano": 2003,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 277.5,
+      "vegetacao_natural": 650.4
+     },
+     {
+      "ano": 2004,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 278.8,
+      "vegetacao_natural": 649.1
+     },
+     {
+      "ano": 2005,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 280.2,
+      "vegetacao_natural": 647.7
+     },
+     {
+      "ano": 2006,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 281.6,
+      "vegetacao_natural": 646.3
+     },
+     {
+      "ano": 2007,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 282.7,
+      "vegetacao_natural": 645.2
+     },
+     {
+      "ano": 2008,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 283.8,
+      "vegetacao_natural": 644.1
+     },
+     {
+      "ano": 2009,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 285.0,
+      "vegetacao_natural": 642.9
+     },
+     {
+      "ano": 2010,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 286.2,
+      "vegetacao_natural": 641.7
+     },
+     {
+      "ano": 2011,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 286.7,
+      "vegetacao_natural": 641.2
+     },
+     {
+      "ano": 2012,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 287.1,
+      "vegetacao_natural": 640.8
+     },
+     {
+      "ano": 2013,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 287.5,
+      "vegetacao_natural": 640.4
+     },
+     {
+      "ano": 2014,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 287.7,
+      "vegetacao_natural": 640.2
+     },
+     {
+      "ano": 2015,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 288.2,
+      "vegetacao_natural": 639.7
+     },
+     {
+      "ano": 2016,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 288.7,
+      "vegetacao_natural": 639.2
+     },
+     {
+      "ano": 2017,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 289.0,
+      "vegetacao_natural": 638.9
+     },
+     {
+      "ano": 2018,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 289.5,
+      "vegetacao_natural": 638.4
+     },
+     {
+      "ano": 2019,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 289.7,
+      "vegetacao_natural": 638.2
+     },
+     {
+      "ano": 2020,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 289.8,
+      "vegetacao_natural": 638.1
+     },
+     {
+      "ano": 2021,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 290.1,
+      "vegetacao_natural": 637.8
+     },
+     {
+      "ano": 2022,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 290.2,
+      "vegetacao_natural": 637.7
+     },
+     {
+      "ano": 2023,
+      "bioma": "Mata Atlântica",
+      "area_total": 927.90397,
+      "desmatado": 290.3,
+      "vegetacao_natural": 637.6
+     }
     ]
    },
    "seeg": {
@@ -970,6 +1140,299 @@
      }
     ],
     "total_tco2e": 350591.49926565
+   },
+   "queimadas": {
+    "fonte": "br_inpe_queimadas.microdados",
+    "serie": [
+     {
+      "ano": 2003,
+      "focos": 28,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2004,
+      "focos": 29,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2005,
+      "focos": 11,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2006,
+      "focos": 26,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2007,
+      "focos": 53,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2008,
+      "focos": 41,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2009,
+      "focos": 12,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2010,
+      "focos": 33,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2011,
+      "focos": 36,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2012,
+      "focos": 11,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2013,
+      "focos": 1,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2014,
+      "focos": 27,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2015,
+      "focos": 10,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2016,
+      "focos": 9,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2017,
+      "focos": 19,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2018,
+      "focos": 2,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2019,
+      "focos": 30,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2020,
+      "focos": 10,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2021,
+      "focos": 7,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2022,
+      "focos": 8,
+      "frp_medio": null,
+      "frp_max": null
+     },
+     {
+      "ano": 2023,
+      "focos": 50,
+      "frp_medio": 5.658,
+      "frp_max": 22.6
+     },
+     {
+      "ano": 2024,
+      "focos": 561,
+      "frp_medio": 10.272595281306716,
+      "frp_max": 119.9
+     },
+     {
+      "ano": 2025,
+      "focos": 4,
+      "frp_medio": 5.625,
+      "frp_max": 10.7
+     }
+    ]
+   },
+   "sisam": {
+    "fonte": "br_inpe_sisam.microdados",
+    "serie": [
+     {
+      "ano": 2000,
+      "pm25_ugm3": 13.649450549450528,
+      "co_ppb": 95.54023224043723
+     },
+     {
+      "ano": 2001,
+      "pm25_ugm3": 12.020370370370356,
+      "co_ppb": 94.89452054794515
+     },
+     {
+      "ano": 2002,
+      "pm25_ugm3": 14.021516393442635,
+      "co_ppb": 107.37712912087909
+     },
+     {
+      "ano": 2003,
+      "pm25_ugm3": 9.050343878954616,
+      "co_ppb": 131.14061643835612
+     },
+     {
+      "ano": 2004,
+      "pm25_ugm3": 9.45499655410062,
+      "co_ppb": 120.67056010928954
+     },
+     {
+      "ano": 2005,
+      "pm25_ugm3": 9.160343642611702,
+      "co_ppb": 119.42486301369854
+     },
+     {
+      "ano": 2006,
+      "pm25_ugm3": 10.152852233676981,
+      "co_ppb": 130.1333561643836
+     },
+     {
+      "ano": 2007,
+      "pm25_ugm3": 10.0464359861592,
+      "co_ppb": 131.31582191780834
+     },
+     {
+      "ano": 2008,
+      "pm25_ugm3": 8.983115991763901,
+      "co_ppb": 121.30554414784406
+     },
+     {
+      "ano": 2009,
+      "pm25_ugm3": 8.885724090597117,
+      "co_ppb": 115.72349315068499
+     },
+     {
+      "ano": 2010,
+      "pm25_ugm3": 9.826933701657467,
+      "co_ppb": 122.30349315068503
+     },
+     {
+      "ano": 2011,
+      "pm25_ugm3": 8.976648351648349,
+      "co_ppb": 114.84095890410964
+     },
+     {
+      "ano": 2012,
+      "pm25_ugm3": 8.021355236139629,
+      "co_ppb": 116.01680327868824
+     },
+     {
+      "ano": 2013,
+      "pm25_ugm3": 8.519381443298965,
+      "co_ppb": 111.00287671232867
+     },
+     {
+      "ano": 2014,
+      "pm25_ugm3": 11.528738800827009,
+      "co_ppb": 134.7558219178081
+     },
+     {
+      "ano": 2015,
+      "pm25_ugm3": 9.4220994475138,
+      "co_ppb": 126.8464383561641
+     },
+     {
+      "ano": 2016,
+      "pm25_ugm3": 10.485409497591196,
+      "co_ppb": 124.73722677595656
+     },
+     {
+      "ano": 2017,
+      "pm25_ugm3": 9.722183828610937,
+      "co_ppb": 123.43013698630146
+     },
+     {
+      "ano": 2018,
+      "pm25_ugm3": 10.261080332409977,
+      "co_ppb": 117.78767123287673
+     },
+     {
+      "ano": 2019,
+      "pm25_ugm3": 8.134051724137922,
+      "co_ppb": null
+     }
+    ]
+   },
+   "mapbiomas": {
+    "fonte": "br_mapbiomas_estatisticas.transicao_municipio_de_para_decenal",
+    "anos": [
+     2010,
+     2020
+    ],
+    "transicoes": [
+     {
+      "de": "Pastagem",
+      "para": "Mosaico de Usos",
+      "area_2010": 20.78963618231196,
+      "area_2020": 41.13496003997768
+     },
+     {
+      "de": "Mosaico de Usos",
+      "para": "Formação Florestal",
+      "area_2010": 19.80446890155022,
+      "area_2020": 21.19230287420668
+     },
+     {
+      "de": "Mosaico de Usos",
+      "para": "Pastagem",
+      "area_2010": 17.82958740307607,
+      "area_2020": 6.114243701416012
+     },
+     {
+      "de": "Formação Florestal",
+      "para": "Mosaico de Usos",
+      "area_2010": 13.98107166595453,
+      "area_2020": 7.937614507568378
+     },
+     {
+      "de": "Formação Florestal",
+      "para": "Silvicultura",
+      "area_2010": 2.554991711303709,
+      "area_2020": 5.101668469116225
+     },
+     {
+      "de": "Mosaico de Usos",
+      "para": "Área Urbanizada",
+      "area_2010": 2.003369458862309,
+      "area_2020": 2.021567424804691
+     }
+    ]
    }
   },
   "conectividade": {
@@ -996,9 +1459,9 @@
     "zonas": 2
    },
    "genero": {
-    "4": 82419,
     "0": 118,
-    "2": 72939
+    "2": 72939,
+    "4": 82419
    },
    "instrucao": {
     "3": 45125,
@@ -1276,7 +1739,7 @@
     "ano": 2024,
     "vinculos_ativos_3112": 56975,
     "vinculos_ativos_ano_anterior": 54441,
-    "remuneracao_media": 2443.06796846371,
+    "remuneracao_media": 2443.0679684637103,
     "estabelecimentos": 11763
    },
    "caged": {
@@ -1285,7 +1748,7 @@
     "admissoes": 23203,
     "desligamentos": 22091,
     "saldo": 1112,
-    "salario_medio_admissao": 1699.6566916180764
+    "salario_medio_admissao": 1699.656691618075
    }
   },
   "agropecuaria": {
@@ -1423,54 +1886,78 @@
    "garantia_safra": null
   },
   "vizinhanca": {
-   "fonte": "br_bd_vizinhanca.municipio",
+   "fonte": "br_bd_vizinhanca.municipio · br_ibge_populacao · br_ibge_pib",
    "municipios": [
-    {
-     "id_municipio": "3300506",
-     "nome": "Bom Jardim",
-     "sigla_uf": "RJ"
-    },
-    {
-     "id_municipio": "3300803",
-     "nome": "Cachoeiras de Macacu",
-     "sigla_uf": "RJ"
-    },
-    {
-     "id_municipio": "3301306",
-     "nome": "Casimiro de Abreu",
-     "sigla_uf": "RJ"
-    },
-    {
-     "id_municipio": "3301603",
-     "nome": "Duas Barras",
-     "sigla_uf": "RJ"
-    },
     {
      "id_municipio": "3302403",
      "nome": "Macaé",
-     "sigla_uf": "RJ"
-    },
-    {
-     "id_municipio": "3305604",
-     "nome": "Silva Jardim",
-     "sigla_uf": "RJ"
-    },
-    {
-     "id_municipio": "3305703",
-     "nome": "Sumidouro",
-     "sigla_uf": "RJ"
+     "sigla_uf": "RJ",
+     "populacao": 264439,
+     "pib_per_capita": 67111.94642242635
     },
     {
      "id_municipio": "3305802",
      "nome": "Teresópolis",
-     "sigla_uf": "RJ"
+     "sigla_uf": "RJ",
+     "populacao": 176735,
+     "pib_per_capita": 33518.81064871135
+    },
+    {
+     "id_municipio": "3300803",
+     "nome": "Cachoeiras de Macacu",
+     "sigla_uf": "RJ",
+     "populacao": 59861,
+     "pib_per_capita": 21809.091060957886
+    },
+    {
+     "id_municipio": "3301306",
+     "nome": "Casimiro de Abreu",
+     "sigla_uf": "RJ",
+     "populacao": 48636,
+     "pib_per_capita": 48362.69430051814
+    },
+    {
+     "id_municipio": "3300506",
+     "nome": "Bom Jardim",
+     "sigla_uf": "RJ",
+     "populacao": 29758,
+     "pib_per_capita": 29817.326433228038
+    },
+    {
+     "id_municipio": "3305604",
+     "nome": "Silva Jardim",
+     "sigla_uf": "RJ",
+     "populacao": 22028,
+     "pib_per_capita": 27358.089704013073
+    },
+    {
+     "id_municipio": "3305703",
+     "nome": "Sumidouro",
+     "sigla_uf": "RJ",
+     "populacao": 15693,
+     "pib_per_capita": 38241.70012107309
+    },
+    {
+     "id_municipio": "3301603",
+     "nome": "Duas Barras",
+     "sigla_uf": "RJ",
+     "populacao": 11355,
+     "pib_per_capita": 21948.0405107882
     },
     {
      "id_municipio": "3305901",
      "nome": "Trajano de Moraes",
-     "sigla_uf": "RJ"
+     "sigla_uf": "RJ",
+     "populacao": 10654,
+     "pib_per_capita": 22716.35066641637
     }
-   ]
+   ],
+   "referencia": {
+    "populacao_ano": 2025,
+    "pib_ano": 2021,
+    "populacao": 203417,
+    "pib_per_capita": 31093.443517503452
+   }
   }
  }
 }

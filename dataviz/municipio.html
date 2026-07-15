@@ -540,7 +540,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(0,131,0,.15);color:var(--s5)">🌳</div>
     <h2>Meio Ambiente & Clima</h2>
-    <span class="table-name">br_inpe_prodes · br_seeg_emissoes</span>
+    <span class="table-name">br_inpe_prodes · br_seeg_emissoes · br_inpe_queimadas · br_inpe_sisam · br_mapbiomas</span>
   </div>
   <div class="grid-3">
     <div class="card">
@@ -561,6 +561,26 @@ details.more > .more-body { margin-top: .4rem; }
         <li><span>Mês mais quente</span><span>Fev (22,1 °C)</span></li>
         <li><span>Mês mais frio</span><span>Jul (14,3 °C)</span></li>
       </ul>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>PRODES — desmatamento acumulado <span class="vintage" id="prodesSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="prodesChart"></canvas></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Queimadas — focos por ano <span class="vintage" id="queimadasAno"></span> <span style="text-transform:none;letter-spacing:0;color:var(--text2)">(cor = intensidade)</span></h3>
+      <div class="chart-container"><canvas id="queimadasChart"></canvas></div>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>SISAM — qualidade do ar <span class="vintage" id="sisamAno"></span></h3>
+      <div class="chart-container"><canvas id="sisamChart"></canvas></div>
+    </div>
+    <div class="card card-chart">
+      <h3>MapBiomas — principais transições de uso do solo <span class="vintage">2010 vs 2020</span></h3>
+      <div class="chart-container"><canvas id="mapbiomasChart"></canvas></div>
     </div>
   </div>
 </div>
@@ -969,7 +989,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(57,135,229,.12);color:var(--s1)">📍</div>
     <h2>Vizinhança</h2>
-    <span class="table-name">br_bd_vizinhanca.municipio</span>
+    <span class="table-name">br_bd_vizinhanca · br_ibge_populacao · br_ibge_pib</span>
   </div>
   <div class="grid-2">
     <div class="card">
@@ -1005,6 +1025,17 @@ details.more > .more-body { margin-top: .4rem; }
         <li><span>Menor vizinho (pop.)</span><span id="menorVizinho">Duas Barras</span></li>
       </ul>
       <div class="sub" style="margin-top:.6rem;color:var(--text3)">Municípios limítrofes listados no mapa ao lado</div>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card">
+      <h3>Ranking de população <span class="vintage" id="viziPopAno"></span></h3>
+      <ul class="data-list" id="viziPopRanking"></ul>
+    </div>
+    <div class="card">
+      <h3>PIB per capita comparado <span class="vintage" id="viziPibAno"></span></h3>
+      <div class="sub" style="margin-bottom:.5rem" id="viziPibResumo"></div>
+      <div class="bench-bars" id="viziPibBars"></div>
     </div>
   </div>
 </div>
@@ -1204,6 +1235,98 @@ async function init() {
             callbacks: { label: ctx => fNum(ctx.parsed.x) + ' tCO₂e' } } },
           scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
                     y: { ticks: { color: C.tick, autoSkip: false, font: { size: 11 } }, grid: { display: false } } }
+        }
+      });
+    }
+  }
+
+  // PRODES — série de desmatamento acumulado
+  if (document.getElementById('prodesChart')) {
+    const serie = g(D, 'secoes.meio_ambiente.prodes.serie') || [];
+    if (serie.length) {
+      document.getElementById('prodesSerieAno').textContent = serie[0].ano + '–' + serie[serie.length - 1].ano;
+      new Chart(document.getElementById('prodesChart'), {
+        type: 'line', data: {
+          labels: serie.map(r => r.ano),
+          datasets: [
+            { label: 'Desmatado acum. (km²)', data: serie.map(r => r.desmatado), borderColor: C.s6, backgroundColor: 'rgba(217,89,38,.10)', fill: true, pointBackgroundColor: C.s6, ...lineStyle },
+            { label: 'Vegetação natural (km²)', data: serie.map(r => r.vegetacao_natural), borderColor: C.s5, backgroundColor: 'rgba(25,158,112,.10)', fill: true, pointBackgroundColor: C.s5, ...lineStyle },
+          ]
+        },
+        options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } } } }
+      });
+    }
+  }
+
+  // Queimadas — focos por ano, coloridos por intensidade
+  if (document.getElementById('queimadasChart')) {
+    const serie = g(D, 'secoes.meio_ambiente.queimadas.serie') || [];
+    if (serie.length) {
+      document.getElementById('queimadasAno').textContent = serie[0].ano + '–' + serie[serie.length - 1].ano;
+      const maxFocos = Math.max(...serie.map(r => r.focos || 0), 1);
+      const intensityColor = t => {
+        const c1 = [250, 178, 25], c2 = [208, 59, 59];
+        const mix = i => Math.round(c1[i] + (c2[i] - c1[i]) * t);
+        return `rgb(${mix(0)},${mix(1)},${mix(2)})`;
+      };
+      const colors = serie.map(r => intensityColor((r.focos || 0) / maxFocos));
+      new Chart(document.getElementById('queimadasChart'), {
+        type: 'bar', data: {
+          labels: serie.map(r => r.ano),
+          datasets: [{ label: 'Focos', data: serie.map(r => r.focos), backgroundColor: colors, maxBarThickness: 22, borderRadius: 3 }]
+        },
+        options: { ...chartOpts, plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+              callbacks: { label: ctx => {
+                const r = serie[ctx.dataIndex];
+                return r.frp_medio != null ? fNum(r.focos) + ' focos (FRP médio ' + fNum1(r.frp_medio) + ')' : fNum(r.focos) + ' focos';
+              } } } },
+          scales: { ...chartOpts.scales, y: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } } } }
+      });
+    }
+  }
+
+  // SISAM — qualidade do ar (dual-axis PM2.5 + CO)
+  if (document.getElementById('sisamChart')) {
+    const serie = g(D, 'secoes.meio_ambiente.sisam.serie') || [];
+    if (serie.length) {
+      document.getElementById('sisamAno').textContent = serie[0].ano + '–' + serie[serie.length - 1].ano;
+      new Chart(document.getElementById('sisamChart'), {
+        type: 'line', data: {
+          labels: serie.map(r => r.ano),
+          datasets: [
+            { label: 'PM2.5 (µg/m³)', data: serie.map(r => r.pm25_ugm3), borderColor: C.s3, backgroundColor: C.s3, yAxisID: 'y', pointBackgroundColor: C.s3, ...lineStyle, fill: false },
+            { label: 'CO (ppb)', data: serie.map(r => r.co_ppb), borderColor: C.s1, backgroundColor: C.s1, yAxisID: 'y1', pointBackgroundColor: C.s1, ...lineStyle, fill: false },
+          ]
+        },
+        options: { ...chartOpts,
+          scales: {
+            x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+            y: { position: 'left', ticks: { color: C.s3, callback: v => fNum1(v) }, grid: { color: C.grid }, title: { display: true, text: 'PM2.5 (µg/m³)', color: C.s3 } },
+            y1: { position: 'right', ticks: { color: C.s1, callback: v => fNum1(v) }, grid: { display: false }, title: { display: true, text: 'CO (ppb)', color: C.s1 } },
+          }
+        }
+      });
+    }
+  }
+
+  // MapBiomas — principais transições de uso do solo (2010 vs 2020)
+  if (document.getElementById('mapbiomasChart')) {
+    const mb = g(D, 'secoes.meio_ambiente.mapbiomas');
+    const trans = (mb && mb.transicoes) || [];
+    if (trans.length) {
+      new Chart(document.getElementById('mapbiomasChart'), {
+        type: 'bar', data: {
+          labels: trans.map(t => t.de + ' → ' + t.para),
+          datasets: [
+            { label: '2010', data: trans.map(t => t.area_2010), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 3 },
+            { label: '2020', data: trans.map(t => t.area_2020), backgroundColor: C.s5, maxBarThickness: 16, borderRadius: 3 },
+          ]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum1(ctx.parsed.x) + ' km²' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } }
         }
       });
     }
@@ -1852,11 +1975,39 @@ async function init() {
 
   // Vizinhos
   const vizinhos = g(D, 'secoes.vizinhanca.municipios') || [];
+  const viziRef = g(D, 'secoes.vizinhanca.referencia');
+  const nomeMunicipio = g(D, 'municipio.nome');
   if (vizinhos.length) {
     document.getElementById('vizinhosContagem').textContent = vizinhos.length;
-    document.getElementById('vizinhosList').innerHTML = vizinhos.map(v =>
-      '<li><span>' + v.nome + '</span><span>' + v.id_municipio + '</span></li>'
-    ).join('');
+    const porPop = [...vizinhos].sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
+    if (document.getElementById('maiorVizinho')) document.getElementById('maiorVizinho').textContent = porPop[0] ? porPop[0].nome : '—';
+    if (document.getElementById('menorVizinho')) document.getElementById('menorVizinho').textContent = porPop[porPop.length - 1] ? porPop[porPop.length - 1].nome : '—';
+
+    // Ranking de população (município + vizinhos)
+    if (document.getElementById('viziPopRanking')) {
+      if (viziRef) document.getElementById('viziPopAno').textContent = viziRef.populacao_ano || '';
+      const ranking = [{ nome: nomeMunicipio, populacao: viziRef && viziRef.populacao, self: true }, ...vizinhos]
+        .sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
+      document.getElementById('viziPopRanking').innerHTML = ranking.map((v, i) =>
+        '<li><span>' + (i + 1) + '. ' + (v.self ? '<b style="color:var(--text)">' + v.nome + '</b>' : v.nome) + '</span><span>' + fNum(v.populacao || 0) + '</span></li>'
+      ).join('');
+    }
+
+    // PIB per capita comparado
+    if (viziRef && document.getElementById('viziPibBars')) {
+      document.getElementById('viziPibAno').textContent = viziRef.pib_ano || '';
+      const refPc = viziRef.pib_per_capita || 0;
+      const acima = vizinhos.filter(v => (v.pib_per_capita || 0) > refPc).length;
+      const abaixo = vizinhos.filter(v => v.pib_per_capita != null && v.pib_per_capita < refPc).length;
+      document.getElementById('viziPibResumo').innerHTML =
+        '<b style="color:var(--text)">' + nomeMunicipio + ':</b> R$ ' + fNum(Math.round(refPc)) + ' · ' + acima + ' vizinho(s) acima, ' + abaixo + ' abaixo';
+      const linhas = [{ nome: nomeMunicipio, valor: refPc, self: true }, ...vizinhos.map(v => ({ nome: v.nome, valor: v.pib_per_capita || 0 }))]
+        .sort((a, b) => b.valor - a.valor);
+      const maxPc = Math.max(...linhas.map(l => l.valor), 1);
+      document.getElementById('viziPibBars').innerHTML = linhas.map(l =>
+        '<div class="row' + (l.self ? ' me' : '') + '"><span>' + l.nome + '</span><div class="track"><div class="fill" style="width:' + (l.valor / maxPc * 100).toFixed(0) + '%"></div></div><span>' + Math.round(l.valor / 1000) + 'k</span></div>'
+      ).join('');
+    }
   }
 
   // Insights
@@ -1881,7 +2032,8 @@ async function init() {
 
   // Sparklines
   document.querySelectorAll('[data-spark-path]').forEach(el => {
-    const arr = g(D, el.dataset.sparkPath) || [];
+    const raw = g(D, el.dataset.sparkPath);
+    const arr = Array.isArray(raw) ? raw : [];
     const key = el.dataset.sparkKey || 'populacao';
     const values = arr.map(d => d[key]).filter(v => v != null);
     if (values.length < 2) return;
