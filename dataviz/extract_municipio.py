@@ -18,7 +18,8 @@ from datetime import date
 
 DUCKDB = os.path.expanduser("~/bin/duckdb")
 ROOT = os.path.expanduser("~/rodado")
-SETTINGS = "SET threads=8; SET memory_limit='20GB'; SET temp_directory='/dev/shm/duckdb_tmp';"
+SETTINGS = ("SET threads=8; SET memory_limit='20GB'; SET temp_directory='/dev/shm/duckdb_tmp'; "
+            "INSTALL spatial; LOAD spatial; ")
 
 
 def q(sql):
@@ -77,6 +78,48 @@ def section(fn):
         except Exception as e:  # noqa: BLE001
             return {"erro": str(e)[:300]}
     return wrap
+
+
+# -------------------------------------------------------------- geografia
+@section
+def geografia(mid):
+    sede = one(f"""SELECT ano, ST_Y(ST_Centroid(geometria)) lat, ST_X(ST_Centroid(geometria)) lon
+        FROM {p('br_geobr_mapas','sede_municipal')} WHERE id_municipio='{mid}' ORDER BY ano DESC LIMIT 1""")
+
+    arranjo = one(f"SELECT arranjo_populacional, populacao_2010 FROM {p('br_geobr_mapas','arranjo_populacional')} WHERE id_municipio='{mid}'")
+    semiarido_n = one(f"SELECT count(*) n FROM {p('br_geobr_mapas','semiarido')} WHERE id_municipio='{mid}'")["n"]
+    rm = one(f"SELECT nome_regiao_metropolitana, tipo FROM {p('br_geobr_mapas','regiao_metropolitana_2017')} WHERE id_municipio='{mid}'")
+
+    t_muni = p("br_geobr_mapas", "municipio")
+    biomas = q(f"""
+        WITH muni AS (SELECT geometria FROM {t_muni} WHERE id_municipio='{mid}')
+        SELECT DISTINCT b.nome_bioma,
+            ST_Area(ST_Intersection(b.geometria, muni.geometria)) / ST_Area(muni.geometria) * 100 pct
+        FROM {p('br_geobr_mapas','bioma')} b, muni WHERE ST_Intersects(b.geometria, muni.geometria)
+        ORDER BY 2 DESC""")
+
+    ucs = q(f"""
+        WITH muni AS (SELECT geometria FROM {t_muni} WHERE id_municipio='{mid}')
+        SELECT uc.unidade_conservacao, uc.categoria, uc.esfera, uc.organizacao_orgao, uc.ano_criacao
+        FROM {p('br_geobr_mapas','unidade_conservacao')} uc, muni WHERE ST_Intersects(uc.geometria, muni.geometria)
+        ORDER BY uc.categoria, uc.unidade_conservacao""")
+    por_cat = {}
+    for r in ucs:
+        k = (r["categoria"], r["esfera"])
+        por_cat[k] = por_cat.get(k, 0) + 1
+    resumo_ucs = sorted(
+        [{"categoria": k[0], "esfera": k[1], "quantidade": v} for k, v in por_cat.items()],
+        key=lambda r: -r["quantidade"])
+
+    return {
+        "fonte": "br_geobr_mapas (sede_municipal, arranjo_populacional, semiarido, regiao_metropolitana_2017, bioma, unidade_conservacao)",
+        "sede_municipal": sede and {"ano": sede["ano"], "lat": sede["lat"], "lon": sede["lon"]},
+        "arranjo_populacional": arranjo and {"nome": arranjo["arranjo_populacional"], "populacao_2010": num(arranjo["populacao_2010"])},
+        "semiarido": semiarido_n > 0,
+        "regiao_metropolitana": rm and {"nome": rm["nome_regiao_metropolitana"], "tipo": rm["tipo"]},
+        "biomas": [{"nome": r["nome_bioma"], "pct_area": r["pct"]} for r in biomas],
+        "unidades_conservacao": {"total": len(ucs), "por_categoria": resumo_ucs, "lista": ucs},
+    }
 
 
 # ---------------------------------------------------------------- perfil
@@ -805,6 +848,7 @@ def main():
         "gerador": "extract_municipio.py (basedosdados local em ~/rodado)",
         "municipio": prof,
         "secoes": {
+            "geografia": geografia(mid),
             "demografia": demografia(mid),
             "economia": {
                 "pib": economia_pib(mid, uf),

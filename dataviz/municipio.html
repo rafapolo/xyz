@@ -422,8 +422,6 @@ details.more > .more-body { margin-top: .4rem; }
     <span class="hero-tag"><strong>DDD:</strong> <span data-path="municipio.ddd"></span></span>
     <span class="hero-tag"><strong>Região:</strong> <span data-path="municipio.regiao"></span></span>
     <span class="hero-tag"><strong>Mesorregião:</strong> <span data-path="municipio.mesorregiao"></span></span>
-    <span class="hero-tag"><strong>Altitude:</strong> 846 m</span>
-    <span class="hero-tag"><strong>Clima:</strong> Cwb</span>
     <span class="hero-tag"><strong>Capital:</strong> <span data-path="municipio.capital_uf" data-fallback="Não"></span></span>
     <span class="hero-tag"><strong>Amazônia Legal:</strong> <span data-path="municipio.amazonia_legal" data-fallback="Não"></span></span>
     <span class="hero-tag"><strong>Reg. Imediata:</strong> <span data-path="municipio.regiao_imediata"></span></span>
@@ -537,15 +535,21 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(0,131,0,.15);color:var(--s5)">🗺️</div>
     <h2>Geografia & Mapas</h2>
-    <span class="table-name">br_geobr_mapas.municipio</span>
+    <span class="table-name">br_geobr_mapas</span>
   </div>
   <div class="grid-3">
-    <div class="card card-metric"><h3>Altitude</h3><div class="value">846 <span class="unit">m</span></div><div class="sub">Sede municipal</div></div>
-    <div class="card"><h3>Bioma</h3><div class="value-sm">Mata Atlântica</div><div class="sub">Predominante</div></div>
-    <div class="card"><h3>Clima</h3><div class="value-sm">Cwb <span style="color:var(--text3);font-size:.85rem">(Subtropical de altitude)</span></div><div class="sub">Temperatura média: 18 °C</div></div>
-    <div class="card"><h3>Arranjo populacional</h3><div class="value-sm"><span data-path="municipio.nome"></span> (isolado)</div></div>
-    <div class="card"><h3>Região metropolitana</h3><div class="value-sm" id="rmVal"></div><div class="sub">Não integra RM</div></div>
-    <div class="card"><h3>Semiárido</h3><div class="value-sm">Não</div></div>
+    <div class="card"><h3>Sede municipal <span class="vintage" id="geoSedeAno"></span></h3><div class="value-sm" id="geoSedeVal">—</div><div class="sub">Coordenadas do centroide (IBGE)</div></div>
+    <div class="card"><h3>Bioma</h3><ul class="data-list" id="geoBiomaList"></ul></div>
+    <div class="card"><h3>Semiárido</h3><div class="value-sm" id="geoSemiaridoVal">—</div></div>
+    <div class="card"><h3>Arranjo populacional</h3><div class="value-sm" id="geoArranjoVal">—</div><div class="sub" id="geoArranjoSub"></div></div>
+    <div class="card"><h3>Região metropolitana</h3><div class="value-sm" id="geoRmVal">—</div><div class="sub" id="geoRmSub"></div></div>
+    <div class="card">
+      <h3>Unidades de conservação <span class="value-sm" id="geoUcTotal" style="text-transform:none;letter-spacing:0"></span></h3>
+      <ul class="data-list" id="geoUcCatList"></ul>
+      <details class="more"><summary>ver todas</summary>
+        <ul class="data-list more-body" id="geoUcListaDet"></ul>
+      </details>
+    </div>
   </div>
 </div>
 
@@ -553,28 +557,19 @@ details.more > .more-body { margin-top: .4rem; }
 <div class="section" id="amb">
   <div class="section-header">
     <div class="icon" style="background:rgba(0,131,0,.15);color:var(--s5)">🌳</div>
-    <h2>Meio Ambiente & Clima</h2>
+    <h2>Meio Ambiente</h2>
     <span class="table-name">br_inpe_prodes · br_seeg_emissoes · br_inpe_queimadas · br_inpe_sisam · br_mapbiomas</span>
   </div>
-  <div class="grid-3">
+  <div class="grid-2">
     <div class="card">
       <h3>PRODES — Mata Atlântica <span class="vintage" id="prodesAno">2023</span></h3>
       <ul class="data-list" id="prodesList">
       </ul>
       <div class="bench" style="margin-top:.5rem"><span><b>Mata Atlântica (BR):</b> 24% de vegetação remanescente</span></div>
     </div>
-    <div class="card card-chart" style="grid-row:span 1">
+    <div class="card card-chart">
       <h3>SEEG — emissões por setor <span class="vintage" id="seegAno"></span> <span style="text-transform:none;letter-spacing:0;color:var(--text2)" id="seegTotal"></span></h3>
       <div class="chart-container"><canvas id="seegChart"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Clima — normais históricas</h3>
-      <ul class="data-list">
-        <li><span>Temperatura média anual</span><span>18,2 °C</span></li>
-        <li><span>Precipitação anual</span><span>1.847 mm</span></li>
-        <li><span>Mês mais quente</span><span>Fev (22,1 °C)</span></li>
-        <li><span>Mês mais frio</span><span>Jul (14,3 °C)</span></li>
-      </ul>
     </div>
   </div>
   <div class="grid-2 mt-1">
@@ -1193,9 +1188,51 @@ async function init() {
     }
   }
 
-  // RM
-  const rm = g(D, 'municipio.regiao_metropolitana');
-  document.getElementById('rmVal').textContent = rm || '—';
+  // Geografia
+  const geo = g(D, 'secoes.geografia');
+  if (geo) {
+    const sede = geo.sede_municipal;
+    if (sede) {
+      document.getElementById('geoSedeAno').textContent = sede.ano || '';
+      document.getElementById('geoSedeVal').textContent = Math.abs(sede.lat).toFixed(3) + '° S, ' + Math.abs(sede.lon).toFixed(3) + '° O';
+    }
+
+    const biomas = geo.biomas || [];
+    document.getElementById('geoBiomaList').innerHTML = biomas.length
+      ? biomas.map(b => '<li><span>' + b.nome + '</span><span>' + b.pct_area.toFixed(1) + '% da área</span></li>').join('')
+      : '<li><span>Sem dado</span><span>—</span></li>';
+
+    document.getElementById('geoSemiaridoVal').textContent = geo.semiarido ? 'Sim' : 'Não';
+
+    const arranjo = geo.arranjo_populacional;
+    if (arranjo) {
+      document.getElementById('geoArranjoVal').textContent = arranjo.nome;
+      document.getElementById('geoArranjoSub').textContent = 'População (2010): ' + fNum(arranjo.populacao_2010 || 0);
+    } else {
+      document.getElementById('geoArranjoVal').textContent = 'Isolado';
+      document.getElementById('geoArranjoSub').textContent = 'Não integra arranjo populacional (IBGE)';
+    }
+
+    const rm = geo.regiao_metropolitana;
+    if (rm) {
+      document.getElementById('geoRmVal').textContent = rm.nome;
+      document.getElementById('geoRmSub').textContent = rm.tipo || '';
+    } else {
+      document.getElementById('geoRmVal').textContent = 'Não integra';
+      document.getElementById('geoRmSub').textContent = '';
+    }
+
+    const ucs = geo.unidades_conservacao;
+    if (ucs) {
+      document.getElementById('geoUcTotal').textContent = '· ' + ucs.total;
+      document.getElementById('geoUcCatList').innerHTML = (ucs.por_categoria || []).map(c =>
+        '<li><span>' + c.categoria + ' (' + c.esfera + ')</span><span>' + c.quantidade + '</span></li>'
+      ).join('');
+      document.getElementById('geoUcListaDet').innerHTML = (ucs.lista || []).map(u =>
+        '<li><span>' + u.unidade_conservacao + '</span><span>' + (u.ano_criacao || '—') + '</span></li>'
+      ).join('');
+    }
+  }
 
   // PRODES
   const prodesArr = g(D, 'secoes.meio_ambiente.prodes.biomas') || [];

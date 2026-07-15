@@ -25,6 +25,218 @@
   "area_km2": 935
  },
  "secoes": {
+  "geografia": {
+   "fonte": "br_geobr_mapas (sede_municipal, arranjo_populacional, semiarido, regiao_metropolitana_2017, bioma, unidade_conservacao)",
+   "sede_municipal": {
+    "ano": 2010,
+    "lat": -22.286461459196047,
+    "lon": -42.53277126296334
+   },
+   "arranjo_populacional": null,
+   "semiarido": false,
+   "regiao_metropolitana": null,
+   "biomas": [
+    {
+     "nome": "Mata Atlântica",
+     "pct_area": 100.00000000000009
+    }
+   ],
+   "unidades_conservacao": {
+    "total": 24,
+    "por_categoria": [
+     {
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "quantidade": 15
+     },
+     {
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "quantidade": 5
+     },
+     {
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Estadual",
+      "quantidade": 3
+     },
+     {
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Federal",
+      "quantidade": 1
+     }
+    ],
+    "lista": [
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Alto Da Boa Vista - Resgate Viii",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2012
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Bacchus",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2009
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Bello E Kerida",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2008
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Carpi",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2010
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Córrego Frio",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2008
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Da Água Boa",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2012
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Duas Pedras",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2010
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Jardim Das Delícias",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2009
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Nêga Fulô",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2012
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Panapaná",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2009
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Reserva Do Sossego I",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2007
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Reserva Do Sossego Ii",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2007
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Reserva Ecológica Rio Bonito De Lumiar",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2017
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Soledade",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2008
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural São José",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2010
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Sítio Azul",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2004
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Sítio Da Luz",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2009
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Terra Do Sol E Da Lua",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2012
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Vale Do Paraíso",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2009
+     },
+     {
+      "unidade_conservacao": "Reserva Particular Do Patrimônio Natural Woodstock",
+      "categoria": "Reserva Particular do Patrimônio Natural",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2008
+     },
+     {
+      "unidade_conservacao": "Área De Proteção Ambiental Da Bacia Do Rio Dos Frades",
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 1990
+     },
+     {
+      "unidade_conservacao": "Área De Proteção Ambiental Da Bacia Do Rio Macacu",
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2002
+     },
+     {
+      "unidade_conservacao": "Área De Proteção Ambiental Da Bacia Do Rio São João - Mico Leão",
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Federal",
+      "organizacao_orgao": "Instituto Chico Mendes de Conservação da Biodiversidade",
+      "ano_criacao": 2002
+     },
+     {
+      "unidade_conservacao": "Área De Proteção Ambiental De Macaé De Cima",
+      "categoria": "Área de Proteção Ambiental",
+      "esfera": "Estadual",
+      "organizacao_orgao": "Instituto Estadual do Ambiente do Rio de Janeiro",
+      "ano_criacao": 2001
+     }
+    ]
+   }
+  },
   "demografia": {
    "fonte": "br_ibge_populacao.municipio · br_ibge_censo_2022",
    "populacao_serie": [
@@ -712,7 +924,7 @@
     "inscritos": 4225,
     "presentes": 3132,
     "redacao": 698.4133738601823,
-    "linguagens": 538.1975683890578,
+    "linguagens": 538.1975683890577,
     "matematica": 577.1218710089399,
     "humanas": 548.4902431610942,
     "natureza": 520.0523627075352,
@@ -745,11 +957,11 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
-     "2": 66,
      "9": 10,
+     "2": 66,
+     "1": 24,
      "3": 316,
-     "4": 1419,
-     "1": 24
+     "4": 1419
     }
    },
    "dengue": {
@@ -765,8 +977,8 @@
      "12|1": 2,
      "10|1": 363,
      "10|None": 2,
-     "8 |None": 18,
-     "11|1": 9
+     "11|1": 9,
+     "8 |None": 18
     }
    },
    "sisvan": {
@@ -1739,7 +1951,7 @@
     "ano": 2024,
     "vinculos_ativos_3112": 56975,
     "vinculos_ativos_ano_anterior": 54441,
-    "remuneracao_media": 2443.0679684637103,
+    "remuneracao_media": 2443.0679684637107,
     "estabelecimentos": 11763
    },
    "caged": {
@@ -1748,7 +1960,7 @@
     "admissoes": 23203,
     "desligamentos": 22091,
     "saldo": 1112,
-    "salario_medio_admissao": 1699.656691618075
+    "salario_medio_admissao": 1699.656691618074
    }
   },
   "agropecuaria": {
