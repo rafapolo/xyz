@@ -225,6 +225,20 @@ a { color: inherit; text-decoration: none; }
 .bench-bars .row.me .fill { background: var(--s1); }
 .bench-bars .row.me { color: var(--text2); font-weight: 500; }
 
+/* VIZ-RANK — ranking combinado (população + PIB per capita) */
+.viz-rank { display: grid; }
+.viz-rank .vr-row { padding: .45rem 0; border-bottom: 1px solid rgba(40,45,63,.4); }
+.viz-rank .vr-row:last-child { border-bottom: none; padding-bottom: 0; }
+.viz-rank .vr-row:first-child { padding-top: 0; }
+.viz-rank .vr-top { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; font-size: .82rem; }
+.viz-rank .vr-name { color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viz-rank .vr-name.me { color: var(--text); font-weight: 600; }
+.viz-rank .vr-pop { font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.viz-rank .vr-bottom { display: flex; align-items: center; gap: .5rem; margin-top: .3rem; }
+.viz-rank .vr-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.viz-rank .vr-fill { height: 100%; border-radius: 3px; }
+.viz-rank .vr-pib { font-size: .68rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; }
+
 /* STATUS — semáforo (ícone + rótulo, nunca só cor) */
 .status { font-size: .68rem; font-weight: 600; display: inline-flex; align-items: center; gap: .3rem; padding: .08rem .45rem; border-radius: 100px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
 .status.st-good { color: var(--st-good); border-color: rgba(12,163,12,.4); }
@@ -1015,27 +1029,9 @@ details.more > .more-body { margin-top: .4rem; }
       </svg>
     </div>
     <div class="card">
-      <h3>Relações regionais</h3>
-      <div class="value-sm" style="margin-bottom:.6rem"><span id="vizinhosContagem"></span> municípios limítrofes</div>
-      <ul class="data-list" id="vizinhosResumo">
-        <li><span>UF</span><span>Todos no Rio de Janeiro</span></li>
-        <li><span>Região imediata</span><span><span data-path="municipio.regiao_imediata"></span> (isolado)</span></li>
-        <li><span>Região intermediária</span><span><span data-path="municipio.regiao_intermediaria"></span></span></li>
-        <li><span>Maior vizinho (pop.)</span><span id="maiorVizinho">Macaé</span></li>
-        <li><span>Menor vizinho (pop.)</span><span id="menorVizinho">Duas Barras</span></li>
-      </ul>
-      <div class="sub" style="margin-top:.6rem;color:var(--text3)">Municípios limítrofes listados no mapa ao lado</div>
-    </div>
-  </div>
-  <div class="grid-2 mt-1">
-    <div class="card">
-      <h3>Ranking de população <span class="vintage" id="viziPopAno"></span></h3>
-      <ul class="data-list" id="viziPopRanking"></ul>
-    </div>
-    <div class="card">
-      <h3>PIB per capita comparado <span class="vintage" id="viziPibAno"></span></h3>
-      <div class="sub" style="margin-bottom:.5rem" id="viziPibResumo"></div>
-      <div class="bench-bars" id="viziPibBars"></div>
+      <h3>Vizinhos — população & PIB per capita <span class="vintage" id="viziAno"></span></h3>
+      <div class="sub" style="margin-bottom:.7rem" id="viziResumo"></div>
+      <div class="viz-rank" id="viziRanking"></div>
     </div>
   </div>
 </div>
@@ -1973,41 +1969,31 @@ async function init() {
     ).join('');
   }
 
-  // Vizinhos
+  // Vizinhos — ranking de população com PIB per capita comparado por linha
   const vizinhos = g(D, 'secoes.vizinhanca.municipios') || [];
   const viziRef = g(D, 'secoes.vizinhanca.referencia');
   const nomeMunicipio = g(D, 'municipio.nome');
-  if (vizinhos.length) {
-    document.getElementById('vizinhosContagem').textContent = vizinhos.length;
-    const porPop = [...vizinhos].sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
-    if (document.getElementById('maiorVizinho')) document.getElementById('maiorVizinho').textContent = porPop[0] ? porPop[0].nome : '—';
-    if (document.getElementById('menorVizinho')) document.getElementById('menorVizinho').textContent = porPop[porPop.length - 1] ? porPop[porPop.length - 1].nome : '—';
+  if (vizinhos.length && document.getElementById('viziRanking')) {
+    const refPop = viziRef && viziRef.populacao;
+    const refPc = (viziRef && viziRef.pib_per_capita) || 0;
+    document.getElementById('viziAno').textContent = (viziRef && viziRef.populacao_ano || '') + ' · PIB ' + (viziRef && viziRef.pib_ano || '');
 
-    // Ranking de população (município + vizinhos)
-    if (document.getElementById('viziPopRanking')) {
-      if (viziRef) document.getElementById('viziPopAno').textContent = viziRef.populacao_ano || '';
-      const ranking = [{ nome: nomeMunicipio, populacao: viziRef && viziRef.populacao, self: true }, ...vizinhos]
-        .sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
-      document.getElementById('viziPopRanking').innerHTML = ranking.map((v, i) =>
-        '<li><span>' + (i + 1) + '. ' + (v.self ? '<b style="color:var(--text)">' + v.nome + '</b>' : v.nome) + '</span><span>' + fNum(v.populacao || 0) + '</span></li>'
-      ).join('');
-    }
+    const acima = vizinhos.filter(v => (v.pib_per_capita || 0) > refPc).length;
+    const abaixo = vizinhos.filter(v => v.pib_per_capita != null && v.pib_per_capita < refPc).length;
+    document.getElementById('viziResumo').innerHTML =
+      vizinhos.length + ' municípios limítrofes (todos no ' + g(D, 'municipio.sigla_uf') + ') · <b style="color:var(--text)">' + nomeMunicipio + '</b>: R$ ' + fNum(Math.round(refPc)) + ' per capita — ' + acima + ' vizinho(s) acima, ' + abaixo + ' abaixo';
 
-    // PIB per capita comparado
-    if (viziRef && document.getElementById('viziPibBars')) {
-      document.getElementById('viziPibAno').textContent = viziRef.pib_ano || '';
-      const refPc = viziRef.pib_per_capita || 0;
-      const acima = vizinhos.filter(v => (v.pib_per_capita || 0) > refPc).length;
-      const abaixo = vizinhos.filter(v => v.pib_per_capita != null && v.pib_per_capita < refPc).length;
-      document.getElementById('viziPibResumo').innerHTML =
-        '<b style="color:var(--text)">' + nomeMunicipio + ':</b> R$ ' + fNum(Math.round(refPc)) + ' · ' + acima + ' vizinho(s) acima, ' + abaixo + ' abaixo';
-      const linhas = [{ nome: nomeMunicipio, valor: refPc, self: true }, ...vizinhos.map(v => ({ nome: v.nome, valor: v.pib_per_capita || 0 }))]
-        .sort((a, b) => b.valor - a.valor);
-      const maxPc = Math.max(...linhas.map(l => l.valor), 1);
-      document.getElementById('viziPibBars').innerHTML = linhas.map(l =>
-        '<div class="row' + (l.self ? ' me' : '') + '"><span>' + l.nome + '</span><div class="track"><div class="fill" style="width:' + (l.valor / maxPc * 100).toFixed(0) + '%"></div></div><span>' + Math.round(l.valor / 1000) + 'k</span></div>'
-      ).join('');
-    }
+    const ranking = [{ nome: nomeMunicipio, populacao: refPop, pib_per_capita: refPc, self: true }, ...vizinhos]
+      .sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
+    const maxPc = Math.max(...ranking.map(v => v.pib_per_capita || 0), 1);
+    document.getElementById('viziRanking').innerHTML = ranking.map((v, i) => {
+      const pc = v.pib_per_capita || 0;
+      const fillColor = v.self ? C.s1 : (pc >= refPc ? C.s5 : C.s6);
+      return '<div class="vr-row">' +
+        '<div class="vr-top"><span class="vr-name' + (v.self ? ' me' : '') + '">' + (i + 1) + '. ' + v.nome + '</span><span class="vr-pop">' + fNum(v.populacao || 0) + ' hab</span></div>' +
+        '<div class="vr-bottom"><div class="vr-track"><div class="vr-fill" style="width:' + (pc / maxPc * 100).toFixed(0) + '%;background:' + fillColor + '"></div></div><span class="vr-pib">R$ ' + Math.round(pc / 1000) + 'k/hab</span></div>' +
+        '</div>';
+    }).join('');
   }
 
   // Insights
