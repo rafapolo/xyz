@@ -285,13 +285,13 @@ function getShareState() {
   return currentState;
 }
 
-// dados por ano ficam em arquivos separados (dados/salarios_<ano>.json)
+// dados por ano ficam em arquivos separados (dados/salarios_<ano>.json.gz)
 // para o primeiro carregamento ser leve; anos são buscados sob demanda
 const loadedYears = new Set();
 
 async function ensureYear(ano) {
   if (loadedYears.has(ano)) return;
-  const setores = await ATLAS.loadJSON(`dados/salarios_${ano}.json`);
+  const setores = await ATLAS.loadJSON(`dados/salarios_${ano}.json.gz`);
   for (const [setor, entries] of Object.entries(setores)) {
     for (const e of entries) {
       if (e.id_municipio == null) continue;
@@ -605,8 +605,8 @@ function fitBrazil(map, animate) {
 
   salaryLookup = {};
   const [geojson, nomes] = await Promise.all([
-    ATLAS.loadJSON('dados/municipios.geojson'),
-    ATLAS.loadJSON('dados/id_municipio_nome.json'),
+    ATLAS.loadJSON('dados/municipios.geojson.gz'),
+    ATLAS.loadJSON('dados/id_municipio_nome.json.gz'),
     ensureYear(currentState.ano),
   ]);
 

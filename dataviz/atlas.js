@@ -138,6 +138,10 @@ const ATLAS = (() => {
   async function loadJSON(url) {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
+    if (url.endsWith('.gz')) {
+      const body = new Response(resp.body.pipeThrough(new DecompressionStream('gzip')));
+      return body.json();
+    }
     return resp.json();
   }
 

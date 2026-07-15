@@ -7,16 +7,18 @@ Usage:
   BEELINK_HOST=custom-host python extrai_dados.py
 
 Output:
-  dados/municipios.geojson      # GeoJSON FeatureCollection (5.570 polygons)
-  dados/salarios_<ano>.json     # { setor: [{ id_municipio, salario_medio, ... }] } por ano
+  dados/municipios.geojson.gz   # Gzipped GeoJSON FeatureCollection (5.570 polygons)
+  dados/salarios_<ano>.json.gz  # Gzipped { setor: [{ id_municipio, salario_medio, ... }] } por ano
                                 # (arquivos por ano para o mapa carregar sob demanda)
 
 Após extrair, simplifique as geometrias (43MB → ~6MB, obrigatório para a web):
   npx mapshaper dados/municipios.geojson -simplify 8% keep-shapes -clean \\
     -o precision=0.0001 force dados/municipios.geojson
+  # Depois compacte com gzip:
+  gzip -9 dados/municipios.geojson dados/salarios_*.json
 """
 
-import json, os, subprocess, sys
+import gzip, json, os, subprocess, sys
 from pathlib import Path
 
 OUT_DIR = Path("dados")
@@ -148,14 +150,20 @@ def main():
     with open(geojson_path, "w") as f:
         json.dump(geojson, f, ensure_ascii=False)
 
-    print(f"[viz28]  Done!")
+    print(f"[viz28]  Done! Gzipping...")
     for ano, setores in sorted(salarios.items()):
         path = OUT_DIR / f"salarios_{ano}.json"
         with open(path, "w") as f:
             json.dump(setores, f, ensure_ascii=False)
-        print(f"  {path}  ({path.stat().st_size / 1e6:.1f} MB)")
-    print(f"  {geojson_path}  ({geojson_path.stat().st_size / 1e6:.1f} MB)")
-    print("  Lembre de simplificar o geojson com mapshaper (ver docstring).")
+        with gzip.open(f"{path}.gz", "wt", encoding="utf-8") as f:
+            json.dump(setores, f, ensure_ascii=False)
+        os.unlink(path)
+        print(f"  {path}.gz  ({(Path(f'{path}.gz').stat().st_size / 1e6):.1f} MB)")
+    with gzip.open(f"{geojson_path}.gz", "wt", encoding="utf-8") as f:
+        json.dump(geojson, f, ensure_ascii=False)
+    os.unlink(geojson_path)
+    print(f"  {geojson_path}.gz  ({(Path(f'{geojson_path}.gz').stat().st_size / 1e6):.1f} MB)")
+    print("  Lembre de simplificar o geojson com mapshaper ANTES do gzip (ver docstring).")
 
 
 if __name__ == "__main__":
