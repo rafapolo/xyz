@@ -737,28 +737,57 @@ def trabalho_rais(mid):
 
 @section
 def trabalho_top_empregadores(mid):
-    """RAIS anonimiza os microdados (sem CNPJ/razão social), então não é possível
-    identificar empresas pelo nome — apenas o setor (CNAE) e a natureza jurídica do
-    maior estabelecimento privado por nº de vínculos ativos."""
-    t = p("br_me_rais", "microdados_estabelecimentos")
+    """br_me_rais_identificada tem razão social (RAIS padrão não identifica empresa).
+    Agrupa por CNPJ básico (uma empresa pode ter matriz + filiais) e filtra só
+    empresas privadas de fato: exclui natureza jurídica pública (1xxx) e
+    cooperativas/associações/fundações (mantém só natureza_juridica LIKE '2%',
+    excluindo cooperativas 2143/2330)."""
+    t = p("br_me_rais_identificada", "estabelecimentos")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
     cnae = p("br_bd_diretorios_brasil", "cnae_2")
     nat = p("br_bd_diretorios_brasil", "natureza_juridica")
     rows = q(f"""
-        SELECT c.descricao_subclasse setor, c.descricao_divisao divisao, n.descricao natureza,
-               e.indicador_simples, e.quantidade_vinculos_ativos
+        SELECT e.cnpj_basico, any_value(e.razao_social) razao_social,
+               any_value(n.descricao) natureza, any_value(c.descricao_subclasse) setor,
+               sum(e.quantidade_vinculos_ativos) vinculos_ativos
         FROM {t} e
-        LEFT JOIN {cnae} c ON c.subclasse = e.cnae_2_subclasse
+        LEFT JOIN {cnae} c ON c.subclasse = e.cnae_fiscal_principal
         LEFT JOIN {nat} n ON n.id_natureza_juridica = e.natureza_juridica
         WHERE e.id_municipio='{mid}' AND e.ano={ano}
-          AND e.natureza_juridica NOT LIKE '1%' AND e.quantidade_vinculos_ativos > 0
-        ORDER BY e.quantidade_vinculos_ativos DESC LIMIT 10""")
+          AND e.natureza_juridica LIKE '2%' AND e.natureza_juridica NOT IN ('2143', '2330')
+          AND e.quantidade_vinculos_ativos > 0
+        GROUP BY e.cnpj_basico
+        ORDER BY vinculos_ativos DESC LIMIT 10""")
     return {
-        "fonte": "br_me_rais.microdados_estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — sem nome de empresa (RAIS anonimizada)",
+        "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
         "ano": ano,
-        "top": [{"setor": r["setor"], "divisao": r["divisao"], "natureza": r["natureza"],
-                 "simples": r["indicador_simples"] == "1",
-                 "vinculos_ativos": num(r["quantidade_vinculos_ativos"])} for r in rows],
+        "top": [{"empresa": r["razao_social"], "setor": r["setor"], "natureza": r["natureza"],
+                 "vinculos_ativos": num(r["vinculos_ativos"])} for r in rows],
+    }
+
+
+@section
+def trabalho_top_empregadores_publicos(mid):
+    """Mesma base (br_me_rais_identificada), mas natureza_juridica LIKE '1%'
+    (administração pública direta/indireta) — prefeitura, câmara, autarquias,
+    fundações públicas etc."""
+    t = p("br_me_rais_identificada", "estabelecimentos")
+    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    nat = p("br_bd_diretorios_brasil", "natureza_juridica")
+    rows = q(f"""
+        SELECT e.cnpj_basico, any_value(e.razao_social) razao_social,
+               any_value(n.descricao) natureza, sum(e.quantidade_vinculos_ativos) vinculos_ativos
+        FROM {t} e
+        LEFT JOIN {nat} n ON n.id_natureza_juridica = e.natureza_juridica
+        WHERE e.id_municipio='{mid}' AND e.ano={ano}
+          AND e.natureza_juridica LIKE '1%' AND e.quantidade_vinculos_ativos > 0
+        GROUP BY e.cnpj_basico
+        ORDER BY vinculos_ativos DESC LIMIT 10""")
+    return {
+        "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (natureza_juridica) — administração pública direta e indireta",
+        "ano": ano,
+        "top": [{"empresa": r["razao_social"], "natureza": r["natureza"],
+                 "vinculos_ativos": num(r["vinculos_ativos"])} for r in rows],
     }
 
 
@@ -908,7 +937,8 @@ def main():
             "social": social(mid),
             "comercio_exterior": comex(mid),
             "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
-                         "top_empregadores": trabalho_top_empregadores(mid)},
+                         "top_empregadores": trabalho_top_empregadores(mid),
+                         "top_empregadores_publicos": trabalho_top_empregadores_publicos(mid)},
             "agropecuaria": agropecuaria(mid),
             "beneficios": beneficios(mid),
             "vizinhanca": vizinhanca(mid),

@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function () {
+  var stored = localStorage.getItem('rodado-theme');
+  if (stored === 'light') document.documentElement.setAttribute('data-theme', 'light');
+})();
+</script>
 <title id="pageTitle">Dashboard Municipal</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
@@ -12,7 +18,7 @@ const JSON_PATH = new URLSearchParams(location.search).get('id')
 
 async function loadData() {
   const r = await fetch(JSON_PATH);
-  if (!r.ok) { document.body.innerHTML = `<p style="color:#e66767;padding:2rem;font-family:sans-serif">Erro ao carregar ${JSON_PATH}: ${r.status}</p>`; return null; }
+  if (!r.ok) { document.body.innerHTML = `<p style="color:#d03b3b;padding:2rem;font-family:sans-serif">Erro ao carregar ${JSON_PATH}: ${r.status}</p>`; return null; }
   return r.json();
 }
 
@@ -66,16 +72,31 @@ function renderDataPaths(D) {
   --bg: #0b0d14; --surface: #151821; --surface2: #1e2230;
   --border: #282d3f; --border-hover: #3a4160;
   --text: #e2e5f0; --text2: #7a8099; --text3: #545a75;
-  --accent: #7b9bff;
+  --accent: #7b9bff; --accent-rgb: 123,155,255;
   /* série categórica validada (dark, superfície #151821) */
   --s1: #3987e5; --s2: #008300; --s3: #d55181; --s4: #c98500;
   --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+  --s1-rgb: 57,135,229; --s4-rgb: 201,133,0; --s8-rgb: 230,103,103;
   /* status — reservado, nunca reusado como série */
   --st-good: #0ca30c; --st-warn: #fab219; --st-serious: #ec835a; --st-crit: #d03b3b;
   --delta-good: #0ca30c; --delta-bad: #e66767;
   --radius: 12px; --radius-sm: 8px;
   --shadow: 0 2px 16px rgba(0,0,0,.5);
   --transition: .2s cubic-bezier(.4,0,.2,1);
+}
+:root[data-theme="light"] {
+  --bg: #f9f9f7; --surface: #fcfcfb; --surface2: #f2f1ed;
+  --border: #e1e0d9; --border-hover: #c3c2b7;
+  --text: #0b0b0b; --text2: #52514e; --text3: #898781;
+  --accent: #2a78d6; --accent-rgb: 42,120,214;
+  /* mesma série categórica, passo claro validado (superfície #fcfcfb) */
+  --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
+  --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+  --s1-rgb: 42,120,214; --s4-rgb: 237,161,0; --s8-rgb: 227,73,72;
+  /* status — mesmos hex, cor fixa nos dois modos */
+  --st-good: #0ca30c; --st-warn: #fab219; --st-serious: #ec835a; --st-crit: #d03b3b;
+  --delta-good: #006300; --delta-bad: #e34948;
+  --shadow: 0 2px 16px rgba(11,11,11,.08);
 }
 html { font-size: 15px; scroll-behavior: smooth; }
 body {
@@ -97,9 +118,19 @@ a { color: inherit; text-decoration: none; }
   z-index: 100; display: flex; flex-direction: column;
 }
 .sidebar-header { padding: 1.25rem 1rem .85rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sidebar-header-top { display: flex; align-items: center; justify-content: space-between; }
 .sidebar-header .logo { font-size: .85rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: .5rem; }
 .sidebar-header .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
 .sidebar-header .sub { font-size: .7rem; color: var(--text2); margin-top: .15rem; }
+.theme-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text2);
+  cursor: pointer; font-size: .75rem; line-height: 1;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
 .sidebar-nav { flex: 1; overflow-y: auto; padding: .35rem 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
@@ -114,8 +145,8 @@ a { color: inherit; text-decoration: none; }
   text-decoration: none; transition: all var(--transition);
   border-left: 2px solid transparent;
 }
-.sidebar-item:hover { color: var(--text); background: rgba(123,155,255,.05); }
-.sidebar-item.active { color: var(--accent); background: rgba(123,155,255,.1); border-left-color: var(--accent); }
+.sidebar-item:hover { color: var(--text); background: rgba(var(--accent-rgb),.05); }
+.sidebar-item.active { color: var(--accent); background: rgba(var(--accent-rgb),.1); border-left-color: var(--accent); }
 .sidebar-item .s-icon { font-size: .85rem; flex-shrink: 0; opacity: .7; }
 .sidebar-item.active .s-icon { opacity: 1; }
 .sidebar-footer { padding: .75rem 1rem; border-top: 1px solid var(--border); font-size: .7rem; color: var(--text3); flex-shrink: 0; }
@@ -124,7 +155,7 @@ a { color: inherit; text-decoration: none; }
 .hero { position: relative; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow: hidden; }
 .hero::before {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(123,155,255,.07) 0%, transparent 60%);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb),.07) 0%, transparent 60%);
   pointer-events: none;
 }
 .hero-badge {
@@ -221,7 +252,7 @@ a { color: inherit; text-decoration: none; }
 .bench-bars { margin-top: .5rem; display: grid; gap: .3rem; font-size: .68rem; color: var(--text3); }
 .bench-bars .row { display: grid; grid-template-columns: 58px 1fr auto; gap: .5rem; align-items: center; }
 .bench-bars .track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.bench-bars .fill { height: 100%; border-radius: 3px; background: rgba(57,135,229,.35); }
+.bench-bars .fill { height: 100%; border-radius: 3px; background: rgba(var(--s1-rgb),.35); }
 .bench-bars .row.me .fill { background: var(--s1); }
 .bench-bars .row.me { color: var(--text2); font-weight: 500; }
 
@@ -292,7 +323,7 @@ details.more[open] summary::before { content: '−'; }
 details.more > .more-body { margin-top: .4rem; }
 
 /* METER */
-.meter { height: 8px; border-radius: 4px; overflow: hidden; background: rgba(57,135,229,.16); margin: .5rem 0 .3rem; }
+.meter { height: 8px; border-radius: 4px; overflow: hidden; background: rgba(var(--s1-rgb),.16); margin: .5rem 0 .3rem; }
 .meter .meter-fill { height: 100%; border-radius: 4px; background: var(--s1); }
 .meter-legend { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text3); }
 
@@ -301,8 +332,8 @@ details.more > .more-body { margin-top: .4rem; }
 .card-center-map .minimap { margin: auto 0; }
 .minimap { width: 100%; height: auto; display: block; }
 .minimap .mm-cell { fill: var(--surface2); stroke: var(--border-hover); stroke-width: 1; rx: 8; transition: fill var(--transition); }
-.minimap .mm-cell:hover { fill: rgba(123,155,255,.15); }
-.minimap .mm-center { fill: rgba(57,135,229,.25); stroke: var(--s1); }
+.minimap .mm-cell:hover { fill: rgba(var(--accent-rgb),.15); }
+.minimap .mm-center { fill: rgba(var(--s1-rgb),.25); stroke: var(--s1); }
 .minimap text { font-family: inherit; fill: var(--text2); font-size: 11px; }
 .minimap .mm-code { fill: var(--text3); font-size: 9px; }
 .minimap .mm-center-label { fill: var(--text); font-weight: 600; }
@@ -375,7 +406,10 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-header">
-    <div class="logo"><span class="logo-dot"></span> Rodado</div>
+    <div class="sidebar-header-top">
+      <div class="logo"><span class="logo-dot"></span> Rodado</div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
+    </div>
     <div class="sub"><span data-path="municipio.nome"></span> · <span data-path="municipio.sigla_uf"></span></div>
   </div>
   <nav class="sidebar-nav">
@@ -438,7 +472,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- VISÃO GERAL -->
 <div class="section" id="resumo">
   <div class="section-header">
-    <div class="icon" style="background:rgba(123,155,255,.12);color:var(--accent)">⭐</div>
+    <div class="icon" style="background:rgba(var(--accent-rgb),.12);color:var(--accent)">⭐</div>
     <h2>Visão Geral</h2>
     <span class="table-name">síntese · 8 indicadores-chave</span>
   </div>
@@ -503,7 +537,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- DEMOGRAFIA -->
 <div class="section" id="demo">
   <div class="section-header">
-    <div class="icon" style="background:rgba(123,155,255,.12);color:var(--accent)">👥</div>
+    <div class="icon" style="background:rgba(var(--accent-rgb),.12);color:var(--accent)">👥</div>
     <h2>Demografia & População</h2>
     <span class="table-name">br_ibge_populacao · censo_2022 · ms_populacao</span>
   </div>
@@ -599,7 +633,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- INFRAESTRUTURA -->
 <div class="section" id="infra">
   <div class="section-header">
-    <div class="icon" style="background:rgba(57,135,229,.12);color:var(--s1)">🚰</div>
+    <div class="icon" style="background:rgba(var(--s1-rgb),.12);color:var(--s1)">🚰</div>
     <h2>Infraestrutura & Saneamento</h2>
     <span class="table-name">br_ana_atlas_esgotos · br_mdr_snis</span>
   </div>
@@ -639,7 +673,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- ECONOMIA -->
 <div class="section" id="econ">
   <div class="section-header">
-    <div class="icon" style="background:rgba(201,133,0,.15);color:var(--s4)">💰</div>
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">💰</div>
     <h2>Economia & Finanças</h2>
     <span class="table-name">br_ibge_pib · br_me_siconfi · br_bcb_estban</span>
   </div>
@@ -713,13 +747,20 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric st-good-b"><h3>Saldo CAGED <span class="vintage" id="cagedAno"></span></h3><div class="value" id="cagedSaldoVal"></div><div class="sub" id="cagedDetSub"></div></div>
     <div class="card card-metric"><h3>Salário médio <span class="vintage" id="raisAno3"></span></h3><div class="value" id="raisSalMed"></div><div class="bench" id="raisSalBench"></div></div>
   </div>
-  <div class="card mt-1">
-    <h3>Maiores empregadores privados <span class="vintage" id="empregAno"></span></h3>
-    <div class="sub" style="margin-bottom:.4rem">Estabelecimentos com mais vínculos ativos, por setor · RAIS não identifica nome de empresa</div>
-    <ul class="data-list" id="empregList"></ul>
-    <details class="more"><summary>ver detalhes</summary>
-      <ul class="data-list more-body" id="empregDetList"></ul>
-    </details>
+  <div class="grid-2 mt-1">
+    <div class="card">
+      <h3>Maiores empregadores privados <span class="vintage" id="empregAno"></span></h3>
+      <div class="sub" style="margin-bottom:.4rem">Empresas privadas com mais vínculos ativos (exclui setor público e cooperativas)</div>
+      <ul class="data-list" id="empregList"></ul>
+      <details class="more"><summary>ver detalhes</summary>
+        <ul class="data-list more-body" id="empregDetList"></ul>
+      </details>
+    </div>
+    <div class="card">
+      <h3>Maiores empregadores públicos <span class="vintage" id="empregPubAno"></span></h3>
+      <div class="sub" style="margin-bottom:.4rem">Administração pública direta e indireta com mais vínculos ativos</div>
+      <ul class="data-list" id="empregPubList"></ul>
+    </div>
   </div>
 </div>
 
@@ -751,7 +792,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- COMÉRCIO EXTERIOR -->
 <div class="section" id="comex">
   <div class="section-header">
-    <div class="icon" style="background:rgba(123,155,255,.12);color:var(--accent)">📦</div>
+    <div class="icon" style="background:rgba(var(--accent-rgb),.12);color:var(--accent)">📦</div>
     <h2>Comércio Exterior</h2>
     <span class="table-name">br_me_comex_stat</span>
   </div>
@@ -779,7 +820,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- EDUCAÇÃO -->
 <div class="section" id="educ">
   <div class="section-header">
-    <div class="icon" style="background:rgba(57,135,229,.12);color:var(--s1)">📚</div>
+    <div class="icon" style="background:rgba(var(--s1-rgb),.12);color:var(--s1)">📚</div>
     <h2>Educação</h2>
     <span class="table-name">br_inep_ideb · saeb · indicadores_educacionais</span>
   </div>
@@ -841,7 +882,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- SAÚDE -->
 <div class="section" id="saude">
   <div class="section-header">
-    <div class="icon" style="background:rgba(230,103,103,.12);color:var(--s8)">🏥</div>
+    <div class="icon" style="background:rgba(var(--s8-rgb),.12);color:var(--s8)">🏥</div>
     <h2>Saúde</h2>
     <span class="table-name">br_ms_cnes · sinan · sinasc</span>
   </div>
@@ -871,7 +912,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- SEGURANÇA -->
 <div class="section" id="seg">
   <div class="section-header">
-    <div class="icon" style="background:rgba(230,103,103,.12);color:var(--s8)">👮</div>
+    <div class="icon" style="background:rgba(var(--s8-rgb),.12);color:var(--s8)">👮</div>
     <h2>Segurança Pública</h2>
     <span class="table-name">br_fbsp_absp · br_rj_isp_estatisticas</span>
   </div>
@@ -900,7 +941,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- CONECTIVIDADE -->
 <div class="section" id="conect">
   <div class="section-header">
-    <div class="icon" style="background:rgba(123,155,255,.12);color:var(--accent)">📶</div>
+    <div class="icon" style="background:rgba(var(--accent-rgb),.12);color:var(--accent)">📶</div>
     <h2>Conectividade & Tecnologia</h2>
     <span class="table-name">br_anatel_banda_larga · indice_conectividade</span>
   </div>
@@ -915,7 +956,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- POLÍTICA -->
 <div class="section" id="pol">
   <div class="section-header">
-    <div class="icon" style="background:rgba(201,133,0,.15);color:var(--s4)">🗳️</div>
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🗳️</div>
     <h2>Política & Eleições</h2>
     <span class="table-name">br_tse_eleicoes</span>
   </div>
@@ -938,7 +979,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- TRANSPARÊNCIA -->
 <div class="section" id="transp">
   <div class="section-header">
-    <div class="icon" style="background:rgba(57,135,229,.12);color:var(--s1)">🔍</div>
+    <div class="icon" style="background:rgba(var(--s1-rgb),.12);color:var(--s1)">🔍</div>
     <h2>Transparência & Governança</h2>
     <span class="table-name">br_cgu_ebt · clp_ranking_competitividade</span>
   </div>
@@ -966,7 +1007,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- VULNERABILIDADE -->
 <div class="section" id="social">
   <div class="section-header">
-    <div class="icon" style="background:rgba(201,133,0,.15);color:var(--s4)">🤝</div>
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🤝</div>
     <h2>Social & Vulnerabilidade</h2>
     <span class="table-name">br_ipea_avs · br_abrinq_oca</span>
   </div>
@@ -991,7 +1032,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- BENEFÍCIOS -->
 <div class="section" id="benef">
   <div class="section-header">
-    <div class="icon" style="background:rgba(201,133,0,.15);color:var(--s4)">🫂</div>
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🫂</div>
     <h2>Benefícios Sociais</h2>
     <span class="table-name">br_cgu_beneficios_cidadao</span>
   </div>
@@ -1006,7 +1047,7 @@ details.more > .more-body { margin-top: .4rem; }
 <!-- VIZINHANÇA -->
 <div class="section" id="vizi">
   <div class="section-header">
-    <div class="icon" style="background:rgba(57,135,229,.12);color:var(--s1)">📍</div>
+    <div class="icon" style="background:rgba(var(--s1-rgb),.12);color:var(--s1)">📍</div>
     <h2>Vizinhança</h2>
     <span class="table-name">br_bd_vizinhanca · br_ibge_populacao · br_ibge_pib</span>
   </div>
@@ -1072,21 +1113,36 @@ details.more > .more-body { margin-top: .4rem; }
 </nav>
 
 <script>
-const C = {
-  s1: '#3987e5', s2: '#008300', s3: '#d55181', s4: '#c98500',
-  s5: '#199e70', s6: '#d95926', s7: '#9085e9', s8: '#e66767',
-  s1fill: 'rgba(57,135,229,.10)', s2fill: 'rgba(0,131,0,.10)',
-  s3fill: 'rgba(213,81,129,.10)', s4fill: 'rgba(201,133,0,.10)',
-  surface: '#151821', grid: 'rgba(40,45,63,.5)', tick: '#7a8099', muted: '#545a75',
+const THEME = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+const PALETTES = {
+  dark: {
+    s1: '#3987e5', s2: '#008300', s3: '#d55181', s4: '#c98500',
+    s5: '#199e70', s6: '#d95926', s7: '#9085e9', s8: '#e66767',
+    s1fill: 'rgba(57,135,229,.10)', s2fill: 'rgba(0,131,0,.10)',
+    s3fill: 'rgba(213,81,129,.10)', s4fill: 'rgba(201,133,0,.10)',
+    surface: '#151821', surface2: '#1e2230', grid: 'rgba(40,45,63,.5)', tick: '#7a8099', muted: '#545a75',
+    ordinal4: ['#b7d3f6', '#6da7ec', '#2a78d6', '#184f95'],
+    tooltipBg: '#1e2230', tooltipTitle: '#e2e5f0', tooltipBody: '#7a8099', tooltipBorder: '#282d3f',
+  },
+  light: {
+    s1: '#2a78d6', s2: '#008300', s3: '#e87ba4', s4: '#eda100',
+    s5: '#1baf7a', s6: '#eb6834', s7: '#4a3aa7', s8: '#e34948',
+    s1fill: 'rgba(42,120,214,.10)', s2fill: 'rgba(0,131,0,.10)',
+    s3fill: 'rgba(232,123,164,.10)', s4fill: 'rgba(237,161,0,.10)',
+    surface: '#fcfcfb', surface2: '#f2f1ed', grid: 'rgba(225,224,217,.7)', tick: '#52514e', muted: '#898781',
+    ordinal4: ['#86b6ef', '#5598e7', '#2a78d6', '#184f95'],
+    tooltipBg: '#f2f1ed', tooltipTitle: '#0b0b0b', tooltipBody: '#52514e', tooltipBorder: '#e1e0d9',
+  },
 };
-const ordinal4 = ['#b7d3f6', '#6da7ec', '#2a78d6', '#184f95'];
+const C = PALETTES[THEME];
+const ordinal4 = C.ordinal4;
 const chartOpts = {
   responsive: true, maintainAspectRatio: false,
   plugins: {
     legend: { position: 'top', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 12 } },
     tooltip: {
-      backgroundColor: '#1e2230', titleColor: '#e2e5f0', bodyColor: '#7a8099',
-      borderColor: '#282d3f', borderWidth: 1, padding: 10, cornerRadius: 8, boxPadding: 6, usePointStyle: true,
+      backgroundColor: C.tooltipBg, titleColor: C.tooltipTitle, bodyColor: C.tooltipBody,
+      borderColor: C.tooltipBorder, borderWidth: 1, padding: 10, cornerRadius: 8, boxPadding: 6, usePointStyle: true,
     }
   },
   scales: {
@@ -1096,6 +1152,17 @@ const chartOpts = {
 };
 const noLegend = { ...chartOpts.plugins, legend: { display: false } };
 const lineStyle = { borderWidth: 2, tension: .3, pointRadius: 4, pointBorderColor: C.surface, pointBorderWidth: 2 };
+
+// Alternância de tema — recarrega a página pra reconstruir os gráficos com a paleta correta
+const themeToggleBtn = document.getElementById('themeToggle');
+if (themeToggleBtn) {
+  themeToggleBtn.textContent = THEME === 'light' ? '☀️' : '🌙';
+  themeToggleBtn.addEventListener('click', () => {
+    sessionStorage.setItem('rodado-scroll', String(scrollY));
+    localStorage.setItem('rodado-theme', THEME === 'light' ? 'dark' : 'light');
+    location.reload();
+  });
+}
 const fNum = n => n == null ? '' : Number(n).toLocaleString('pt-BR');
 const fNum1 = n => n == null ? '' : Number(n).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
 const fPct = n => n == null ? '' : (Number(n) * 100).toFixed(1) + '%';
@@ -1933,11 +2000,22 @@ async function init() {
   const empregTop = (empreg && empreg.top) || [];
   if (empregTop.length) {
     document.getElementById('empregAno').textContent = empreg.ano || '';
-    const rowEmpreg = e => '<li><span>' + (e.setor || e.divisao || 'setor não informado') +
-      (e.natureza ? ' <span style="color:var(--text3)">· ' + e.natureza + '</span>' : '') +
+    const rowEmpreg = e => '<li><span>' + (e.empresa || 'empresa não informada') +
+      (e.setor ? ' <span style="color:var(--text3)">· ' + e.setor + '</span>' : '') +
       '</span><span>' + fNum(e.vinculos_ativos || 0) + ' vínculos</span></li>';
     document.getElementById('empregList').innerHTML = empregTop.slice(0, 5).map(rowEmpreg).join('');
     document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map(rowEmpreg).join('');
+  }
+
+  // Maiores empregadores públicos
+  const empregPub = g(D, 'secoes.trabalho.top_empregadores_publicos');
+  const empregPubTop = (empregPub && empregPub.top) || [];
+  if (empregPubTop.length) {
+    document.getElementById('empregPubAno').textContent = empregPub.ano || '';
+    const rowEmpregPub = e => '<li><span>' + (e.empresa || 'órgão não informado') +
+      (e.natureza ? ' <span style="color:var(--text3)">· ' + e.natureza + '</span>' : '') +
+      '</span><span>' + fNum(e.vinculos_ativos || 0) + ' vínculos</span></li>';
+    document.getElementById('empregPubList').innerHTML = empregPubTop.map(rowEmpregPub).join('');
   }
 
   // Comex
@@ -2105,7 +2183,7 @@ async function init() {
     const path = pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
     const [ex, ey] = pts[pts.length - 1];
     el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
-      '<polyline points="' + path + '" fill="none" stroke="#545a75" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<polyline points="' + path + '" fill="none" stroke="' + C.muted + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
       '<circle cx="' + ex.toFixed(1) + '" cy="' + ey.toFixed(1) + '" r="2.5" fill="' + C.s1 + '" stroke="' + C.surface + '" stroke-width="1.5"/></svg>';
   });
 
@@ -2136,6 +2214,12 @@ async function init() {
   }, { passive: true });
   addEventListener('resize', updateSpy);
   updateSpy();
+
+  const savedScroll = sessionStorage.getItem('rodado-scroll');
+  if (savedScroll != null) {
+    sessionStorage.removeItem('rodado-scroll');
+    scrollTo(0, Number(savedScroll));
+  }
 }
 
 init();
