@@ -297,6 +297,8 @@ details.more > .more-body { margin-top: .4rem; }
 .meter-legend { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text3); }
 
 /* MINI MAPA (esquemático) */
+.card-center-map { display: flex; flex-direction: column; }
+.card-center-map .minimap { margin: auto 0; }
 .minimap { width: 100%; height: auto; display: block; }
 .minimap .mm-cell { fill: var(--surface2); stroke: var(--border-hover); stroke-width: 1; rx: 8; transition: fill var(--transition); }
 .minimap .mm-cell:hover { fill: rgba(123,155,255,.15); }
@@ -711,6 +713,14 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric st-good-b"><h3>Saldo CAGED <span class="vintage" id="cagedAno"></span></h3><div class="value" id="cagedSaldoVal"></div><div class="sub" id="cagedDetSub"></div></div>
     <div class="card card-metric"><h3>Salário médio <span class="vintage" id="raisAno3"></span></h3><div class="value" id="raisSalMed"></div><div class="bench" id="raisSalBench"></div></div>
   </div>
+  <div class="card mt-1">
+    <h3>Maiores empregadores privados <span class="vintage" id="empregAno"></span></h3>
+    <div class="sub" style="margin-bottom:.4rem">Estabelecimentos com mais vínculos ativos, por setor · RAIS não identifica nome de empresa</div>
+    <ul class="data-list" id="empregList"></ul>
+    <details class="more"><summary>ver detalhes</summary>
+      <ul class="data-list more-body" id="empregDetList"></ul>
+    </details>
+  </div>
 </div>
 
 <!-- AGROPECUÁRIA -->
@@ -1001,26 +1011,26 @@ details.more > .more-body { margin-top: .4rem; }
     <span class="table-name">br_bd_vizinhanca · br_ibge_populacao · br_ibge_pib</span>
   </div>
   <div class="grid-2">
-    <div class="card">
+    <div class="card card-center-map">
       <h3>Mapa esquemático <span style="text-transform:none;letter-spacing:0;color:var(--text3)">(posição aproximada)</span></h3>
       <svg class="minimap" viewBox="0 0 460 300" role="img" aria-label="Mapa esquemático dos municípios vizinhos de Nova Friburgo">
         <!-- N -->
-        <rect class="mm-cell" x="80"  y="10"  width="130" height="52" rx="8"/><text x="145" y="32" text-anchor="middle">Sumidouro</text><text class="mm-code" x="145" y="48" text-anchor="middle">3305701</text>
-        <rect class="mm-cell" x="230" y="10"  width="130" height="52" rx="8"/><text x="295" y="32" text-anchor="middle">Duas Barras</text><text class="mm-code" x="295" y="48" text-anchor="middle">3301604</text>
+        <rect class="mm-cell" x="80"  y="10"  width="130" height="52" rx="8"/><text x="145" y="32" text-anchor="middle">Sumidouro</text><text class="mm-code" data-mid="3305703" x="145" y="48" text-anchor="middle"></text>
+        <rect class="mm-cell" x="230" y="10"  width="130" height="52" rx="8"/><text x="295" y="32" text-anchor="middle">Duas Barras</text><text class="mm-code" data-mid="3301603" x="295" y="48" text-anchor="middle"></text>
         <!-- NE -->
-        <rect class="mm-cell" x="330" y="76"  width="120" height="52" rx="8"/><text x="390" y="98" text-anchor="middle">Bom Jardim</text><text class="mm-code" x="390" y="114" text-anchor="middle">3300506</text>
-        <rect class="mm-cell" x="330" y="140" width="120" height="52" rx="8"/><text x="390" y="158" text-anchor="middle">Trajano de</text><text x="390" y="172" text-anchor="middle">Moraes · <tspan class="mm-code">3305909</tspan></text>
+        <rect class="mm-cell" x="330" y="76"  width="120" height="52" rx="8"/><text x="390" y="98" text-anchor="middle">Bom Jardim</text><text class="mm-code" data-mid="3300506" x="390" y="114" text-anchor="middle"></text>
+        <rect class="mm-cell" x="330" y="140" width="120" height="52" rx="8"/><text x="390" y="158" text-anchor="middle">Trajano de</text><text x="390" y="172" text-anchor="middle">Moraes · <tspan class="mm-code" data-mid="3305901"></tspan></text>
         <!-- W -->
-        <rect class="mm-cell" x="10"  y="76"  width="120" height="52" rx="8"/><text x="70" y="98" text-anchor="middle">Teresópolis</text><text class="mm-code" x="70" y="114" text-anchor="middle">3305800</text>
-        <rect class="mm-cell" x="10"  y="140" width="120" height="52" rx="8"/><text x="70" y="158" text-anchor="middle">Cachoeiras de</text><text x="70" y="172" text-anchor="middle">Macacu · <tspan class="mm-code">3300803</tspan></text>
+        <rect class="mm-cell" x="10"  y="76"  width="120" height="52" rx="8"/><text x="70" y="98" text-anchor="middle">Teresópolis</text><text class="mm-code" data-mid="3305802" x="70" y="114" text-anchor="middle"></text>
+        <rect class="mm-cell" x="10"  y="140" width="120" height="52" rx="8"/><text x="70" y="158" text-anchor="middle">Cachoeiras de</text><text x="70" y="172" text-anchor="middle">Macacu · <tspan class="mm-code" data-mid="3300803"></tspan></text>
         <!-- CENTRO -->
         <rect class="mm-cell mm-center" x="150" y="90" width="160" height="90" rx="10"/>
         <text class="mm-center-label" x="230" y="130" text-anchor="middle">Nova Friburgo</text>
-        <text class="mm-code" x="230" y="148" text-anchor="middle">3303401</text>
+        <text class="mm-code" data-mid="3303401" x="230" y="148" text-anchor="middle"></text>
         <!-- S / SE / E -->
-        <rect class="mm-cell" x="30"  y="222" width="120" height="52" rx="8"/><text x="90" y="244" text-anchor="middle">Silva Jardim</text><text class="mm-code" x="90" y="260" text-anchor="middle">3305602</text>
-        <rect class="mm-cell" x="170" y="222" width="130" height="52" rx="8"/><text x="235" y="240" text-anchor="middle">Casimiro de</text><text x="235" y="254" text-anchor="middle">Abreu · <tspan class="mm-code">3301307</tspan></text>
-        <rect class="mm-cell" x="320" y="222" width="120" height="52" rx="8"/><text x="380" y="244" text-anchor="middle">Macaé</text><text class="mm-code" x="380" y="260" text-anchor="middle">3302403</text>
+        <rect class="mm-cell" x="30"  y="222" width="120" height="52" rx="8"/><text x="90" y="244" text-anchor="middle">Silva Jardim</text><text class="mm-code" data-mid="3305604" x="90" y="260" text-anchor="middle"></text>
+        <rect class="mm-cell" x="170" y="222" width="130" height="52" rx="8"/><text x="235" y="240" text-anchor="middle">Casimiro de</text><text x="235" y="254" text-anchor="middle">Abreu · <tspan class="mm-code" data-mid="3301306"></tspan></text>
+        <rect class="mm-cell" x="320" y="222" width="120" height="52" rx="8"/><text x="380" y="244" text-anchor="middle">Macaé</text><text class="mm-code" data-mid="3302403" x="380" y="260" text-anchor="middle"></text>
       </svg>
     </div>
     <div class="card">
@@ -1918,6 +1928,18 @@ async function init() {
     document.getElementById('cagedDetSub').textContent = fNum(caged.admissoes || 0) + ' admissões − ' + fNum(caged.desligamentos || 0) + ' desligamentos';
   }
 
+  // Maiores empregadores privados
+  const empreg = g(D, 'secoes.trabalho.top_empregadores');
+  const empregTop = (empreg && empreg.top) || [];
+  if (empregTop.length) {
+    document.getElementById('empregAno').textContent = empreg.ano || '';
+    const rowEmpreg = e => '<li><span>' + (e.setor || e.divisao || 'setor não informado') +
+      (e.natureza ? ' <span style="color:var(--text3)">· ' + e.natureza + '</span>' : '') +
+      '</span><span>' + fNum(e.vinculos_ativos || 0) + ' vínculos</span></li>';
+    document.getElementById('empregList').innerHTML = empregTop.slice(0, 5).map(rowEmpreg).join('');
+    document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map(rowEmpreg).join('');
+  }
+
   // Comex
   const exp = g(D, 'secoes.comercio_exterior.exportacoes');
   const imp = g(D, 'secoes.comercio_exterior.importacoes');
@@ -2037,6 +2059,14 @@ async function init() {
         '<div class="vr-bottom"><div class="vr-track"><div class="vr-fill" style="width:' + (pc / maxPc * 100).toFixed(0) + '%;background:' + fillColor + '"></div></div><span class="vr-pib">R$ ' + Math.round(pc / 1000) + 'k/hab</span></div>' +
         '</div>';
     }).join('');
+
+    // Minimapa: mostra PIB per capita de cada vizinho no lugar do código IBGE
+    const pcById = new Map(vizinhos.map(v => [String(v.id_municipio), v.pib_per_capita]));
+    pcById.set(String(g(D, 'municipio.id_municipio')), refPc);
+    document.querySelectorAll('.mm-code[data-mid]').forEach(el => {
+      const pc = pcById.get(el.dataset.mid);
+      el.textContent = pc ? 'R$ ' + Math.round(pc / 1000) + 'k/hab' : '—';
+    });
   }
 
   // Insights

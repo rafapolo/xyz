@@ -736,6 +736,33 @@ def trabalho_rais(mid):
 
 
 @section
+def trabalho_top_empregadores(mid):
+    """RAIS anonimiza os microdados (sem CNPJ/razão social), então não é possível
+    identificar empresas pelo nome — apenas o setor (CNAE) e a natureza jurídica do
+    maior estabelecimento privado por nº de vínculos ativos."""
+    t = p("br_me_rais", "microdados_estabelecimentos")
+    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    cnae = p("br_bd_diretorios_brasil", "cnae_2")
+    nat = p("br_bd_diretorios_brasil", "natureza_juridica")
+    rows = q(f"""
+        SELECT c.descricao_subclasse setor, c.descricao_divisao divisao, n.descricao natureza,
+               e.indicador_simples, e.quantidade_vinculos_ativos
+        FROM {t} e
+        LEFT JOIN {cnae} c ON c.subclasse = e.cnae_2_subclasse
+        LEFT JOIN {nat} n ON n.id_natureza_juridica = e.natureza_juridica
+        WHERE e.id_municipio='{mid}' AND e.ano={ano}
+          AND e.natureza_juridica NOT LIKE '1%' AND e.quantidade_vinculos_ativos > 0
+        ORDER BY e.quantidade_vinculos_ativos DESC LIMIT 10""")
+    return {
+        "fonte": "br_me_rais.microdados_estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — sem nome de empresa (RAIS anonimizada)",
+        "ano": ano,
+        "top": [{"setor": r["setor"], "divisao": r["divisao"], "natureza": r["natureza"],
+                 "simples": r["indicador_simples"] == "1",
+                 "vinculos_ativos": num(r["quantidade_vinculos_ativos"])} for r in rows],
+    }
+
+
+@section
 def trabalho_caged(mid):
     t = p("br_me_caged", "microdados_movimentacao")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}' AND mes=12")["a"]
@@ -880,7 +907,8 @@ def main():
             "transparencia": transparencia(mid),
             "social": social(mid),
             "comercio_exterior": comex(mid),
-            "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid)},
+            "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
+                         "top_empregadores": trabalho_top_empregadores(mid)},
             "agropecuaria": agropecuaria(mid),
             "beneficios": beneficios(mid),
             "vizinhanca": vizinhanca(mid),

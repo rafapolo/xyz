@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "gerado_em": "2026-07-15",
+ "gerado_em": "2026-07-16",
  "gerador": "extract_municipio.py (basedosdados local em ~/rodado)",
  "municipio": {
   "fonte": "br_bd_diretorios_brasil.municipio · br_ibge_censo_2022.municipio",
@@ -924,11 +924,11 @@
     "inscritos": 4225,
     "presentes": 3132,
     "redacao": 698.4133738601823,
-    "linguagens": 538.1975683890577,
-    "matematica": 577.1218710089399,
+    "linguagens": 538.1975683890578,
+    "matematica": 577.1218710089398,
     "humanas": 548.4902431610942,
     "natureza": 520.0523627075352,
-    "media_geral": 579.3218030157201
+    "media_geral": 579.3218030157202
    }
   },
   "saude": {
@@ -959,9 +959,9 @@
     "pre_natal_distribuicao": {
      "9": 10,
      "2": 66,
-     "1": 24,
      "3": 316,
-     "4": 1419
+     "4": 1419,
+     "1": 24
     }
    },
    "dengue": {
@@ -975,9 +975,9 @@
     "classificacao_bruta": {
      "10|9": 5,
      "12|1": 2,
+     "11|1": 9,
      "10|1": 363,
      "10|None": 2,
-     "11|1": 9,
      "8 |None": 18
     }
    },
@@ -1479,7 +1479,7 @@
      {
       "ano": 2023,
       "focos": 50,
-      "frp_medio": 5.658,
+      "frp_medio": 5.6579999999999995,
       "frp_max": 22.6
      },
      {
@@ -1951,7 +1951,7 @@
     "ano": 2024,
     "vinculos_ativos_3112": 56975,
     "vinculos_ativos_ano_anterior": 54441,
-    "remuneracao_media": 2443.0679684637107,
+    "remuneracao_media": 2443.0679684637116,
     "estabelecimentos": 11763
    },
    "caged": {
@@ -1960,7 +1960,83 @@
     "admissoes": 23203,
     "desligamentos": 22091,
     "saldo": 1112,
-    "salario_medio_admissao": 1699.656691618074
+    "salario_medio_admissao": 1699.656691618069
+   },
+   "top_empregadores": {
+    "fonte": "br_me_rais.microdados_estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — sem nome de empresa (RAIS anonimizada)",
+    "ano": 2024,
+    "top": [
+     {
+      "setor": "Fabricação de artigos de serralheria, exceto esquadrias",
+      "divisao": "Fabricação De Produtos De Metal, Exceto Máquinas\nE Equipamentos",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 1602
+     },
+     {
+      "setor": "Atividades de atendimento hospitalar, exceto pronto-socorro e unidades para atendimento a urgências",
+      "divisao": "Atividades De Atenção À Saúde Humana",
+      "natureza": "Cooperativa",
+      "simples": false,
+      "vinculos_ativos": 654
+     },
+     {
+      "setor": "Transporte rodoviário coletivo de passageiros, com itinerário fixo, municipal",
+      "divisao": "Transporte Terrestre",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 594
+     },
+     {
+      "setor": "Obras de urbanização - ruas, praças e calçadas",
+      "divisao": "Obras De Infraestrutura",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 506
+     },
+     {
+      "setor": "Fabricação de artigos de serralheria, exceto esquadrias",
+      "divisao": "Fabricação De Produtos De Metal, Exceto Máquinas\nE Equipamentos",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 479
+     },
+     {
+      "setor": "Atividades de atendimento hospitalar, exceto pronto-socorro e unidades para atendimento a urgências",
+      "divisao": "Atividades De Atenção À Saúde Humana",
+      "natureza": "Sociedade Anônima Fechada",
+      "simples": false,
+      "vinculos_ativos": 358
+     },
+     {
+      "setor": "Fabricação de artigos de serralheria, exceto esquadrias",
+      "divisao": "Fabricação De Produtos De Metal, Exceto Máquinas\nE Equipamentos",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 338
+     },
+     {
+      "setor": "Fabricação de produtos de padaria e confeitaria com predominância de produção própria",
+      "divisao": "Fabricação De Produtos Alimentícios",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 316
+     },
+     {
+      "setor": "Confecção de roupas íntimas",
+      "divisao": "Confecção De Artigos Do Vestuário E Acessórios",
+      "natureza": "Sociedade Anônima Fechada",
+      "simples": false,
+      "vinculos_ativos": 311
+     },
+     {
+      "setor": "Captação, tratamento e distribuição de água",
+      "divisao": "Captação, Tratamento E Distribuição De Água",
+      "natureza": "Sociedade Empresária Limitada",
+      "simples": false,
+      "vinculos_ativos": 288
+     }
+    ]
    }
   },
   "agropecuaria": {
