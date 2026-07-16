@@ -269,6 +269,7 @@ a { color: inherit; text-decoration: none; }
 .viz-rank .vr-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
 .viz-rank .vr-fill { height: 100%; border-radius: 3px; }
 .viz-rank .vr-pib { font-size: .68rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; }
+.viz-rank .vr-tag { font-size: .68rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
 
 /* STATUS — semáforo (ícone + rótulo, nunca só cor) */
 .status { font-size: .68rem; font-weight: 600; display: inline-flex; align-items: center; gap: .3rem; padding: .08rem .45rem; border-radius: 100px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
@@ -751,15 +752,15 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card">
       <h3>Maiores empregadores privados <span class="vintage" id="empregAno"></span></h3>
       <div class="sub" style="margin-bottom:.4rem">Empresas privadas com mais vínculos ativos (exclui setor público e cooperativas)</div>
-      <ul class="data-list" id="empregList"></ul>
+      <div class="viz-rank" id="empregList"></div>
       <details class="more"><summary>ver detalhes</summary>
-        <ul class="data-list more-body" id="empregDetList"></ul>
+        <div class="viz-rank more-body" id="empregDetList"></div>
       </details>
     </div>
     <div class="card">
       <h3>Maiores empregadores públicos <span class="vintage" id="empregPubAno"></span></h3>
       <div class="sub" style="margin-bottom:.4rem">Administração pública direta e indireta com mais vínculos ativos</div>
-      <ul class="data-list" id="empregPubList"></ul>
+      <div class="viz-rank" id="empregPubList"></div>
     </div>
   </div>
 </div>
@@ -1995,16 +1996,28 @@ async function init() {
     document.getElementById('cagedDetSub').textContent = fNum(caged.admissoes || 0) + ' admissões − ' + fNum(caged.desligamentos || 0) + ' desligamentos';
   }
 
+  // Maiores empregadores — ranking com barra proporcional (nome nunca quebra linha; área/natureza truncada)
+  const rowEmpregRank = (e, i, maxVal, fallbackName, tagField) => {
+    const nome = e.empresa || fallbackName;
+    const val = e.vinculos_ativos || 0;
+    const tag = e[tagField];
+    return '<div class="vr-row">' +
+      '<div class="vr-top"><span class="vr-name" title="' + nome + '">' + (i + 1) + '. ' + nome + '</span>' +
+      '<span class="vr-pop">' + fNum(val) + ' vínculos</span></div>' +
+      '<div class="vr-bottom"><div class="vr-track"><div class="vr-fill" style="width:' + (val / maxVal * 100).toFixed(0) + '%;background:' + C.s1 + '"></div></div>' +
+      (tag ? '<span class="vr-tag" title="' + tag + '">' + tag + '</span>' : '') + '</div>' +
+      '</div>';
+  };
+
   // Maiores empregadores privados
   const empreg = g(D, 'secoes.trabalho.top_empregadores');
   const empregTop = (empreg && empreg.top) || [];
   if (empregTop.length) {
     document.getElementById('empregAno').textContent = empreg.ano || '';
-    const rowEmpreg = e => '<li><span>' + (e.empresa || 'empresa não informada') +
-      (e.setor ? ' <span style="color:var(--text3)">· ' + e.setor + '</span>' : '') +
-      '</span><span>' + fNum(e.vinculos_ativos || 0) + ' vínculos</span></li>';
+    const maxEmpreg = Math.max(...empregTop.map(e => e.vinculos_ativos || 0), 1);
+    const rowEmpreg = (e, i) => rowEmpregRank(e, i, maxEmpreg, 'empresa não informada', 'setor');
     document.getElementById('empregList').innerHTML = empregTop.slice(0, 5).map(rowEmpreg).join('');
-    document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map(rowEmpreg).join('');
+    document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map((e, i) => rowEmpregRank(e, i + 5, maxEmpreg, 'empresa não informada', 'setor')).join('');
   }
 
   // Maiores empregadores públicos
@@ -2012,10 +2025,8 @@ async function init() {
   const empregPubTop = (empregPub && empregPub.top) || [];
   if (empregPubTop.length) {
     document.getElementById('empregPubAno').textContent = empregPub.ano || '';
-    const rowEmpregPub = e => '<li><span>' + (e.empresa || 'órgão não informado') +
-      (e.natureza ? ' <span style="color:var(--text3)">· ' + e.natureza + '</span>' : '') +
-      '</span><span>' + fNum(e.vinculos_ativos || 0) + ' vínculos</span></li>';
-    document.getElementById('empregPubList').innerHTML = empregPubTop.map(rowEmpregPub).join('');
+    const maxEmpregPub = Math.max(...empregPubTop.map(e => e.vinculos_ativos || 0), 1);
+    document.getElementById('empregPubList').innerHTML = empregPubTop.map((e, i) => rowEmpregRank(e, i, maxEmpregPub, 'órgão não informado', 'natureza')).join('');
   }
 
   // Comex
