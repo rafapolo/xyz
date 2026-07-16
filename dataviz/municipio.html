@@ -610,7 +610,7 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
   <div class="grid-2 mt-1">
     <div class="card card-chart">
-      <h3>PRODES — desmatamento acumulado <span class="vintage" id="prodesSerieAno"></span></h3>
+      <h3>PRODES — desmatamento por ano <span class="vintage" id="prodesSerieAno"></span></h3>
       <div class="chart-container"><canvas id="prodesChart"></canvas></div>
     </div>
     <div class="card card-chart">
@@ -1350,24 +1350,24 @@ async function init() {
     }
   }
 
-  // PRODES — série de desmatamento acumulado
+  // PRODES — incremento anual de desmatamento (km² perdidos a cada ano, não o acumulado)
   if (document.getElementById('prodesChart')) {
     const serie = g(D, 'secoes.meio_ambiente.prodes.serie') || [];
-    if (serie.length) {
-      document.getElementById('prodesSerieAno').textContent = serie[0].ano + '–' + serie[serie.length - 1].ano;
+    if (serie.length > 1) {
+      const incrementos = serie.slice(1).map((r, i) => ({ ano: r.ano, incremento: r.desmatado - serie[i].desmatado }));
+      document.getElementById('prodesSerieAno').textContent = incrementos[0].ano + '–' + incrementos[incrementos.length - 1].ano;
       new Chart(document.getElementById('prodesChart'), {
-        type: 'line', data: {
-          labels: serie.map(r => r.ano),
+        type: 'bar', data: {
+          labels: incrementos.map(r => r.ano),
           datasets: [
-            { label: 'Desmatado acum. (km²)', data: serie.map(r => r.desmatado), borderColor: C.s6, backgroundColor: 'rgba(217,89,38,.45)', fill: 'origin', pointRadius: 0, borderWidth: 1.5, tension: .25 },
-            { label: 'Vegetação natural (km²)', data: serie.map(r => r.vegetacao_natural), borderColor: C.s5, backgroundColor: 'rgba(25,158,112,.35)', fill: '-1', pointRadius: 0, borderWidth: 1.5, tension: .25 },
+            { label: 'Área desmatada no ano (km²)', data: incrementos.map(r => r.incremento), backgroundColor: C.s6, maxBarThickness: 22, borderRadius: 3 },
           ]
         },
         options: { ...chartOpts,
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => 'Perda: ' + fNum1(ctx.parsed.y) + ' km²' } } },
           scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
-                    y: { stacked: true, ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } } },
-          plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
-            callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum1(ctx.parsed.y) + ' km²' } } }
+                    y: { ticks: { color: C.muted, callback: v => fNum1(v) + ' km²' }, grid: { color: C.grid } } }
         }
       });
     }

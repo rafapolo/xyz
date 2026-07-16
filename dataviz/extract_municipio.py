@@ -748,7 +748,7 @@ def trabalho_top_empregadores(mid):
     nat = p("br_bd_diretorios_brasil", "natureza_juridica")
     rows = q(f"""
         SELECT e.cnpj_basico, any_value(e.razao_social) razao_social,
-               any_value(n.descricao) natureza, any_value(c.descricao_subclasse) setor,
+               any_value(n.descricao) natureza, any_value(c.descricao_secao) setor,
                sum(e.quantidade_vinculos_ativos) vinculos_ativos
         FROM {t} e
         LEFT JOIN {cnae} c ON c.subclasse = e.cnae_fiscal_principal
