@@ -271,7 +271,7 @@ a { color: inherit; text-decoration: none; }
 .viz-rank .vr-pib { font-size: .68rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; }
 .viz-rank .vr-tag { font-size: .68rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
 
-/* RANK-TABLE — ranking tabular (empresa em negrito + barra de magnitude na coluna numérica) */
+/* RANK-TABLE — ranking tabular (empresa em negrito) */
 .rank-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .82rem; }
 .rank-table th {
   text-align: left; font-weight: 600; color: var(--text3); font-size: .64rem;
@@ -284,18 +284,14 @@ a { color: inherit; text-decoration: none; }
 .rank-table th:nth-child(3), .rank-table td.valor { width: 20%; }
 .rank-table td {
   padding: .5rem .5rem .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4);
-  vertical-align: middle; position: relative;
+  vertical-align: middle;
 }
 .rank-table tr:last-child td { border-bottom: none; }
 .rank-table td.rank-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rank-table td.rank-name .rk-num { color: var(--text3); font-weight: 400; margin-right: .2rem; }
 .rank-table td.rank-name b { color: var(--text); font-weight: 600; }
 .rank-table td.area { color: var(--text3); font-size: .74rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rank-table td.valor .bar-fill {
-  position: absolute; left: 0; top: 0; bottom: 0; z-index: 0;
-  border-radius: 4px; background: rgba(var(--s1-rgb), .16);
-}
-.rank-table td.valor .val { position: relative; z-index: 1; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rank-table td.valor .val { font-weight: 600; font-variant-numeric: tabular-nums; }
 
 @media (max-width: 768px) {
   .rank-table, .rank-table thead, .rank-table tbody, .rank-table tr, .rank-table td { display: block; width: auto !important; }
@@ -306,12 +302,11 @@ a { color: inherit; text-decoration: none; }
   .rank-table td.rank-name { font-size: .85rem; }
   .rank-table td.area { font-size: .72rem; }
   .rank-table td.valor {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: .3rem; padding: .3rem .4rem;
+    display: flex; justify-content: space-between; align-items: center; margin-top: .3rem;
   }
   .rank-table td.valor::before {
     content: attr(data-label); font-size: .64rem; color: var(--text3);
-    text-transform: uppercase; letter-spacing: .03em; position: relative; z-index: 1;
+    text-transform: uppercase; letter-spacing: .03em;
   }
 }
 
@@ -2046,17 +2041,15 @@ async function init() {
     document.getElementById('cagedDetSub').textContent = fNum(caged.admissoes || 0) + ' admissões − ' + fNum(caged.desligamentos || 0) + ' desligamentos';
   }
 
-  // Maiores empregadores — linha de tabela com barra de magnitude na coluna numérica
-  const rowEmpregRank = (e, i, maxVal, fallbackName, tagField) => {
+  // Maiores empregadores — linha de tabela
+  const rowEmpregRank = (e, i, fallbackName, tagField) => {
     const nome = e.empresa || fallbackName;
     const val = e.vinculos_ativos || 0;
     const tag = e[tagField] || '';
     return '<tr>' +
       '<td class="rank-name" title="' + nome + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + nome + '</b></td>' +
       '<td class="area" title="' + tag + '">' + tag + '</td>' +
-      '<td class="valor" data-label="Vínculos ativos">' +
-      '<span class="bar-fill" style="width:' + (val / maxVal * 100).toFixed(0) + '%"></span>' +
-      '<span class="val">' + fNum(val) + '</span></td>' +
+      '<td class="valor" data-label="Vínculos ativos"><span class="val">' + fNum(val) + '</span></td>' +
       '</tr>';
   };
 
@@ -2065,10 +2058,9 @@ async function init() {
   const empregTop = (empreg && empreg.top) || [];
   if (empregTop.length) {
     document.getElementById('empregAno').textContent = empreg.ano || '';
-    const maxEmpreg = Math.max(...empregTop.map(e => e.vinculos_ativos || 0), 1);
-    const rowEmpreg = (e, i) => rowEmpregRank(e, i, maxEmpreg, 'empresa não informada', 'setor');
+    const rowEmpreg = (e, i) => rowEmpregRank(e, i, 'empresa não informada', 'setor');
     document.getElementById('empregList').innerHTML = empregTop.slice(0, 5).map(rowEmpreg).join('');
-    document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map((e, i) => rowEmpregRank(e, i + 5, maxEmpreg, 'empresa não informada', 'setor')).join('');
+    document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map((e, i) => rowEmpregRank(e, i + 5, 'empresa não informada', 'setor')).join('');
   }
 
   // Maiores empregadores públicos
@@ -2076,8 +2068,7 @@ async function init() {
   const empregPubTop = (empregPub && empregPub.top) || [];
   if (empregPubTop.length) {
     document.getElementById('empregPubAno').textContent = empregPub.ano || '';
-    const maxEmpregPub = Math.max(...empregPubTop.map(e => e.vinculos_ativos || 0), 1);
-    document.getElementById('empregPubList').innerHTML = empregPubTop.map((e, i) => rowEmpregRank(e, i, maxEmpregPub, 'órgão não informado', 'natureza')).join('');
+    document.getElementById('empregPubList').innerHTML = empregPubTop.map((e, i) => rowEmpregRank(e, i, 'órgão não informado', 'natureza')).join('');
   }
 
   // Comex
