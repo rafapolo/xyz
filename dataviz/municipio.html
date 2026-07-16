@@ -271,6 +271,50 @@ a { color: inherit; text-decoration: none; }
 .viz-rank .vr-pib { font-size: .68rem; color: var(--text3); white-space: nowrap; flex-shrink: 0; }
 .viz-rank .vr-tag { font-size: .68rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
 
+/* RANK-TABLE — ranking tabular (empresa em negrito + barra de magnitude na coluna numérica) */
+.rank-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: .82rem; }
+.rank-table th {
+  text-align: left; font-weight: 600; color: var(--text3); font-size: .64rem;
+  text-transform: uppercase; letter-spacing: .03em;
+  padding: 0 .5rem .4rem 0; border-bottom: 1px solid var(--border);
+}
+.rank-table th:last-child, .rank-table td.valor { text-align: right; }
+.rank-table th:nth-child(1), .rank-table td.rank-name { width: 46%; }
+.rank-table th:nth-child(2), .rank-table td.area { width: 34%; }
+.rank-table th:nth-child(3), .rank-table td.valor { width: 20%; }
+.rank-table td {
+  padding: .5rem .5rem .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4);
+  vertical-align: middle; position: relative;
+}
+.rank-table tr:last-child td { border-bottom: none; }
+.rank-table td.rank-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-table td.rank-name .rk-num { color: var(--text3); font-weight: 400; margin-right: .2rem; }
+.rank-table td.rank-name b { color: var(--text); font-weight: 600; }
+.rank-table td.area { color: var(--text3); font-size: .74rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-table td.valor .bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; z-index: 0;
+  border-radius: 4px; background: rgba(var(--s1-rgb), .16);
+}
+.rank-table td.valor .val { position: relative; z-index: 1; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 768px) {
+  .rank-table, .rank-table thead, .rank-table tbody, .rank-table tr, .rank-table td { display: block; width: auto !important; }
+  .rank-table thead { display: none; }
+  .rank-table tr { padding: .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4); }
+  .rank-table tr:last-child { border-bottom: none; }
+  .rank-table td { border-bottom: none; padding: .1rem 0; white-space: normal; }
+  .rank-table td.rank-name { font-size: .85rem; }
+  .rank-table td.area { font-size: .72rem; }
+  .rank-table td.valor {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: .3rem; padding: .3rem .4rem;
+  }
+  .rank-table td.valor::before {
+    content: attr(data-label); font-size: .64rem; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .03em; position: relative; z-index: 1;
+  }
+}
+
 /* STATUS — semáforo (ícone + rótulo, nunca só cor) */
 .status { font-size: .68rem; font-weight: 600; display: inline-flex; align-items: center; gap: .3rem; padding: .08rem .45rem; border-radius: 100px; border: 1px solid; white-space: nowrap; flex-shrink: 0; }
 .status.st-good { color: var(--st-good); border-color: rgba(12,163,12,.4); }
@@ -752,15 +796,21 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card">
       <h3>Maiores empregadores privados <span class="vintage" id="empregAno"></span></h3>
       <div class="sub" style="margin-bottom:.4rem">Empresas privadas com mais vínculos ativos (exclui setor público e cooperativas)</div>
-      <div class="viz-rank" id="empregList"></div>
+      <table class="rank-table">
+        <thead><tr><th>Empresa</th><th>Área</th><th>Vínculos ativos</th></tr></thead>
+        <tbody id="empregList"></tbody>
+      </table>
       <details class="more"><summary>ver detalhes</summary>
-        <div class="viz-rank more-body" id="empregDetList"></div>
+        <table class="rank-table more-body"><tbody id="empregDetList"></tbody></table>
       </details>
     </div>
     <div class="card">
       <h3>Maiores empregadores públicos <span class="vintage" id="empregPubAno"></span></h3>
       <div class="sub" style="margin-bottom:.4rem">Administração pública direta e indireta com mais vínculos ativos</div>
-      <div class="viz-rank" id="empregPubList"></div>
+      <table class="rank-table">
+        <thead><tr><th>Órgão</th><th>Natureza</th><th>Vínculos ativos</th></tr></thead>
+        <tbody id="empregPubList"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -1996,17 +2046,18 @@ async function init() {
     document.getElementById('cagedDetSub').textContent = fNum(caged.admissoes || 0) + ' admissões − ' + fNum(caged.desligamentos || 0) + ' desligamentos';
   }
 
-  // Maiores empregadores — ranking com barra proporcional (nome nunca quebra linha; área/natureza truncada)
+  // Maiores empregadores — linha de tabela com barra de magnitude na coluna numérica
   const rowEmpregRank = (e, i, maxVal, fallbackName, tagField) => {
     const nome = e.empresa || fallbackName;
     const val = e.vinculos_ativos || 0;
-    const tag = e[tagField];
-    return '<div class="vr-row">' +
-      '<div class="vr-top"><span class="vr-name" title="' + nome + '">' + (i + 1) + '. ' + nome + '</span>' +
-      '<span class="vr-pop">' + fNum(val) + ' vínculos</span></div>' +
-      '<div class="vr-bottom"><div class="vr-track"><div class="vr-fill" style="width:' + (val / maxVal * 100).toFixed(0) + '%;background:' + C.s1 + '"></div></div>' +
-      (tag ? '<span class="vr-tag" title="' + tag + '">' + tag + '</span>' : '') + '</div>' +
-      '</div>';
+    const tag = e[tagField] || '';
+    return '<tr>' +
+      '<td class="rank-name" title="' + nome + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + nome + '</b></td>' +
+      '<td class="area" title="' + tag + '">' + tag + '</td>' +
+      '<td class="valor" data-label="Vínculos ativos">' +
+      '<span class="bar-fill" style="width:' + (val / maxVal * 100).toFixed(0) + '%"></span>' +
+      '<span class="val">' + fNum(val) + '</span></td>' +
+      '</tr>';
   };
 
   // Maiores empregadores privados
