@@ -1,348 +1,234 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Exploring New Cartographic Technologies</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploring New Cartographic Technologies</title>
+<meta name="description" content="Seven cartographic explorations of Brazilian public data — IBGE, CNEFE and the Federal Revenue registry: Rio's CNPJs dot by dot, every church in the country, Nova Friburgo in 3D, ownership networks and the RAIS Wage Atlas.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Exploring New Cartographic Technologies">
+<meta property="og:description" content="Seven cartographic explorations of Brazilian public data — IBGE, CNEFE and the Federal Revenue registry.">
+<meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
+<meta property="og:url" content="https://xn--2dk.xyz/dataviz/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../assets/mcp-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js" defer></script>
+</head>
+<body>
 
-        <link rel="stylesheet" href="../assets/site.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-        <link rel="stylesheet" href="../assets/mcp-theme.css">
-
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
-        <script>
-            mermaid.initialize({
-                startOnLoad: true,
-                theme: "default",
-                sankey: { useMaxWidth: true },
-            });
-        </script>
-
-
-    </head>
-    <body>
-
-    <nav class="site-nav">
-      <div class="nav-inner">
-        <a class="brand" href="../index.html">ミ</a>
-        <div class="nav-right">
-          <div class="links">
-            <a href="https://github.com/rafapolo/xyz">GitHub</a>
-          </div>
-          <div class="nav-controls">
-            <div class="lang-switch">
-              <a href="../index.html" class="lang-link">PT</a>
-              <span class="lang-sep">/</span>
-              <span class="lang-current">EN</span>
-            </div>
-            <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme" type="button"><i class="fa-solid fa-moon"></i></button>
-          </div>
-        </div>
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">ミ</a>
+    <div class="nav-right">
+      <div class="links">
+        <a href="https://github.com/rafapolo/xyz">GitHub</a>
       </div>
-    </nav>
-
-    <main>
-        <h1>&#x30df;xploring New Cartographic Technologies</h1>
-
-        <p>
-            Today, through a screen, an individual can interrelate, interact,
-            represent and navigate among millions of data points. Technological
-            advances have drastically expanded our capacity to map territories,
-            networks and flows.
-        </p>
-
-        <hr />
-
-        <h2>&#x1f4ca; Data Visualizations</h2>
-
-        <p>
-            The image below is not an aerial photo: it is a visual
-            representation of Rio de Janeiro, where each illuminated point
-            is a Legal Entity establishment.
-        </p>
-
-        <h3>Rio de Janeiro Business Network</h3>
-
-        <p>
-            =>
-            <a href="https://xn--2dk.xyz/dataviz/rio/ibge"
-                >Interactive Map: Rio de Janeiro Establishments</a
-            >
-        </p>
-
-        <blockquote>
-            Visual representation of Rio de Janeiro where each illuminated
-            point represents a registered business establishment
-        </blockquote>
-
-        <div class="content-section">
-            <img src="/images/image1.png" alt="Rio de Janeiro visualization" />
-            <img src="/images/image2.png" alt="Rio de Janeiro visualization" />
+      <div class="nav-controls">
+        <div class="lang-switch">
+          <a href="../index.html" class="lang-link">PT</a>
+          <span class="lang-sep">/</span>
+          <span class="lang-current">EN</span>
         </div>
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme" type="button"><i class="fa-solid fa-moon"></i></button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-        <hr />
+<main>
+  <p class="eyebrow">7 cartographic explorations · IBGE, CNEFE, Federal Revenue</p>
+  <h1>ミxploring New Cartographic Technologies</h1>
+  <p class="dek">Today, through a screen, an individual can interrelate, interact, represent and navigate among millions of data points. Technological advances have drastically expanded our capacity to map territories, networks and flows.</p>
 
-        <div class="content-section">
-            <h2>All Churches in the Country</h2>
-            <blockquote>
-                Comprehensive mapping of religious institutions across Brazil,
-                showing distribution patterns and density
-            </blockquote>
+  <!-- ── 01 ─────────────────────────────────────────────── -->
 
-            <img src="/images/image3.png" alt="Churches" />
-            <img src="/images/image4.png" alt="Churches" />
-            <img src="/images/image5.png" alt="Churches" />
-            <img src="/images/image6.png" alt="Churches" />
-            <img src="/images/image7.png" alt="Churches" />
+  <h2 id="tema-01">01 · Rio de Janeiro: every dot is a company</h2>
 
-            <h3>More Churches Than Schools &#x1f614;</h3>
-            <blockquote>
-                Comparative analysis revealing the disproportionate number of
-                religious institutions versus educational facilities
-            </blockquote>
+  <p class="lede">It looks like a nighttime aerial photo — but every dot of light is a business establishment registered with Brazil's Federal Revenue. Plotting the location of every active establishment in the National Registry of Legal Entities (CNPJ), the urban fabric draws itself: avenues, commercial centers and peripheries emerge without any base map.</p>
 
-            <img src="/images/image8.png" alt="Churches vs schools comparison" />
+  <p class="pull">Not an aerial photo: it is the Federal Revenue registry projected onto the territory.</p>
 
-            <h3>Religious Affiliation by Municipality</h3>
-            <blockquote>
-                The more yellow, the more Catholic a municipality. Purple
-                tends to be Evangelical
-            </blockquote>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rio/ibge"><img src="../images/image1.png" alt="Dark map of the state of Rio de Janeiro formed by millions of luminous dots, each representing an active company registration" width="760" height="799" fetchpriority="high"></a>
+    <figcaption>Every illuminated dot is a legal-entity establishment. Source: CNPJ registry, Federal Revenue. Click to open the interactive version.</figcaption>
+  </figure>
 
-            <img src="/images/image16.png" alt="Religious map" />
-            <img src="/images/image17.png" alt="Religious map" />
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rio/ibge"><img src="../images/image2.png" alt="Close-up of the Rio de Janeiro company visualization, with the urban footprint drawn only by establishment dots" width="852" height="558" loading="lazy"></a>
+    <figcaption>Zooming in, the urban footprint appears drawn by the establishments alone — no satellite imagery is used.</figcaption>
+  </figure>
 
-            <h3>
-                81.5% of Brazilian States Have Double the Religious
-                Establishments Compared to Health Units
-            </h3>
-            <blockquote>
-                Stark comparison highlighting the imbalance between religious
-                institutions and healthcare facilities
-            </blockquote>
+  <p>Explore the interactive version at <a href="https://xn--2dk.xyz/dataviz/rio/ibge">ミ.xyz/dataviz/rio/ibge</a>.</p>
 
-            <img src="/images/image18.png" alt="Religious vs health comparison" />
+  <!-- ── 02 ─────────────────────────────────────────────── -->
 
-            <h3>
-                Religious Entities Outnumber Labor Unions in 2000
-            </h3>
-            <blockquote>
-                Historical comparison showing the predominance of religious
-                organizations over workers' unions
-            </blockquote>
+  <h2 id="tema-02">02 · Every church in the country</h2>
 
-            <img src="/images/image14.png" alt="Religious vs unions" />
+  <p class="lede">The CNPJ registry records the legal nature of each establishment, which makes it possible to isolate religious organizations and plot them onto the territory. The result is a portrait of the country's religious infrastructure — and of the asymmetries that appear when we compare it with schools, health units and labor unions.</p>
 
-            <h3>Distribution of School Types in Rio (Primary, Secondary...)</h3>
-            <blockquote>
-                Educational infrastructure mapping showing the distribution of
-                different educational levels
-            </blockquote>
+  <h3>The national map</h3>
+  <figure>
+    <img src="../images/image3.png" alt="Map of Brazil formed by dots marking every religious establishment in the country, with high density along the coast and in the Northeast" width="805" height="908" loading="lazy">
+    <figcaption>Every dot is an active religious establishment. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-            <img src="/images/image19.png" alt="School types" />
-            <img src="/images/image20.png" alt="School types" />
-        </div>
+  <figure>
+    <img src="../images/image7.png" alt="3D map of the state of Rio de Janeiro with vertical spikes marking the concentration of religious establishments" width="778" height="676" loading="lazy">
+    <figcaption>In three dimensions: the concentration of religious establishments in the state of Rio de Janeiro.</figcaption>
+  </figure>
 
-        <hr />
+  <figure>
+    <img src="../images/image8.png" alt="Heat map of the São Gonçalo region (RJ), with purple and yellow dots marking the density of religious establishments" width="778" height="719" loading="lazy">
+    <figcaption>Density of religious establishments in the São Gonçalo region (RJ).</figcaption>
+  </figure>
 
-        <div class="content-section">
-            <h3>
-                Residential Areas in Nova Friburgo with Height Relative to
-                Number of Residents
-            </h3>
-            <blockquote>
-                3D visualization showing population density through building
-                height representation in Nova Friburgo
-            </blockquote>
+  <h3>The religious profile of each municipality</h3>
+  <p>Crossing the IBGE Census with municipal locations, the country can be colored by the declared religious profile of its population: the more yellow, the more Catholic the municipality; purple tends to indicate Evangelical predominance.</p>
+  <figure>
+    <img src="../images/image16.png" alt="Map of Brazil in kepler.gl with municipalities colored from yellow (Catholic predominance) to purple (Evangelical predominance)" width="862" height="732" loading="lazy">
+    <figcaption>Declared religious profile by municipality. Source: IBGE Census; visualization in kepler.gl + DuckDB.</figcaption>
+  </figure>
 
-            <img src="/images/image9.png" alt="Nova Friburgo 3D" />
+  <h3>More churches than health units</h3>
+  <figure>
+    <img src="../images/image18.png" alt="Stacked bar chart by state comparing the share of education, health and religious establishments in the 2022 Census" width="815" height="583" loading="lazy">
+    <figcaption>Share of education, health and religious establishments in each state. Source: IBGE, 2022 Census.</figcaption>
+  </figure>
+  <p class="pull">22 of Brazil's 27 states have twice as many religious establishments as health units.</p>
 
-            <p>
-                =>
-                <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d"
-                    >Interactive 3D Map: Nova Friburgo Population</a
-                >
-            </p>
+  <h3>Religious entities overtake labor unions</h3>
+  <figure>
+    <img src="../images/image14.png" alt="Line chart of the cumulative number of establishments by legal nature: religious organizations overtake labor unions around the year 2000 and surge after 2010" width="602" height="359" loading="lazy">
+    <figcaption>Cumulative establishments by legal nature: religious organizations overtake labor unions around the year 2000. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-            <h3>All Residences in Nova Friburgo Municipality</h3>
-            <blockquote>
-                Complete residential mapping showing housing distribution
-                patterns across the city
-            </blockquote>
+  <h3>And the schools?</h3>
+  <figure>
+    <img src="../images/image19.png" alt="Visualization of the distribution of school types in Rio de Janeiro, from primary to secondary education" width="868" height="532" loading="lazy">
+    <figcaption>Distribution of school types in Rio de Janeiro (primary, secondary…). Source: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <img src="/images/image13.png" alt="Residences Nova Friburgo" />
+  <!-- ── 03 ─────────────────────────────────────────────── -->
 
-            <h3>Heat Map of Areas with Most Residences</h3>
-            <blockquote>
-                Density visualization highlighting residential concentration
-                zones
-            </blockquote>
+  <h2 id="tema-03">03 · Nova Friburgo in three dimensions</h2>
 
-            <img src="/images/image25.png" alt="Residential heatmap" />
-            <img src="/images/image26.png" alt="Residential heatmap" />
-            <img src="/images/image27.png" alt="Residential heatmap" />
-            <img src="/images/image28.png" alt="Residential heatmap" />
+  <p class="lede">The National Registry of Addresses for Statistical Purposes (CNEFE) records every address visited by IBGE. Filtering down to the municipality of Nova Friburgo (RJ), the city can be reconstructed house by house — and each residence extruded by its number of residents.</p>
 
-            <h3>Heatmap of New Business Registrations in Nova Friburgo</h3>
-            <blockquote>
-                Temporal and spatial analysis of entrepreneurial activity and
-                business creation patterns
-            </blockquote>
+  <h3>Residences with height relative to the number of residents</h3>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d"><img src="../images/image9.png" alt="3D visualization of Nova Friburgo where each residence is a column with height proportional to the number of residents" width="784" height="480" loading="lazy"></a>
+    <figcaption>Each column is a residence; its height, the number of residents. Source: IBGE / CNEFE. Click to open the interactive version.</figcaption>
+  </figure>
 
-            <img src="/images/image15.png" alt="Business heatmap" />
-        </div>
+  <p>Explore the interactive version at <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d">ミ.xyz/dataviz/friba/pop_3d</a>.</p>
 
-        <hr />
+  <h3>Every residence in the municipality</h3>
+  <figure>
+    <img src="../images/image13.png" alt="Elongated map of the municipality of Nova Friburgo with all residential addresses plotted as dots" width="1148" height="487" loading="lazy">
+    <figcaption>All residential addresses in Nova Friburgo. Source: IBGE / CNEFE.</figcaption>
+  </figure>
 
-        <div class="content-section">
-            <h3>Distribution of Garment Companies</h3>
-            <blockquote>
-                Mapping of textile and clothing companies based on active
-                business registrations (CNPJs)
-            </blockquote>
+  <h3>Where the city concentrates</h3>
+  <figure>
+    <img src="../images/image26.png" alt="Dark 3D map of Rio de Janeiro's mountain region with blue and purple spikes marking residential concentrations in Nova Friburgo, Teresópolis and surroundings" width="804" height="523" loading="lazy">
+    <figcaption>In the mountain region, urban cores rise as peaks of residential density. Source: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <img src="/images/image10.png" alt="Garment companies" />
+  <figure>
+    <img src="../images/image28.png" alt="Street-level visualization of downtown Nova Friburgo, with 3D columns over each residential address" width="700" height="750" loading="lazy">
+    <figcaption>At street level: columns over every address in downtown Nova Friburgo. Source: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <h3>Garment Companies Opened and Closed During Pandemic</h3>
-            <blockquote>
-                Analysis of business dynamics in the intimate apparel industry
-                hub during COVID-19
-            </blockquote>
+  <h3>Where companies are born</h3>
+  <figure>
+    <img src="../images/image15.png" alt="Heat map of new company registrations in Nova Friburgo, with the highest intensity downtown" width="842" height="499" loading="lazy">
+    <figcaption>New company registrations in Nova Friburgo. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-            <img src="/images/image12.png" alt="Garment pandemic" />
+  <!-- ── 04 ─────────────────────────────────────────────── -->
 
-            <h3>
-                Which Economic Sectors Closed After Others During the Pandemic?
-            </h3>
-            <blockquote>
-                Sequential analysis of business closures by economic sector
-                during COVID-19
-            </blockquote>
+  <h2 id="tema-04">04 · Garment factories and the pandemic</h2>
 
-            <img src="/images/image22.png" alt="Sector closures pandemic" />
-        </div>
+  <p class="lede">Every CNPJ registration carries the economic activity code (CNAE), the opening date and, when applicable, the closing date. Filtering the active garment factories of Nova Friburgo's lingerie hub, we can map the sector's geography — and watch, record by record, the impact of the pandemic.</p>
 
-        <hr />
+  <h3>The distribution of garment factories</h3>
+  <figure>
+    <img src="../images/image10.png" alt="Map of the distribution of active garment factories in Nova Friburgo, mapped from company registrations" width="694" height="762" loading="lazy">
+    <figcaption>Active garment factories, mapped from CNPJ registrations. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-        <div class="content-section">
-            <h3>
-                Corporate Relationships of Friburgo Entrepreneurs with Multiple
-                Companies
-            </h3>
-            <blockquote>
-                Network analysis revealing business interconnections and
-                corporate relationships
-            </blockquote>
+  <h3>Opened and closed during the pandemic</h3>
+  <figure>
+    <img src="../images/image12.png" alt="Vertical visualization comparing garment factories opened and closed during the pandemic in Nova Friburgo's lingerie hub" width="486" height="1258" loading="lazy">
+    <figcaption>Garment factories opened and closed during the pandemic in the lingerie hub. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-            <img src="/images/image23.png" alt="Corporate networks" />
+  <h3>Which sectors closed after others?</h3>
+  <p>Ordering company closures over time reveals a sequence: some economic sectors closed first, others held on longer — a temporal trace of the crisis moving through the local economy.</p>
+  <figure>
+    <img src="../images/image22.png" alt="Visualization comparing the temporal sequence of closures across different economic sectors during the pandemic" width="836" height="622" loading="lazy">
+    <figcaption>The order of closures by economic sector during the pandemic. Source: CNPJ registry, Federal Revenue.</figcaption>
+  </figure>
 
-            <h3>Biggest Companies in the Country per State</h3>
-            <p>
-                =>
-                <a href="https://xn--2dk.xyz/dataviz/rais/por_uf"
-                    >Interactive Treemap</a
-                >
-            </p>
-            <img src="/images/pvt_por_uf.png" alt="Companies per state" />
+  <!-- ── 05 ─────────────────────────────────────────────── -->
 
-            <h3>Investigating Societal Relations</h3>
-            <p>
-                =>
-                <a href="https://rafapolo.github.io/fincrime/"
-                    >Interactive Societal Investigation</a
-                >
-            </p>
-            <img src="/images/reag-viz.png" alt="Societal relations" />
+  <h2 id="tema-05">05 · Ownership networks</h2>
 
-            <h3>Companies and Partners of the "Tiger Game" Owner</h3>
-            <blockquote>
-                Corporate network analysis of gambling platform ownership
-                structures
-            </blockquote>
+  <p class="lede">The CNPJ registry publishes the ownership structure of every company. Linking partners to companies — and companies to other partners — turns economic power relations into a navigable graph: who stands next to whom, and through what.</p>
 
-            <img src="/images/image29.png" alt="Tiger Game" />
+  <h3>Nova Friburgo businesspeople with the most companies</h3>
+  <figure>
+    <img src="../images/image23.png" alt="Graph of ownership relations linking the Nova Friburgo businesspeople with the largest number of companies" width="726" height="587" loading="lazy">
+    <figcaption>Ownership network of the Nova Friburgo businesspeople with the most companies. Source: CNPJ ownership records.</figcaption>
+  </figure>
 
-            <p>
-                =>
-                <a href="https://tinyurl.com/pegadas-tigrim"
-                    >Detailed Network Analysis: Tiger Game Footprints</a
-                >
-            </p>
+  <h3>The companies of the "Tiger Game" owner</h3>
+  <figure>
+    <a href="https://tinyurl.com/pegadas-tigrim"><img src="../images/image29.png" alt="Graph of the companies and partners linked to the owner of the 'Tiger Game' gambling platform" width="874" height="296" loading="lazy"></a>
+    <figcaption>Companies and partners of the "Jogo do Tigrinho" owner. Source: CNPJ ownership records. Click to open the interactive graph.</figcaption>
+  </figure>
 
-            <h3>Corporate Structure Visualization of a Specific Senator</h3>
-            <blockquote>
-                Political-business network mapping showing corporate
-                connections and influence patterns
-            </blockquote>
+  <h3>The business network of a senator</h3>
+  <figure>
+    <img src="../images/image30.png" alt="Graph of the partnerships and companies linked to a Brazilian senator" width="809" height="671" loading="lazy">
+    <figcaption>Partnerships and companies of a particular senator. Source: CNPJ ownership records.</figcaption>
+  </figure>
 
-            <img src="/images/image30.png" alt="Senator network" />
+  <h3>Swiss companies headquartered in Brazil</h3>
+  <figure>
+    <a href="https://tinyurl.com/swiss-brazilian-network"><img src="../images/image31.png" alt="Graph of the network of Swiss companies headquartered in Brazil and their partners" width="886" height="585" loading="lazy"></a>
+    <figcaption>The network of Swiss companies headquartered in Brazil. Source: CNPJ ownership records. Click to open the interactive graph.</figcaption>
+  </figure>
 
-            <h3>Swiss Companies with Headquarters in Brazil</h3>
-            <blockquote>
-                International business presence analysis showing foreign
-                investment patterns
-            </blockquote>
+  <!-- ── 06 ─────────────────────────────────────────────── -->
 
-            <img src="/images/image31.png" alt="Swiss companies" />
+  <h2 id="tema-06">06 · Wage Atlas of Brazil</h2>
 
-            <p>
-                =>
-                <a href="https://tinyurl.com/swiss-brazilian-network"
-                    >Swiss-Brazilian Business Network</a
-                >
-            </p>
+  <p class="lede">The Annual Report of Social Information (RAIS) records every formal employment contract in the country. Aggregating those contracts by municipality, the atlas shows where wages concentrate — and where formal employment nearly vanishes from the map.</p>
 
-            <h3>Brazil Salary Atlas (RAIS 2020–2024)</h3>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rais/mapa/"><img src="../images/image32.jpg" alt="Choropleth map of Brazil with municipalities colored by the average wage of formal employment contracts in RAIS" width="1280" height="1043" loading="lazy"></a>
+    <figcaption>Wages of formal employment contracts by municipality. Source: RAIS, Ministry of Labor and Employment, 2020–2024. Click to open the interactive atlas.</figcaption>
+  </figure>
 
-            <img src="/images/image32.jpg" alt="Brazil Salary Atlas" />
+  <p>Explore the interactive atlas at <a href="https://xn--2dk.xyz/dataviz/rais/mapa/">ミ.xyz/dataviz/rais/mapa/</a>.</p>
 
-            <p>
-                =>
-                <a href="https://xn--2dk.xyz/dataviz/rais/mapa/"
-                    >Interactive Map: Brazil Salary Atlas</a
-                >
-            </p>
-        </div>
+  <!-- ── 07 ─────────────────────────────────────────────── -->
 
-        <hr />
+  <h2 id="tema-07">07 · Housing censuses: 1970–2000</h2>
 
-        <h2>
-            &#x1f4c8; IBGE Housing Census Data: Four Decades of Evolution
-            (1970-2010)
-        </h2>
+  <p class="lede">Each Sankey diagram reads an IBGE housing census in three layers: the household situation (rural, urban…), the occupancy condition (owned, rented, lent…) and the dwelling type. Following the flows across 1970, 1980 and 2000, the country's housing transformation appears all at once.</p>
 
-        <blockquote>
-            <em
-                >Comprehensive Sankey flow diagrams showing Brazilian housing
-                patterns across five census periods, revealing the
-                transformation of housing ownership, urbanization trends, and
-                dwelling characteristics over 40 years</em
-            >
-        </blockquote>
+  <h3>1970 Census</h3>
+  <p>Housing patterns before mass urbanization: rural owned households still rival urban ones, and the predominant construction type is rustic.</p>
 
-        <p>
-            &#x1f517;
-            <strong
-                ><a href="https://github.com/rafapolo/IBGE13/"
-                    >Source Repository: IBGE Housing Census Analysis</a
-                ></strong
-            >
-        </p>
-
-        <h3>1970 Housing Census</h3>
-        <blockquote>
-            <em
-                >Post-industrialization era housing patterns showing the
-                dominance of rural owned properties and rustic housing
-                types</em
-            >
-        </blockquote>
-
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -350,55 +236,48 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Sit Urbano,Cond sem declaracao,1168
-Sit Suburbano,Cond sem declaracao,26
-Sit Rural,Cond sem declaracao,775
-Sit Urbano,Cond Proprio ja pago,6602220
-Sit Suburbano,Cond Proprio ja pago,345236
-Sit Rural,Cond Proprio ja pago,6514120
-Sit Urbano,Cond Proprio em aquisicao,1021044
-Sit Suburbano,Cond Proprio em aquisicao,33202
-Sit Rural,Cond Proprio em aquisicao,111461
-Sit Urbano,Cond Alugado,3575026
-Sit Suburbano,Cond Alugado,109313
-Sit Rural,Cond Alugado,300507
-Sit Nao classificado,Cond Alugado,2
-Sit Urbano,Cond Cedido,906408
-Sit Suburbano,Cond Cedido,40742
-Sit Rural,Cond Cedido,920018
-Sit Urbano,Cond Outra condicao,139868
-Sit Suburbano,Cond Outra condicao,13135
-Sit Rural,Cond Outra condicao,2859867
-Sit Urbano,Cond Nao classificado,16
-Cond sem declaracao,Tipo Rustico,1434
-Cond sem declaracao,Tipo Duravel,535
-Cond Proprio ja pago,Tipo Rustico,9912955
-Cond Proprio ja pago,Tipo Duravel,3548621
-Cond Proprio em aquisicao,Tipo Rustico,1032172
-Cond Proprio em aquisicao,Tipo Duravel,133535
-Cond Alugado,Tipo Rustico,3465003
-Cond Alugado,Tipo Duravel,519845
-Cond Cedido,Tipo Rustico,1235874
-Cond Cedido,Tipo Duravel,631294
-Cond Outra condicao,Tipo Rustico,1659069
-Cond Outra condicao,Tipo Duravel,1353801
-Cond Nao classificado,Tipo Rustico,16
-</pre
-            >
-        </div>
+"Urban","No declaration",1168
+"Suburban","No declaration",26
+"Rural","No declaration",775
+"Urban","Owned (paid off)",6602220
+"Suburban","Owned (paid off)",345236
+"Rural","Owned (paid off)",6514120
+"Urban","Owned (being acquired)",1021044
+"Suburban","Owned (being acquired)",33202
+"Rural","Owned (being acquired)",111461
+"Urban","Rented",3575026
+"Suburban","Rented",109313
+"Rural","Rented",300507
+"Unclassified (situation)","Rented",2
+"Urban","Lent",906408
+"Suburban","Lent",40742
+"Rural","Lent",920018
+"Urban","Other condition",139868
+"Suburban","Other condition",13135
+"Rural","Other condition",2859867
+"Urban","Unclassified (condition)",16
+"No declaration","Rustic",1434
+"No declaration","Durable",535
+"Owned (paid off)","Rustic",9912955
+"Owned (paid off)","Durable",3548621
+"Owned (being acquired)","Rustic",1032172
+"Owned (being acquired)","Durable",133535
+"Rented","Rustic",3465003
+"Rented","Durable",519845
+"Lent","Rustic",1235874
+"Lent","Durable",631294
+"Other condition","Rustic",1659069
+"Other condition","Durable",1353801
+"Unclassified (condition)","Rustic",16
+</pre>
+  </div>
+  <p><small>Source: IBGE, 1970 Demographic Census — household situation → occupancy condition → construction type.</small></p>
 
-        <hr />
+  <h3>1980 Census</h3>
+  <p>The great urbanization begins: cities and towns already concentrate most households, and apartment living starts to register in the statistics.</p>
 
-        <h3>1980 Housing Census</h3>
-        <blockquote>
-            <em
-                >Beginning of major urbanization: emergence of apartment living
-                and shift from rural to urban settlements</em
-            >
-        </blockquote>
-
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -406,64 +285,57 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Aglomerado rural,Alugado,19572
-Aglomerado rural,Cedido por empregador,13165
-Aglomerado rural,Cedido por particular,8836
-Aglomerado rural,ignorado,437
-Aglomerado rural,Outra condicao,3330
-Aglomerado rural,Proprio em aquisicao,11155
-Aglomerado rural,Proprio ja pago,124728
-Area urbana isolada,Alugado,6098
-Area urbana isolada,Cedido por empregador,1893
-Area urbana isolada,Cedido por particular,1910
-Area urbana isolada,ignorado,38
-Area urbana isolada,Outra condicao,342
-Area urbana isolada,Proprio em aquisicao,1212
-Area urbana isolada,Proprio ja pago,15536
-Cidade ou Vila,Alugado,1343492
-Cidade ou Vila,Cedido por empregador,96021
-Cidade ou Vila,Cedido por particular,277264
-Cidade ou Vila,ignorado,6427
-Cidade ou Vila,Outra condicao,54910
-Cidade ou Vila,Proprio em aquisicao,344477
-Cidade ou Vila,Proprio ja pago,2334531
-Zona rural,Alugado,34671
-Zona rural,Cedido por empregador,429076
-Zona rural,Cedido por particular,170478
-Zona rural,ignorado,3637
-Zona rural,Outra condicao,46914
-Zona rural,Proprio em aquisicao,8230
-Zona rural,Proprio ja pago,1125161
-Alugado,Apartamento,192360
-Alugado,Casa,1211473
-Cedido por empregador,Apartamento,15897
-Cedido por empregador,Casa,524258
-Cedido por particular,Apartamento,15198
-Cedido por particular,Casa,443290
-ignorado,Apartamento,1420
-ignorado,Casa,9119
-Outra condicao,Apartamento,3131
-Outra condicao,Casa,102365
-Proprio em aquisicao,Apartamento,107008
-Proprio em aquisicao,Casa,258066
-Proprio ja pago,Apartamento,115652
-Proprio ja pago,Casa,3484304
-</pre
-            >
-        </div>
+"Rural settlement","Rented",19572
+"Rural settlement","Lent by employer",13165
+"Rural settlement","Lent by individual",8836
+"Rural settlement","Unknown",437
+"Rural settlement","Other condition",3330
+"Rural settlement","Owned (being acquired)",11155
+"Rural settlement","Owned (paid off)",124728
+"Isolated urban area","Rented",6098
+"Isolated urban area","Lent by employer",1893
+"Isolated urban area","Lent by individual",1910
+"Isolated urban area","Unknown",38
+"Isolated urban area","Other condition",342
+"Isolated urban area","Owned (being acquired)",1212
+"Isolated urban area","Owned (paid off)",15536
+"City or town","Rented",1343492
+"City or town","Lent by employer",96021
+"City or town","Lent by individual",277264
+"City or town","Unknown",6427
+"City or town","Other condition",54910
+"City or town","Owned (being acquired)",344477
+"City or town","Owned (paid off)",2334531
+"Rural zone","Rented",34671
+"Rural zone","Lent by employer",429076
+"Rural zone","Lent by individual",170478
+"Rural zone","Unknown",3637
+"Rural zone","Other condition",46914
+"Rural zone","Owned (being acquired)",8230
+"Rural zone","Owned (paid off)",1125161
+"Rented","Apartment",192360
+"Rented","House",1211473
+"Lent by employer","Apartment",15897
+"Lent by employer","House",524258
+"Lent by individual","Apartment",15198
+"Lent by individual","House",443290
+"Unknown","Apartment",1420
+"Unknown","House",9119
+"Other condition","Apartment",3131
+"Other condition","House",102365
+"Owned (being acquired)","Apartment",107008
+"Owned (being acquired)","House",258066
+"Owned (paid off)","Apartment",115652
+"Owned (paid off)","House",3484304
+</pre>
+  </div>
+  <p><small>Source: IBGE, 1980 Demographic Census — household situation → occupancy condition → dwelling type.</small></p>
 
-        <hr />
+  <h3>2000 Census</h3>
+  <p>The millennium turn: a simplified urban/rural classification, the consolidation of urban living and of fully-owned homes — with the apartment as an established category.</p>
 
-        <h3>2000 Housing Census</h3>
-        <blockquote>
-            <em
-                >Millennium era: simplified urban/rural classification showing
-                the consolidation of urban living and apartment culture</em
-            >
-        </blockquote>
-
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -471,88 +343,91 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Rural,Alugado,67876
-Rural,Cedido de outra forma,334512
-Rural,Cedido por empregador,776836
-Rural,ignorado,70761
-Rural,Outra condicao,68061
-Rural,Proprio em aquisicao,78000
-Rural,Proprio pago,3476050
-Urbano,Alugado,2206025
-Urbano,Cedido de outra forma,855342
-Urbano,Cedido por empregador,207996
-Urbano,ignorado,108024
-Urbano,Outra condicao,170945
-Urbano,Proprio em aquisicao,1146742
-Urbano,Proprio pago,10707242
-Alugado,Apartamento,315423
-Alugado,Casa,1907731
-Alugado,Comodo,50747
-Cedido de outra forma,Apartamento,35972
-Cedido de outra forma,Casa,1124609
-Cedido de outra forma,Comodo,29273
-Cedido por empregador,Apartamento,21095
-Cedido por empregador,Casa,956863
-Cedido por empregador,Comodo,6874
-ignorado,OutroNIU,178785
-Outra condicao,Apartamento,8251
-Outra condicao,Casa,222231
-Outra condicao,Comodo,8524
-Proprio em aquisicao,Apartamento,287630
-Proprio em aquisicao,Casa,933642
-Proprio em aquisicao,Comodo,3470
-Proprio pago,Apartamento,604698
-Proprio pago,Casa,13508004
-Proprio pago,Comodo,70590
-</pre
-            >
-        </div>
+"Rural","Rented",67876
+"Rural","Lent in another way",334512
+"Rural","Lent by employer",776836
+"Rural","Unknown",70761
+"Rural","Other condition",68061
+"Rural","Owned (being acquired)",78000
+"Rural","Owned (paid off)",3476050
+"Urban","Rented",2206025
+"Urban","Lent in another way",855342
+"Urban","Lent by employer",207996
+"Urban","Unknown",108024
+"Urban","Other condition",170945
+"Urban","Owned (being acquired)",1146742
+"Urban","Owned (paid off)",10707242
+"Rented","Apartment",315423
+"Rented","House",1907731
+"Rented","Single room",50747
+"Lent in another way","Apartment",35972
+"Lent in another way","House",1124609
+"Lent in another way","Single room",29273
+"Lent by employer","Apartment",21095
+"Lent by employer","House",956863
+"Lent by employer","Single room",6874
+"Unknown","Other",178785
+"Other condition","Apartment",8251
+"Other condition","House",222231
+"Other condition","Single room",8524
+"Owned (being acquired)","Apartment",287630
+"Owned (being acquired)","House",933642
+"Owned (being acquired)","Single room",3470
+"Owned (paid off)","Apartment",604698
+"Owned (paid off)","House",13508004
+"Owned (paid off)","Single room",70590
+</pre>
+  </div>
+  <p><small>Source: IBGE, 2000 Demographic Census — household situation → occupancy condition → dwelling type.</small></p>
 
-        <hr />
+  <h3>What the three censuses show</h3>
+  <ul>
+    <li><strong>Accelerating urbanization:</strong> in 1970, rural households still rivaled urban ones; by 2000, urban areas concentrate roughly three times more households than rural ones.</li>
+    <li><strong>Consolidation of home ownership:</strong> the fully-owned home is the dominant condition in all three censuses — and widens its lead over renting.</li>
+    <li><strong>Access to credit:</strong> the "owned, being acquired" category grows markedly between 1970 and 2000, reflecting the expansion of housing finance.</li>
+    <li><strong>The apartment era:</strong> nearly invisible in 1970, the apartment appears in 1980 and settles in as a relevant category by 2000.</li>
+  </ul>
 
-        <h3>Key Insights from Four Decades of Housing Evolution</h3>
+  <p>🔗 <strong><a href="https://github.com/rafapolo/IBGE13/">Source repository: IBGE housing census analysis</a></strong></p>
 
-        <p><strong>Major Trends Observed:</strong></p>
-        <ul>
-            <li>
-                <strong>Urbanization Acceleration:</strong> Massive shift from
-                rural to urban housing (1970-2010)
-            </li>
-            <li>
-                <strong>Homeownership Growth:</strong> Increase in fully owned
-                properties vs. rentals
-            </li>
-            <li>
-                <strong>Housing Diversification:</strong> From basic rural/urban
-                to complex categorizations including condominiums
-            </li>
-            <li>
-                <strong>Social Recognition:</strong> Inclusion of indigenous
-                housing and institutional living categories
-            </li>
-            <li>
-                <strong>Economic Development:</strong> Shift from "fully paid"
-                to "in acquisition" reflecting credit access
-            </li>
-        </ul>
+  <!-- ── about ──────────────────────────────────────────── -->
 
-        <hr />
+  <h2>About the data</h2>
 
-        <h2>&#x1f527; Data Sources</h2>
+  <p class="lede">We experiment with visualizing public data, integrating the IBGE Censuses, the CNEFE address registry and the Federal Revenue's company registry: population data by religious profile, education, race and age; companies with economic activities, ownership structures, religious organizations, police battalions, city halls, quilombola communities and banks — most of them geolocated — potentially cross-referenced with the Electoral Court (TSE), Chamber of Deputies expenses, parliamentary caucuses and "PIX" budget amendments.</p>
 
-        <ul>
-            <li>IBGE Census (Brazilian Institute of Geography and Statistics)</li>
-            <li>CNEFE (National Registry of Addresses for Statistical Purposes)</li>
-            <li>Federal Revenue Registry</li>
-            <li>TSE (Superior Electoral Court)</li>
-            <li>Chamber of Deputies Expense Records</li>
-        </ul>
+  <blockquote>Digital cartography makes it possible to spatialize complex knowledge — such as economic patterns, religious practices, or networks of power — that used to remain scattered or hidden in raw data. This spatialization turns large volumes of data into accessible cognitive interfaces, mobilizing both visual perception and critical analysis. <em>(Drucker, 2011)</em></blockquote>
+</main>
 
-        <hr />
+<footer>
+  <div class="footer-inner">
+    <a href="../index.html">Versão em português</a>
+    <a href="https://github.com/rafapolo/xyz">Repository</a>
+    <span>Data: official public sources — IBGE, CNEFE, Federal Revenue · ミ ~ 2026</span>
+  </div>
+</footer>
 
-        <p>&#x30df; ~ 2025</p>
-    </main>
+<script src="../assets/theme-toggle.js"></script>
+<script>
+// re-render the sankeys when data-theme changes (theme-toggle.js only swaps the attribute)
+window.addEventListener('DOMContentLoaded', function () {
+  var diagrams = document.querySelectorAll('pre.mermaid');
+  diagrams.forEach(function (el) { el.dataset.src = el.textContent; });
 
-    <script src="../assets/theme-toggle.js"></script>
-    </body>
+  function render() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', sankey: { useMaxWidth: true } });
+    diagrams.forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.src;
+    });
+    mermaid.run({ nodes: diagrams });
+  }
+
+  render();
+
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
+</script>
+</body>
 </html>

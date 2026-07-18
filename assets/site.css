@@ -362,14 +362,27 @@ main blockquote {
 
 .content-section { margin: 2rem 0; }
 
+figure { margin: 2rem 0; }
+figure img, figure a img { margin: 0; }
+figure > a { display: block; }
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+  margin-top: 0.6rem;
+}
+
 .sankey-container {
   border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 15px;
   margin: 20px 0;
   background-color: var(--bg-raised);
-  display: inline-block;
-  width: 800px;
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  overflow-x: auto;
 }
 
 .mermaid { margin: 2rem 0; text-align: center; }

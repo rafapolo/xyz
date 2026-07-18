@@ -1,274 +1,234 @@
 <!doctype html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>ミxplorando Novas Tecnologias Cartográficas</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミxplorando Novas Tecnologias Cartográficas</title>
+<meta name="description" content="Sete explorações cartográficas com dados públicos brasileiros — IBGE, CNEFE e Receita Federal: CNPJs do Rio ponto a ponto, todas as igrejas do país, Nova Friburgo em 3D, redes societárias e o Atlas Salarial da RAIS.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ミxplorando Novas Tecnologias Cartográficas">
+<meta property="og:description" content="Sete explorações cartográficas com dados públicos brasileiros — IBGE, CNEFE e Receita Federal.">
+<meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
+<meta property="og:url" content="https://xn--2dk.xyz/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="assets/mcp-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js" defer></script>
+</head>
+<body>
 
-        <link rel="stylesheet" href="assets/site.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-        <link rel="stylesheet" href="assets/mcp-theme.css">
-
-        <!-- Mermaid for Sankey diagrams -->
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
-        <script>
-            mermaid.initialize({
-                startOnLoad: true,
-                theme: "default",
-                sankey: { useMaxWidth: true },
-            });
-        </script>
-
-
-    </head>
-    <body>
-
-    <nav class="site-nav">
-      <div class="nav-inner">
-        <a class="brand" href="index.html">ミ</a>
-        <div class="nav-right">
-          <div class="links">
-            <a href="https://github.com/rafapolo/xyz">GitHub</a>
-          </div>
-          <div class="nav-controls">
-            <div class="lang-switch">
-              <span class="lang-current">PT</span>
-              <span class="lang-sep">/</span>
-              <a href="dataviz/index.html" class="lang-link">EN</a>
-            </div>
-            <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema claro/escuro" type="button"><i class="fa-solid fa-moon"></i></button>
-          </div>
-        </div>
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">ミ</a>
+    <div class="nav-right">
+      <div class="links">
+        <a href="https://github.com/rafapolo/xyz">GitHub</a>
       </div>
-    </nav>
-
-    <main>
-        <h1>ミxplorando Novas Tecnologias Cartográficas</h1>
-
-        <p>
-            Hoje, através de uma tela, um indíviduo pode inter-relacionar,
-            interagir, representar e navegar entre milhões de dados. O avanço
-            nas tecnologias ampliou drasticamente nossa capacidade de mapear o
-            território, as redes e os fluxos.
-        </p>
-
-        <p>
-            Experimentamos visualizar dados públicos, integrando os Censos do
-            IBGE, o CNEFE e o Cadastro da Receita Federal, envolvendo:
-        </p>
-
-        <ul>
-            <li>
-                dados populacionais por perfil religioso, escolaridade, cor,
-                idade...;
-            </li>
-            <li>
-                empresas com atividades econômicas, sociedades, organizações
-                religiosas, batalhões, prefeituras, comunidades quilombolas,
-                bancos... a maioria com localização geográfica;
-            </li>
-            <li>
-                potencialmente co-relacionados com o TSE, Despesas da Câmara,
-                Frentes, Emendas PIX...
-            </li>
-        </ul>
-
-        <p>
-            Demonstrando em pulos, a imagem abaixo não é uma foto aérea: é uma
-            representação visual do Rio de Janeiro, onde cada ponto iluminado é
-            um estabelecimento de Pessoa Jurídica;
-        </p>
-
-        <p>
-            =>
-            <a href="https://xn--2dk.xyz/dataviz/rio/ibge"
-                >https://ミ.xyz/dataviz/rio/ibge</a
-            >
-        </p>
-
-        <div class="content-section">
-            <img src="images/image1.png" alt="Visualização Rio de Janeiro" />
-            <img src="images/image2.png" alt="Visualização Rio de Janeiro" />
+      <div class="nav-controls">
+        <div class="lang-switch">
+          <span class="lang-current">PT</span>
+          <span class="lang-sep">/</span>
+          <a href="dataviz/index.html" class="lang-link">EN</a>
         </div>
+        <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema claro/escuro" type="button"><i class="fa-solid fa-moon"></i></button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-        <div class="content-section">
-            <h2>Todas as Igrejas do País</h2>
+<main>
+  <p class="eyebrow">7 explorações cartográficas · IBGE, CNEFE, Receita Federal</p>
+  <h1>ミxplorando Novas Tecnologias Cartográficas</h1>
+  <p class="dek">Hoje, através de uma tela, um indivíduo pode inter-relacionar, interagir, representar e navegar entre milhões de dados. O avanço nas tecnologias ampliou drasticamente nossa capacidade de mapear o território, as redes e os fluxos.</p>
 
-            <img src="images/image3.png" alt="Igrejas" />
-            <img src="images/image4.png" alt="Igrejas" />
-            <img src="images/image5.png" alt="Igrejas" />
-            <img src="images/image6.png" alt="Igrejas" />
-            <img src="images/image7.png" alt="Igrejas" />
+  <!-- ── 01 ─────────────────────────────────────────────── -->
 
-            <h3>Mais igrejas que escolas. :/</h3>
+  <h2 id="tema-01">01 · Rio de Janeiro: cada ponto é um CNPJ</h2>
 
-            <img src="images/image8.png" alt="Comparação igrejas e escolas" />
+  <p class="lede">A imagem parece uma foto aérea noturna — mas cada ponto de luz é um estabelecimento de Pessoa Jurídica registrado na Receita Federal. Ao plotar a localização de cada estabelecimento ativo do CNPJ, o próprio tecido urbano se desenha: avenidas, centros comerciais e periferias emergem sem que nenhum mapa de fundo seja necessário.</p>
 
-            <h3>
-                Quanto mais amarelo, mais Católico um município. Roxo tende a
-                ser Evangélico.
-            </h3>
+  <p class="pull">Não é uma foto aérea: é o cadastro da Receita Federal projetado sobre o território.</p>
 
-            <img src="images/image16.png" alt="Mapa religioso" />
-            <img src="images/image17.png" alt="Mapa religioso" />
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rio/ibge"><img src="images/image1.png" alt="Mapa escuro do estado do Rio de Janeiro formado por milhões de pontos luminosos, cada um representando um CNPJ ativo" width="760" height="799" fetchpriority="high"></a>
+    <figcaption>Cada ponto iluminado é um estabelecimento de Pessoa Jurídica. Fonte: Cadastro CNPJ, Receita Federal. Clique para abrir a versão interativa.</figcaption>
+  </figure>
 
-            <h3>
-                81,5% dos estados brasileiros têm o dobro de estabelecimentos
-                religiosos comparado a unidades de saúde.
-            </h3>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rio/ibge"><img src="images/image2.png" alt="Aproximação da visualização de CNPJs do Rio de Janeiro, com a mancha urbana desenhada apenas pelos pontos de estabelecimentos" width="852" height="558" loading="lazy"></a>
+    <figcaption>Aproximando, a mancha urbana aparece desenhada apenas pelos estabelecimentos — nenhuma imagem de satélite é usada.</figcaption>
+  </figure>
 
-            <img
-                src="images/image18.png"
-                alt="Comparação religiosos vs saúde"
-            />
+  <p>Explore a versão interativa em <a href="https://xn--2dk.xyz/dataviz/rio/ibge">ミ.xyz/dataviz/rio/ibge</a>.</p>
 
-            <h3>
-                Número de Entidades Religiosas supera o de Sindicatos no ano
-                2000
-            </h3>
+  <!-- ── 02 ─────────────────────────────────────────────── -->
 
-            <img src="images/image14.png" alt="Religiosas vs Sindicatos" />
+  <h2 id="tema-02">02 · Todas as igrejas do país</h2>
 
-            <h3>
-                Distribuição de Tipo de Escolas no Rio (primário, secundária…)
-            </h3>
+  <p class="lede">O cadastro CNPJ registra a natureza jurídica de cada estabelecimento, o que permite isolar as organizações religiosas e plotá-las sobre o território. O resultado é um retrato da infraestrutura religiosa do país — e das assimetrias quando a comparamos com escolas, unidades de saúde e sindicatos.</p>
 
-            <img src="images/image19.png" alt="Escolas Rio" />
-            <img src="images/image20.png" alt="Escolas Rio" />
-        </div>
+  <h3>O mapa nacional</h3>
+  <figure>
+    <img src="images/image3.png" alt="Mapa do Brasil formado por pontos que marcam cada estabelecimento religioso do país, com o litoral e o Nordeste em alta densidade" width="805" height="908" loading="lazy">
+    <figcaption>Cada ponto é um estabelecimento religioso ativo. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-        <div class="content-section">
-            <h3>
-                Residenciais em Nova Friburgo com Altura relativa a número de
-                moradores
-            </h3>
+  <figure>
+    <img src="images/image7.png" alt="Mapa 3D do estado do Rio de Janeiro com espículas verticais marcando a concentração de estabelecimentos religiosos" width="778" height="676" loading="lazy">
+    <figcaption>Em três dimensões: a concentração de estabelecimentos religiosos no estado do Rio de Janeiro.</figcaption>
+  </figure>
 
-            <img src="images/image9.png" alt="Nova Friburgo 3D" />
+  <figure>
+    <img src="images/image8.png" alt="Mapa de calor da região de São Gonçalo (RJ), com pontos em tons de roxo e amarelo marcando a densidade de estabelecimentos religiosos" width="778" height="719" loading="lazy">
+    <figcaption>Densidade de estabelecimentos religiosos na região de São Gonçalo (RJ).</figcaption>
+  </figure>
 
-            <p>
-                =>
-                <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d"
-                    >https://ミ.xyz/dataviz/friba/pop_3d</a
-                >
-            </p>
+  <h3>O perfil religioso de cada município</h3>
+  <p>Cruzando o Censo do IBGE com a localização dos municípios, é possível colorir o país pelo perfil religioso declarado da população: quanto mais amarelo, mais católico o município; o roxo tende a indicar predominância evangélica.</p>
+  <figure>
+    <img src="images/image16.png" alt="Mapa do Brasil em kepler.gl com municípios coloridos do amarelo (predominância católica) ao roxo (predominância evangélica)" width="862" height="732" loading="lazy">
+    <figcaption>Perfil religioso declarado por município. Fonte: Censo IBGE; visualização em kepler.gl + DuckDB.</figcaption>
+  </figure>
 
-            <h3>Todas as Residências no Município de Nova Friburgo</h3>
+  <h3>Mais igrejas que unidades de saúde</h3>
+  <figure>
+    <img src="images/image18.png" alt="Gráfico de barras empilhadas por estado comparando percentuais de estabelecimentos de educação, saúde e religiosos no Censo 2022" width="815" height="583" loading="lazy">
+    <figcaption>Participação de estabelecimentos de educação, saúde e religiosos em cada estado. Fonte: IBGE, Censo 2022.</figcaption>
+  </figure>
+  <p class="pull">22 dos 27 estados brasileiros têm o dobro de estabelecimentos religiosos em relação a unidades de saúde.</p>
 
-            <img src="images/image13.png" alt="Residências Nova Friburgo" />
+  <h3>Entidades religiosas ultrapassam os sindicatos</h3>
+  <figure>
+    <img src="images/image14.png" alt="Gráfico de linhas do acúmulo de estabelecimentos por natureza jurídica: organizações religiosas ultrapassam entidades sindicais por volta do ano 2000 e disparam depois de 2010" width="602" height="359" loading="lazy">
+    <figcaption>Acúmulo de estabelecimentos por natureza jurídica: organizações religiosas ultrapassam as entidades sindicais por volta do ano 2000. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-            <h3>Mapa de calor de áreas com mais Residências</h3>
+  <h3>E as escolas?</h3>
+  <figure>
+    <img src="images/image19.png" alt="Visualização da distribuição dos tipos de escola no Rio de Janeiro, do ensino primário ao secundário" width="868" height="532" loading="lazy">
+    <figcaption>Distribuição dos tipos de escola no Rio de Janeiro (primário, secundário…). Fonte: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <img src="images/image25.png" alt="Heatmap residências" />
-            <img src="images/image26.png" alt="Heatmap residências" />
-            <img src="images/image27.png" alt="Heatmap residências" />
-            <img src="images/image28.png" alt="Heatmap residências" />
+  <!-- ── 03 ─────────────────────────────────────────────── -->
 
-            <h3>Heatmap de registros de novas Empresas em Nova Friburgo</h3>
+  <h2 id="tema-03">03 · Nova Friburgo em três dimensões</h2>
 
-            <img src="images/image15.png" alt="Heatmap empresas" />
-        </div>
+  <p class="lede">O Cadastro Nacional de Endereços para Fins Estatísticos (CNEFE) registra cada endereço visitado pelo IBGE. Restringindo ao município de Nova Friburgo (RJ), dá para reconstruir a cidade casa a casa — e extrudar cada residência pela quantidade de moradores.</p>
 
-        <div class="content-section">
-            <h3>
-                Distribuição de Confecções (mapeado a partir dos CNPJs ativos)
-            </h3>
+  <h3>Residências com altura relativa ao número de moradores</h3>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d"><img src="images/image9.png" alt="Visualização 3D de Nova Friburgo em que cada residência é uma coluna com altura proporcional ao número de moradores" width="784" height="480" loading="lazy"></a>
+    <figcaption>Cada coluna é uma residência; a altura, o número de moradores. Fonte: IBGE / CNEFE. Clique para abrir a versão interativa.</figcaption>
+  </figure>
 
-            <img src="images/image10.png" alt="Confecções" />
+  <p>Explore a versão interativa em <a href="https://xn--2dk.xyz/dataviz/friba/pop_3d">ミ.xyz/dataviz/friba/pop_3d</a>.</p>
 
-            <h3>
-                Visualizando Confecçoes Abertas e Fechadas na Pandemia no pólo
-                de moda intima
-            </h3>
+  <h3>Todas as residências do município</h3>
+  <figure>
+    <img src="images/image13.png" alt="Mapa alongado do município de Nova Friburgo com todos os endereços residenciais plotados como pontos" width="1148" height="487" loading="lazy">
+    <figcaption>Todos os endereços residenciais de Nova Friburgo. Fonte: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <img src="images/image12.png" alt="Confecções pandemia" />
+  <h3>Onde a cidade se concentra</h3>
+  <figure>
+    <img src="images/image26.png" alt="Mapa 3D escuro da região serrana do Rio de Janeiro com espículas azuis e roxas marcando concentrações de residências em Nova Friburgo, Teresópolis e arredores" width="804" height="523" loading="lazy">
+    <figcaption>Na região serrana, os núcleos urbanos saltam como picos de densidade residencial. Fonte: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <h3>
-                Que áreas econômicas fecharam depois de outras durante a
-                pandemia?
-            </h3>
+  <figure>
+    <img src="images/image28.png" alt="Visualização em nível de rua do centro de Nova Friburgo, com colunas 3D sobre cada endereço residencial" width="700" height="750" loading="lazy">
+    <figcaption>No nível da rua: colunas sobre cada endereço do centro de Nova Friburgo. Fonte: IBGE / CNEFE.</figcaption>
+  </figure>
 
-            <img src="images/image22.png" alt="Áreas econômicas pandemia" />
-        </div>
+  <h3>Onde as empresas nascem</h3>
+  <figure>
+    <img src="images/image15.png" alt="Mapa de calor dos registros de novas empresas em Nova Friburgo, com manchas de maior intensidade no centro da cidade" width="842" height="499" loading="lazy">
+    <figcaption>Registros de novas empresas em Nova Friburgo. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-        <div class="content-section">
-            <h3>
-                Relação Societária de Empresários Friburguenses com mais
-                empresas
-            </h3>
+  <!-- ── 04 ─────────────────────────────────────────────── -->
 
-            <img src="images/image23.png" alt="Redes societárias" />
+  <h2 id="tema-04">04 · Confecções e a pandemia</h2>
 
-            <h3>Empresas e Sócios do dono do Jogo do Tigrinho</h3>
+  <p class="lede">Cada CNPJ carrega a atividade econômica (CNAE), a data de abertura e, quando é o caso, a data de baixa. Filtrando as confecções ativas do polo de moda íntima de Nova Friburgo, dá para mapear a geografia do setor — e assistir, registro a registro, ao impacto da pandemia.</p>
 
-            <p>
-                =>
-                <a href="https://tinyurl.com/pegadas-tigrim"
-                    >https://tinyurl.com/pegadas-tigrim</a
-                >
-            </p>
+  <h3>A distribuição das confecções</h3>
+  <figure>
+    <img src="images/image10.png" alt="Mapa da distribuição das confecções ativas em Nova Friburgo, mapeadas a partir dos CNPJs" width="694" height="762" loading="lazy">
+    <figcaption>Confecções ativas, mapeadas a partir dos CNPJs. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-            <img src="images/image29.png" alt="Rede Tigrinho" />
+  <h3>Abertas e fechadas durante a pandemia</h3>
+  <figure>
+    <img src="images/image12.png" alt="Visualização vertical comparando confecções abertas e fechadas durante a pandemia no polo de moda íntima de Nova Friburgo" width="486" height="1258" loading="lazy">
+    <figcaption>Confecções abertas e fechadas durante a pandemia no polo de moda íntima. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-            <h3>
-                Visualização das Sociedades e Empresas de um determinado Senador
-            </h3>
+  <h3>Que setores fecharam depois de outros?</h3>
+  <p>Ordenando as baixas de CNPJ no tempo, aparece uma sequência: alguns setores econômicos fecharam primeiro, outros resistiram mais — um rastro temporal da crise atravessando a economia local.</p>
+  <figure>
+    <img src="images/image22.png" alt="Visualização comparando a sequência temporal de fechamento de diferentes áreas econômicas durante a pandemia" width="836" height="622" loading="lazy">
+    <figcaption>A ordem dos fechamentos por área econômica durante a pandemia. Fonte: Cadastro CNPJ, Receita Federal.</figcaption>
+  </figure>
 
-            <img src="images/image30.png" alt="Rede Senador" />
+  <!-- ── 05 ─────────────────────────────────────────────── -->
 
-            <h3>Empresas Suíças com sede no Brasil</h3>
+  <h2 id="tema-05">05 · Redes societárias</h2>
 
-            <p>
-                =>
-                <a href="https://tinyurl.com/swiss-brazilian-network"
-                    >https://tinyurl.com/swiss-brazilian-network</a
-                >
-            </p>
+  <p class="lede">O cadastro CNPJ publica o quadro societário de cada empresa. Ligando sócios a empresas — e empresas a outros sócios —, as relações de poder econômico viram um grafo navegável: quem está ao lado de quem, e através de quê.</p>
 
-            <img src="images/image31.png" alt="Empresas Suíças" />
+  <h3>Empresários friburguenses com mais empresas</h3>
+  <figure>
+    <img src="images/image23.png" alt="Grafo de relações societárias ligando os empresários de Nova Friburgo com maior número de empresas" width="726" height="587" loading="lazy">
+    <figcaption>Relação societária dos empresários friburguenses com mais empresas. Fonte: Quadro societário, Cadastro CNPJ.</figcaption>
+  </figure>
 
-            <h3>Atlas Salarial do Brasil (RAIS 2020–2024)</h3>
+  <h3>As empresas do dono do Jogo do Tigrinho</h3>
+  <figure>
+    <a href="https://tinyurl.com/pegadas-tigrim"><img src="images/image29.png" alt="Grafo das empresas e sócios ligados ao dono do Jogo do Tigrinho" width="874" height="296" loading="lazy"></a>
+    <figcaption>Empresas e sócios do dono do Jogo do Tigrinho. Fonte: Quadro societário, Cadastro CNPJ. Clique para abrir o grafo interativo.</figcaption>
+  </figure>
 
-            <img src="images/image32.jpg" alt="Atlas Salarial do Brasil" />
+  <h3>As sociedades de um senador</h3>
+  <figure>
+    <img src="images/image30.png" alt="Grafo das sociedades e empresas ligadas a um senador da República" width="809" height="671" loading="lazy">
+    <figcaption>Sociedades e empresas de um determinado senador. Fonte: Quadro societário, Cadastro CNPJ.</figcaption>
+  </figure>
 
-            <p>
-                =>
-                <a href="https://xn--2dk.xyz/dataviz/rais/mapa/"
-                    >https://ミ.xyz/dataviz/rais/mapa/</a
-                >
-            </p>
-        </div>
+  <h3>Empresas suíças com sede no Brasil</h3>
+  <figure>
+    <a href="https://tinyurl.com/swiss-brazilian-network"><img src="images/image31.png" alt="Grafo da rede de empresas suíças com sede no Brasil e seus sócios" width="886" height="585" loading="lazy"></a>
+    <figcaption>A rede das empresas suíças com sede no Brasil. Fonte: Quadro societário, Cadastro CNPJ. Clique para abrir o grafo interativo.</figcaption>
+  </figure>
 
-        <hr />
+  <!-- ── 06 ─────────────────────────────────────────────── -->
 
-        <h2>
-            📈 Dados dos Censos Habitacionais do IBGE: Quatro Décadas de
-            Evolução (1970-2010)
-        </h2>
+  <h2 id="tema-06">06 · Atlas Salarial do Brasil</h2>
 
-        <blockquote>
-            <em
-                >Diagramas de fluxo Sankey abrangentes mostrando os padrões
-                habitacionais brasileiros ao longo de cinco períodos
-                censitários, revelando a transformação da propriedade
-                habitacional, tendências de urbanização e características das
-                moradias durante 40 anos</em
-            >
-        </blockquote>
+  <p class="lede">A Relação Anual de Informações Sociais (RAIS) registra cada vínculo formal de trabalho no país. Agregando os vínculos por município, o atlas mostra onde os salários se concentram — e onde o trabalho formal praticamente desaparece do mapa.</p>
 
-        <h3>Censo Habitacional de 1970</h3>
-        <blockquote>
-            <em
-                >Padrões habitacionais da era pós-industrialização mostrando o
-                domínio de propriedades rurais próprias e tipos de habitação
-                rústica</em
-            >
-        </blockquote>
+  <figure>
+    <a href="https://xn--2dk.xyz/dataviz/rais/mapa/"><img src="images/image32.jpg" alt="Mapa coroplético do Brasil com os municípios coloridos pela remuneração média dos vínculos formais da RAIS" width="1280" height="1043" loading="lazy"></a>
+    <figcaption>Remuneração dos vínculos formais por município. Fonte: RAIS, Ministério do Trabalho e Emprego, 2020–2024. Clique para abrir o atlas interativo.</figcaption>
+  </figure>
 
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <p>Explore o atlas interativo em <a href="https://xn--2dk.xyz/dataviz/rais/mapa/">ミ.xyz/dataviz/rais/mapa/</a>.</p>
+
+  <!-- ── 07 ─────────────────────────────────────────────── -->
+
+  <h2 id="tema-07">07 · Censos habitacionais: 1970–2000</h2>
+
+  <p class="lede">Cada diagrama Sankey lê um censo habitacional do IBGE em três camadas: a situação do domicílio (rural, urbano…), a condição de ocupação (próprio, alugado, cedido…) e o tipo de moradia. Seguindo os fluxos de 1970, 1980 e 2000, a transformação habitacional do país aparece de uma vez só.</p>
+
+  <h3>Censo de 1970</h3>
+  <p>Padrões habitacionais da era pré-urbanização em massa: os domicílios rurais próprios ainda rivalizam com os urbanos, e o tipo de construção predominante é o rústico.</p>
+
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -276,55 +236,48 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Sit Urbano,Cond sem declaracao,1168
-Sit Suburbano,Cond sem declaracao,26
-Sit Rural,Cond sem declaracao,775
-Sit Urbano,Cond Proprio ja pago,6602220
-Sit Suburbano,Cond Proprio ja pago,345236
-Sit Rural,Cond Proprio ja pago,6514120
-Sit Urbano,Cond Proprio em aquisicao,1021044
-Sit Suburbano,Cond Proprio em aquisicao,33202
-Sit Rural,Cond Proprio em aquisicao,111461
-Sit Urbano,Cond Alugado,3575026
-Sit Suburbano,Cond Alugado,109313
-Sit Rural,Cond Alugado,300507
-Sit Nao classificado,Cond Alugado,2
-Sit Urbano,Cond Cedido,906408
-Sit Suburbano,Cond Cedido,40742
-Sit Rural,Cond Cedido,920018
-Sit Urbano,Cond Outra condicao,139868
-Sit Suburbano,Cond Outra condicao,13135
-Sit Rural,Cond Outra condicao,2859867
-Sit Urbano,Cond Nao classificado,16
-Cond sem declaracao,Tipo Rustico,1434
-Cond sem declaracao,Tipo Duravel,535
-Cond Proprio ja pago,Tipo Rustico,9912955
-Cond Proprio ja pago,Tipo Duravel,3548621
-Cond Proprio em aquisicao,Tipo Rustico,1032172
-Cond Proprio em aquisicao,Tipo Duravel,133535
-Cond Alugado,Tipo Rustico,3465003
-Cond Alugado,Tipo Duravel,519845
-Cond Cedido,Tipo Rustico,1235874
-Cond Cedido,Tipo Duravel,631294
-Cond Outra condicao,Tipo Rustico,1659069
-Cond Outra condicao,Tipo Duravel,1353801
-Cond Nao classificado,Tipo Rustico,16
-</pre
-            >
-        </div>
+"Urbano","Sem declaracao",1168
+"Suburbano","Sem declaracao",26
+"Rural","Sem declaracao",775
+"Urbano","Proprio ja quitado",6602220
+"Suburbano","Proprio ja quitado",345236
+"Rural","Proprio ja quitado",6514120
+"Urbano","Proprio em aquisicao",1021044
+"Suburbano","Proprio em aquisicao",33202
+"Rural","Proprio em aquisicao",111461
+"Urbano","Alugado",3575026
+"Suburbano","Alugado",109313
+"Rural","Alugado",300507
+"Nao classificado (situacao)","Alugado",2
+"Urbano","Cedido",906408
+"Suburbano","Cedido",40742
+"Rural","Cedido",920018
+"Urbano","Outra condicao",139868
+"Suburbano","Outra condicao",13135
+"Rural","Outra condicao",2859867
+"Urbano","Nao classificado (condicao)",16
+"Sem declaracao","Rustico",1434
+"Sem declaracao","Duravel",535
+"Proprio ja quitado","Rustico",9912955
+"Proprio ja quitado","Duravel",3548621
+"Proprio em aquisicao","Rustico",1032172
+"Proprio em aquisicao","Duravel",133535
+"Alugado","Rustico",3465003
+"Alugado","Duravel",519845
+"Cedido","Rustico",1235874
+"Cedido","Duravel",631294
+"Outra condicao","Rustico",1659069
+"Outra condicao","Duravel",1353801
+"Nao classificado (condicao)","Rustico",16
+</pre>
+  </div>
+  <p><small>Fonte: IBGE, Censo Demográfico 1970 — situação do domicílio → condição de ocupação → tipo de construção.</small></p>
 
-        <hr />
+  <h3>Censo de 1980</h3>
+  <p>Início da grande urbanização: as cidades e vilas já concentram a maior parte dos domicílios, e a vida em apartamento começa a aparecer na estatística.</p>
 
-        <h3>Censo Habitacional de 1980</h3>
-        <blockquote>
-            <em
-                >Início da grande urbanização: emergência da vida em
-                apartamentos e mudança de assentamentos rurais para urbanos</em
-            >
-        </blockquote>
-
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -332,65 +285,57 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Aglomerado rural,Alugado,19572
-Aglomerado rural,Cedido por empregador,13165
-Aglomerado rural,Cedido por particular,8836
-Aglomerado rural,ignorado,437
-Aglomerado rural,Outra condicao,3330
-Aglomerado rural,Proprio em aquisicao,11155
-Aglomerado rural,Proprio ja pago,124728
-Area urbana isolada,Alugado,6098
-Area urbana isolada,Cedido por empregador,1893
-Area urbana isolada,Cedido por particular,1910
-Area urbana isolada,ignorado,38
-Area urbana isolada,Outra condicao,342
-Area urbana isolada,Proprio em aquisicao,1212
-Area urbana isolada,Proprio ja pago,15536
-Cidade ou Vila,Alugado,1343492
-Cidade ou Vila,Cedido por empregador,96021
-Cidade ou Vila,Cedido por particular,277264
-Cidade ou Vila,ignorado,6427
-Cidade ou Vila,Outra condicao,54910
-Cidade ou Vila,Proprio em aquisicao,344477
-Cidade ou Vila,Proprio ja pago,2334531
-Zona rural,Alugado,34671
-Zona rural,Cedido por empregador,429076
-Zona rural,Cedido por particular,170478
-Zona rural,ignorado,3637
-Zona rural,Outra condicao,46914
-Zona rural,Proprio em aquisicao,8230
-Zona rural,Proprio ja pago,1125161
-Alugado,Apartamento,192360
-Alugado,Casa,1211473
-Cedido por empregador,Apartamento,15897
-Cedido por empregador,Casa,524258
-Cedido por particular,Apartamento,15198
-Cedido por particular,Casa,443290
-ignorado,Apartamento,1420
-ignorado,Casa,9119
-Outra condicao,Apartamento,3131
-Outra condicao,Casa,102365
-Proprio em aquisicao,Apartamento,107008
-Proprio em aquisicao,Casa,258066
-Proprio ja pago,Apartamento,115652
-Proprio ja pago,Casa,3484304
-</pre
-            >
-        </div>
+"Aglomerado rural","Alugado",19572
+"Aglomerado rural","Cedido por empregador",13165
+"Aglomerado rural","Cedido por particular",8836
+"Aglomerado rural","Ignorado",437
+"Aglomerado rural","Outra condicao",3330
+"Aglomerado rural","Proprio em aquisicao",11155
+"Aglomerado rural","Proprio ja quitado",124728
+"Area urbana isolada","Alugado",6098
+"Area urbana isolada","Cedido por empregador",1893
+"Area urbana isolada","Cedido por particular",1910
+"Area urbana isolada","Ignorado",38
+"Area urbana isolada","Outra condicao",342
+"Area urbana isolada","Proprio em aquisicao",1212
+"Area urbana isolada","Proprio ja quitado",15536
+"Cidade ou vila","Alugado",1343492
+"Cidade ou vila","Cedido por empregador",96021
+"Cidade ou vila","Cedido por particular",277264
+"Cidade ou vila","Ignorado",6427
+"Cidade ou vila","Outra condicao",54910
+"Cidade ou vila","Proprio em aquisicao",344477
+"Cidade ou vila","Proprio ja quitado",2334531
+"Zona rural","Alugado",34671
+"Zona rural","Cedido por empregador",429076
+"Zona rural","Cedido por particular",170478
+"Zona rural","Ignorado",3637
+"Zona rural","Outra condicao",46914
+"Zona rural","Proprio em aquisicao",8230
+"Zona rural","Proprio ja quitado",1125161
+"Alugado","Apartamento",192360
+"Alugado","Casa",1211473
+"Cedido por empregador","Apartamento",15897
+"Cedido por empregador","Casa",524258
+"Cedido por particular","Apartamento",15198
+"Cedido por particular","Casa",443290
+"Ignorado","Apartamento",1420
+"Ignorado","Casa",9119
+"Outra condicao","Apartamento",3131
+"Outra condicao","Casa",102365
+"Proprio em aquisicao","Apartamento",107008
+"Proprio em aquisicao","Casa",258066
+"Proprio ja quitado","Apartamento",115652
+"Proprio ja quitado","Casa",3484304
+</pre>
+  </div>
+  <p><small>Fonte: IBGE, Censo Demográfico 1980 — situação do domicílio → condição de ocupação → tipo de moradia.</small></p>
 
-        <hr />
+  <h3>Censo de 2000</h3>
+  <p>Virada do milênio: classificação urbano/rural simplificada, consolidação da vida urbana e da casa própria quitada — e o apartamento como categoria estabelecida.</p>
 
-        <h3>Censo Habitacional de 2000</h3>
-        <blockquote>
-            <em
-                >Era do milênio: classificação urbano/rural simplificada
-                mostrando a consolidação da vida urbana e cultura de
-                apartamentos</em
-            >
-        </blockquote>
-
-        <div class="sankey-container">
-            <pre class="mermaid">
+  <div class="sankey-container">
+    <pre class="mermaid">
 ---
 config:
   sankey:
@@ -398,95 +343,114 @@ config:
     useMaxWidth: true
 ---
 sankey-beta
-Rural,Alugado,67876
-Rural,Cedido de outra forma,334512
-Rural,Cedido por empregador,776836
-Rural,ignorado,70761
-Rural,Outra condicao,68061
-Rural,Proprio em aquisicao,78000
-Rural,Proprio pago,3476050
-Urbano,Alugado,2206025
-Urbano,Cedido de outra forma,855342
-Urbano,Cedido por empregador,207996
-Urbano,ignorado,108024
-Urbano,Outra condicao,170945
-Urbano,Proprio em aquisicao,1146742
-Urbano,Proprio pago,10707242
-Alugado,Apartamento,315423
-Alugado,Casa,1907731
-Alugado,Comodo,50747
-Cedido de outra forma,Apartamento,35972
-Cedido de outra forma,Casa,1124609
-Cedido de outra forma,Comodo,29273
-Cedido por empregador,Apartamento,21095
-Cedido por empregador,Casa,956863
-Cedido por empregador,Comodo,6874
-ignorado,OutroNIU,178785
-Outra condicao,Apartamento,8251
-Outra condicao,Casa,222231
-Outra condicao,Comodo,8524
-Proprio em aquisicao,Apartamento,287630
-Proprio em aquisicao,Casa,933642
-Proprio em aquisicao,Comodo,3470
-Proprio pago,Apartamento,604698
-Proprio pago,Casa,13508004
-Proprio pago,Comodo,70590
-</pre
-            >
-        </div>
+"Rural","Alugado",67876
+"Rural","Cedido de outra forma",334512
+"Rural","Cedido por empregador",776836
+"Rural","Ignorado",70761
+"Rural","Outra condicao",68061
+"Rural","Proprio em aquisicao",78000
+"Rural","Proprio quitado",3476050
+"Urbano","Alugado",2206025
+"Urbano","Cedido de outra forma",855342
+"Urbano","Cedido por empregador",207996
+"Urbano","Ignorado",108024
+"Urbano","Outra condicao",170945
+"Urbano","Proprio em aquisicao",1146742
+"Urbano","Proprio quitado",10707242
+"Alugado","Apartamento",315423
+"Alugado","Casa",1907731
+"Alugado","Comodo",50747
+"Cedido de outra forma","Apartamento",35972
+"Cedido de outra forma","Casa",1124609
+"Cedido de outra forma","Comodo",29273
+"Cedido por empregador","Apartamento",21095
+"Cedido por empregador","Casa",956863
+"Cedido por empregador","Comodo",6874
+"Ignorado","Outro",178785
+"Outra condicao","Apartamento",8251
+"Outra condicao","Casa",222231
+"Outra condicao","Comodo",8524
+"Proprio em aquisicao","Apartamento",287630
+"Proprio em aquisicao","Casa",933642
+"Proprio em aquisicao","Comodo",3470
+"Proprio quitado","Apartamento",604698
+"Proprio quitado","Casa",13508004
+"Proprio quitado","Comodo",70590
+</pre>
+  </div>
+  <p><small>Fonte: IBGE, Censo Demográfico 2000 — situação do domicílio → condição de ocupação → tipo de moradia.</small></p>
 
-        <hr />
+  <h3>O que os três censos mostram</h3>
+  <ul>
+    <li><strong>Aceleração da urbanização:</strong> em 1970, os domicílios rurais ainda rivalizavam com os urbanos; em 2000, o meio urbano concentra cerca de três vezes mais domicílios que o rural.</li>
+    <li><strong>Consolidação da casa própria:</strong> o domicílio próprio já quitado é a condição dominante nos três censos — e amplia sua vantagem sobre o aluguel.</li>
+    <li><strong>Acesso ao crédito:</strong> a categoria "próprio em aquisição" cresce de forma expressiva entre 1970 e 2000, refletindo a expansão do financiamento habitacional.</li>
+    <li><strong>A era do apartamento:</strong> praticamente invisível em 1970, o apartamento aparece em 1980 e se estabelece como categoria relevante em 2000.</li>
+  </ul>
 
-        <h3>Principais Insights de Quatro Décadas de Evolução Habitacional</h3>
+  <p>🔗 <strong><a href="https://github.com/rafapolo/IBGE13/">Repositório fonte: análise dos censos habitacionais do IBGE</a></strong></p>
 
-        <p><strong>Principais Tendências Observadas:</strong></p>
-        <ul>
-            <li>
-                <strong>Aceleração da Urbanização:</strong> Mudança massiva de
-                habitação rural para urbana (1970-2010)
-            </li>
-            <li>
-                <strong>Crescimento da Propriedade:</strong> Aumento em
-                propriedades quitadas vs. aluguéis
-            </li>
-            <li>
-                <strong>Diversificação Habitacional:</strong> De classificação
-                rural/urbana básica para categorizações complexas incluindo
-                condomínios
-            </li>
-            <li>
-                <strong>Reconhecimento Social:</strong> Inclusão de habitação
-                indígena e categorias de moradia institucional
-            </li>
-            <li>
-                <strong>Desenvolvimento Econômico:</strong> Mudança de "quitado"
-                para "em aquisição" refletindo acesso ao crédito
-            </li>
-        </ul>
+  <!-- ── sobre ──────────────────────────────────────────── -->
 
-        <p>
-            🔗
-            <strong
-                ><a href="https://github.com/rafapolo/IBGE13/"
-                    >Repositório Fonte: Análise dos Censos Habitacionais IBGE</a
-                ></strong
-            >
-        </p>
+  <h2>Sobre os dados</h2>
 
-        <hr />
+  <p class="lede">Experimentamos visualizar dados públicos, integrando os Censos do IBGE, o CNEFE e o Cadastro da Receita Federal: dados populacionais por perfil religioso, escolaridade, cor e idade; empresas com atividades econômicas, sociedades, organizações religiosas, batalhões, prefeituras, comunidades quilombolas e bancos — a maioria com localização geográfica —, potencialmente co-relacionados com o TSE, as Despesas da Câmara, as Frentes Parlamentares e as Emendas PIX.</p>
 
-        <p>
-            (Drucker, 2011) A cartografia digital permite espacializar saberes
-            complexos — como padrões econômicos, práticas religiosas, ou redes
-            de poder — que antes ficavam dispersos ou ocultos nos dados brutos.
-            Essa espacialização transforma grandes volumes de dados em
-            interfaces cognitivas acessíveis, mobilizando tanto percepção visual
-            quanto análise crítica.
-        </p>
+  <blockquote>A cartografia digital permite espacializar saberes complexos — como padrões econômicos, práticas religiosas, ou redes de poder — que antes ficavam dispersos ou ocultos nos dados brutos. Essa espacialização transforma grandes volumes de dados em interfaces cognitivas acessíveis, mobilizando tanto percepção visual quanto análise crítica. <em>(Drucker, 2011)</em></blockquote>
+</main>
 
-        <p><strong>ミ ~ 2025</strong></p>
-    </main>
+<footer>
+  <div class="footer-inner">
+    <a href="dataviz/index.html">English version</a>
+    <a href="https://github.com/rafapolo/xyz">Repositório</a>
+    <span>Dados: fontes públicas oficiais — IBGE, CNEFE, Receita Federal · ミ ~ 2026</span>
+  </div>
+</footer>
 
-    <script src="assets/theme-toggle.js"></script>
-    </body>
+<script src="assets/theme-toggle.js"></script>
+<script>
+// re-renderiza os sankeys quando o data-theme muda (theme-toggle.js só troca o atributo)
+window.addEventListener('DOMContentLoaded', function () {
+  var diagrams = document.querySelectorAll('pre.mermaid');
+  diagrams.forEach(function (el) { el.dataset.src = el.textContent; });
+
+  // o parser sankey do mermaid só aceita ASCII; os rótulos ficam sem acento
+  // na fonte e são acentuados aqui, depois de renderizado o SVG
+  var ROTULOS = {
+    'Sem declaracao': 'Sem declaração',
+    'Proprio ja quitado': 'Próprio já quitado',
+    'Proprio em aquisicao': 'Próprio em aquisição',
+    'Outra condicao': 'Outra condição',
+    'Nao classificado (situacao)': 'Não classificado (situação)',
+    'Nao classificado (condicao)': 'Não classificado (condição)',
+    'Rustico': 'Rústico',
+    'Duravel': 'Durável',
+    'Area urbana isolada': 'Área urbana isolada',
+    'Proprio quitado': 'Próprio quitado',
+    'Comodo': 'Cômodo'
+  };
+
+  function acentuar() {
+    document.querySelectorAll('pre.mermaid svg text').forEach(function (t) {
+      var novo = ROTULOS[t.textContent.trim()];
+      if (novo) t.textContent = novo;
+    });
+  }
+
+  function render() {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', sankey: { useMaxWidth: true } });
+    diagrams.forEach(function (el) {
+      el.removeAttribute('data-processed');
+      el.textContent = el.dataset.src;
+    });
+    mermaid.run({ nodes: diagrams }).then(acentuar);
+  }
+
+  render();
+
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
+</script>
+</body>
 </html>
