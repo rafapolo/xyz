@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ミxplorando Novas Tecnologias Cartográficas</title>
-<meta name="description" content="Sete explorações cartográficas com dados públicos brasileiros — IBGE, CNEFE e Receita Federal: CNPJs do Rio ponto a ponto, todas as igrejas do país, Nova Friburgo em 3D, redes societárias e o Atlas Salarial da RAIS.">
+<meta name="description" content="Oito explorações com dados públicos brasileiros — IBGE, CNEFE, Receita Federal e SINASC: CNPJs do Rio ponto a ponto, todas as igrejas do país, Nova Friburgo em 3D, redes societárias, o Atlas Salarial da RAIS e natalidade por idade, raça e fé.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ミxplorando Novas Tecnologias Cartográficas">
-<meta property="og:description" content="Sete explorações cartográficas com dados públicos brasileiros — IBGE, CNEFE e Receita Federal.">
+<meta property="og:description" content="Oito explorações com dados públicos brasileiros — IBGE, CNEFE, Receita Federal e SINASC.">
 <meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
 <meta property="og:url" content="https://xn--2dk.xyz/">
 <meta name="twitter:card" content="summary_large_image">
@@ -43,7 +43,7 @@
 </nav>
 
 <main>
-  <p class="eyebrow">7 explorações cartográficas · IBGE, CNEFE, Receita Federal</p>
+  <p class="eyebrow">8 explorações · IBGE, CNEFE, Receita Federal, SINASC</p>
   <h1>ミxplorando Novas Tecnologias Cartográficas</h1>
   <p class="dek">Hoje, através de uma tela, um indivíduo pode inter-relacionar, interagir, representar e navegar entre milhões de dados. O avanço nas tecnologias ampliou drasticamente nossa capacidade de mapear o território, as redes e os fluxos.</p>
 
@@ -391,6 +391,42 @@ sankey-beta
   </ul>
 
   <p>🔗 <strong><a href="https://github.com/rafapolo/IBGE13/">Repositório fonte: análise dos censos habitacionais do IBGE</a></strong></p>
+
+  <!-- ── 08 ─────────────────────────────────────────────── -->
+
+  <h2 id="tema-08">08 · Natalidade em números</h2>
+
+  <p class="lede">O Censo Demográfico do IBGE e o SINASC (Sistema de Informações sobre Nascidos Vivos) registram, para cada nascimento no Brasil, a idade, a raça, a escolaridade e a religião da mãe — cruzando essas variáveis, dá para ver como elas se relacionam com a fecundidade e com a saúde do bebê ao nascer.</p>
+
+  <h3>Quanto mais estudo, mais tarde os filhos</h3>
+  <figure>
+    <img src="dataviz/natalidade/escolaridade_idade_mae_2010.png" alt="Distribuição da idade da mãe por escolaridade, Censo 2010" width="1965" height="1447" loading="lazy">
+    <figcaption>Idade média da mãe sobe de 25,7 anos (sem instrução) para 31,7 anos (superior completo). Fonte: Censo Demográfico 2010, IBGE.</figcaption>
+  </figure>
+
+  <h3>Fecundidade e escolaridade entre evangélicos</h3>
+  <figure>
+    <img src="dataviz/natalidade/evangelicos_fecundidade_escolaridade.png" alt="Fecundidade x escolaridade entre denominações evangélicas, Censo 2010" width="2400" height="1680" loading="lazy">
+    <figcaption>Fiéis da Deus é Amor e da Assembleia de Deus têm mais filhos e menos escolaridade que presbiterianos e metodistas. Fonte: Censo Demográfico 2010, IBGE.</figcaption>
+  </figure>
+
+  <h3>Fecundidade e escolaridade por raça</h3>
+  <figure>
+    <img src="dataviz/natalidade/racas_fecundidade_2010.png" alt="Fecundidade x escolaridade por raça/cor, Censo 2010" width="2200" height="1600" loading="lazy">
+    <figcaption>Mulheres indígenas têm em média 4 filhos e a menor taxa de ensino superior; mulheres brancas, o padrão inverso. Fonte: Censo Demográfico 2010, IBGE.</figcaption>
+  </figure>
+
+  <h3>O risco é da idade, não do diploma</h3>
+  <figure>
+    <img src="dataviz/natalidade/peso_prematuridade_idade_mae_2022.png" alt="Baixo peso e prematuridade por idade e escolaridade da mãe, SINASC 2022" width="2151" height="1160" loading="lazy">
+    <figcaption>Bebês de mães adolescentes e de 40+ nascem menores, mesmo entre mães com mais estudo. Fonte: SINASC 2022, Ministério da Saúde.</figcaption>
+  </figure>
+
+  <h3>Raça desloca a curva do risco</h3>
+  <figure>
+    <img src="dataviz/natalidade/peso_prematuridade_idade_raca_2022.png" alt="Baixo peso e prematuridade por idade e raça da mãe, SINASC 2022" width="2125" height="1160" loading="lazy">
+    <figcaption>Em toda faixa etária, mães pretas e pardas têm mais partos prematuros e bebês de baixo peso que mães brancas. Fonte: SINASC 2022, Ministério da Saúde.</figcaption>
+  </figure>
 
   <!-- ── sobre ──────────────────────────────────────────── -->
 
