@@ -901,7 +901,7 @@ def main():
     doc = {
         "schema_version": 1,
         "gerado_em": date.today().isoformat(),
-        "gerador": "extract_municipio.py (basedosdados local em ~/rodado)",
+        "gerador": "rodado",
         "municipio": prof,
         "secoes": {
             "geografia": geografia(mid),
