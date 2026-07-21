@@ -1,0 +1,335 @@
+/* ============================================================
+   Atlas Brasil — JS Utilities (swissviz-dark)
+   ============================================================ */
+
+const ATLAS = (() => {
+  // --- Palettes ---
+  const SEQUENTIAL_BLUE  = [[247,251,255],[198,219,239],[158,202,225],[107,174,214],[49,130,189],[8,81,156]];
+  const SEQUENTIAL_GREEN = [[237,248,251],[186,228,179],[116,196,118],[49,163,84],[0,109,44]];
+  const SEQUENTIAL_RED   = [[255,255,204],[254,204,92],[253,141,60],[240,59,32],[189,0,38]];
+  const DIVERGING_RDBU   = [[165,0,38],[215,48,39],[244,109,67],[253,174,97],[255,255,191],[171,217,233],[116,173,209],[69,117,180],[49,54,149]];
+  const CATEGORICAL_BRIGHT = [[166,206,227],[31,120,180],[178,223,138],[51,160,44],[251,154,153],[227,26,28],[253,192,134],[255,127,0],[202,178,214],[106,61,154]];
+
+  // --- Display ---
+  const isTouch = window.matchMedia('(hover: none)').matches;
+
+  function fmtNum(v, decimals) {
+    if (v == null) return '—';
+    return Number(v).toLocaleString('pt-BR', {
+      minimumFractionDigits: decimals ?? 2,
+      maximumFractionDigits: decimals ?? 2,
+    });
+  }
+
+  function fmtPct(v, decimals) {
+    if (v == null) return '—';
+    return (v * 100).toLocaleString('pt-BR', {
+      minimumFractionDigits: decimals ?? 1,
+      maximumFractionDigits: decimals ?? 1,
+    }) + '%';
+  }
+
+  function fmtMoney(v) {
+    if (v == null) return '—';
+    return 'R$ ' + Number(v).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2, maximumFractionDigits: 2,
+    });
+  }
+
+  // --- Tooltip ---
+  let tooltipEl = null;
+
+  function showTooltip(x, y, html) {
+    if (!tooltipEl) {
+      tooltipEl = document.getElementById('tooltip');
+      if (!tooltipEl) return;
+    }
+    tooltipEl.innerHTML = html;
+    tooltipEl.style.display = 'block';
+    if (window.innerWidth > 980) {
+      const w = tooltipEl.offsetWidth;
+      const h = tooltipEl.offsetHeight;
+      let l = x + 14, t = y + 14;
+      if (l + w > window.innerWidth - 10)  l = x - w - 14;
+      if (t + h > window.innerHeight - 10) t = y - h - 14;
+      if (l < 10) l = 10;
+      if (t < 10) t = 10;
+      tooltipEl.style.left = l + 'px';
+      tooltipEl.style.top  = t + 'px';
+    } else {
+      tooltipEl.style.left = '';
+      tooltipEl.style.top = '';
+      document.querySelectorAll('.panel, #legend').forEach(p => p.classList.remove('open'));
+      const bd = document.getElementById('sheet-backdrop');
+      if (bd) bd.classList.remove('visible');
+    }
+  }
+
+  function hideTooltip() {
+    if (tooltipEl) tooltipEl.style.display = 'none';
+  }
+
+  // --- Legend ---
+  function buildLegend(opts) {
+    let el = document.getElementById('legend');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'legend';
+      document.getElementById('app').appendChild(el);
+    }
+    if (opts.type === 'gradient' && opts.gradient) {
+      const g = opts.gradient;
+      const stops = g.stops && g.stops.length ? g.stops : [g.from, g.to];
+      const minLabel = g.minLabel != null ? g.minLabel : fmtMoney(g.min);
+      const maxLabel = g.maxLabel != null ? g.maxLabel : fmtMoney(g.max);
+      el.innerHTML = `
+        <div class="legend-title">${opts.title}</div>
+        ${opts.unit ? `<div class="legend-subtitle">${opts.unit}</div>` : ''}
+        <div class="gradient-bar" style="background: linear-gradient(to right, ${stops.join(', ')});"></div>
+        <div class="gradient-labels">
+          <span>${minLabel}</span>
+          <span>${maxLabel}</span>
+        </div>
+        ${opts.footer ? `<div class="legend-footer">${opts.footer}</div>` : ''}
+      `;
+    } else if (opts.type === 'categorical' && opts.items) {
+      el.innerHTML = `
+        <div class="legend-title">${opts.title}</div>
+        ${opts.items.map(i => `
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--text-secondary);">
+            <span style="width:10px;height:10px;border-radius:2px;background:${i.color};flex-shrink:0;"></span>
+            ${i.label}
+          </div>
+        `).join('')}
+      `;
+    }
+  }
+
+  // --- Color scale from palette ---
+  function colorScaleFromPalette(palette, min, max) {
+    return (val) => {
+      if (val == null) return [180, 180, 180, 100];
+      const t = max === min ? 0.5 : (val - min) / (max - min);
+      const idx = Math.min(palette.length - 1, Math.max(0, Math.round(t * (palette.length - 1))));
+      const c = palette[idx];
+      return [...c, 200];
+    };
+  }
+
+  // --- Quantile-based color scale ---
+  // Splits values into palette.length equal-count bins; bin i covers
+  // [q(i/k), q((i+1)/k)). Ties at upper break go to the last bin.
+  function quantileScale(values, palette) {
+    const sorted = values.filter(v => v != null).sort((a, b) => a - b);
+    const n = sorted.length;
+    const k = palette.length;
+    if (n === 0) return () => [180, 180, 180, 100];
+    // upper break of each bin (last one = max)
+    const breaks = palette.map((_, i) => {
+      const idx = Math.floor(((i + 1) / k) * n) - 1;
+      return sorted[Math.max(0, Math.min(idx, n - 1))];
+    });
+    const scale = (val) => {
+      if (val == null) return [180, 180, 180, 100];
+      let bin = k - 1;
+      for (let i = 0; i < k; i++) {
+        if (val <= breaks[i]) { bin = i; break; }
+      }
+      return [...palette[bin], 200];
+    };
+    scale.breaks = breaks;
+    return scale;
+  }
+
+  // --- Load JSON helpers ---
+  async function loadJSON(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
+    if (url.endsWith('.gz')) {
+      const body = new Response(resp.body.pipeThrough(new DecompressionStream('gzip')));
+      return body.json();
+    }
+    return resp.json();
+  }
+
+  async function loadData(basePath) {
+    const [geojson, salarios] = await Promise.all([
+      loadJSON(basePath + 'dados/municipios.geojson'),
+      loadJSON(basePath + 'dados/salarios.json'),
+    ]);
+    return { geojson, salarios };
+  }
+
+  // --- initMap ---
+  const INITIAL_VIEW_STATE = {
+    longitude: -53.1,
+    latitude:  -14.2,
+    zoom:       4,
+    pitch:     45,
+    bearing:    0,
+    minZoom:    2,
+    maxZoom:   16,
+  };
+
+  function initMap(containerId, overrides) {
+    const view = Object.assign({}, INITIAL_VIEW_STATE, overrides || {});
+    const map = new maplibregl.Map({
+      container: containerId,
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center: [view.longitude, view.latitude],
+      zoom: view.zoom,
+      pitch: view.pitch,
+      bearing: view.bearing,
+      minZoom: view.minZoom,
+      maxZoom: view.maxZoom,
+      attributionControl: false,
+    });
+    map._atlasHome = view; // "home" view used by the reset action
+
+    // Apply swissviz tint
+    map.on('load', () => {
+      try {
+        map.getStyle().layers.forEach(l => {
+          if (l.type === 'raster') {
+            map.setPaintProperty(l.id, 'raster-brightness-min', 0.07);
+            map.setPaintProperty(l.id, 'raster-hue-rotate', 210);
+            map.setPaintProperty(l.id, 'raster-saturation', 0.4);
+            map.setPaintProperty(l.id, 'raster-contrast', -0.1);
+          }
+        });
+      } catch (_) {}
+    });
+
+    const deckOverlay = new deck.MapboxOverlay({
+      interleaved: true,
+    });
+    map.addControl(deckOverlay);
+
+    return { map, deck: deckOverlay };
+  }
+
+  // --- setupActions ---
+  function setupActions(map, vizNum, getShareState, getSql) {
+    const resetBtn = document.getElementById('btn-reset');
+    const shareBtn = document.getElementById('btn-share');
+    const sqlBtn   = document.getElementById('btn-sql');
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        const home = map._atlasHome || INITIAL_VIEW_STATE;
+        map.flyTo({
+          center: [home.longitude, home.latitude],
+          zoom: home.zoom,
+          pitch: home.pitch,
+          bearing: home.bearing,
+          duration: 600,
+        });
+      });
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        const state = getShareState ? getShareState() : {};
+        const params = new URLSearchParams();
+        if (vizNum) params.set('v', vizNum);
+        Object.entries(state).forEach(([k, v]) => {
+          if (v != null && v !== '') params.set(k, v);
+        });
+        const url = `${window.location.origin}${window.location.pathname}?${params}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          shareBtn.textContent = '✓';
+          setTimeout(() => { shareBtn.textContent = '⎘'; }, 1500);
+        } catch (_) {
+          // fallback
+          const ta = document.createElement('textarea');
+          ta.value = url; document.body.appendChild(ta);
+          ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta);
+          shareBtn.textContent = '✓';
+          setTimeout(() => { shareBtn.textContent = '⎘'; }, 1500);
+        }
+      });
+    }
+
+    if (sqlBtn) {
+      sqlBtn.addEventListener('click', () => {
+        const modal = document.getElementById('sql-modal');
+        if (modal) {
+          const code = modal.querySelector('pre code');
+          if (code) code.textContent = getSql ? getSql() : '';
+          modal.classList.toggle('open');
+        }
+      });
+    }
+
+    // close modal on overlay click
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('sql-modal');
+      if (modal && modal.classList.contains('open') && e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+  }
+
+  // --- setupMobilePanels ---
+  function setupMobilePanels() {
+    const toggleLeft = document.getElementById('toggle-left');
+    const toggleRight = document.getElementById('toggle-right');
+    const leftPanel = document.getElementById('control-panel');
+    const rightPanel = document.getElementById('legend');
+    const backdrop = document.getElementById('sheet-backdrop');
+    const panels = [leftPanel, rightPanel].filter(Boolean);
+
+    function closeAll() {
+      panels.forEach(p => p.classList.remove('open'));
+      if (backdrop) backdrop.classList.remove('visible');
+    }
+
+    function togglePanel(panel) {
+      if (!panel) return;
+      const isOpen = panel.classList.contains('open');
+      closeAll();
+      hideTooltip();
+      if (!isOpen) {
+        panel.classList.add('open');
+        if (backdrop) backdrop.classList.add('visible');
+      }
+    }
+
+    if (toggleLeft && leftPanel) {
+      toggleLeft.addEventListener('click', () => togglePanel(leftPanel));
+    }
+    if (toggleRight && rightPanel) {
+      toggleRight.addEventListener('click', () => togglePanel(rightPanel));
+    }
+    if (backdrop) {
+      backdrop.addEventListener('click', closeAll);
+    }
+  }
+
+  // --- hideLoading ---
+  function hideLoading() {
+    const el = document.getElementById('loading');
+    if (el) el.classList.add('hidden');
+  }
+
+  return {
+    // palettes
+    SEQUENTIAL_BLUE, SEQUENTIAL_GREEN, SEQUENTIAL_RED,
+    DIVERGING_RDBU, CATEGORICAL_BRIGHT,
+    INITIAL_VIEW_STATE,
+
+    // utils
+    isTouch,
+    fmtNum, fmtPct, fmtMoney,
+    colorScaleFromPalette, quantileScale,
+
+    // UI
+    showTooltip, hideTooltip, buildLegend,
+    initMap, setupActions, setupMobilePanels, hideLoading,
+
+    // data
+    loadJSON, loadData,
+  };
+})();

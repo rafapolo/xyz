@@ -1,0 +1,116 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #000;
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* Land/water/border colors are flattened to black directly via
+   map.setPaintProperty() in map.js (hideRoads()), since a CSS filter only
+   scales existing colors and still leaves relative contrast (e.g. water's
+   blue-gray vs background) visible as a faint coastline. This filter is a
+   light safety net for anything not explicitly overridden (building fills,
+   remaining halos, etc.) — kept subtle so it doesn't wash out real content. */
+#map .maplibregl-canvas {
+  filter: brightness(0.6) saturate(0.4);
+}
+
+.uf-hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #eee;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 60vw;
+  pointer-events: none;
+}
+
+.uf-hud a {
+  color: #d9a99f;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.uf-hud a:hover {
+  text-decoration: underline;
+}
+
+.uf-hud .uf-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.uf-hud .uf-stats {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.uf-brightness {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #ccc;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.uf-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uf-zoom-row {
+  text-align: right;
+  color: #888;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.uf-zoom-row span {
+  color: #ccc;
+  font-variant-numeric: tabular-nums;
+}
+
+.uf-slider-row label {
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.uf-brightness input[type="range"] {
+  width: 90px;
+  accent-color: #8B574F;
+}
+
+.uf-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  z-index: 5;
+  pointer-events: none;
+}

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brasil · cada ponto é um CNPJ</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/mcp-theme.css">
+  <style>
+    .hero {
+      display: block;
+      position: relative;
+      aspect-ratio: 21 / 9;
+      background: #000;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--ink);
+      margin: 2rem 0 2.5rem;
+      border-radius: 3px;
+      border: 1px solid var(--rule);
+    }
+    .hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero .label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 2.2rem 1.6rem 1.2rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+      font-family: var(--sans);
+    }
+    .hero .uf { font-size: 1.6rem; font-weight: 800; color: #ece6d8; }
+    .hero .n { font-size: 0.9rem; color: #ccc; margin-top: 0.2rem; }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+    }
+    .card {
+      display: block;
+      position: relative;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card .label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1.4rem 0.7rem 0.6rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88), transparent);
+      font-family: var(--sans);
+    }
+    .card .uf { font-size: 0.95rem; font-weight: 700; color: #ece6d8; }
+    .card .n { font-size: 0.72rem; color: #bbb; margin-top: 0.1rem; }
+    #empty { color: var(--ink-faint); }
+  </style>
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html">ミ</a>
+      <div class="nav-right">
+        <div class="links">
+          <a href="../../index.html">Início</a>
+          <a href="../rio/ibge.html">RJ (origem)</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <main class="wide">
+    <p class="eyebrow">CNPJ &middot; Receita Federal &middot; CNEFE / Censo IBGE 2022</p>
+    <h1>Brasil · cada ponto é um CNPJ</h1>
+    <p class="dek">Cada ponto é um estabelecimento de Pessoa Jurídica ativo, geolocalizado por
+      casamento exato de endereço com o Censo IBGE 2022 (CNEFE) — sem fallback por centroide de
+      CEP, então nem todo estabelecimento aparece. <a href="../rio/ibge.html">Origem: RJ</a>.</p>
+    <div id="hero-slot"></div>
+    <div id="grid"></div>
+    <p id="empty" style="display:none">Nenhum estado disponível ainda.</p>
+  </main>
+  <script>
+    function cardHtml(uf, info) {
+      var label = uf === "BR" ? "Brasil" : uf;
+      return '<img src="thumbs/' + uf.toLowerCase() + '.png" alt="' + label + '" loading="lazy">' +
+        '<div class="label"><div class="uf">' + label + '</div><div class="n">' +
+        info.n_points.toLocaleString("pt-BR") + " pontos</div></div>";
+    }
+
+    fetch("data/meta.json")
+      .then(function (res) { return res.json(); })
+      .then(function (meta) {
+        var ufs = Object.keys(meta);
+        if (!ufs.length) {
+          document.getElementById("empty").style.display = "block";
+          return;
+        }
+
+        if (meta.BR) {
+          var hero = document.createElement("a");
+          hero.className = "hero";
+          hero.href = "br/";
+          hero.innerHTML = cardHtml("BR", meta.BR);
+          document.getElementById("hero-slot").appendChild(hero);
+        }
+
+        var grid = document.getElementById("grid");
+        ufs.filter(function (uf) { return uf !== "BR"; }).sort().forEach(function (uf) {
+          var a = document.createElement("a");
+          a.className = "card";
+          a.href = uf.toLowerCase() + "/";
+          a.innerHTML = cardHtml(uf, meta[uf]);
+          grid.appendChild(a);
+        });
+      })
+      .catch(function (err) {
+        console.error(err);
+        document.getElementById("empty").textContent = "Erro ao carregar dados: " + err.message;
+        document.getElementById("empty").style.display = "block";
+      });
+  </script>
+</body>
+</html>
