@@ -1,0 +1,76 @@
+id,nivel,nome,id_pai
+0,0,Total,
+2800,1,Católica Romana,0
+95263,1,Católica Apostólica Romana,0
+100430,1,Católica Apostólica Brasileira,0
+2803,1,Católica Ortodoxa,0
+95277,1,Evangélicas,0
+95264,2,Evangélicas de Missão,95277
+99739,3,Evangélicas de Missão - Evangélica Adventista do Sétimo Dia,95264
+100403,3,Evangélicas de Missão - Igreja Evangélica Luterana,95264
+99740,3,Evangélicas de Missão - Igreja Evangélica de Missão Luterana,95264
+100404,3,Evangélicas de Missão - Igreja Evangélica Presbiteriana,95264
+100405,3,Evangélicas de Missão - Igreja Evangélica Metodista,95264
+99741,3,Evangélicas de Missão - Igreja Evangélica Batista,95264
+99742,3,Evangélicas de Missão - Igreja Presbiteriana,95264
+100406,3,Evangélicas de Missão - Igreja Evangélica Congregacional,95264
+100407,3,Evangélicas de Missão - Igreja Evangélica Adventista,95264
+99743,3,Evangélicas de Missão - outras,95264
+95265,2,Evangélicas de origem pentecostal,95277
+100409,3,Evangélicas de origem pentecostal - Igreja Assembléia de Deus,95265
+99746,3,Evangélicas de origem pentecostal - Igreja Congregação Cristã do Brasil,95265
+100410,3,Evangélicas de origem pentecostal - Igreja o Brasil para Cristo,95265
+100411,3,Evangélicas de origem pentecostal - Igreja Evangelho Quadrangular,95265
+99745,3,Evangélicas de origem pentecostal - Igreja Universal do Reino de Deus,95265
+99744,3,Evangélicas de origem pentecostal - Evangelho Quadrangular,95265
+100412,3,Evangélicas de origem pentecostal - Igreja Casa da Benção,95265
+100413,3,Evangélicas de origem pentecostal - Igreja Deus é Amor,95265
+100414,3,Evangélicas de origem pentecostal - Igreja Maranata,95265
+100415,3,Evangélicas de origem pentecostal - Igreja Nova Vida,95265
+12881,3,Evangélicas de origem pentecostal - Evangélica renovada não determinada,95265
+12882,3,Evangélicas de origem pentecostal - Comunidade Evangélica,95265
+99747,3,Evangélicas de origem pentecostal - Igreja Evangélica Assembléia de Deus,95265
+99748,3,Evangélicas de origem pentecostal - outras,95265
+95266,2,Evangélicas - outras religiões evangélicas,95277
+121096,2,Evangélica não determinada,95277
+2804,2,Evangélica tradicional,95277
+2801,1,Outra cristã tradicional,0
+12891,1,Outras religiosidades cristãs,0
+100423,1,Igreja de Jesus Cristo dos Santos dos Últimos Dias,0
+2812,1,Evangélica pentecostal,0
+2821,1,Cristã reformada não determinada,0
+2822,1,Neo-cristã,0
+2824,1,Testemunhas de Jeová,0
+95267,1,Espiritualista,0
+2826,1,Espírita,0
+2827,1,Umbanda e Candomblé,0
+2829,2,Umbanda,2827
+2828,2,Candomblé,2827
+12883,2,Outras declarações de religiosidades afrobrasileira,2827
+95268,1,Judaica,0
+100424,1,Judaísmo,0
+100425,1,Hinduísmo,0
+2830,1,Judaica ou Israelita,0
+2831,1,Religiões orientais,0
+95269,1,Budismo,0
+95271,1,Islâmica,0
+100427,1,Novas religiões orientais,0
+100428,2,Novas religiões orientais - Igreja Messiânica Mundial,100427
+100429,2,Novas religiões orientais - Outras novas religiões orientais,100427
+95270,1,Outras religiões orientais,0
+95272,1,Hinduísta,0
+100426,1,Islamismo,0
+95273,1,Tradições esotéricas,0
+95274,1,Tradições indígenas,0
+95275,1,Outras religiosidades,0
+2835,1,Outras,0
+2836,1,Sem religião,0
+12884,2,Sem religião - Sem religião,2836
+12885,2,Sem religião - Ateu,2836
+12886,2,Sem religião - Agnóstico,2836
+12887,1,Não determinada e multiplo pertencimento,0
+12888,2,Não determinada e multiplo pertencimento - Religiosidade não determinada ou mal definida,12887
+12889,2,Não determinada e multiplo pertencimento - Declaração de múltipla religiosidade,12887
+95276,1,Não determinadas,0
+12890,1,Não sabe,0
+2837,1,Sem declaração,0

@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Templos Religiosos do Brasil por Vertente</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/deck.gl@9.3.3/dist.min.js"></script>
+<style>
+  :root {
+    --accent: #6c8eff;
+    --bg-panel: rgb(16,23,41);
+    --border: rgba(255,255,255,0.07);
+    --border-subtle: rgba(255,255,255,0.06);
+    --border-mid: rgba(255,255,255,0.10);
+  }
+  html, body { margin:0; padding:0; height:100%; background:#0b0f1a; font-family: 'Inter', Helvetica, Arial, sans-serif; overflow-x:hidden; }
+  #map { position:absolute; top:0; bottom:0; left:0; right:0; background:#0b0f1a; }
+  .maplibregl-ctrl-attribution { background:rgba(16,23,41,0.7) !important; color:#888 !important; font-size:10px !important; }
+  .maplibregl-ctrl-attribution a { color:#6c8eff !important; }
+  .maplibregl-ctrl-group { background:var(--bg-panel) !important; border:1px solid var(--border) !important; box-shadow:none !important; }
+  .maplibregl-ctrl-group button { width:30px !important; height:30px !important; }
+  .maplibregl-ctrl-icon { filter: invert(1) brightness(1.6); }
+
+  .panel {
+    position:absolute; z-index:1000; background:var(--bg-panel); color:#eee;
+    border:1px solid var(--border); border-radius:6px; opacity:0.97;
+  }
+
+  /* ---- info / context (top-left) ---- */
+  #info { top:12px; left:12px; padding:13px 15px; max-width:320px; }
+  #info .eyebrow { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--accent); margin:0 0 5px; }
+  #info h1 { font-size:15px; font-weight:700; letter-spacing:-0.2px; color:#fff; margin:0 0 8px; }
+  #context-line { font-size:11.5px; color:rgba(255,255,255,0.75); line-height:1.5; margin-bottom:6px; }
+  #context-line strong { color:#fff; font-weight:600; }
+  #filter-chips { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; min-width:0; }
+  #filter-chips:empty { display:none; margin:0; }
+  .chip {
+    font-size:10.5px; padding:2px 8px; border-radius:12px; background:rgba(108,142,255,0.14);
+    border:1px solid rgba(108,142,255,0.35); color:var(--accent);
+    max-width:100%; overflow-wrap:break-word; line-height:1.4;
+  }
+  #info p.about {
+    font-size:11px; line-height:1.55; margin:8px 0 0; padding-top:8px;
+    border-top:1px solid var(--border-subtle); color:rgba(255,255,255,0.55);
+  }
+  #info .about-toggle {
+    font-size:10.5px; color:var(--accent); cursor:pointer; user-select:none; margin-top:6px;
+    display:inline-block;
+  }
+  #info p.about.collapsed { display:none; }
+
+  /* ---- legend / advanced drawer (top-right) ---- */
+  #legend { top:12px; right:12px; padding:12px 13px; font-size:12px; width:236px; transition:width 0.2s ease, padding 0.2s ease; }
+  #legend.collapsed { width:auto; padding:9px 11px; }
+  #legend.collapsed .legend-body, #legend.collapsed .drawer-section { display:none; }
+  .legend-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
+  .legend-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:#999; }
+  #collapse-legend {
+    background:none; border:none; color:rgba(255,255,255,0.55); cursor:pointer; font-size:15px;
+    line-height:1; padding:2px 4px; flex-shrink:0;
+  }
+  #collapse-legend:hover { color:#fff; }
+  #clear-focus {
+    font-size:10.5px; color:var(--accent); background:rgba(108,142,255,0.12); border:1px solid rgba(108,142,255,0.3);
+    border-radius:20px; padding:3px 9px; cursor:pointer; margin:6px 0 4px;
+  }
+  #clear-focus[hidden] { display:none; }
+  .legend-body { margin-top:6px; }
+  #granularity-select {
+    width:100%; margin-bottom:8px; font-family:inherit; font-size:11px; color:#ddd;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border-mid, var(--border)); border-radius:5px;
+    padding:5px 6px; cursor:pointer;
+  }
+  #legend-items { max-height:44vh; overflow-y:auto; }
+  #legend-items::-webkit-scrollbar { width:4px; }
+  #legend-items::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+  #legend .item {
+    display:flex; align-items:center; gap:8px; padding:5px 4px; cursor:pointer;
+    border-radius:6px; user-select:none; transition:background 0.12s, opacity 0.12s;
+  }
+  #legend .item:hover { background:rgba(255,255,255,0.07); }
+  #legend .item.faded { opacity:0.4; }
+  #legend .item.focused { background:rgba(255,255,255,0.09); }
+  #legend .item.locked { background:rgba(108,142,255,0.12); }
+  #legend .swatch { width:11px; height:11px; border-radius:50%; flex-shrink:0; transition:filter 0.12s; }
+  #legend .label { flex:1; color:#ddd; line-height:1.3; }
+  #legend .count { font-family:'JetBrains Mono',monospace; color:#888; font-size:10px; flex-shrink:0; text-align:right; }
+  #legend .count .pct { color:#666; }
+  .drawer-section { margin-top:9px; padding-top:9px; border-top:1px solid var(--border-subtle); }
+  .drawer-section .size-row label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:4px; font-size:11px; }
+  .drawer-section .size-row input[type=range] { width:100%; accent-color:var(--accent); }
+  .cnpj-row { margin-top:9px; }
+  .cnpj-label { display:block; color:#999; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px; }
+  .segmented { display:flex; gap:2px; background:rgba(255,255,255,0.05); border-radius:8px; padding:2px; }
+  .segmented button {
+    flex:1; font-family:inherit; font-size:11px; color:rgba(255,255,255,0.6); background:none; border:none;
+    padding:6px 4px; border-radius:6px; cursor:pointer; transition:background 0.12s, color 0.12s;
+  }
+  .segmented button:hover { color:#fff; }
+  .segmented button.active { background:rgba(108,142,255,0.18); color:var(--accent); }
+  .cnpj-counts {
+    display:flex; justify-content:space-between; margin-top:5px; padding:0 2px;
+    font-family:'JetBrains Mono',monospace; color:#888; font-size:10px;
+  }
+
+  #point-tooltip {
+    position:absolute; z-index:1200; pointer-events:none; display:none;
+    background:var(--bg-panel); color:#eee;
+    border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+    font-size:12px; line-height:1.5; box-shadow:0 6px 20px rgba(0,0,0,0.5);
+    min-width:220px; max-width:290px; white-space:normal;
+  }
+  .tt-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .tt-name { font-weight:600; font-size:14px; color:#fff; }
+  .tt-badge {
+    font-size:9.5px; font-weight:600; letter-spacing:0.4px; color:#ccc; text-transform:uppercase;
+    border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:1px 5px; flex-shrink:0; white-space:nowrap;
+  }
+  .tt-badge.on { color:#8be0a9; border-color:rgba(139,224,169,0.4); }
+  .tt-sub { font-size:11px; color:#888; margin:2px 0 8px; }
+  .tt-metric {
+    font-size:16px; font-weight:600; line-height:1.3; word-break:break-word;
+  }
+  .tt-metric-label { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:8px; }
+  .tt-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px 14px; padding-top:8px; border-top:1px solid var(--border-subtle); }
+  .tt-cell { display:flex; flex-direction:column; gap:1px; font-size:11px; }
+  .tt-cell .k { color:#888; font-size:9.5px; text-transform:uppercase; letter-spacing:0.3px; }
+  .tt-cell .v { font-family:'JetBrains Mono',monospace; color:#ddd; }
+
+  #toggle-info, #toggle-legend {
+    display:none; position:fixed; top:12px; width:42px; height:42px; z-index:1100;
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:6px;
+    color:#eee; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+  #toggle-info { left:12px; }
+  #toggle-legend { right:12px; }
+  #sheet-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
+  #sheet-backdrop.visible { display:block; }
+
+  @media (max-width: 760px) {
+    #toggle-info, #toggle-legend { display:flex; }
+    #collapse-legend { display:none; }
+    #info, #legend {
+      position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
+      width:100% !important; max-width:none !important; max-height:70vh; overflow-y:auto;
+      box-sizing:border-box;
+      transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index:1080; border-radius:16px 16px 0 0;
+    }
+    #legend.collapsed .legend-body, #legend.collapsed .drawer-section { display:block; }
+    #info::before, #legend::before {
+      content:''; display:block; width:36px; height:4px; background:rgba(255,255,255,0.15);
+      border-radius:2px; margin:-4px auto 12px;
+    }
+    #info.open, #legend.open { transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="info" class="panel">
+  <div class="eyebrow">IBGE Censo 2022 · CNEFE</div>
+  <h1>Templos Religiosos do Brasil por Vertente</h1>
+  <div id="context-line"></div>
+  <div id="filter-chips"></div>
+  <span class="about-toggle" id="about-toggle">sobre os dados ▾</span>
+  <p class="about collapsed" id="about-text">570.428 templos <strong>oficiais</strong> do Cadastro Nacional de Endereços (CNEFE, Censo 2022) —
+  critério do IBGE (<code>tipo_especie='estabelecimento religioso'</code>, o mesmo que gera o número
+  publicado pelo Censo, 579.800) — mais 195.163 templos <strong>identificados só pelo nome</strong>
+  ("não oficiais"): endereços que o recenseador NÃO marcou como religiosos, mas cujo nome anotado em
+  campo (ex. "IGREJA ASSEMBLEIA DE DEUS") deixa claro que são — classificado assim em campo como
+  "estabelecimento de outras finalidades". Ficam sempre no mapa, com <strong>opacidade reduzida</strong>
+  pra diferenciar do confirmado oficialmente — descartá-los de cara escondia ~25% dos templos reais.<br><br>
+  <strong>Vertente/Denominação</strong> não vem pronta do Censo — é <strong>casamento de texto</strong>:
+  o nome anotado em campo é comparado contra um dicionário de ~245 padrões conhecidos ("IGREJA BATISTA",
+  "TESTEMUNHA DE JEOVA" etc., o padrão mais específico vence), cada um apontando pra uma das 75
+  categorias oficiais da classificação "Religião" do Censo <strong>2010</strong> (IBGE Sidra, tabela
+  137) — daí "nomenclatura 2010" no seletor de detalhamento. O modo "Vertente" agrupa essas categorias
+  nas 9 que o Censo 2022 publica oficialmente; o modo "Denominação" mostra as categorias finas direto
+  (ex. Assembleia de Deus, Batista, Luterana). ~30% dos templos não batem em nenhum padrão e ficam "não
+  classificado".<br><br>
+  Terceira camada independente: <strong>CNPJ ativo</strong> (CNAE 9491-0/00) no mesmo CEP — mede
+  formalização jurídica, não presença; só 20% têm essa confirmação porque a maioria dos templos
+  brasileiros não tem CNPJ próprio.</p>
+</div>
+<div id="legend" class="panel">
+  <div class="legend-head">
+    <span class="legend-title" id="legend-title">Vertente</span>
+    <button id="collapse-legend" aria-label="Recolher legenda">›</button>
+  </div>
+  <div class="legend-body">
+    <select id="granularity-select" title="Nível de detalhe da classificação religiosa">
+      <option value="coarse">Vertente · 9 categorias</option>
+      <option value="fina">Denominação · nomenclatura 2010</option>
+    </select>
+    <button id="clear-focus" hidden>✕ Limpar seleção</button>
+    <div id="legend-items"></div>
+  </div>
+  <div class="drawer-section">
+    <div class="size-row">
+      <label for="radius-slider">Tamanho do ponto <span id="radius-value"></span></label>
+      <input type="range" id="radius-slider" min="0.8" max="6" step="0.1" value="2.2">
+    </div>
+    <div class="cnpj-row">
+      <span class="cnpj-label">CNPJ</span>
+      <div class="segmented" id="cnpj-filter">
+        <button data-cnpj="todos" class="active">Todos</button>
+        <button data-cnpj="com">Só com CNPJ</button>
+        <button data-cnpj="sem">Só sem CNPJ</button>
+      </div>
+      <div class="cnpj-counts" id="cnpj-counts"></div>
+    </div>
+  </div>
+</div>
+<button id="toggle-info" aria-label="Sobre o mapa">☰</button>
+<button id="toggle-legend" aria-label="Legenda">▤</button>
+<div id="sheet-backdrop"></div>
+
+<div id="point-tooltip"></div>
+<script>
+const fmt = new Intl.NumberFormat('pt-BR');
+function fmtAbbrev(n) {
+  if (n >= 1000) return (n / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mil';
+  return fmt.format(n);
+}
+function hexToRgb(hex) {
+  const v = parseInt(hex.slice(1), 16);
+  return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+}
+function relLuminance(hex) {
+  const [r, g, b] = hexToRgb(hex).map(function (c) { return c / 255; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function textColorFor(hex) {
+  const amt = Math.max(0, 0.62 - relLuminance(hex));
+  const [r, g, b] = hexToRgb(hex);
+  const mix = function (c) { return Math.round(c + (255 - c) * amt).toString(16).padStart(2, '0'); };
+  return '#' + mix(r) + mix(g) + mix(b);
+}
+
+const RADIUS_DEFAULT = 2.2;
+const ALPHA_OFICIAL = 209;   // 0.82 * 255
+const ALPHA_NAO_OFICIAL = 89; // 0.35 * 255
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'carto-dark': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 256,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      }
+    },
+    layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': '#0b0f1a' } },
+      { id: 'carto-dark', type: 'raster', source: 'carto-dark', paint: {
+          'raster-brightness-min': 0.07,
+          'raster-hue-rotate': 210,
+          'raster-saturation': 0.4,
+          'raster-contrast': -0.1,
+          'raster-fade-duration': 0
+      } }
+    ]
+  },
+  center: [-51.9, -14.2],
+  zoom: 4,
+  minZoom: 3,
+  maxZoom: 18,
+  attributionControl: false
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+const overlay = new deck.MapboxOverlay({ layers: [] });
+map.addControl(overlay);
+
+const tooltip = document.getElementById('point-tooltip');
+function showTooltip(html, x, y) {
+  if (!html) { tooltip.style.display = 'none'; return; }
+  tooltip.style.display = 'block';
+  tooltip.style.left = (x + 14) + 'px';
+  tooltip.style.top = (y + 14) + 'px';
+  tooltip.innerHTML = html;
+}
+
+// ---- estado ----
+let legend = [], legendFina = [], desc = [], total = 0;
+let sortedPoints = [];   // pre-ordenado: categorias maiores primeiro (embaixo), menores por cima
+let baseFiltered = [];   // apos toggles de qualidade (recalculado só quando eles mudam)
+let cnpjFilter = 'todos'; // 'todos' | 'com' | 'sem'
+let radiusPx = RADIUS_DEFAULT;
+let lockedCat = null;   // categoria travada por clique
+let hoverCat = null;    // categoria em preview por hover
+let granularity = 'coarse'; // 'coarse' (9 vertentes) | 'fina' (denominações, nomenclatura 2010)
+
+function activeFocus() { return hoverCat !== null ? hoverCat : lockedCat; }
+function activeLegend() { return granularity === 'fina' ? legendFina : legend; }
+function activeCatField() { return granularity === 'fina' ? 6 : 2; }
+
+function recomputeBaseFiltered() {
+  if (cnpjFilter === 'com') baseFiltered = sortedPoints.filter(function (p) { return p[3]; });
+  else if (cnpjFilter === 'sem') baseFiltered = sortedPoints.filter(function (p) { return !p[3]; });
+  else baseFiltered = sortedPoints;
+}
+
+function render() {
+  const focus = activeFocus();
+  const catField = activeCatField();
+  const lg = activeLegend();
+  // pontos fora do foco ficam invisiveis (alpha 0) - tira-os do proprio
+  // array de dados, nao so da cor, senao o picking do deck.gl ainda os
+  // encontra (hit-test nao olha alpha) e o tooltip aponta pra algo que
+  // nao esta la
+  const layerData = focus !== null ? baseFiltered.filter(function (p) { return p[catField] === focus; }) : baseFiltered;
+
+  const layer = new deck.ScatterplotLayer({
+    id: 'pontos',
+    data: layerData,
+    getPosition: function (d) { return [d[1], d[0]]; },
+    getRadius: radiusPx,
+    radiusUnits: 'pixels',
+    getFillColor: function (d) {
+      const cat = d[catField], oficial = d[4];
+      const alpha = oficial ? ALPHA_OFICIAL : ALPHA_NAO_OFICIAL;
+      const rgb = hexToRgb(lg[cat].cor);
+      return [rgb[0], rgb[1], rgb[2], alpha];
+    },
+    updateTriggers: { getFillColor: [catField] },
+    pickable: true,
+    stroked: false,
+    parameters: { depthTest: false },
+    onHover: function (info) {
+      if (info.object) {
+        const p = info.object;
+        const nomeVisto = desc[p[5]] || '(sem nome anotado)';
+        const coarseName = legend[p[2]].nome;
+        const finaName = legendFina.length ? legendFina[p[6]].nome : coarseName;
+        const catColor = lg[p[catField]].cor;
+        const textColor = textColorFor(catColor);
+        showTooltip(
+          '<div class="tt-head"><span class="tt-name">' + nomeVisto + '</span>' +
+          '<span class="tt-badge' + (p[4] ? ' on' : '') + '">' + (p[4] ? 'Oficial' : 'Só nome') + '</span></div>' +
+          '<div class="tt-sub">' + coarseName + '</div>' +
+          '<div class="tt-metric" style="color:' + textColor + '">' + finaName + '</div>' +
+          '<div class="tt-metric-label">Denominação · nomenclatura 2010</div>' +
+          '<div class="tt-grid">' +
+            '<div class="tt-cell"><span class="k">Censo</span><span class="v">' + (p[4] ? 'Confirmado oficial' : 'Só pelo nome') + '</span></div>' +
+            '<div class="tt-cell"><span class="k">CNPJ</span><span class="v">' + (p[3] ? 'Ativo no CEP' : 'Não encontrado') + '</span></div>' +
+          '</div>',
+          info.x, info.y
+        );
+      } else {
+        showTooltip(null);
+      }
+    }
+  });
+
+  overlay.setProps({ layers: [layer] });
+  updateFilterChips();
+}
+
+function updateFilterChips() {
+  const chips = [];
+  if (cnpjFilter === 'com') chips.push('Somente com CNPJ');
+  else if (cnpjFilter === 'sem') chips.push('Somente sem CNPJ');
+  const focus = activeFocus();
+  if (focus !== null) chips.push('Foco: ' + activeLegend()[focus].nome);
+  const el = document.getElementById('filter-chips');
+  el.innerHTML = chips.map(function (c) { return '<span class="chip">' + c + '</span>'; }).join('');
+}
+
+function updateContextLine() {
+  document.getElementById('context-line').innerHTML =
+    '<strong>' + fmt.format(total) + '</strong> pontos religiosos · <strong>' + activeLegend().length +
+    '</strong> ' + (granularity === 'fina' ? 'denominações' : 'categorias') +
+    ' · <strong>5.570</strong> municípios (IBGE)';
+}
+
+function buildLegendItems() {
+  const legendEl = document.getElementById('legend-items');
+  legendEl.innerHTML = '';
+  activeLegend().forEach(function (l) {
+    const row = document.createElement('div');
+    row.className = 'item';
+    row.dataset.idx = l.idx;
+    row.innerHTML =
+      '<span class="swatch" style="background:' + l.cor + '"></span>' +
+      '<span class="label">' + l.nome + '</span>' +
+      '<span class="count" title="' + fmt.format(l.n) + ' pontos exatos">' + fmtAbbrev(l.n) +
+      ' <span class="pct">· ' + Math.round(l.n / total * 100) + '%</span></span>';
+    row.addEventListener('mouseenter', function () { hoverCat = l.idx; render(); refreshLegendStates(); });
+    row.addEventListener('mouseleave', function () { hoverCat = null; render(); refreshLegendStates(); });
+    row.addEventListener('click', function () {
+      lockedCat = (lockedCat === l.idx) ? null : l.idx;
+      render();
+      refreshLegendStates();
+    });
+    legendEl.appendChild(row);
+  });
+  refreshLegendStates();
+}
+
+function refreshLegendStates() {
+  const focus = activeFocus();
+  document.querySelectorAll('#legend .item').forEach(function (row) {
+    const idx = parseInt(row.dataset.idx, 10);
+    row.classList.toggle('faded', focus !== null && idx !== focus);
+    row.classList.toggle('focused', focus !== null && idx === focus);
+    row.classList.toggle('locked', lockedCat === idx);
+  });
+  document.getElementById('clear-focus').hidden = (lockedCat === null);
+}
+
+fetch('data.json')
+  .then(function (r) { return r.json(); })
+  .then(function (json) {
+    legend = json.legend;
+    legendFina = json.legendFina || [];
+    desc = json.desc || [];
+    total = json.points.length;
+
+    // ordena por categoria (maior primeiro = desenhada embaixo) uma unica
+    // vez no load, pra filtragem por toggle continuar O(n) preservando a
+    // ordem de empilhamento visual sem precisar re-ordenar depois
+    const rank = {};
+    legend.slice().sort(function (a, b) { return b.n - a.n; })
+      .forEach(function (l, i) { rank[l.idx] = i; });
+    const buckets = legend.map(function () { return []; });
+    for (let i = 0; i < json.points.length; i++) {
+      buckets[rank[json.points[i][2]]].push(json.points[i]);
+    }
+    sortedPoints = [].concat.apply([], buckets);
+
+    recomputeBaseFiltered();
+
+    updateContextLine();
+    buildLegendItems();
+
+    document.getElementById('clear-focus').addEventListener('click', function () {
+      lockedCat = null; hoverCat = null;
+      render(); refreshLegendStates();
+    });
+
+    document.getElementById('granularity-select').addEventListener('change', function (e) {
+      granularity = e.target.value;
+      lockedCat = null; hoverCat = null;
+      document.getElementById('legend-title').textContent = granularity === 'fina' ? 'Denominação' : 'Vertente';
+      updateContextLine();
+      buildLegendItems();
+      render();
+    });
+
+    const comCnaeTotal = json.comCnaeTotal || 0;
+    const semCnaeTotal = total - comCnaeTotal;
+    document.getElementById('cnpj-counts').innerHTML =
+      '<span>' + fmt.format(comCnaeTotal) + ' · ' + Math.round(comCnaeTotal / total * 100) + '%</span>' +
+      '<span>' + fmt.format(semCnaeTotal) + ' · ' + Math.round(semCnaeTotal / total * 100) + '%</span>';
+    document.querySelectorAll('#cnpj-filter button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        cnpjFilter = btn.dataset.cnpj;
+        document.querySelectorAll('#cnpj-filter button').forEach(function (b) {
+          b.classList.toggle('active', b === btn);
+        });
+        recomputeBaseFiltered();
+        render();
+      });
+    });
+
+    const radiusSlider = document.getElementById('radius-slider');
+    const radiusValue = document.getElementById('radius-value');
+    radiusValue.textContent = radiusPx.toFixed(1);
+    radiusSlider.addEventListener('input', function (e) {
+      radiusPx = parseFloat(e.target.value);
+      radiusValue.textContent = radiusPx.toFixed(1);
+      render();
+    });
+
+    render();
+  });
+
+document.getElementById('about-toggle').addEventListener('click', function () {
+  const p = document.getElementById('about-text');
+  const collapsed = p.classList.toggle('collapsed');
+  this.textContent = collapsed ? 'sobre os dados ▾' : 'sobre os dados ▴';
+});
+
+document.getElementById('collapse-legend').addEventListener('click', function () {
+  const panel = document.getElementById('legend');
+  const collapsed = panel.classList.toggle('collapsed');
+  this.textContent = collapsed ? '‹' : '›';
+});
+
+(function setupMobilePanels() {
+  const toggleInfo = document.getElementById('toggle-info');
+  const toggleLegend = document.getElementById('toggle-legend');
+  const infoPanel = document.getElementById('info');
+  const legendPanel = document.getElementById('legend');
+  const backdrop = document.getElementById('sheet-backdrop');
+  const allPanels = [infoPanel, legendPanel];
+
+  function closeAll() {
+    allPanels.forEach(function (p) { p.classList.remove('open'); });
+    backdrop.classList.remove('visible');
+    document.body.classList.remove('sheet-open');
+  }
+  function togglePanel(panel) {
+    const isOpen = panel.classList.contains('open');
+    closeAll();
+    if (!isOpen) {
+      panel.classList.add('open');
+      backdrop.classList.add('visible');
+      document.body.classList.add('sheet-open');
+    }
+  }
+  toggleInfo.addEventListener('click', function () { togglePanel(infoPanel); });
+  toggleLegend.addEventListener('click', function () { togglePanel(legendPanel); });
+  backdrop.addEventListener('click', closeAll);
+})();
+</script>
+</body>
+</html>

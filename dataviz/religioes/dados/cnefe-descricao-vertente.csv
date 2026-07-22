@@ -1,0 +1,245 @@
+padrao,vertente_id,fonte,confianca,excluir
+TERREIRO DE CAFE,,inferencia_nome,alta,true
+TERREIRO CAFE,,inferencia_nome,alta,true
+TERREIRO DE SECAR CAFE,,inferencia_nome,alta,true
+TERREIRO SECAR CAFE,,inferencia_nome,alta,true
+TERREIRO DE SECAGEM DE CAFE,,inferencia_nome,alta,true
+TERREIRO DE SECAGEM,,inferencia_nome,alta,true
+TERREIRO DE PEDRA,,inferencia_nome,alta,true
+TERREIRO TULHA,,inferencia_nome,alta,true
+TULHA E TERREIRO DE PEDRA,,inferencia_nome,alta,true
+CAPELA MORTUARIA,,inferencia_nome,alta,true
+CAPELA VELORIO,,inferencia_nome,alta,true
+CAPELA DO CEMITERIO,,inferencia_nome,alta,true
+ASSEMBLEIA LEGISLATIVA,,inferencia_nome,alta,true
+MINISTERIO PUBLICO,,inferencia_nome,alta,true
+MINISTERIO DO TRABALHO,,inferencia_nome,alta,true
+MINISTERIO DA FAZENDA,,inferencia_nome,alta,true
+MINISTERIO DA SAUDE,,inferencia_nome,alta,true
+MINISTERIO DA EDUCACAO,,inferencia_nome,alta,true
+MINISTERIO DA JUSTICA,,inferencia_nome,alta,true
+MINISTERIO DA AGRICULTURA,,inferencia_nome,alta,true
+MINISTERIO DO MEIO AMBIENTE,,inferencia_nome,alta,true
+MINISTERIO DA DEFESA,,inferencia_nome,alta,true
+MINISTERIO DAS RELACOES,,inferencia_nome,alta,true
+MINISTERIO DA CULTURA,,inferencia_nome,alta,true
+MINISTERIO DE MINAS,,inferencia_nome,alta,true
+MINISTERIO DO PLANEJAMENTO,,inferencia_nome,alta,true
+MINISTERIO DO TURISMO,,inferencia_nome,alta,true
+MINISTERIO DAS CIDADES,,inferencia_nome,alta,true
+MINISTERIO DA CIENCIA,,inferencia_nome,alta,true
+MINISTERIO DA INFRAESTRUTURA,,inferencia_nome,alta,true
+MINISTERIO DA INTEGRACAO,,inferencia_nome,alta,true
+SANTUARIO ECOLOGICO,,inferencia_nome,alta,true
+SANTUARIO DE VIDA,,inferencia_nome,alta,true
+SANTUARIO DE ANIMAIS,,inferencia_nome,alta,true
+FARMACIA CATEDRAL,,inferencia_nome,alta,true
+DROGARIA CATEDRAL,,inferencia_nome,alta,true
+RESTAURANTE CATEDRAL,,inferencia_nome,alta,true
+IGREJA DESATIVADA,,inferencia_nome,alta,true
+IGREJA ABANDONADA,,inferencia_nome,alta,true
+IGREJA FECHADA,,inferencia_nome,alta,true
+ESTACIONAMENTO DA IGREJA,,inferencia_nome,alta,true
+ESTACIONAMENTO IGREJA,,inferencia_nome,alta,true
+ESCRITORIO DA IGREJA,,inferencia_nome,alta,true
+ESCRITORIO DA PAROQUIA,,inferencia_nome,alta,true
+ESCRITORIO PAROQUIAL,,inferencia_nome,alta,true
+SECRETARIA DA IGREJA,,inferencia_nome,alta,true
+SECRETARIA DA PAROQUIA,,inferencia_nome,alta,true
+SECRETARIA PAROQUIAL,,inferencia_nome,alta,true
+CENTRO PAROQUIAL,,inferencia_nome,media,true
+CASA PAROQUIAL,,inferencia_nome,alta,true
+SALAO PAROQUIAL,,inferencia_nome,alta,true
+DEPOSITO DA IGREJA,,inferencia_nome,alta,true
+BARRACAO DA IGREJA,,inferencia_nome,alta,true
+BARACAO DA IGREJA,,inferencia_nome,alta,true
+BARRACAO DE FESTA DA IGREJA,,inferencia_nome,alta,true
+BARRACAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true
+BARRACAO DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true
+SALAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true
+SALAO DE FESTA DA IGREJA,,inferencia_nome,alta,true
+SALAO DE EVENTOS DA IGREJA,,inferencia_nome,alta,true
+SALAO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true
+CENTRO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true
+SALAO DA IGREJA,,inferencia_nome,media,true
+SALAO IGREJA,,inferencia_nome,media,true
+ANEXO DA IGREJA,,inferencia_nome,alta,true
+REFEITORIO DA IGREJA,,inferencia_nome,alta,true
+REFEITORIO DA ASSEMBLEIA,,inferencia_nome,alta,true
+CANTINA DA IGREJA,,inferencia_nome,alta,true
+CANTINA DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true
+COZINHA DA IGREJA,,inferencia_nome,alta,true
+GALPAO DA IGREJA,,inferencia_nome,alta,true
+GARAGEM DA IGREJA,,inferencia_nome,alta,true
+BARRACA DA IGREJA,,inferencia_nome,alta,true
+BARRAQUINHA DA IGREJA,,inferencia_nome,alta,true
+FUNDOS DA IGREJA,,inferencia_nome,alta,true
+FUNDO DA IGREJA,,inferencia_nome,alta,true
+ESCOLINHA DA IGREJA,,inferencia_nome,alta,true
+ESCOLA DA IGREJA,,inferencia_nome,alta,true
+CASA DA IGREJA,,inferencia_nome,media,true
+BAZAR DA IGREJA,,inferencia_nome,alta,true
+LANCHONETE DA IGREJA,,inferencia_nome,alta,true
+BAR DA IGREJA,,inferencia_nome,alta,true
+LOJA DA IGREJA,,inferencia_nome,alta,true
+DEPENDENCIA DA IGREJA,,inferencia_nome,media,true
+DEPENDENCIAS DA IGREJA,,inferencia_nome,media,true
+PARTE DA IGREJA,,inferencia_nome,media,true
+FAZ PARTE DA IGREJA,,inferencia_nome,media,true
+SEDE DA IGREJA,,inferencia_nome,media,true
+ADMINISTRACAO DA IGREJA,,inferencia_nome,alta,true
+TERRENO DA IGREJA,,inferencia_nome,alta,true
+ALOJAMENTO DA IGREJA,,inferencia_nome,alta,true
+USO DA IGREJA,,inferencia_nome,media,true
+ESPACO DA IGREJA,,inferencia_nome,media,true
+BANHEIRO DA IGREJA,,inferencia_nome,alta,true
+PASTORAL DA IGREJA,,inferencia_nome,media,true
+PAVILHAO DA IGREJA,,inferencia_nome,media,true
+SALAS DA IGREJA,,inferencia_nome,media,true
+SALA DA IGREJA,,inferencia_nome,media,true
+IGREJA ADVENTISTA DA PROMESSA,95265,pesquisa_web,alta,false
+IGREJA CATOLICA APOSTOLICA ROMANA,95263,censo2010_nomenclatura,alta,false
+IGREJA APOSTOLICA ROMANA,95263,revisao_fable,alta,false
+IGREJA CATOLICA,95263,censo2010_nomenclatura,alta,false
+PAROQUIA,95263,inferencia_nome,alta,false
+IGREJA MATRIZ,95263,inferencia_nome,alta,false
+DIOCESE,95263,inferencia_nome,alta,false
+IGREJA NOSSA SENHORA,95263,inferencia_nome,alta,false
+IGREJA SAO,95263,inferencia_nome,media,false
+IGREJA SANTO,95263,inferencia_nome,media,false
+IGREJA SANTA,95263,inferencia_nome,media,false
+CAPELA NOSSA SENHORA,95263,inferencia_nome,alta,false
+CAPELA SAO,95263,inferencia_nome,media,false
+CAPELA,95263,inferencia_nome,media,false
+SANTUARIO NOSSA SENHORA,95263,revisao_fable,alta,false
+SANTUARIO SAO,95263,revisao_fable,media,false
+SANTUARIO SANTA,95263,revisao_fable,media,false
+SANTUARIO SANTO,95263,revisao_fable,media,false
+CATEDRAL NOSSA SENHORA,95263,revisao_fable,alta,false
+CATEDRAL SAO,95263,revisao_fable,media,false
+CATEDRAL SANTA,95263,revisao_fable,media,false
+CATEDRAL SANTO,95263,revisao_fable,media,false
+CATEDRAL METROPOLITANA,95263,revisao_fable,alta,false
+IGREJA BATISTA,99741,censo2010_nomenclatura,alta,false
+CONGREGACAO BATISTA,99741,revisao_fable,alta,false
+TEMPLO BATISTA,99741,revisao_fable,alta,false
+IGREJA PRESBITERIANA DO BRASIL,100404,censo2010_nomenclatura,alta,false
+IGREJA PRESBITERIANA RENOVADA,100404,inferencia_nome,media,false
+IGREJA PRESBITERIANA,100404,censo2010_nomenclatura,alta,false
+IGREJA METODISTA WESLEYANA,100405,inferencia_nome,alta,false
+IGREJA METODISTA,100405,censo2010_nomenclatura,alta,false
+IGREJA ADVENTISTA DO SETIMO DIA,99739,censo2010_nomenclatura,alta,false
+IGREJA ADVENTISTA DO 7 DIA,99739,censo2010_nomenclatura,alta,false
+IGREJA ADVENTISTA,99739,censo2010_nomenclatura,media,false
+IGREJA EVANGELICA LUTERANA,100403,censo2010_nomenclatura,alta,false
+IGREJA EVANGELICA DE CONFISSAO LUTERANA,99740,censo2010_nomenclatura,alta,false
+IGREJA LUTERANA,100403,censo2010_nomenclatura,alta,false
+IGREJA EVANGELICA CONGREGACIONAL,100406,censo2010_nomenclatura,alta,false
+IGREJA CONGREGACIONAL,100406,revisao_fable,media,false
+IGREJA DE CRISTO PENTECOSTAL,95265,revisao_fable,alta,false
+IGREJA DE CRISTO PENTENCOSTAL,95265,revisao_fable,alta,false
+IGREJA DE CRISTO,99743,inferencia_nome,media,false
+IGREJA DO NAZARENO,99743,pesquisa_web,alta,false
+IGREJA EVANGELICA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
+IGREJA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
+ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
+IGREJA ASSEMBLEIA,100409,inferencia_nome,alta,false
+IGREJA ASSENBLEIA DE DEUS,100409,inferencia_nome,alta,false
+IGREJA ASSEMBREIA DE DEUS,100409,inferencia_nome,alta,false
+IGREJA ASSEBLEIA DE DEUS,100409,inferencia_nome,alta,false
+IGREJA ASEMBLEIA DE DEUS,100409,revisao_fable,alta,false
+IGREJA ASS DE DEUS,100409,revisao_fable,alta,false
+MINISTERIO DE MADUREIRA,100409,revisao_fable,alta,false
+MINISTERIO MADUREIRA,100409,revisao_fable,alta,false
+AD MADUREIRA,100409,revisao_fable,media,false
+NACAO MADUREIRA,100409,revisao_fable,media,false
+MADUREIRA,100409,revisao_fable,baixa,false
+ASSEMBLEIA,95265,revisao_fable,baixa,false
+CONGREGACAO CRISTA NO BRASIL,99746,censo2010_nomenclatura,alta,false
+CONGREGACAO CRISTA DO BRASIL,99746,censo2010_nomenclatura,alta,false
+IGREJA CONGREGACAO CRISTA,99746,censo2010_nomenclatura,alta,false
+CONGREGACAO CRISTA,99746,censo2010_nomenclatura,media,false
+IGREJA PENTECOSTAL DEUS E AMOR,100413,censo2010_nomenclatura,alta,false
+IGREJA PENTENCOSTAL DEUS E AMOR,100413,revisao_fable,alta,false
+IGREJA DEUS E AMOR,100413,censo2010_nomenclatura,alta,false
+IGREJA DO EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
+IGREJA QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
+IGREJA UNIVERSAL DO REINO DE DEUS,99745,censo2010_nomenclatura,alta,false
+IGREJA UNIVERSAL,99745,censo2010_nomenclatura,alta,false
+IGREJA INTERNACIONAL DA GRACA DE DEUS,99748,pesquisa_web,alta,false
+IGREJA CRISTA MARANATA,100414,censo2010_nomenclatura,alta,false
+IGREJA MARANATA,100414,censo2010_nomenclatura,alta,false
+IGREJA MUNDIAL DO PODER DE DEUS,99748,pesquisa_web,alta,false
+MUNDIAL DO PODER DE DEUS,99748,revisao_fable,media,false
+IGREJA MUNDIAL,99748,inferencia_nome,media,false
+IGREJA O BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false
+IGREJA CASA DA BENCAO,100412,censo2010_nomenclatura,alta,false
+IGREJA MISSIONARIA PENTECOSTAL,95265,revisao_fable,alta,false
+IGREJA MISSIONARIA PETENCOSTAL,95265,revisao_fable,alta,false
+IGREJA EVANGELICA PENTECOSTAL,95265,inferencia_nome,media,false
+IGREJA PENTECOSTAL,95265,inferencia_nome,media,false
+IGREJA PETENCOSTAL,95265,inferencia_nome,media,false
+IGREJA PENTENCOSTAL,95265,revisao_fable,media,false
+SALAO DO REINO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
+SALAO DO REINO TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
+SALAO DO REINO DAS TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
+SALAO DO REINO TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
+SALAO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
+IGREJA SALAO DO REINO DAS TESTEMUNHAS DE,2824,censo2010_nomenclatura,alta,false
+SALAO DO REINO,2824,censo2010_nomenclatura,alta,false
+IGREJA TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
+IGREJA TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
+TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
+TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
+CENTRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+CENTRO UMBANDA,2829,censo2010_nomenclatura,alta,false
+CASA DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+TENDA DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+TERREIRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+SALAO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+TEMPLO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
+UMBANDA,2829,censo2010_nomenclatura,media,false
+TERREIRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
+CASA DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
+CENTRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
+CANDOMBLE,2828,censo2010_nomenclatura,media,false
+TERREIRO DE OGUM,2827,revisao_fable,alta,false
+TERREIRO DE XANGO,2827,revisao_fable,alta,false
+TERREIRO ILE AXE,2827,revisao_fable,alta,false
+TERREIRO,2827,inferencia_nome,baixa,false
+CENTRO ESPIRITA,2826,censo2010_nomenclatura,alta,false
+CASA ESPIRITA,2826,censo2010_nomenclatura,alta,false
+TEMPLO ESPIRITA,2826,censo2010_nomenclatura,alta,false
+ESPIRITA,2826,censo2010_nomenclatura,media,false
+KARDECISTA,2826,inferencia_nome,alta,false
+SINAGOGA,95268,censo2010_nomenclatura,alta,false
+MESQUITA ISLAMICA,95271,revisao_fable,alta,false
+MESQUITA MUCULMANA,95271,revisao_fable,alta,false
+MESQUITA MUSSULMANA,95271,revisao_fable,alta,false
+MESQUITA ARABE,95271,revisao_fable,alta,false
+MESQUITA AL HUDA,95271,revisao_fable,alta,false
+MESQUITA DA PAZ,95271,revisao_fable,alta,false
+MESQUITA SUNITA,95271,revisao_fable,alta,false
+CENTRO ISLAMICO,95271,revisao_fable,alta,false
+SOCIEDADE ISLAMICA,95271,revisao_fable,alta,false
+MUSSALLA,95271,revisao_fable,media,false
+TEMPLO BUDISTA,95269,censo2010_nomenclatura,alta,false
+BUDISTA,95269,censo2010_nomenclatura,media,false
+SANTOS DOS ULTIMOS DIAS,100423,censo2010_nomenclatura,alta,false
+IGREJA MESSIANICA MUNDIAL DO BRASIL,100428,censo2010_nomenclatura,alta,false
+IGREJA DA GRACA,99748,inferencia_nome,media,false
+IGREJA INTERNACIONAL DA GRACA,99748,inferencia_nome,media,false
+IGREJA APOSTOLICA,95265,inferencia_nome,baixa,false
+IGREJA EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
+IGREJA DO EVANGELIO QUADRANGULAR,100411,inferencia_nome,alta,false
+IGREJA SO O SENHOR E DEUS,121096,pesquisa_web,media,false
+IGREJA SINOS DE BELEM,99748,pesquisa_web,alta,false
+IGREJA BOLA DE NEVE,99748,pesquisa_web,alta,false
+IGREJA RENASCER,99748,pesquisa_web,alta,false
+SARA NOSSA TERRA,99748,revisao_fable,alta,false
+VERBO DA VIDA,99748,revisao_fable,alta,false
+TABERNACULO DA FE,95265,revisao_fable,media,false
+IGREJA CASA DE ORACAO,95265,inferencia_nome,baixa,false
+IGREJA IEQ,100411,inferencia_nome,alta,false
+BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false
+IGREJA EVANGELICA,121096,inferencia_nome,baixa,false
