@@ -1,245 +1,1032 @@
-padrao,vertente_id,fonte,confianca,excluir
-TERREIRO DE CAFE,,inferencia_nome,alta,true
-TERREIRO CAFE,,inferencia_nome,alta,true
-TERREIRO DE SECAR CAFE,,inferencia_nome,alta,true
-TERREIRO SECAR CAFE,,inferencia_nome,alta,true
-TERREIRO DE SECAGEM DE CAFE,,inferencia_nome,alta,true
-TERREIRO DE SECAGEM,,inferencia_nome,alta,true
-TERREIRO DE PEDRA,,inferencia_nome,alta,true
-TERREIRO TULHA,,inferencia_nome,alta,true
-TULHA E TERREIRO DE PEDRA,,inferencia_nome,alta,true
-CAPELA MORTUARIA,,inferencia_nome,alta,true
-CAPELA VELORIO,,inferencia_nome,alta,true
-CAPELA DO CEMITERIO,,inferencia_nome,alta,true
-ASSEMBLEIA LEGISLATIVA,,inferencia_nome,alta,true
-MINISTERIO PUBLICO,,inferencia_nome,alta,true
-MINISTERIO DO TRABALHO,,inferencia_nome,alta,true
-MINISTERIO DA FAZENDA,,inferencia_nome,alta,true
-MINISTERIO DA SAUDE,,inferencia_nome,alta,true
-MINISTERIO DA EDUCACAO,,inferencia_nome,alta,true
-MINISTERIO DA JUSTICA,,inferencia_nome,alta,true
-MINISTERIO DA AGRICULTURA,,inferencia_nome,alta,true
-MINISTERIO DO MEIO AMBIENTE,,inferencia_nome,alta,true
-MINISTERIO DA DEFESA,,inferencia_nome,alta,true
-MINISTERIO DAS RELACOES,,inferencia_nome,alta,true
-MINISTERIO DA CULTURA,,inferencia_nome,alta,true
-MINISTERIO DE MINAS,,inferencia_nome,alta,true
-MINISTERIO DO PLANEJAMENTO,,inferencia_nome,alta,true
-MINISTERIO DO TURISMO,,inferencia_nome,alta,true
-MINISTERIO DAS CIDADES,,inferencia_nome,alta,true
-MINISTERIO DA CIENCIA,,inferencia_nome,alta,true
-MINISTERIO DA INFRAESTRUTURA,,inferencia_nome,alta,true
-MINISTERIO DA INTEGRACAO,,inferencia_nome,alta,true
-SANTUARIO ECOLOGICO,,inferencia_nome,alta,true
-SANTUARIO DE VIDA,,inferencia_nome,alta,true
-SANTUARIO DE ANIMAIS,,inferencia_nome,alta,true
-FARMACIA CATEDRAL,,inferencia_nome,alta,true
-DROGARIA CATEDRAL,,inferencia_nome,alta,true
-RESTAURANTE CATEDRAL,,inferencia_nome,alta,true
-IGREJA DESATIVADA,,inferencia_nome,alta,true
-IGREJA ABANDONADA,,inferencia_nome,alta,true
-IGREJA FECHADA,,inferencia_nome,alta,true
-ESTACIONAMENTO DA IGREJA,,inferencia_nome,alta,true
-ESTACIONAMENTO IGREJA,,inferencia_nome,alta,true
-ESCRITORIO DA IGREJA,,inferencia_nome,alta,true
-ESCRITORIO DA PAROQUIA,,inferencia_nome,alta,true
-ESCRITORIO PAROQUIAL,,inferencia_nome,alta,true
-SECRETARIA DA IGREJA,,inferencia_nome,alta,true
-SECRETARIA DA PAROQUIA,,inferencia_nome,alta,true
-SECRETARIA PAROQUIAL,,inferencia_nome,alta,true
-CENTRO PAROQUIAL,,inferencia_nome,media,true
-CASA PAROQUIAL,,inferencia_nome,alta,true
-SALAO PAROQUIAL,,inferencia_nome,alta,true
-DEPOSITO DA IGREJA,,inferencia_nome,alta,true
-BARRACAO DA IGREJA,,inferencia_nome,alta,true
-BARACAO DA IGREJA,,inferencia_nome,alta,true
-BARRACAO DE FESTA DA IGREJA,,inferencia_nome,alta,true
-BARRACAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true
-BARRACAO DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true
-SALAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true
-SALAO DE FESTA DA IGREJA,,inferencia_nome,alta,true
-SALAO DE EVENTOS DA IGREJA,,inferencia_nome,alta,true
-SALAO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true
-CENTRO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true
-SALAO DA IGREJA,,inferencia_nome,media,true
-SALAO IGREJA,,inferencia_nome,media,true
-ANEXO DA IGREJA,,inferencia_nome,alta,true
-REFEITORIO DA IGREJA,,inferencia_nome,alta,true
-REFEITORIO DA ASSEMBLEIA,,inferencia_nome,alta,true
-CANTINA DA IGREJA,,inferencia_nome,alta,true
-CANTINA DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true
-COZINHA DA IGREJA,,inferencia_nome,alta,true
-GALPAO DA IGREJA,,inferencia_nome,alta,true
-GARAGEM DA IGREJA,,inferencia_nome,alta,true
-BARRACA DA IGREJA,,inferencia_nome,alta,true
-BARRAQUINHA DA IGREJA,,inferencia_nome,alta,true
-FUNDOS DA IGREJA,,inferencia_nome,alta,true
-FUNDO DA IGREJA,,inferencia_nome,alta,true
-ESCOLINHA DA IGREJA,,inferencia_nome,alta,true
-ESCOLA DA IGREJA,,inferencia_nome,alta,true
-CASA DA IGREJA,,inferencia_nome,media,true
-BAZAR DA IGREJA,,inferencia_nome,alta,true
-LANCHONETE DA IGREJA,,inferencia_nome,alta,true
-BAR DA IGREJA,,inferencia_nome,alta,true
-LOJA DA IGREJA,,inferencia_nome,alta,true
-DEPENDENCIA DA IGREJA,,inferencia_nome,media,true
-DEPENDENCIAS DA IGREJA,,inferencia_nome,media,true
-PARTE DA IGREJA,,inferencia_nome,media,true
-FAZ PARTE DA IGREJA,,inferencia_nome,media,true
-SEDE DA IGREJA,,inferencia_nome,media,true
-ADMINISTRACAO DA IGREJA,,inferencia_nome,alta,true
-TERRENO DA IGREJA,,inferencia_nome,alta,true
-ALOJAMENTO DA IGREJA,,inferencia_nome,alta,true
-USO DA IGREJA,,inferencia_nome,media,true
-ESPACO DA IGREJA,,inferencia_nome,media,true
-BANHEIRO DA IGREJA,,inferencia_nome,alta,true
-PASTORAL DA IGREJA,,inferencia_nome,media,true
-PAVILHAO DA IGREJA,,inferencia_nome,media,true
-SALAS DA IGREJA,,inferencia_nome,media,true
-SALA DA IGREJA,,inferencia_nome,media,true
-IGREJA ADVENTISTA DA PROMESSA,95265,pesquisa_web,alta,false
-IGREJA CATOLICA APOSTOLICA ROMANA,95263,censo2010_nomenclatura,alta,false
-IGREJA APOSTOLICA ROMANA,95263,revisao_fable,alta,false
-IGREJA CATOLICA,95263,censo2010_nomenclatura,alta,false
-PAROQUIA,95263,inferencia_nome,alta,false
-IGREJA MATRIZ,95263,inferencia_nome,alta,false
-DIOCESE,95263,inferencia_nome,alta,false
-IGREJA NOSSA SENHORA,95263,inferencia_nome,alta,false
-IGREJA SAO,95263,inferencia_nome,media,false
-IGREJA SANTO,95263,inferencia_nome,media,false
-IGREJA SANTA,95263,inferencia_nome,media,false
-CAPELA NOSSA SENHORA,95263,inferencia_nome,alta,false
-CAPELA SAO,95263,inferencia_nome,media,false
-CAPELA,95263,inferencia_nome,media,false
-SANTUARIO NOSSA SENHORA,95263,revisao_fable,alta,false
-SANTUARIO SAO,95263,revisao_fable,media,false
-SANTUARIO SANTA,95263,revisao_fable,media,false
-SANTUARIO SANTO,95263,revisao_fable,media,false
-CATEDRAL NOSSA SENHORA,95263,revisao_fable,alta,false
-CATEDRAL SAO,95263,revisao_fable,media,false
-CATEDRAL SANTA,95263,revisao_fable,media,false
-CATEDRAL SANTO,95263,revisao_fable,media,false
-CATEDRAL METROPOLITANA,95263,revisao_fable,alta,false
-IGREJA BATISTA,99741,censo2010_nomenclatura,alta,false
-CONGREGACAO BATISTA,99741,revisao_fable,alta,false
-TEMPLO BATISTA,99741,revisao_fable,alta,false
-IGREJA PRESBITERIANA DO BRASIL,100404,censo2010_nomenclatura,alta,false
-IGREJA PRESBITERIANA RENOVADA,100404,inferencia_nome,media,false
-IGREJA PRESBITERIANA,100404,censo2010_nomenclatura,alta,false
-IGREJA METODISTA WESLEYANA,100405,inferencia_nome,alta,false
-IGREJA METODISTA,100405,censo2010_nomenclatura,alta,false
-IGREJA ADVENTISTA DO SETIMO DIA,99739,censo2010_nomenclatura,alta,false
-IGREJA ADVENTISTA DO 7 DIA,99739,censo2010_nomenclatura,alta,false
-IGREJA ADVENTISTA,99739,censo2010_nomenclatura,media,false
-IGREJA EVANGELICA LUTERANA,100403,censo2010_nomenclatura,alta,false
-IGREJA EVANGELICA DE CONFISSAO LUTERANA,99740,censo2010_nomenclatura,alta,false
-IGREJA LUTERANA,100403,censo2010_nomenclatura,alta,false
-IGREJA EVANGELICA CONGREGACIONAL,100406,censo2010_nomenclatura,alta,false
-IGREJA CONGREGACIONAL,100406,revisao_fable,media,false
-IGREJA DE CRISTO PENTECOSTAL,95265,revisao_fable,alta,false
-IGREJA DE CRISTO PENTENCOSTAL,95265,revisao_fable,alta,false
-IGREJA DE CRISTO,99743,inferencia_nome,media,false
-IGREJA DO NAZARENO,99743,pesquisa_web,alta,false
-IGREJA EVANGELICA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
-IGREJA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
-ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false
-IGREJA ASSEMBLEIA,100409,inferencia_nome,alta,false
-IGREJA ASSENBLEIA DE DEUS,100409,inferencia_nome,alta,false
-IGREJA ASSEMBREIA DE DEUS,100409,inferencia_nome,alta,false
-IGREJA ASSEBLEIA DE DEUS,100409,inferencia_nome,alta,false
-IGREJA ASEMBLEIA DE DEUS,100409,revisao_fable,alta,false
-IGREJA ASS DE DEUS,100409,revisao_fable,alta,false
-MINISTERIO DE MADUREIRA,100409,revisao_fable,alta,false
-MINISTERIO MADUREIRA,100409,revisao_fable,alta,false
-AD MADUREIRA,100409,revisao_fable,media,false
-NACAO MADUREIRA,100409,revisao_fable,media,false
-MADUREIRA,100409,revisao_fable,baixa,false
-ASSEMBLEIA,95265,revisao_fable,baixa,false
-CONGREGACAO CRISTA NO BRASIL,99746,censo2010_nomenclatura,alta,false
-CONGREGACAO CRISTA DO BRASIL,99746,censo2010_nomenclatura,alta,false
-IGREJA CONGREGACAO CRISTA,99746,censo2010_nomenclatura,alta,false
-CONGREGACAO CRISTA,99746,censo2010_nomenclatura,media,false
-IGREJA PENTECOSTAL DEUS E AMOR,100413,censo2010_nomenclatura,alta,false
-IGREJA PENTENCOSTAL DEUS E AMOR,100413,revisao_fable,alta,false
-IGREJA DEUS E AMOR,100413,censo2010_nomenclatura,alta,false
-IGREJA DO EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
-IGREJA QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
-IGREJA UNIVERSAL DO REINO DE DEUS,99745,censo2010_nomenclatura,alta,false
-IGREJA UNIVERSAL,99745,censo2010_nomenclatura,alta,false
-IGREJA INTERNACIONAL DA GRACA DE DEUS,99748,pesquisa_web,alta,false
-IGREJA CRISTA MARANATA,100414,censo2010_nomenclatura,alta,false
-IGREJA MARANATA,100414,censo2010_nomenclatura,alta,false
-IGREJA MUNDIAL DO PODER DE DEUS,99748,pesquisa_web,alta,false
-MUNDIAL DO PODER DE DEUS,99748,revisao_fable,media,false
-IGREJA MUNDIAL,99748,inferencia_nome,media,false
-IGREJA O BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false
-IGREJA CASA DA BENCAO,100412,censo2010_nomenclatura,alta,false
-IGREJA MISSIONARIA PENTECOSTAL,95265,revisao_fable,alta,false
-IGREJA MISSIONARIA PETENCOSTAL,95265,revisao_fable,alta,false
-IGREJA EVANGELICA PENTECOSTAL,95265,inferencia_nome,media,false
-IGREJA PENTECOSTAL,95265,inferencia_nome,media,false
-IGREJA PETENCOSTAL,95265,inferencia_nome,media,false
-IGREJA PENTENCOSTAL,95265,revisao_fable,media,false
-SALAO DO REINO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
-SALAO DO REINO TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
-SALAO DO REINO DAS TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
-SALAO DO REINO TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
-SALAO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
-IGREJA SALAO DO REINO DAS TESTEMUNHAS DE,2824,censo2010_nomenclatura,alta,false
-SALAO DO REINO,2824,censo2010_nomenclatura,alta,false
-IGREJA TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
-IGREJA TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
-TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false
-TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false
-CENTRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-CENTRO UMBANDA,2829,censo2010_nomenclatura,alta,false
-CASA DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-TENDA DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-TERREIRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-SALAO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-TEMPLO DE UMBANDA,2829,censo2010_nomenclatura,alta,false
-UMBANDA,2829,censo2010_nomenclatura,media,false
-TERREIRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
-CASA DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
-CENTRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false
-CANDOMBLE,2828,censo2010_nomenclatura,media,false
-TERREIRO DE OGUM,2827,revisao_fable,alta,false
-TERREIRO DE XANGO,2827,revisao_fable,alta,false
-TERREIRO ILE AXE,2827,revisao_fable,alta,false
-TERREIRO,2827,inferencia_nome,baixa,false
-CENTRO ESPIRITA,2826,censo2010_nomenclatura,alta,false
-CASA ESPIRITA,2826,censo2010_nomenclatura,alta,false
-TEMPLO ESPIRITA,2826,censo2010_nomenclatura,alta,false
-ESPIRITA,2826,censo2010_nomenclatura,media,false
-KARDECISTA,2826,inferencia_nome,alta,false
-SINAGOGA,95268,censo2010_nomenclatura,alta,false
-MESQUITA ISLAMICA,95271,revisao_fable,alta,false
-MESQUITA MUCULMANA,95271,revisao_fable,alta,false
-MESQUITA MUSSULMANA,95271,revisao_fable,alta,false
-MESQUITA ARABE,95271,revisao_fable,alta,false
-MESQUITA AL HUDA,95271,revisao_fable,alta,false
-MESQUITA DA PAZ,95271,revisao_fable,alta,false
-MESQUITA SUNITA,95271,revisao_fable,alta,false
-CENTRO ISLAMICO,95271,revisao_fable,alta,false
-SOCIEDADE ISLAMICA,95271,revisao_fable,alta,false
-MUSSALLA,95271,revisao_fable,media,false
-TEMPLO BUDISTA,95269,censo2010_nomenclatura,alta,false
-BUDISTA,95269,censo2010_nomenclatura,media,false
-SANTOS DOS ULTIMOS DIAS,100423,censo2010_nomenclatura,alta,false
-IGREJA MESSIANICA MUNDIAL DO BRASIL,100428,censo2010_nomenclatura,alta,false
-IGREJA DA GRACA,99748,inferencia_nome,media,false
-IGREJA INTERNACIONAL DA GRACA,99748,inferencia_nome,media,false
-IGREJA APOSTOLICA,95265,inferencia_nome,baixa,false
-IGREJA EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false
-IGREJA DO EVANGELIO QUADRANGULAR,100411,inferencia_nome,alta,false
-IGREJA SO O SENHOR E DEUS,121096,pesquisa_web,media,false
-IGREJA SINOS DE BELEM,99748,pesquisa_web,alta,false
-IGREJA BOLA DE NEVE,99748,pesquisa_web,alta,false
-IGREJA RENASCER,99748,pesquisa_web,alta,false
-SARA NOSSA TERRA,99748,revisao_fable,alta,false
-VERBO DA VIDA,99748,revisao_fable,alta,false
-TABERNACULO DA FE,95265,revisao_fable,media,false
-IGREJA CASA DE ORACAO,95265,inferencia_nome,baixa,false
-IGREJA IEQ,100411,inferencia_nome,alta,false
-BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false
-IGREJA EVANGELICA,121096,inferencia_nome,baixa,false
+padrao,vertente_id,fonte,confianca,excluir,prioridade
+TERREIRO DE CAFE,,inferencia_nome,alta,true,100
+TERREIRO CAFE,,inferencia_nome,alta,true,100
+TERREIRO DE SECAR CAFE,,inferencia_nome,alta,true,100
+TERREIRO SECAR CAFE,,inferencia_nome,alta,true,100
+TERREIRO DE SECAGEM DE CAFE,,inferencia_nome,alta,true,100
+TERREIRO DE SECAGEM,,inferencia_nome,alta,true,100
+TERREIRO DE PEDRA,,inferencia_nome,alta,true,100
+TERREIRO TULHA,,inferencia_nome,alta,true,100
+TULHA E TERREIRO DE PEDRA,,inferencia_nome,alta,true,100
+CAPELA MORTUARIA,,inferencia_nome,alta,true,100
+CAPELA VELORIO,,inferencia_nome,alta,true,100
+CAPELA DO CEMITERIO,,inferencia_nome,alta,true,100
+ASSEMBLEIA LEGISLATIVA,,inferencia_nome,alta,true,100
+MINISTERIO PUBLICO,,inferencia_nome,alta,true,100
+MINISTERIO DO TRABALHO,,inferencia_nome,alta,true,100
+MINISTERIO DA FAZENDA,,inferencia_nome,alta,true,100
+MINISTERIO DA SAUDE,,inferencia_nome,alta,true,100
+MINISTERIO DA EDUCACAO,,inferencia_nome,alta,true,100
+MINISTERIO DA JUSTICA,,inferencia_nome,alta,true,100
+MINISTERIO DA AGRICULTURA,,inferencia_nome,alta,true,100
+MINISTERIO DO MEIO AMBIENTE,,inferencia_nome,alta,true,100
+MINISTERIO DA DEFESA,,inferencia_nome,alta,true,100
+MINISTERIO DAS RELACOES,,inferencia_nome,alta,true,100
+MINISTERIO DA CULTURA,,inferencia_nome,alta,true,100
+MINISTERIO DE MINAS,,inferencia_nome,alta,true,100
+MINISTERIO DO PLANEJAMENTO,,inferencia_nome,alta,true,100
+MINISTERIO DO TURISMO,,inferencia_nome,alta,true,100
+MINISTERIO DAS CIDADES,,inferencia_nome,alta,true,100
+MINISTERIO DA CIENCIA,,inferencia_nome,alta,true,100
+MINISTERIO DA INFRAESTRUTURA,,inferencia_nome,alta,true,100
+MINISTERIO DA INTEGRACAO,,inferencia_nome,alta,true,100
+SANTUARIO ECOLOGICO,,inferencia_nome,alta,true,100
+SANTUARIO DE VIDA,,inferencia_nome,alta,true,100
+SANTUARIO DE ANIMAIS,,inferencia_nome,alta,true,100
+FARMACIA CATEDRAL,,inferencia_nome,alta,true,100
+DROGARIA CATEDRAL,,inferencia_nome,alta,true,100
+RESTAURANTE CATEDRAL,,inferencia_nome,alta,true,100
+IGREJA DESATIVADA,,inferencia_nome,alta,true,100
+IGREJA ABANDONADA,,inferencia_nome,alta,true,100
+IGREJA FECHADA,,inferencia_nome,alta,true,100
+ESTACIONAMENTO DA IGREJA,,inferencia_nome,alta,true,100
+ESTACIONAMENTO IGREJA,,inferencia_nome,alta,true,100
+ESCRITORIO DA IGREJA,,inferencia_nome,alta,true,100
+ESCRITORIO DA PAROQUIA,,inferencia_nome,alta,true,100
+ESCRITORIO PAROQUIAL,,inferencia_nome,alta,true,100
+SECRETARIA DA IGREJA,,inferencia_nome,alta,true,100
+SECRETARIA DA PAROQUIA,,inferencia_nome,alta,true,100
+SECRETARIA PAROQUIAL,,inferencia_nome,alta,true,100
+CENTRO PAROQUIAL,,inferencia_nome,media,true,100
+CASA PAROQUIAL,,inferencia_nome,alta,true,100
+SALAO PAROQUIAL,,inferencia_nome,alta,true,100
+DEPOSITO DA IGREJA,,inferencia_nome,alta,true,100
+BARRACAO DA IGREJA,,inferencia_nome,alta,true,100
+BARACAO DA IGREJA,,inferencia_nome,alta,true,100
+BARRACAO DE FESTA DA IGREJA,,inferencia_nome,alta,true,100
+BARRACAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true,100
+BARRACAO DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true,100
+SALAO DE FESTAS DA IGREJA,,inferencia_nome,alta,true,100
+SALAO DE FESTA DA IGREJA,,inferencia_nome,alta,true,100
+SALAO DE EVENTOS DA IGREJA,,inferencia_nome,alta,true,100
+SALAO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true,100
+CENTRO COMUNITARIO DA IGREJA,,inferencia_nome,alta,true,100
+SALAO DA IGREJA,,inferencia_nome,media,true,100
+SALAO IGREJA,,inferencia_nome,media,true,100
+ANEXO DA IGREJA,,inferencia_nome,alta,true,100
+REFEITORIO DA IGREJA,,inferencia_nome,alta,true,100
+REFEITORIO DA ASSEMBLEIA,,inferencia_nome,alta,true,100
+CANTINA DA IGREJA,,inferencia_nome,alta,true,100
+CANTINA DA IGREJA ASSEMBLEIA,,inferencia_nome,alta,true,100
+COZINHA DA IGREJA,,inferencia_nome,alta,true,100
+GALPAO DA IGREJA,,inferencia_nome,alta,true,100
+GARAGEM DA IGREJA,,inferencia_nome,alta,true,100
+BARRACA DA IGREJA,,inferencia_nome,alta,true,100
+BARRAQUINHA DA IGREJA,,inferencia_nome,alta,true,100
+FUNDOS DA IGREJA,,inferencia_nome,alta,true,100
+FUNDO DA IGREJA,,inferencia_nome,alta,true,100
+ESCOLINHA DA IGREJA,,inferencia_nome,alta,true,100
+ESCOLA DA IGREJA,,inferencia_nome,alta,true,100
+CASA DA IGREJA,,inferencia_nome,media,true,100
+BAZAR DA IGREJA,,inferencia_nome,alta,true,100
+LANCHONETE DA IGREJA,,inferencia_nome,alta,true,100
+BAR DA IGREJA,,inferencia_nome,alta,true,100
+LOJA DA IGREJA,,inferencia_nome,alta,true,100
+DEPENDENCIA DA IGREJA,,inferencia_nome,media,true,100
+DEPENDENCIAS DA IGREJA,,inferencia_nome,media,true,100
+PARTE DA IGREJA,,inferencia_nome,media,true,100
+FAZ PARTE DA IGREJA,,inferencia_nome,media,true,100
+SEDE DA IGREJA,,inferencia_nome,media,true,100
+ADMINISTRACAO DA IGREJA,,inferencia_nome,alta,true,100
+TERRENO DA IGREJA,,inferencia_nome,alta,true,100
+ALOJAMENTO DA IGREJA,,inferencia_nome,alta,true,100
+USO DA IGREJA,,inferencia_nome,media,true,100
+ESPACO DA IGREJA,,inferencia_nome,media,true,100
+BANHEIRO DA IGREJA,,inferencia_nome,alta,true,100
+PASTORAL DA IGREJA,,inferencia_nome,media,true,100
+PAVILHAO DA IGREJA,,inferencia_nome,media,true,100
+SALAS DA IGREJA,,inferencia_nome,media,true,100
+SALA DA IGREJA,,inferencia_nome,media,true,100
+IGREJA ADVENTISTA DA PROMESSA,95265,pesquisa_web,alta,false,95
+IGREJA CATOLICA APOSTOLICA ROMANA,95263,censo2010_nomenclatura,alta,false,100
+IGREJA APOSTOLICA ROMANA,95263,revisao_fable,alta,false,100
+IGREJA CATOLICA,95263,censo2010_nomenclatura,alta,false,100
+PAROQUIA,95263,inferencia_nome,alta,false,100
+IGREJA MATRIZ,95263,inferencia_nome,alta,false,100
+DIOCESE,95263,inferencia_nome,alta,false,100
+IGREJA NOSSA SENHORA,95263,inferencia_nome,alta,false,100
+IGREJA SAO,95263,inferencia_nome,media,false,100
+IGREJA SANTO,95263,inferencia_nome,media,false,100
+IGREJA SANTA,95263,inferencia_nome,media,false,100
+CAPELA NOSSA SENHORA,95263,inferencia_nome,alta,false,100
+CAPELA SAO,95263,inferencia_nome,media,false,100
+CAPELA,95263,inferencia_nome,media,false,100
+SANTUARIO NOSSA SENHORA,95263,revisao_fable,alta,false,100
+SANTUARIO SAO,95263,revisao_fable,media,false,100
+SANTUARIO SANTA,95263,revisao_fable,media,false,100
+SANTUARIO SANTO,95263,revisao_fable,media,false,100
+CATEDRAL NOSSA SENHORA,95263,revisao_fable,alta,false,100
+CATEDRAL SAO,95263,revisao_fable,media,false,100
+CATEDRAL SANTA,95263,revisao_fable,media,false,100
+CATEDRAL SANTO,95263,revisao_fable,media,false,100
+CATEDRAL METROPOLITANA,95263,revisao_fable,alta,false,100
+IGREJA BATISTA,99741,censo2010_nomenclatura,alta,false,100
+CONGREGACAO BATISTA,99741,revisao_fable,alta,false,100
+TEMPLO BATISTA,99741,revisao_fable,alta,false,100
+IGREJA PRESBITERIANA DO BRASIL,100404,censo2010_nomenclatura,alta,false,100
+IGREJA PRESBITERIANA RENOVADA,100404,inferencia_nome,media,false,100
+IGREJA PRESBITERIANA,100404,censo2010_nomenclatura,alta,false,100
+IGREJA METODISTA WESLEYANA,100405,inferencia_nome,alta,false,100
+IGREJA METODISTA,100405,censo2010_nomenclatura,alta,false,100
+IGREJA ADVENTISTA DO SETIMO DIA,99739,censo2010_nomenclatura,alta,false,100
+IGREJA ADVENTISTA DO 7 DIA,99739,censo2010_nomenclatura,alta,false,100
+IGREJA ADVENTISTA,99739,censo2010_nomenclatura,media,false,100
+IGREJA EVANGELICA LUTERANA,100403,censo2010_nomenclatura,alta,false,100
+IGREJA EVANGELICA DE CONFISSAO LUTERANA,99740,censo2010_nomenclatura,alta,false,100
+IGREJA LUTERANA,100403,censo2010_nomenclatura,alta,false,100
+IGREJA EVANGELICA CONGREGACIONAL,100406,censo2010_nomenclatura,alta,false,100
+IGREJA CONGREGACIONAL,100406,revisao_fable,media,false,100
+IGREJA DE CRISTO PENTECOSTAL,95265,revisao_fable,alta,false,100
+IGREJA DE CRISTO PENTENCOSTAL,95265,revisao_fable,alta,false,100
+IGREJA DE CRISTO,99743,inferencia_nome,media,false,100
+IGREJA DO NAZARENO,99743,pesquisa_web,alta,false,100
+IGREJA EVANGELICA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false,100
+IGREJA ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false,100
+ASSEMBLEIA DE DEUS,100409,censo2010_nomenclatura,alta,false,100
+IGREJA ASSEMBLEIA,100409,inferencia_nome,alta,false,100
+IGREJA ASSENBLEIA DE DEUS,100409,inferencia_nome,alta,false,100
+IGREJA ASSEMBREIA DE DEUS,100409,inferencia_nome,alta,false,100
+IGREJA ASSEBLEIA DE DEUS,100409,inferencia_nome,alta,false,100
+IGREJA ASEMBLEIA DE DEUS,100409,revisao_fable,alta,false,100
+IGREJA ASS DE DEUS,100409,revisao_fable,alta,false,100
+MINISTERIO DE MADUREIRA,100409,revisao_fable,alta,false,100
+MINISTERIO MADUREIRA,100409,revisao_fable,alta,false,100
+AD MADUREIRA,100409,revisao_fable,media,false,100
+NACAO MADUREIRA,100409,revisao_fable,media,false,100
+MADUREIRA,100409,revisao_fable,baixa,false,100
+ASSEMBLEIA,95265,revisao_fable,baixa,false,30
+CONGREGACAO CRISTA NO BRASIL,99746,censo2010_nomenclatura,alta,false,100
+CONGREGACAO CRISTA DO BRASIL,99746,censo2010_nomenclatura,alta,false,100
+IGREJA CONGREGACAO CRISTA,99746,censo2010_nomenclatura,alta,false,100
+CONGREGACAO CRISTA,99746,censo2010_nomenclatura,media,false,100
+IGREJA PENTECOSTAL DEUS E AMOR,100413,censo2010_nomenclatura,alta,false,100
+IGREJA PENTENCOSTAL DEUS E AMOR,100413,revisao_fable,alta,false,100
+IGREJA DEUS E AMOR,100413,censo2010_nomenclatura,alta,false,100
+IGREJA DO EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false,100
+IGREJA QUADRANGULAR,100411,censo2010_nomenclatura,alta,false,100
+IGREJA UNIVERSAL DO REINO DE DEUS,99745,censo2010_nomenclatura,alta,false,100
+IGREJA UNIVERSAL,99745,censo2010_nomenclatura,alta,false,100
+IGREJA INTERNACIONAL DA GRACA DE DEUS,99748,pesquisa_web,alta,false,100
+IGREJA CRISTA MARANATA,100414,censo2010_nomenclatura,alta,false,100
+IGREJA MARANATA,100414,censo2010_nomenclatura,alta,false,100
+IGREJA MUNDIAL DO PODER DE DEUS,99748,pesquisa_web,alta,false,100
+MUNDIAL DO PODER DE DEUS,99748,revisao_fable,media,false,100
+IGREJA MUNDIAL,99748,inferencia_nome,media,false,100
+IGREJA O BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false,100
+IGREJA CASA DA BENCAO,100412,censo2010_nomenclatura,alta,false,100
+IGREJA MISSIONARIA PENTECOSTAL,95265,revisao_fable,alta,false,30
+IGREJA MISSIONARIA PETENCOSTAL,95265,revisao_fable,alta,false,30
+IGREJA EVANGELICA PENTECOSTAL,95265,inferencia_nome,media,false,30
+IGREJA PENTECOSTAL,95265,inferencia_nome,media,false,30
+IGREJA PETENCOSTAL,95265,inferencia_nome,media,false,30
+IGREJA PENTENCOSTAL,95265,revisao_fable,media,false,30
+SALAO DO REINO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+SALAO DO REINO TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+SALAO DO REINO DAS TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+SALAO DO REINO TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+SALAO DAS TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+IGREJA SALAO DO REINO DAS TESTEMUNHAS DE,2824,censo2010_nomenclatura,alta,false,100
+SALAO DO REINO,2824,censo2010_nomenclatura,alta,false,100
+IGREJA TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+IGREJA TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+TESTEMUNHAS DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+TESTEMUNHA DE JEOVA,2824,censo2010_nomenclatura,alta,false,100
+CENTRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+CENTRO UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+CASA DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+TENDA DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+TERREIRO DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+SALAO DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+TEMPLO DE UMBANDA,2829,censo2010_nomenclatura,alta,false,100
+UMBANDA,2829,censo2010_nomenclatura,media,false,100
+TERREIRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false,100
+CASA DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false,100
+CENTRO DE CANDOMBLE,2828,censo2010_nomenclatura,alta,false,100
+CANDOMBLE,2828,censo2010_nomenclatura,media,false,100
+TERREIRO DE OGUM,2827,revisao_fable,alta,false,95
+TERREIRO DE XANGO,2827,revisao_fable,alta,false,100
+TERREIRO ILE AXE,2827,revisao_fable,alta,false,95
+TERREIRO,2827,inferencia_nome,baixa,false,95
+CENTRO ESPIRITA,2826,censo2010_nomenclatura,alta,false,100
+CASA ESPIRITA,2826,censo2010_nomenclatura,alta,false,100
+TEMPLO ESPIRITA,2826,censo2010_nomenclatura,alta,false,100
+ESPIRITA,2826,censo2010_nomenclatura,media,false,100
+KARDECISTA,2826,inferencia_nome,alta,false,100
+SINAGOGA,95268,censo2010_nomenclatura,alta,false,100
+MESQUITA ISLAMICA,95271,revisao_fable,alta,false,100
+MESQUITA MUCULMANA,95271,revisao_fable,alta,false,100
+MESQUITA MUSSULMANA,95271,revisao_fable,alta,false,100
+MESQUITA ARABE,95271,revisao_fable,alta,false,100
+MESQUITA AL HUDA,95271,revisao_fable,alta,false,100
+MESQUITA DA PAZ,95271,revisao_fable,alta,false,100
+MESQUITA SUNITA,95271,revisao_fable,alta,false,100
+CENTRO ISLAMICO,95271,revisao_fable,alta,false,100
+SOCIEDADE ISLAMICA,95271,revisao_fable,alta,false,100
+MUSSALLA,95271,revisao_fable,media,false,100
+TEMPLO BUDISTA,95269,censo2010_nomenclatura,alta,false,100
+BUDISTA,95269,censo2010_nomenclatura,media,false,100
+SANTOS DOS ULTIMOS DIAS,100423,censo2010_nomenclatura,alta,false,100
+IGREJA MESSIANICA MUNDIAL DO BRASIL,100428,censo2010_nomenclatura,alta,false,100
+IGREJA DA GRACA,99748,inferencia_nome,media,false,100
+IGREJA INTERNACIONAL DA GRACA,99748,inferencia_nome,media,false,100
+IGREJA APOSTOLICA,95265,inferencia_nome,baixa,false,30
+IGREJA EVANGELHO QUADRANGULAR,100411,censo2010_nomenclatura,alta,false,100
+IGREJA DO EVANGELIO QUADRANGULAR,100411,inferencia_nome,alta,false,100
+IGREJA SO O SENHOR E DEUS,121096,pesquisa_web,media,false,100
+IGREJA SINOS DE BELEM,99748,pesquisa_web,alta,false,100
+IGREJA BOLA DE NEVE,99748,pesquisa_web,alta,false,100
+IGREJA RENASCER,99748,pesquisa_web,alta,false,100
+SARA NOSSA TERRA,99748,revisao_fable,alta,false,100
+VERBO DA VIDA,99748,revisao_fable,alta,false,100
+TABERNACULO DA FE,95265,revisao_fable,media,false,95
+IGREJA CASA DE ORACAO,95265,inferencia_nome,baixa,false,95
+IGREJA IEQ,100411,inferencia_nome,alta,false,100
+BRASIL PARA CRISTO,100410,censo2010_nomenclatura,alta,false,100
+IGREJA EVANGELICA,121096,inferencia_nome,baixa,false,30
+CASA DE SANTO,2827,inferencia_nome,alta,false,95
+ROCA DE SANTO,2827,inferencia_nome,alta,false,100
+ILE AXE,2828,inferencia_nome,alta,false,100
+YLE AXE,2828,inferencia_nome,alta,false,100
+ILEAXE,2828,inferencia_nome,alta,false,100
+ILE ASE,2828,inferencia_nome,alta,false,100
+YLE ASE,2828,inferencia_nome,alta,false,100
+ILE OMO,2828,inferencia_nome,alta,false,100
+ABASSA,2828,inferencia_nome,alta,false,100
+BABALORIXA,2828,inferencia_nome,alta,false,100
+YALORIXA,2828,inferencia_nome,alta,false,100
+IALORIXA,2828,inferencia_nome,alta,false,100
+CASA DE CARIDADE,2827,inferencia_nome,media,false,95
+IEMANJA,2827,inferencia_nome,alta,false,95
+OXALA,2827,inferencia_nome,alta,false,100
+ORIXA,2827,inferencia_nome,alta,false,100
+JUREMA,2827,inferencia_nome,alta,false,100
+CATIMBO,2827,inferencia_nome,alta,false,100
+QUIMBANDA,2827,inferencia_nome,alta,false,95
+DEUS E AMOR,100413,pesquisa_web,alta,false,100
+CASA DA BENCAO,100412,pesquisa_web,alta,false,100
+MUNDIAL IGREJA DO PODER DE DEUS,99748,pesquisa_web,alta,false,100
+IGREJA DE DEUS NO BRASIL,99748,pesquisa_web,alta,false,100
+CASA DE ORACAO,95265,pesquisa_web,media,false,30
+IGREJA EVANJELICA,121096,mineracao_grafia,alta,false,90
+ASSEMBLEI DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVANGLICA,121096,mineracao_grafia,alta,false,90
+IGREJA EVANGELUCA,121096,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLEA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLIA DE DEUS,100409,mineracao_grafia,alta,false,90
+TERRERO,2827,mineracao_grafia,alta,false,90
+IGREJA ADIVENTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTECISTAL,95265,mineracao_grafia,alta,false,90
+IGREJA BASTISTA,99741,mineracao_grafia,alta,false,90
+IGREJA ADIVENTISTA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTESCOTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PREBISTERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA ASSEMLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTACOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PRESBETERIANA,100404,mineracao_grafia,alta,false,90
+ASSEMBLEA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ENVAGELICA,121096,mineracao_grafia,alta,false,90
+CONGREGRACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+CAMDOMBLE,2828,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLEI DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA QUADRAGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EVAGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+ASSEMBLIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGRECACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+CONCREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA EVANGELIA,121096,mineracao_grafia,alta,false,90
+IGREJA TESTEMUNHO DE JEOVA,2824,mineracao_grafia,alta,false,90
+COGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+ASSSEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRAGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA ASSEMBELIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTECOATAL,95265,mineracao_grafia,alta,false,90
+CANDONBLE,2828,mineracao_grafia,alta,false,90
+IGREJA ASSMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA QUANDRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA EVANELICA,121096,mineracao_grafia,alta,false,90
+IGREJA PREBITERIANA,100404,mineracao_grafia,alta,false,90
+ASSRMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGREGACAO CRITA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA ASSSEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTECONSTAL,95265,mineracao_grafia,alta,false,90
+ASSEMVLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVANGELCA,121096,mineracao_grafia,alta,false,90
+IGREJA CATILICA,95263,mineracao_grafia,alta,false,90
+IGREJA COTOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA EANGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA ASSENBREIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADVETISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA ADEVENTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTECOTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSEMBKEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVENGELICA,121096,mineracao_grafia,alta,false,90
+ASSMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA DO ENVANGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO GUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA CATLICA,95263,mineracao_grafia,alta,false,90
+ASSEMLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA CATOLICO,95263,mineracao_grafia,alta,false,90
+ASSEMBLEUA DE DEUS,100409,mineracao_grafia,alta,false,90
+TESTEMUNHO DE JEOVA,2824,mineracao_grafia,alta,false,90
+IGREJA GUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUANDRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRESBETERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJA BATISA,99741,mineracao_grafia,alta,false,90
+ASSEMPLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADEVENTISTA,99739,mineracao_grafia,alta,false,90
+IGREJA SEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ECANGELICA,121096,mineracao_grafia,alta,false,90
+CONGRGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PLESBITERIANA,100404,mineracao_grafia,alta,false,90
+CONGRAGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PENECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PRESBETERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+ASSAMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ASSRMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA CAOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA PRESBITERANA,100404,mineracao_grafia,alta,false,90
+IGREJA BAISTA,99741,mineracao_grafia,alta,false,90
+CONCREGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+CONGRECACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA ADVENISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA CARTOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA ASSBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PREBISTERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJA ASSEMVLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGREGRACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA CATOLIA,95263,mineracao_grafia,alta,false,90
+IGREJA APOSTILICA,95265,mineracao_grafia,alta,false,90
+IGREJA CATOLUCA,95263,mineracao_grafia,alta,false,90
+IGREJA PREBISTERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+IGREJA CONGRECIONAL,100406,mineracao_grafia,alta,false,90
+IGREJA EVANGEICA,121096,mineracao_grafia,alta,false,90
+IGREJA BAPTISTA,99741,mineracao_grafia,alta,false,90
+IGREJA CAROLICA,95263,mineracao_grafia,alta,false,90
+IGREJA MARANATHA,100414,mineracao_grafia,alta,false,90
+IGREJA ADIVENTISTA DO 7 DIA,99739,mineracao_grafia,alta,false,90
+COGREGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA EVANGRLICA,121096,mineracao_grafia,alta,false,90
+IGREJA QUADRIANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA ASENBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLEUA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADVESTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+CENTRO DE CAMDOMBLE,2828,mineracao_grafia,alta,false,90
+IGREJA DO EVANJELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA EVANGELHICA,121096,mineracao_grafia,alta,false,90
+CADOMBLE,2828,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLIA,100409,mineracao_grafia,alta,false,90
+IGREJA ENVANGELICA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLRIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CENTRO ESPERITA,2826,mineracao_grafia,alta,false,90
+IGREJA ADVETISTA,99739,mineracao_grafia,alta,false,90
+IGREJA PRESIBITERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA ADENTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+C0NGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA ASEEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLEA,100409,mineracao_grafia,alta,false,90
+IGREJA EVNGELICA,121096,mineracao_grafia,alta,false,90
+CASA DE CAMDOMBLE,2828,mineracao_grafia,alta,false,90
+IGREJA APISTOLICA,95265,mineracao_grafia,alta,false,90
+CENTRO ESPRITA,2826,mineracao_grafia,alta,false,90
+ASSWMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVAMGELICA,121096,mineracao_grafia,alta,false,90
+MADEIRA,100409,mineracao_grafia,alta,false,90
+IGREJA EVANGELIVA,121096,mineracao_grafia,alta,false,90
+ASSEMBLEIS DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRANCULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PREBITERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJA ADVENISTA,99739,mineracao_grafia,alta,false,90
+IGREJA CRISTAN MARANATA,100414,mineracao_grafia,alta,false,90
+IGREJA PENTEGOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PENTCOSTAL,95265,mineracao_grafia,alta,false,90
+ASSEMBELEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTEOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA BATSTA,99741,mineracao_grafia,alta,false,90
+IGREJA EVAGENLICA,121096,mineracao_grafia,alta,false,90
+IGREJA ESSEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ASSEMBLEIS DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVSNGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA EVANJELICA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA AVENTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA ASSEMPLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGREGAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PEBTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PENDECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA OENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA UNIERSAL,99745,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRIANGULAR,100411,mineracao_grafia,alta,false,90
+CENTRO ESPIRIRA,2826,mineracao_grafia,alta,false,90
+IGREJA EVABGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA ASDEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGREGACAO CRITA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PETENCONSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CATOLOCA,95263,mineracao_grafia,alta,false,90
+IGREJA EVANGELUCA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA IVANGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUANDRAGULAR,100411,mineracao_grafia,alta,false,90
+CONGREGASSAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PENTRCOSTAL,95265,mineracao_grafia,alta,false,90
+CENTRO EDPIRITA,2826,mineracao_grafia,alta,false,90
+IGREJA ADENTISTA,99739,mineracao_grafia,alta,false,90
+IGREJA CONCREGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA QUADRANCULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUDRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA NEOPENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA QUDRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PENTENCONSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA INTERNACINAL DA GRACA DE DEUS,99748,mineracao_grafia,alta,false,90
+IGREJA UNIVESAL,99745,mineracao_grafia,alta,false,90
+CENTRO DE CANDONBLE,2828,mineracao_grafia,alta,false,90
+IGREJA ADVENTSTA,99739,mineracao_grafia,alta,false,90
+COMGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+CINGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+CONGREGRACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELIO QUADRAGULAR,100411,mineracao_grafia,alta,false,90
+CONGRGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+CONGRAGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA AASEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTEVOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA EVANGEKICA,121096,mineracao_grafia,alta,false,90
+IGREJA ASSEBREIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGRECACAO BATISTA,99741,mineracao_grafia,alta,false,90
+IGREJA PENTECOSPAL,95265,mineracao_grafia,alta,false,90
+IGREJA EVANVELICA,121096,mineracao_grafia,alta,false,90
+IGREJA PRESBITERINA,100404,mineracao_grafia,alta,false,90
+IGREJA CONGREGRACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA COGREGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+TEREIRO,2827,mineracao_grafia,alta,false,90
+IGREJA EVANGELICS,121096,mineracao_grafia,alta,false,90
+IGREJA CATOICA,95263,mineracao_grafia,alta,false,90
+IGREJA EVANGELHO QUADRAGULAR,100411,mineracao_grafia,alta,false,90
+CONGREGAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PENTECOSAL,95265,mineracao_grafia,alta,false,90
+IGREJA PETENCISTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PRESPITERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA PENTECSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ADVESTISTA,99739,mineracao_grafia,alta,false,90
+IGREJA ASSEMLEIA,100409,mineracao_grafia,alta,false,90
+IGREJA ENVANGELICA LUTERANA,100403,mineracao_grafia,alta,false,90
+CONGEGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PENTESCONTAL,95265,mineracao_grafia,alta,false,90
+IGREJAS DE CRISTO,99743,mineracao_grafia,alta,false,90
+CENTRO DE UMBADA,2829,mineracao_grafia,alta,false,90
+IGREJA PETENCOATAL,95265,mineracao_grafia,alta,false,90
+IGREJA PENTECODTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CATOLCA,95263,mineracao_grafia,alta,false,90
+IGREJA PETECONSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PENTENCISTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSRMBLEIA,100409,mineracao_grafia,alta,false,90
+IGREJA EVANGELIA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSAMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGRECACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA EVANGLICA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA MUDIAL,99748,mineracao_grafia,alta,false,90
+IGREJA QUANDRAGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA ADENTISTA DO 7 DIA,99739,mineracao_grafia,alta,false,90
+IGREJA ADVEBTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+COGREGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA DO ENVAGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA EVANGELIGA,121096,mineracao_grafia,alta,false,90
+IGREJA PRESBITRIANA,100404,mineracao_grafia,alta,false,90
+IGREJA EVANGELA,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVAGELHO QUADRAGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRESBTERIANA,100404,mineracao_grafia,alta,false,90
+TARBENACULO DA FE,95265,mineracao_grafia,alta,false,90
+CONCREGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA PENTECOSYAL,95265,mineracao_grafia,alta,false,90
+IGREJA ADVENTSTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PENRECOSTAL,95265,mineracao_grafia,alta,false,90
+CARDECISTA,2826,mineracao_grafia,alta,false,90
+IGREJA ADVENTITA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTECOSCAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASEMBREIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA CATOLIVA,95263,mineracao_grafia,alta,false,90
+IGREJA PLESBITERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+IGREJA QUADANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA POSTOLICA,95265,mineracao_grafia,alta,false,90
+IGREJA EVANHELICA,121096,mineracao_grafia,alta,false,90
+IGREJA ADVEBTISTA,99739,mineracao_grafia,alta,false,90
+IGREJA APOATOLICA,95265,mineracao_grafia,alta,false,90
+CENTRO ESPIRTA,2826,mineracao_grafia,alta,false,90
+IGREJA PANTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CATOLOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA EVAGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+ASSEMBLIA,95265,mineracao_grafia,alta,false,90
+IGREJA NOSSSA SENHORA,95263,mineracao_grafia,alta,false,90
+MUDIAL IGREJA DO PODER DE DEUS,99748,mineracao_grafia,alta,false,90
+IGREJA ADEVENTISTA DO 7 DIA,99739,mineracao_grafia,alta,false,90
+IGREJA EVANFELICA,121096,mineracao_grafia,alta,false,90
+CONGREGACAO CRSTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJAS EVANGELICAS,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVAMGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EANGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+CONGREGASSAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA ADVENTISA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA AVANGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA QUADRIGULAR,100411,mineracao_grafia,alta,false,90
+GONGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRANDULAR,100411,mineracao_grafia,alta,false,90
+IGREJA ASSEMBRLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTECONTAL,95265,mineracao_grafia,alta,false,90
+CONCREGACAO BATISTA,99741,mineracao_grafia,alta,false,90
+IGREJA APOSTOLOCA,95265,mineracao_grafia,alta,false,90
+IGREJA PENTECOSRAL,95265,mineracao_grafia,alta,false,90
+ASSEMBLE DE DEUS,100409,mineracao_grafia,alta,false,90
+IREJA CATOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA PRESITERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA EVANGELISTICA,121096,mineracao_grafia,alta,false,90
+ESSEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CASA DE ORCAO,95265,mineracao_grafia,alta,false,90
+IGREJA PESTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASAEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA EVANGELICQ,121096,mineracao_grafia,alta,false,90
+IGREJA PESBITERIANA,100404,mineracao_grafia,alta,false,90
+ASSEMBLEA,95265,mineracao_grafia,alta,false,90
+COBGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA RENACER,99748,mineracao_grafia,alta,false,90
+IGREJA UNIVERSSAL,99745,mineracao_grafia,alta,false,90
+IGREJA NOSSA SENORA,95263,mineracao_grafia,alta,false,90
+IGREJA PENTECOLTAL,95265,mineracao_grafia,alta,false,90
+IGREJA EBANGELICA,121096,mineracao_grafia,alta,false,90
+CINGREGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+ASSSMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+TEMPLO DE UMBADA,2829,mineracao_grafia,alta,false,90
+IGREJA ASSSMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+ASSEMBBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA CONGRGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA QUADRANGUAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRESITERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+CENTRO EAPIRITA,2826,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELIO GUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA AVENTISTA,99739,mineracao_grafia,alta,false,90
+ASSEEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADVENRISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PRESBITERANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJA PENTEPOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CRITA MARANATA,100414,mineracao_grafia,alta,false,90
+IGREJA PLESBITERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJA PETENCOTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PRESIBITERIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+IGREJ PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSEMBREA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONGREGACAO CRSTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA UNIERSAL DO REINO DE DEUS,99745,mineracao_grafia,alta,false,90
+IGREJA LUTERNA,100403,mineracao_grafia,alta,false,90
+IGREJA APOSTLICA,95265,mineracao_grafia,alta,false,90
+ASSEMBLWIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA PENTERCOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJ EVANGELICA,121096,mineracao_grafia,alta,false,90
+ESPIRIRA,2826,mineracao_grafia,alta,false,90
+ASS3MBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADSEMBLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA NOSSA SEHORA,95263,mineracao_grafia,alta,false,90
+IGREJA PETESCOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CATOKICA,95263,mineracao_grafia,alta,false,90
+IGREJA ASSENBLEA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA NOSSA SENHRA,95263,mineracao_grafia,alta,false,90
+IGREJA PENTWCOSTAL,95265,mineracao_grafia,alta,false,90
+MADEREIRA,100409,mineracao_grafia,alta,false,90
+IGREJA ASSEMBELEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CASA DE UMBADA,2829,mineracao_grafia,alta,false,90
+ESPRITA,2826,mineracao_grafia,alta,false,90
+IGREJA PRESIBITERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+IGREJA PENTENCOSAL,95265,mineracao_grafia,alta,false,90
+IGREJA ADVENDISTA,99739,mineracao_grafia,alta,false,90
+IGREJ BATISTA,99741,mineracao_grafia,alta,false,90
+IGREJA EVAVGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVANGEHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+CONGREGACA CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PENTENOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PREBITERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+IGREJA UNVERSAL,99745,mineracao_grafia,alta,false,90
+CONGREGAO CRISTA,99746,mineracao_grafia,alta,false,90
+CASA DE CANDONBLE,2828,mineracao_grafia,alta,false,90
+CONGRAGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA ADVETISTA DO 7 DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTECOSTAO,95265,mineracao_grafia,alta,false,90
+ASSEMBLEIDA DE DEUS,100409,mineracao_grafia,alta,false,90
+UMBADA,2829,mineracao_grafia,alta,false,90
+CNGREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA DO EVANHELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRNTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA ADVENTITA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PENTENCOATAL,95265,mineracao_grafia,alta,false,90
+IGREJA QUADRAGULA,100411,mineracao_grafia,alta,false,90
+IGREJA CONGRENACIONAL,100406,mineracao_grafia,alta,false,90
+CENTRO ESIRITA,2826,mineracao_grafia,alta,false,90
+ASSEMBLEIS,95265,mineracao_grafia,alta,false,90
+IGREJA ADVENTISA,99739,mineracao_grafia,alta,false,90
+IGREJA PWNTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA CONGREGACAO CRITA,99746,mineracao_grafia,alta,false,90
+IGREJA EVANGWLICA,121096,mineracao_grafia,alta,false,90
+IGREJA PETENCOSCAL,95265,mineracao_grafia,alta,false,90
+IGREJA ASSEMNLEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+CONREGACAO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA PRESBITARIANA DO BRASIL,100404,mineracao_grafia,alta,false,90
+COMGREGACAO CRISTA,99746,mineracao_grafia,alta,false,90
+CONGREGACO CRISTA NO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA BATITA,99741,mineracao_grafia,alta,false,90
+IGREJA INTERNACIINAL DA GRACA DE DEUS,99748,mineracao_grafia,alta,false,90
+IGREJA ADVERTISTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA PRESPITERIANA RENOVADA,100404,mineracao_grafia,alta,false,90
+IGREJA MUNDIA DO PODER DE DEUS,99748,mineracao_grafia,alta,false,90
+ESPERITA,2826,mineracao_grafia,alta,false,90
+IGREJA ENVAGELICA PENTECOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA PRESBIERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA EVANGELICW,121096,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRANGUAR,100411,mineracao_grafia,alta,false,90
+IGREJA ASSEBEIA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRESIBETERIANA,100404,mineracao_grafia,alta,false,90
+IGREJA PENCOSTAL,95265,mineracao_grafia,alta,false,90
+IGREJA TESTEMUNHOS DE JEOVA,2824,mineracao_grafia,alta,false,90
+CONGRACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+IGREJA METODOTISTA,100405,mineracao_grafia,alta,false,90
+TESTEMUNHOS DE JEOVA,2824,mineracao_grafia,alta,false,90
+IGREJA PENTECOSTSL,95265,mineracao_grafia,alta,false,90
+IGREJA QUQDRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA MOTODISTA,100405,mineracao_grafia,alta,false,90
+IGREJA ASSEMBREI DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA DO EVNGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+COGREGACAO BATISTA,99741,mineracao_grafia,alta,false,90
+CONGEGACAO CRISTA DO BRASIL,99746,mineracao_grafia,alta,false,90
+ASSEMBLEOA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA ADVENTUSTA DO SETIMO DIA,99739,mineracao_grafia,alta,false,90
+IGREJA DO EVANELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+ESPIRTA,2826,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELHO QUADRABGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA DO EVANGELGO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+IGREJA CATOLIGA,95263,mineracao_grafia,alta,false,90
+IGREJA QUADRANDULAR,100411,mineracao_grafia,alta,false,90
+IGREJA PRESBITARIANA,100404,mineracao_grafia,alta,false,90
+IREJA EVANGELICA,121096,mineracao_grafia,alta,false,90
+IGREJA UNVERSAL DO REINO DE DEUS,99745,mineracao_grafia,alta,false,90
+IGREJA ASSEBLEA DE DEUS,100409,mineracao_grafia,alta,false,90
+IGREJA MUDIAL DO PODER DE DEUS,99748,mineracao_grafia,alta,false,90
+IGREJA QUADRNGULAR,100411,mineracao_grafia,alta,false,90
+CENTRO RSPIRITA,2826,mineracao_grafia,alta,false,90
+IGREJA UNUVERSAL,99745,mineracao_grafia,alta,false,90
+IGREJA CAYOLICA,95263,mineracao_grafia,alta,false,90
+IGREJA CONGRECACAO CRISTA,99746,mineracao_grafia,alta,false,90
+IGREJA CATOLICQ,95263,mineracao_grafia,alta,false,90
+EPIRITA,2826,mineracao_grafia,alta,false,90
+IGREJA DO EVENGELHO QUADRANGULAR,100411,mineracao_grafia,alta,false,90
+JOAO BATISTA,95263,mineracao_excecao,media,false,60
+SALA DE ORACAO,99746,mineracao_excecao,alta,false,60
+BATISTA RENOVADA,99741,mineracao_excecao,alta,false,60
+DEUS MISSIONARIA,100409,mineracao_excecao,alta,false,60
+EVANGELICA PETENCOSTAL,121096,mineracao_excecao,media,false,60
+DEUS PETENCOSTAL,100409,mineracao_excecao,media,false,60
+DEUS INTERNACIONAL,100409,mineracao_excecao,alta,false,60
+BATISTA MISSIONARIA,99741,mineracao_excecao,alta,false,60
+EVANGELICA MISSIONARIA,121096,mineracao_excecao,alta,false,60
+EVANGELICA INTERNACIONAL,121096,mineracao_excecao,media,false,60
+DEUS RENOVADA,100409,mineracao_excecao,media,false,60
+BATISTA INTERNACIONAL,99741,mineracao_excecao,alta,false,60
+QUADRANGULAR TABERNACULO,100411,mineracao_excecao,alta,false,60
+PENTECOSTAL INTERNACIONAL,95265,mineracao_excecao,alta,false,60
+ORACAO DA CONGREGACAO,99746,mineracao_excecao,media,false,60
+DEUS JEOVA,100409,mineracao_excecao,media,false,60
+CRISTO PETENCOSTAL,99743,mineracao_excecao,media,false,60
+BATISTA MARANATA,99741,mineracao_excecao,alta,false,60
+DEUS TABERNACULO,100409,mineracao_excecao,alta,false,60
+BATISTA DO SETIMO,99741,mineracao_excecao,media,false,60
+BATISTA TABERNACULO,99741,mineracao_excecao,alta,false,60
+DEUS TENDA,100409,mineracao_excecao,alta,false,60
+DEUS VISAO MISSIONARIA,100409,mineracao_excecao,media,false,60
+LIVRE RENOVADA,99741,mineracao_excecao,media,false,60
+DEUS MARANATA,100409,mineracao_excecao,alta,false,60
+BATISTA JEOVA,99741,mineracao_excecao,alta,false,60
+METODISTA RENOVADA,100405,mineracao_excecao,media,false,60
+BATISTA PETENCOSTAL,99741,mineracao_excecao,media,false,60
+NACIONAL MISSIONARIA,99741,mineracao_excecao,alta,false,60
+DEUS MINISTERIO INTERNACIONAL,100409,mineracao_excecao,alta,false,60
+DE DEUS UNIVERSAL,100409,mineracao_excecao,media,false,60
+ADVENTISTA RENOVADA,99739,mineracao_excecao,alta,false,60
+ESPIRITA SANTA,2826,mineracao_excecao,alta,false,60
+TENDA ESPIRITA,2826,mineracao_excecao,alta,false,60
+CAPELA DE ORACAO,95263,mineracao_excecao,alta,false,60
+ORACAO ASSEMBLEIA,100409,mineracao_excecao,media,false,60
+ORACAO DA IGREJA DE,99743,mineracao_excecao,media,false,60
+ORACAO DA ASSEMBLEIA,100409,mineracao_excecao,media,false,60
+ESPIRITA JOAO BATISTA,2826,mineracao_excecao,alta,false,60
+DEUS MINISTERIO JEOVA,100409,mineracao_excecao,media,false,60
+ESPIRITA NOSSA SENHORA,2826,mineracao_excecao,alta,false,60
+MISSIONARIA ASSEMBLEIA,100409,mineracao_excecao,media,false,60
+BATISTA CASA DE ORACAO,99741,mineracao_excecao,alta,false,60
+PETENCOSTAL DEUS E AMOR,100413,mineracao_excecao,alta,false,60
+ESPIRITA SAO JOAO BATISTA,2826,mineracao_excecao,alta,false,60
+PETENCOSTAL ASSEMBLEIA DE,100409,mineracao_excecao,media,false,60
+ORACAO CONGREGACAO CRISTA,99746,mineracao_excecao,alta,false,60
+IGREJA ASSEMBLEIA MISSIONARIA,100409,mineracao_excecao,alta,false,60
+MISSIONARIA,95265,mineracao_marcador,media,false,50
+BATISTA,99741,mineracao_marcador,alta,false,50
+CATOLICA,95263,mineracao_marcador,alta,false,50
+INTERNACIONAL,99748,mineracao_marcador,media,false,50
+EVANGELHO,100411,mineracao_marcador,alta,false,50
+QUADRANGULAR,100411,mineracao_marcador,alta,false,50
+SANTUARIO,95263,mineracao_marcador,media,false,50
+UNIVERSAL,99745,mineracao_marcador,alta,false,50
+ORACAO,95265,mineracao_marcador,media,false,50
+SETIMO,99739,mineracao_marcador,alta,false,50
+TABERNACULO,95265,mineracao_marcador,media,false,50
+ASSENBLEIA,100409,mineracao_marcador,alta,false,50
+RENOVADA,100404,mineracao_marcador,media,false,50
+TENDA,2829,mineracao_marcador,media,false,50
+JEOVA,2824,mineracao_marcador,alta,false,50
+ASSEBLEIA,100409,mineracao_marcador,alta,false,50
+PETENCOSTAL,95265,mineracao_marcador,alta,false,50
+PRESBITERIANA,100404,mineracao_marcador,alta,false,50
+ASEMBLEIA,100409,mineracao_marcador,alta,false,50
+ASSEMBREIA,100409,mineracao_marcador,alta,false,50
+NACAO,100409,mineracao_marcador,media,false,50
+MARANATA,100414,mineracao_marcador,alta,false,50
+ULTIMOS,100423,mineracao_marcador,media,false,50
+MATRIZ,95263,mineracao_marcador,alta,false,50
+EVANGELIO,100411,mineracao_marcador,media,false,50
+NAZARENO,99743,mineracao_marcador,media,false,50
+BOLA,99748,mineracao_marcador,media,false,50
+NEVE,99748,mineracao_marcador,alta,false,50
+TESTEMUNHA,2824,mineracao_marcador,alta,false,50
+MESSIANICA,100428,mineracao_marcador,alta,false,50
+METODISTA,100405,mineracao_marcador,alta,false,50
+SARA,99748,mineracao_marcador,alta,false,50
+WESLEYANA,100405,mineracao_marcador,alta,false,50
+CONGREGACIONAL,100406,mineracao_marcador,alta,false,50
+TESTEMUNHAS,2824,mineracao_marcador,alta,false,50
+ROMANA,95263,mineracao_marcador,alta,false,50
+VERBO,99748,mineracao_marcador,media,false,50
+CONFISSAO,99740,mineracao_marcador,alta,false,50
+DO AMANHECER,2826,mineracao_ngrama,media,false,40
+BIBLICO,121096,mineracao_ngrama,media,false,40
+IGREJA TABERNACULO,95265,mineracao_ngrama,alta,false,40
+PENTECOSTAL DO,95265,mineracao_ngrama,media,false,40
+CRISTO DOS SANTOS,100423,mineracao_ngrama,alta,false,40
+IGREJA AD,100409,mineracao_ngrama,alta,false,40
+CENTRO PASTORAL,95263,mineracao_ngrama,alta,false,40
+LUTERANA,121096,mineracao_ngrama,media,false,40
+DEUS PENTECOSTAL,100409,mineracao_ngrama,alta,false,40
+DOS SANTOS DOS,100423,mineracao_ngrama,alta,false,40
+CONG,100409,mineracao_ngrama,media,false,40
+MACUMBA,2827,mineracao_ngrama,media,false,40
+FRATERNIDADE,2826,mineracao_ngrama,media,false,40
+IGREJA ENVANGELICA,100409,mineracao_ngrama,media,false,40
+EVANGELUCA,100409,mineracao_ngrama,media,false,40
+SOCIEDADE,2826,mineracao_ngrama,media,false,40
+CATOLICA SAO,95263,mineracao_ngrama,alta,false,40
+UNIDA DO,95265,mineracao_ngrama,alta,false,40
+CRISTAN,99746,mineracao_ngrama,media,false,40
+OBRA DA RESTAURACAO,121096,mineracao_ngrama,media,false,40
+IGREJA MAE,100409,mineracao_ngrama,media,false,40
+PENTECOSTAL DA,95265,mineracao_ngrama,media,false,40
+PENTECOSTAL JESUS,95265,mineracao_ngrama,alta,false,40
+GEOVA,2824,mineracao_ngrama,media,false,40
+BATISTA DA,99741,mineracao_ngrama,alta,false,40
+PENTECOSTAL DE,95265,mineracao_ngrama,media,false,40
+BATISTA DO,99741,mineracao_ngrama,alta,false,40
+BATISTA NACIONAL,99741,mineracao_ngrama,alta,false,40
+IGREIJA EVANGELICA,100409,mineracao_ngrama,media,false,40
+TERREIRA,2829,mineracao_ngrama,media,false,40
+BATISTA NOVA,99741,mineracao_ngrama,alta,false,40
+LUTERANA DO,100403,mineracao_ngrama,media,false,40
+DEUS MONTE,100409,mineracao_ngrama,alta,false,40
+JERUSALEM DE,95265,mineracao_ngrama,media,false,40
+DO BELEM,100409,mineracao_ngrama,media,false,40
+CATOLICA SANTA,95263,mineracao_ngrama,alta,false,40
+MONTESE,100409,mineracao_ngrama,media,false,40
+UNIVERSAL JESUS,99745,mineracao_ngrama,alta,false,40
+CRISTA PRESBITERIANA,121096,mineracao_ngrama,media,false,40
+EVANGELICA BETEL,121096,mineracao_ngrama,alta,false,40
+DE MINA,2827,mineracao_ngrama,media,false,40
+EVANGELICA RENOVADA,121096,mineracao_ngrama,alta,false,40
+LAR DE,2826,mineracao_ngrama,media,false,40
+PENTECOSTAL A,95265,mineracao_ngrama,alta,false,40
+DE CAMDOMBLE,2827,mineracao_ngrama,media,false,40
+DE DEUS MISSIONARIA,100409,mineracao_ngrama,alta,false,40
+BATISTA EM,99741,mineracao_ngrama,alta,false,40
+TRADICIONAL,100409,mineracao_ngrama,media,false,40
+PRESBITERIANA DO,100404,mineracao_ngrama,alta,false,40
+PENTECOSTAL MINISTERIO,95265,mineracao_ngrama,media,false,40
+PENTECOSTAL NOVA,95265,mineracao_ngrama,media,false,40
+FAMILIA GLOBAL,100411,mineracao_ngrama,alta,false,40
+UNGIDA,95265,mineracao_ngrama,alta,false,40
+DEUS MIN,100409,mineracao_ngrama,alta,false,40
+BATISTA DE,99741,mineracao_ngrama,media,false,40
+MARIA DE NAZARE,2826,mineracao_ngrama,media,false,40
+CHICO,2826,mineracao_ngrama,media,false,40
+E CARIDADE,2826,mineracao_ngrama,media,false,40
+IGREJA SARA,99748,mineracao_ngrama,alta,false,40
+ADVENTISTA DA,99739,mineracao_ngrama,alta,false,40
+ANAPOLIS,100409,mineracao_ngrama,media,false,40
+CAMPO DE,100409,mineracao_ngrama,media,false,40
+PENTECOSTAL CRISTO,95265,mineracao_ngrama,alta,false,40
+CATOLICA DE,95263,mineracao_ngrama,alta,false,40
+BATISTA BETEL,99741,mineracao_ngrama,alta,false,40
+CATOLICA SANTO,95263,mineracao_ngrama,alta,false,40
+EVANGELICA FILADELFIA,121096,mineracao_ngrama,alta,false,40
+IEADALPE,100409,mineracao_ngrama,alta,false,40
+ASSISTENCIAL,2826,mineracao_ngrama,media,false,40
+MOVIMENTO DE,99739,mineracao_ngrama,media,false,40
+EVANGELICA MONTE,121096,mineracao_ngrama,alta,false,40
+ADVENTISTA SETIMO,99739,mineracao_ngrama,alta,false,40
+DEUS PENTENCOSTAL,100409,mineracao_ngrama,media,false,40
+EVANGELICA BATISTA,121096,mineracao_ngrama,alta,false,40
+EVANGELICA FONTE,121096,mineracao_ngrama,alta,false,40
+DE DEUS PETENCOSTAL,100409,mineracao_ngrama,media,false,40
+DEUS MISSOES,100409,mineracao_ngrama,alta,false,40
+DIA MOVIMENTO,99739,mineracao_ngrama,alta,false,40
+DEUS AVIVAMENTO,100409,mineracao_ngrama,media,false,40
+MINISTERIO BELEM,100409,mineracao_ngrama,media,false,40
+PRESBITERIANA DE,100404,mineracao_ngrama,alta,false,40
+PENTECOSTAL MONTE,95265,mineracao_ngrama,media,false,40
+EVANGELICA ALIANCA,121096,mineracao_ngrama,alta,false,40
+DE DEUS INTERNACIONAL,100409,mineracao_ngrama,alta,false,40
+EVANGELICA NOVA ALIANCA,121096,mineracao_ngrama,alta,false,40
+BEZERRA,2826,mineracao_ngrama,alta,false,40
+FUNDACAO,2826,mineracao_ngrama,media,false,40
+EVANGELICA PALAVRA,121096,mineracao_ngrama,alta,false,40
+MENEZES,2826,mineracao_ngrama,alta,false,40
+DA LAGOINHA,99741,mineracao_ngrama,alta,false,40
+EVANGELICA EL,121096,mineracao_ngrama,alta,false,40
+FAMA,100409,mineracao_ngrama,media,false,40
+CASA DO CAMINHO,2826,mineracao_ngrama,alta,false,40
+TEST,2824,mineracao_ngrama,alta,false,40
+DE REFORMA,99739,mineracao_ngrama,alta,false,40
+BATISTA VIDA,99741,mineracao_ngrama,alta,false,40
+EVANGELICA FAMILIA,121096,mineracao_ngrama,alta,false,40
+APOSTOLICA DO,95265,mineracao_ngrama,media,false,40
+MINISTERIO DE BELEM,100409,mineracao_ngrama,media,false,40
+PERUS,100409,mineracao_ngrama,media,false,40
+REGULAR,99741,mineracao_ngrama,alta,false,40
+HOLINESS,121096,mineracao_ngrama,media,false,40
+EVANGELICA PROJETO,121096,mineracao_ngrama,alta,false,40
+MATRIZ DE,95263,mineracao_ngrama,alta,false,40
+IGREJA VERBO,99748,mineracao_ngrama,alta,false,40
+BATISTA MONTE,99741,mineracao_ngrama,alta,false,40
+CAMINHO DA LUZ,2826,mineracao_ngrama,media,false,40
+BATISTA SHALOM,99741,mineracao_ngrama,media,false,40
+MINISTERIO VILA,100409,mineracao_ngrama,media,false,40
+PENTECOSTAL VIDA,95265,mineracao_ngrama,media,false,40
+PENTECOSTAL UNIDOS,95265,mineracao_ngrama,alta,false,40
+EVANGELICA MANANCIAL,121096,mineracao_ngrama,alta,false,40
+SETA,100409,mineracao_ngrama,media,false,40
+DEUS CAMPO,100409,mineracao_ngrama,alta,false,40
+PENTECOSTAL FOGO,95265,mineracao_ngrama,media,false,40
+IGREJA DOS SANTOS,100423,mineracao_ngrama,alta,false,40
+RENOVACAO ESPIRITUAL,99741,mineracao_ngrama,media,false,40
+EVANGELICA PENTENCOSTAL,121096,mineracao_ngrama,alta,false,40
+PENTECOSTAL MISSIONARIA,95265,mineracao_ngrama,media,false,40
+DA PRECE,2826,mineracao_ngrama,media,false,40
+DEUS E ESPIRITO,121096,mineracao_ngrama,alta,false,40
+PENTECOSTAL PODER,95265,mineracao_ngrama,alta,false,40
+KARDEC,2826,mineracao_ngrama,alta,false,40
+VEGETAL,2826,mineracao_ngrama,alta,false,40
+O BRASIL P,95265,mineracao_ngrama,media,false,40
+MATO GROSSO,100409,mineracao_ngrama,media,false,40
+EVANGELICA LUZ,121096,mineracao_ngrama,alta,false,40
+PENTECOSTAL RESGATANDO,95265,mineracao_ngrama,alta,false,40
+NOSSA,95263,mineracao_hagionimo,media,false,20
+SENHORA,95263,mineracao_hagionimo,alta,false,20
+SANTA,95263,mineracao_hagionimo,media,false,20
+APARECIDA,95263,mineracao_hagionimo,alta,false,20
+JOSE,95263,mineracao_hagionimo,media,false,20
+ANTONIO,95263,mineracao_hagionimo,media,false,20
+CORACAO DE,95263,mineracao_hagionimo,media,false,20
+SAGRADO,95263,mineracao_hagionimo,media,false,20
+FRANCISCO,95263,mineracao_hagionimo,media,false,20
+CONCEICAO,95263,mineracao_hagionimo,media,false,20
+BOM JESUS,95263,mineracao_hagionimo,media,false,20
+SENHORA DE,95263,mineracao_hagionimo,alta,false,20
+DE SANTO,95263,mineracao_hagionimo,media,false,20
+FATIMA,95263,mineracao_hagionimo,alta,false,20
+SENHORA DA,95263,mineracao_hagionimo,alta,false,20
+SEBASTIAO,95263,mineracao_hagionimo,media,false,20
+SAO JOAO,95263,mineracao_hagionimo,media,false,20
+LUZIA,95263,mineracao_hagionimo,alta,false,20
+SENHORA DO,95263,mineracao_hagionimo,alta,false,20
+PEDRO,95263,mineracao_hagionimo,media,false,20
+GRACAS,95263,mineracao_hagionimo,media,false,20
+SAGRADA FAMILIA,95263,mineracao_hagionimo,alta,false,20
+ROSARIO,95263,mineracao_hagionimo,media,false,20
+DIVINO ESPIRITO,95263,mineracao_hagionimo,media,false,20
+RAINHA,95263,mineracao_hagionimo,media,false,20
+IMACULADA,95263,mineracao_hagionimo,alta,false,20
+PERPETUO,95263,mineracao_hagionimo,alta,false,20
+RITA,95263,mineracao_hagionimo,alta,false,20
+MENINO,95263,mineracao_hagionimo,media,false,20
+CATEQUESE,95263,mineracao_hagionimo,media,false,20
+BENEDITO,95263,mineracao_hagionimo,media,false,20
+VICENTE,95263,mineracao_hagionimo,media,false,20
+CATEQUETICO,95263,mineracao_hagionimo,alta,false,20
+CARMO,95263,mineracao_hagionimo,media,false,20
+SANTA CRUZ,95263,mineracao_hagionimo,media,false,20
+N SRA,95263,mineracao_hagionimo,alta,false,20
+TEREZINHA,95263,mineracao_hagionimo,alta,false,20
+EXPEDITO,95263,mineracao_hagionimo,alta,false,20
+DO DIVINO,95263,mineracao_hagionimo,media,false,20
+SAO MIGUEL,95263,mineracao_hagionimo,media,false,20
+SANTANA,95263,mineracao_hagionimo,media,false,20
+RAIMUNDO,95263,mineracao_hagionimo,media,false,20
+JUDAS,95263,mineracao_hagionimo,alta,false,20
+SALAO COMUNITARIO,95263,mineracao_hagionimo,media,false,20
+CASSIA,95263,mineracao_hagionimo,alta,false,20
+SANTA MARIA,95263,mineracao_hagionimo,media,false,20
+CLARA,95263,mineracao_hagionimo,media,false,20
+SAUDE,95263,mineracao_hagionimo,media,false,20
+ROQUE,95263,mineracao_hagionimo,alta,false,20
+LOURDES,95263,mineracao_hagionimo,alta,false,20
+DORES,95263,mineracao_hagionimo,alta,false,20
+TADEU,95263,mineracao_hagionimo,alta,false,20
+N SENHORA,95263,mineracao_hagionimo,media,false,20
+PAI ETERNO,95263,mineracao_hagionimo,media,false,20
+CRISTOVAO,95263,mineracao_hagionimo,alta,false,20
+SRA DE,95263,mineracao_hagionimo,alta,false,20
+GUADALUPE,95263,mineracao_hagionimo,media,false,20
+DIVINO PAI,95263,mineracao_hagionimo,media,false,20
+SRA DO,95263,mineracao_hagionimo,alta,false,20
+SRA DA,95263,mineracao_hagionimo,alta,false,20
+OPERARIO,95263,mineracao_hagionimo,alta,false,20
+PADRE CICERO,95263,mineracao_hagionimo,media,false,20
+SENHOR BOM,95263,mineracao_hagionimo,alta,false,20
+SAO BENTO,95263,mineracao_hagionimo,media,false,20
+MUNICIPAL,95263,mineracao_hagionimo,media,false,20
+E SAO,95263,mineracao_hagionimo,media,false,20
+MISTICA,95263,mineracao_hagionimo,alta,false,20
+DA FAZENDA,95263,mineracao_hagionimo,media,false,20
+IMACULADO,95263,mineracao_hagionimo,alta,false,20
+TERESINHA,95263,mineracao_hagionimo,alta,false,20
+JOAO PAULO,95263,mineracao_hagionimo,alta,false,20
+JESUS DA LAPA,95263,mineracao_hagionimo,media,false,20
+AUXILIADORA,95263,mineracao_hagionimo,alta,false,20
+NONATO,95263,mineracao_hagionimo,alta,false,20
+NAVEGANTES,95263,mineracao_hagionimo,media,false,20
+BOSCO,95263,mineracao_hagionimo,media,false,20
+SANTA ANA,95263,mineracao_hagionimo,alta,false,20
+POBRES,95263,mineracao_hagionimo,media,false,20
+LURDES,95263,mineracao_hagionimo,alta,false,20
+GERALDO,95263,mineracao_hagionimo,media,false,20
+NSA SRA,95263,mineracao_hagionimo,alta,false,20
+DOMINGOS,95263,mineracao_hagionimo,media,false,20
+DA SAGRADA,95263,mineracao_hagionimo,alta,false,20
+DO LIVRAMENTO,95263,mineracao_hagionimo,media,false,20
+PRAGA,95263,mineracao_hagionimo,media,false,20
+MAE DE,95263,mineracao_hagionimo,media,false,20
+SANTOS REIS,95263,mineracao_hagionimo,alta,false,20
+PAULO II,95263,mineracao_hagionimo,alta,false,20
+MARIA MAE,95263,mineracao_hagionimo,media,false,20
+MAE DA,95263,mineracao_hagionimo,alta,false,20
+DA DIVINA,95263,mineracao_hagionimo,media,false,20
+MADRE,95263,mineracao_hagionimo,media,false,20
+GALVAO,95263,mineracao_hagionimo,media,false,20
+SANTA ROSA,95263,mineracao_hagionimo,media,false,20
+PARTICULAR,95263,mineracao_hagionimo,media,false,20
+SANTAS,95263,mineracao_hagionimo,media,false,20
+DO SITIO,95263,mineracao_hagionimo,media,false,20
+SAO LUCAS,95263,mineracao_hagionimo,media,false,20
+ECUMENICA,95263,mineracao_hagionimo,media,false,20
+SALETE,95263,mineracao_hagionimo,alta,false,20
+DA PIEDADE,95263,mineracao_hagionimo,media,false,20
+SANTA CATARINA,95263,mineracao_hagionimo,alta,false,20
+SAO LUIS,95263,mineracao_hagionimo,media,false,20
+PAULINA,95263,mineracao_hagionimo,media,false,20
+SAO LUIZ,95263,mineracao_hagionimo,media,false,20
+SANTA ISABEL,95263,mineracao_hagionimo,media,false,20
+NSRA,95263,mineracao_hagionimo,alta,false,20
+SAO JOAQUIM,95263,mineracao_hagionimo,alta,false,20
+DIVINA MISERICORDIA,95263,mineracao_hagionimo,alta,false,20
+DOS PASSOS,95263,mineracao_hagionimo,media,false,20
+PERPETO,95263,mineracao_hagionimo,alta,false,20
+ASSUNCAO,95263,mineracao_hagionimo,alta,false,20
+JESUS MISERICORDIOSO,95263,mineracao_hagionimo,media,false,20
+SAO BRAS,95263,mineracao_hagionimo,alta,false,20
+PRACA DA,95263,mineracao_hagionimo,media,false,20
+DE LIMA,95263,mineracao_hagionimo,media,false,20
+SAO LOURENCO,95263,mineracao_hagionimo,media,false,20
+APOST,95263,mineracao_hagionimo,media,false,20
+E SANTA,95263,mineracao_hagionimo,alta,false,20
+INACIO,95263,mineracao_hagionimo,media,false,20
+MERCES,95263,mineracao_hagionimo,alta,false,20
+ESPEDITO,95263,mineracao_hagionimo,alta,false,20
+DESTERRO,95263,mineracao_hagionimo,media,false,20
+EDWIGES,95263,mineracao_hagionimo,alta,false,20
+DO AMPARO,95263,mineracao_hagionimo,media,false,20
+DE TODOS OS SANTOS,95263,mineracao_hagionimo,media,false,20
+SAO TOME,95263,mineracao_hagionimo,alta,false,20
+REMEDIOS,95263,mineracao_hagionimo,alta,false,20
+GONCALO,95263,mineracao_hagionimo,media,false,20
+DO SOCORRO,95263,mineracao_hagionimo,media,false,20
+SANTA TEREZA,95263,mineracao_hagionimo,media,false,20
+CECILIA,95263,mineracao_hagionimo,media,false,20
+CARAVAGIO,95263,mineracao_hagionimo,alta,false,20
+DAS CHAGAS,95263,mineracao_hagionimo,media,false,20
+SANTO REIS,95263,mineracao_hagionimo,alta,false,20
+SANTA DULCE,95263,mineracao_hagionimo,alta,false,20
+PARAQUIA,95263,mineracao_hagionimo,alta,false,20
+MONICA,95263,mineracao_hagionimo,media,false,20
+SANTA LUCIA,95263,mineracao_hagionimo,media,false,20
+SAO CARLOS,95263,mineracao_hagionimo,alta,false,20
+DOS HOMENS,95263,mineracao_hagionimo,alta,false,20
+CAPELLA,95263,mineracao_hagionimo,alta,false,20
+PARIQUIA,95263,mineracao_hagionimo,alta,false,20
+PARQUIA,95263,mineracao_hagionimo,alta,false,20

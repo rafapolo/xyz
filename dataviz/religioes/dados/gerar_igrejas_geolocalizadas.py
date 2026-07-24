@@ -34,8 +34,14 @@ def carregar_padroes():
         rows = list(csv.DictReader(f))
     positivos = [r for r in rows if r["excluir"] != "true"]
     exclusoes = [r for r in rows if r["excluir"] == "true"]
-    # mais especifico (string mais longa) primeiro
-    positivos.sort(key=lambda r: len(r["padrao"]), reverse=True)
+    # (prioridade desc, comprimento desc). So o comprimento nao basta: o
+    # fallback "IGREJA EVANGELICA" -> Evangelica nao determinada tem 17
+    # caracteres e vencia "IGREJA BATISTA" (14), jogando "IGREJA EVANGELICA
+    # QUADRANGULAR" no balde generico. Padroes curados ficam em 100, os
+    # minerados e os fallbacks rebaixados usam a faixa abaixo - ver
+    # minerar_padroes.py.
+    positivos.sort(key=lambda r: (int(r.get("prioridade") or 100), len(r["padrao"])),
+                   reverse=True)
     return positivos, exclusoes
 
 

@@ -39,14 +39,45 @@ Uma pequena lista de exclusões (`excluir=true` em `dados/cnefe-descricao-verten
 `tipo_especie='8'` diz *que* é um templo, mas não diz qual denominação — esse campo não existe no CNEFE. A vertente é inferida por casamento de substring entre `descricao_estabelecimento` e um dicionário curado manualmente: `dados/cnefe-descricao-vertente.csv`.
 
 **Mecânica** (em `gerar_igrejas_geolocalizadas.py`):
-1. Padrões (`excluir=false`) são ordenados do mais longo (mais específico) pro mais curto, e viram uma cadeia `CASE WHEN ... ILIKE '%padrao%' THEN vertente_id` em SQL — o primeiro que bater (mais específico) decide o `vertente_id`.
+1. Padrões (`excluir=false`) são ordenados por **(prioridade desc, comprimento desc)** e viram uma cadeia `CASE WHEN ... ILIKE '%padrao%' THEN vertente_id` em SQL — o primeiro que bater decide o `vertente_id`.
 2. Padrões de exclusão (`excluir=true`) são checados primeiro; se baterem, a linha é descartada mesmo tendo `tipo_especie='8'`.
 3. Se nenhum padrão positivo bater, `vertente_id` fica `NULL` ("não classificado") — a linha continua no dataset como presença confirmada de templo, só sem denominação atribuída. **Nunca se força uma classificação sem evidência textual.**
 
-**Colunas do dicionário**: `padrao, vertente_id, fonte, confianca, excluir`.
+**Colunas do dicionário**: `padrao, vertente_id, fonte, confianca, excluir, prioridade`.
 - `vertente_id` referencia sempre um `id` de `dados/vertentes-religiosas.csv` (a taxonomia oficial do IBGE) — nunca um código inventado.
-- `fonte` documenta de onde veio a certeza: `censo2010_nomenclatura` (nome já é literal numa categoria oficial do IBGE), `pesquisa_web` (confirmado via busca), `inferencia_nome` (só o padrão do nome, sem fonte externa), `revisao_fable` (correção/adição feita na auditoria de segunda opinião, §5).
+- `fonte` documenta de onde veio a certeza: `censo2010_nomenclatura` (nome já é literal numa categoria oficial do IBGE), `pesquisa_web` (confirmado via busca), `inferencia_nome` (só o padrão do nome, sem fonte externa), `revisao_fable` (correção/adição feita na auditoria de segunda opinião, §5), `mineracao_*` (§4.2).
 - Regra seguida durante a curadoria: **toda denominação cujo nome não é autoexplicativo foi pesquisada antes de classificar** — ex. "Igreja Adventista da Promessa" parece família Adventista/Missão pelo nome, mas é historicamente pentecostal (confirmado via busca); o mesmo padrão de erro apareceu depois com "Igreja Missionária X" (nome sugere família Missão, mas é nomenclatura pentecostal/neopentecostal — corrigido na auditoria).
+
+**Por que `prioridade` existe.** Desempatar só por comprimento tinha um efeito perverso: `IGREJA EVANGELICA` → "Evangélica não determinada" tem 17 caracteres e ganhava de `IGREJA BATISTA` (14), então `IGREJA EVANGELICA QUADRANGULAR` era publicada como *não determinada*. Eram 1.932 templos com denominação declarada no próprio nome caindo no balde genérico. A prioridade separa **quão confiável** é o padrão de **quão comprido** ele é:
+
+| prioridade | camada | o que é |
+|---|---|---|
+| 100 | curado | escrito à mão, com `fonte` |
+| 95 | demoção | curado que perdia pra um irmão mais específico (`TERREIRO` vs `TERREIRO DE UMBANDA`) |
+| 90 | grafia | erro de digitação (§4.2) |
+| 60 | exceção | contexto que contradiz um marcador |
+| 50 | marcador | token denominacional |
+| 40 | n-grama | propagação por co-ocorrência |
+| 30 | fallback | guarda-chuva "é evangélica e não sabemos qual" |
+| 20 | hagiônimo | nome de santo |
+
+Hagiônimo no fundo é a decisão de conteúdo mais importante da tabela: `SAO SEBASTIAO`, `SANTA BARBARA`, `NOSSA SENHORA` indicam católica **só na ausência de qualquer outro sinal**, porque terreiro de umbanda e centro espírita usam exatamente os mesmos nomes (sincretismo). Com hagiônimo acima de `TERREIRO`, "TERREIRO SAO SEBASTIAO" virava católica — subnotificando justamente a religião de menor volume e maior sensibilidade.
+
+### 4.2 Mineração de padrões (`minerar_padroes.py`)
+
+Os ~265 padrões escritos à mão deixavam **37% dos templos sem classificação**. Boa parte não era falta de sinal, e sim sinal fora do formato canônico: `COMUNIDADE BATISTA`, `MISSAO BATISTA`, `IGREIJA BATISTA` — 2.562 templos com "BATIST" no nome e sem vertente. `minerar_padroes.py` propõe padrões novos usando o **corpo já classificado como evidência**.
+
+**Evidência honesta.** A estatística ingênua se auto-confirma: o n-grama `DE DEUS` parece 93% Assembleia de Deus, mas só porque o padrão `ASSEMBLEIA DE DEUS` o contém — não há informação nova ali. Então, ao avaliar um trecho `g`, só contam as linhas classificadas cujo rótulo veio de um padrão que **não contém** `g`. Se o sinal sobrevive a isso, ele é independente. É esse teste que faz `SAO JOAO BATISTA` sair como **católica**: as linhas classificadas que o contêm foram rotuladas por `IGREJA SAO`, não por um padrão batista.
+
+As quatro camadas (marcador, exceção, n-grama, grafia) estão documentadas no docstring do script. A que mais rende é o **marcador**: um token que, no dicionário curado, só aparece em padrões de uma única vertente. Ele é aceito conforme a **discordância** — entre as linhas classificadas que o contêm mas foram rotuladas por outro sinal, quantas apontam pra vertente diferente. `BATISTA` fica em 6,4%, quase toda do idiomatismo católico "São João Batista", que a camada de exceção então isola e cobre; `PARA`, `BELEM`, `SOCIEDADE`, `MISSIONARIA` ficam entre 49% e 99% e são rejeitados.
+
+Nada é aplicado automaticamente. A saída é `candidatos_padroes.csv` (com ganho, pureza, suporte e exemplos por padrão) e `residuo_sem_classificacao.csv` (o que sobra, pra curadoria manual); `--aplicar` grava no dicionário. Antes de gravar, uma simulação roda o dicionário inteiro e **descarta qualquer candidato que reclassifique linha já rotulada** por padrão curado em prioridade cheia.
+
+**Validação.** `--validar` esconde 30% dos padrões curados *de denominação específica* (fallback genérico fora do sorteio: reproduzir a convenção "não determinada" não testaria nada), remineração com o dicionário mutilado, e compara com o rótulo do dicionário inteiro. Isso simula a condição real de produção — texto com sinal denominacional que o dicionário não cobre. Em 6 sementes: **97–99,8% de precisão quando a mineração se compromete com uma denominação**, com duas exceções (59% e 71%) em que o sorteio removeu *todo* o vocabulário de uma religião (espírita, adventista) e não sobrou nada de onde inferir — situação que não ocorre em produção, onde os padrões curados estão todos presentes.
+
+**Resultado**: "não classificado" caiu de 282.505 (36,9%) para **200.901 (26,2%)**, mais 4.705 templos que saíram de balde genérico pra denominação específica. Umbanda e Candomblé cresceu 38% (9.868 → 13.625) — o efeito combinado da mineração e da correção do sincretismo. O que resta é majoritariamente irrecuperável: 82 mil templos cujo nome anotado é literalmente "IGREJA", mais "SEM NOME", "CAPELINHA", "VAGO".
+
+**Reaplicar o dicionário sem reconsultar o CNEFE**: a vertente é função pura de `descricao_estabelecimento`, então `reclassificar.py` reescreve só a coluna `vertente_id` no parquet local — não precisa do beelink nem reler 60 GB.
 
 ### 4.1 Agrupamento pra exibição (rollup)
 
@@ -106,11 +137,15 @@ O Censo 2022 recolheu religião com uma pergunta mais genérica que 2010, e o IB
 
 ## 8. Limitações conhecidas (pra revisão por pares)
 
-1. **~37% "não classificado"** — templo confirmado (`tipo_especie='8'`), mas sem denominação atribuída porque o nome no CNEFE não dá informação suficiente (ex. "IGREJA" sozinho, sem qualificador). Isso é uma proporção honesta, não um erro: não se deve interpretar as proporções entre vertentes *classificadas* como estimativa não-enviesada da proporção nacional real, porque denominações com marca consistente (Testemunhas de Jeová, Assembleia de Deus) são classificadas a uma taxa muito maior que igrejas independentes de nome genérico. Qualquer análise publicada deve reportar "não classificado" como categoria própria, não redistribuir/ignorar essa fatia.
-2. **Vertente é heurística de texto, presença não é.** A distinção importa: um templo aparecer no dataset é garantido pelo critério oficial do IBGE; a denominação atribuída a ele é inferência nossa, auditável linha a linha em `cnefe-descricao-vertente.csv` (coluna `fonte`/`confianca`), mas não é um dado oficial.
-3. **Diferença residual de 1,6% vs. o número oficial do IBGE** (570.428 vs. 579.800) não foi decomposta até a última unidade — pode ser efeito residual da lista de exclusões (que ainda opera por cima de `tipo_especie='8'`) ou diferença de metodologia/data de corte entre a extração local e a publicação oficial do IBGE.
-4. **`com_cnae` mede formalização jurídica, não existência física** — um templo sem CNPJ é igualmente real; o selo só informa se *também* tem registro formal encontrável pelo endereço.
-5. **Coordenadas**: 99,5% das linhas religiosas do CNEFE têm `nivel_geocodificacao_coordenadas=1` ("coordenada original do Censo 2022", GPS real de campo) — o restante usa coordenada estimada/interpolada (face de quadra, localidade, ou setor censitário), reportado por linha no parquet (`nivel_geocodificacao_coordenadas`), não descartado.
+1. **~26% "não classificado"** (era 37% antes da mineração, §4.2) — templo confirmado (`tipo_especie='8'`), mas sem denominação atribuída porque o nome no CNEFE não dá informação suficiente: 82 mil são literalmente "IGREJA", o resto é "SEM NOME", "CAPELINHA", sigla ou nome próprio sem marca denominacional. Isso é uma proporção honesta, não um erro: não se deve interpretar as proporções entre vertentes *classificadas* como estimativa não-enviesada da proporção nacional real, porque denominações com marca consistente (Testemunhas de Jeová, Assembleia de Deus) são classificadas a uma taxa muito maior que igrejas independentes de nome genérico. Qualquer análise publicada deve reportar "não classificado" como categoria própria, não redistribuir/ignorar essa fatia.
+
+   A mineração **reduz** esse viés mas não o elimina, e o desloca um pouco: como ela aprende do que já estava classificado, denominações já bem representadas ganham mais padrões novos que as sub-representadas. O grupo com maior ganho relativo foi Umbanda e Candomblé (+38%), mas por outro motivo — a correção de precedência do sincretismo (§4), não a mineração em si.
+
+2. **A classificação de ~760 dos ~1.030 padrões é estatística, não documental.** Os padrões `mineracao_*` no dicionário não têm fonte externa: a evidência deles é o próprio corpus (coluna `fonte`, `confianca` derivada da pureza). São auditáveis linha a linha em `candidatos_padroes.csv`, que guarda ganho, pureza, suporte e exemplos reais de cada um. Quem quiser só o dicionário documental pode filtrar `fonte NOT LIKE 'mineracao_%'` e reaplicar com `reclassificar.py`.
+3. **Vertente é heurística de texto, presença não é.** A distinção importa: um templo aparecer no dataset é garantido pelo critério oficial do IBGE; a denominação atribuída a ele é inferência nossa, auditável linha a linha em `cnefe-descricao-vertente.csv` (coluna `fonte`/`confianca`), mas não é um dado oficial.
+4. **Diferença residual de 1,6% vs. o número oficial do IBGE** (570.428 vs. 579.800) não foi decomposta até a última unidade — pode ser efeito residual da lista de exclusões (que ainda opera por cima de `tipo_especie='8'`) ou diferença de metodologia/data de corte entre a extração local e a publicação oficial do IBGE.
+5. **`com_cnae` mede formalização jurídica, não existência física** — um templo sem CNPJ é igualmente real; o selo só informa se *também* tem registro formal encontrável pelo endereço.
+6. **Coordenadas**: 99,5% das linhas religiosas do CNEFE têm `nivel_geocodificacao_coordenadas=1` ("coordenada original do Censo 2022", GPS real de campo) — o restante usa coordenada estimada/interpolada (face de quadra, localidade, ou setor censitário), reportado por linha no parquet (`nivel_geocodificacao_coordenadas`), não descartado.
 
 ## 9. Estrutura de arquivos e reprodução
 
@@ -120,9 +155,14 @@ dataviz/religioes/
 ├── treeview-religioes.txt               taxonomia oficial (tabela 137) em árvore, leitura humana
 ├── dados/
 │   ├── vertentes-religiosas.csv         taxonomia oficial (75 categorias, id/nivel/nome/id_pai)
-│   ├── cnefe-descricao-vertente.csv     dicionário heurístico (padrão de texto → vertente_id | exclusão)
-│   ├── gerar_igrejas_geolocalizadas.py  pipeline (roda via ssh beelink + DuckDB)
-│   ├── igrejas_geolocalizadas.parquet   dataset final (570.428 linhas), cópia local do output remoto
+│   ├── cnefe-descricao-vertente.csv     dicionário (padrão de texto → vertente_id | exclusão), ~1.030 linhas
+│   ├── gerar_igrejas_geolocalizadas.py  pipeline de extração (roda via ssh beelink + DuckDB)
+│   ├── minerar_padroes.py               minera padrões novos do que ficou sem classificação (§4.2)
+│   ├── reclassificar.py                 reaplica o dicionário no parquet local, sem reconsultar o CNEFE
+│   ├── gerar_data_json.py               rollup + paleta + legenda → igrejas/data.json
+│   ├── candidatos_padroes.csv           saída de auditoria: cada padrão minerado com ganho/pureza/exemplos
+│   ├── residuo_sem_classificacao.csv    saída de curadoria: o que sobrou sem proposta, por volume
+│   ├── igrejas_geolocalizadas.parquet   dataset final (765.591 linhas), cópia local do output remoto
 │   └── readme.md                        índice de todas as fontes de dados do projeto (não só templos)
 └── igrejas/
     ├── index.html                       mapa Leaflet (camada canvas customizada, ~570k pontos)
@@ -132,10 +172,12 @@ dataviz/religioes/
 **Para reproduzir do zero:**
 1. `python3 dados/gerar_igrejas_geolocalizadas.py` (sem argumento = nacional; passe uma sigla de UF, ex. `SP`, pra rodar num recorte de teste primeiro) — requer acesso SSH ao host `beelink` com o mirror local da basedosdados em `~/rodado` e DuckDB com a extensão `spatial`.
 2. `scp beelink:/tmp/igrejas_geolocalizadas.parquet dados/igrejas_geolocalizadas.parquet`
-3. Rodar o bloco Python de geração de `igrejas/data.json` (rollup + paleta + legenda) — hoje é um script inline usado ad-hoc nesta sessão, não um arquivo `.py` separado no repo; candidato a extrair como script próprio numa próxima iteração.
+3. `python3 dados/gerar_data_json.py` (rollup + paleta + legenda → `igrejas/data.json`).
 4. Abrir `igrejas/index.html` (servido por qualquer HTTP server estático — não funciona em `file://` por causa do `fetch('data.json')`).
 
-**Para alterar a classificação de vertente**: editar `dados/cnefe-descricao-vertente.csv` diretamente (é um CSV comum, git-diffável) e rodar o passo 1 de novo. Regra de ouro: toda linha nova deve citar `fonte` real (não adicionar padrão sem saber de onde veio a certeza) e, se a denominação não for autoexplicativa pelo nome, pesquisar antes de classificar.
+**Para alterar a classificação de vertente**: editar `dados/cnefe-descricao-vertente.csv` diretamente (é um CSV comum, git-diffável), depois `python3 dados/reclassificar.py && python3 dados/gerar_data_json.py` — não precisa refazer o passo 1, que é caro e depende do beelink. `reclassificar.py --dry-run` mostra o diff (quantos entram, quantos trocam de vertente) antes de gravar. Regra de ouro: toda linha nova deve citar `fonte` real (não adicionar padrão sem saber de onde veio a certeza) e, se a denominação não for autoexplicativa pelo nome, pesquisar antes de classificar.
+
+**Para propor padrões novos a partir do que ficou sem classificação**: `python3 dados/minerar_padroes.py` escreve `candidatos_padroes.csv` sem tocar em nada; revise e rode com `--aplicar`. `--validar` mede a precisão por holdout (§4.2).
 
 ## 10. Resumo do histórico (para quem for revisar o diff)
 

@@ -179,13 +179,20 @@
   "estabelecimento de outras finalidades". Ficam sempre no mapa, com <strong>opacidade reduzida</strong>
   pra diferenciar do confirmado oficialmente — descartá-los de cara escondia ~25% dos templos reais.<br><br>
   <strong>Vertente/Denominação</strong> não vem pronta do Censo — é <strong>casamento de texto</strong>:
-  o nome anotado em campo é comparado contra um dicionário de ~245 padrões conhecidos ("IGREJA BATISTA",
-  "TESTEMUNHA DE JEOVA" etc., o padrão mais específico vence), cada um apontando pra uma das 75
-  categorias oficiais da classificação "Religião" do Censo <strong>2010</strong> (IBGE Sidra, tabela
-  137) — daí "nomenclatura 2010" no seletor de detalhamento. O modo "Vertente" agrupa essas categorias
-  nas 9 que o Censo 2022 publica oficialmente; o modo "Denominação" mostra as categorias finas direto
-  (ex. Assembleia de Deus, Batista, Luterana). ~30% dos templos não batem em nenhum padrão e ficam "não
-  classificado".<br><br>
+  o nome anotado em campo é comparado contra um dicionário de ~1.030 padrões ("IGREJA BATISTA",
+  "TESTEMUNHA DE JEOVA" etc.), cada um apontando pra uma das 75 categorias oficiais da classificação
+  "Religião" do Censo <strong>2010</strong> (IBGE Sidra, tabela 137) — daí "nomenclatura 2010" no
+  seletor de detalhamento. O modo "Vertente" agrupa essas categorias nas 9 que o Censo 2022 publica
+  oficialmente; o modo "Denominação" mostra as categorias finas direto (ex. Assembleia de Deus,
+  Batista, Luterana).<br><br>
+  Desses padrões, 265 foram escritos à mão e ~760 <strong>minerados dos próprios dados</strong>: cada
+  trecho candidato ("COMUNIDADE BATISTA", "IGREIJA BATISTA") só entra se a vertente dele se sustentar
+  entre os templos já classificados <em>por outro sinal</em> — assim "SAO JOAO BATISTA" sai como
+  católica, não batista. Cada padrão carrega uma prioridade, então nome de santo (a pista mais fraca,
+  porque terreiro e centro espírita usam os mesmos) só decide quando nada mais decide. Num teste em que
+  escondemos 30% do dicionário escrito à mão, a mineração recupera o rótulo certo em ~98% dos casos em
+  que se compromete com uma denominação. <strong>26% dos templos</strong> ainda ficam "não classificado"
+  — a maior parte porque o nome anotado é literalmente "IGREJA" (82 mil) ou "SEM NOME".<br><br>
   Terceira camada independente: <strong>CNPJ ativo</strong> (CNAE 9491-0/00) no mesmo CEP — mede
   formalização jurídica, não presença; só 20% têm essa confirmação porque a maioria dos templos
   brasileiros não tem CNPJ próprio.</p>
