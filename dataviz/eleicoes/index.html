@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polarização nas Eleições Municipais 2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; background:#0b0b0b; font-family: 'Inter', Helvetica, Arial, sans-serif; overflow-x:hidden; }
+  #map { position:absolute; top:0; bottom:0; left:0; right:0; background:#0b0b0b; }
+  .panel {
+    position:absolute; z-index:1000; background:rgba(20,20,20,0.88); color:#eee;
+    border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  }
+  #info { top:12px; left:12px; padding:14px 16px; max-width:350px; }
+  #info .eyebrow { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:#7ab8ff; margin:0 0 6px; }
+  #info h1 {
+    font-size:16px; font-weight:700; letter-spacing:-0.2px; color:#fff;
+    margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);
+  }
+  #info p { font-size:12px; line-height:1.6; margin:0; color:rgba(255,255,255,0.65); }
+  #info p + p { margin-top:8px; }
+  #info a { color:#7ab8ff; text-decoration:none; border-bottom:1px solid rgba(122,184,255,0.35); }
+  #info a:hover { border-bottom-color:#7ab8ff; }
+  #info .xref {
+    margin-top:10px; padding-top:9px; border-top:1px solid rgba(255,255,255,0.1);
+    font-size:11px; color:rgba(255,255,255,0.6);
+  }
+  #info .xref b { color:#e08a8a; }
+  #info .xref b.blue { color:#7ab8ff; }
+  #legend { bottom:20px; right:12px; padding:10px 14px; font-size:11px; }
+  #legend .cap { color:#ddd; margin-bottom:2px; font-weight:500; }
+  #legend .bar { width:230px; height:10px; border-radius:2px; margin:6px 0 4px; }
+  #legend .bar.lean { background: linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac); }
+  #legend .bar.polar { background: linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921); }
+  #legend .labels { display:flex; justify-content:space-between; color:#bbb; }
+  #legend .hide { display:none; }
+  #parties { bottom:20px; left:12px; padding:10px 12px; font-size:10px; max-width:320px; }
+  #parties .phead { display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; }
+  #parties .ptitle { color:#ddd; font-weight:500; font-size:11px; }
+  #parties .psub { color:#888; font-size:9px; margin:1px 0 7px; }
+  #parties .caret { color:#888; font-size:10px; transition:transform .15s; }
+  #parties.collapsed .caret { transform:rotate(-90deg); }
+  #parties.collapsed .pbody, #parties.collapsed .psub { display:none; }
+  #parties .pbody { columns:2; column-gap:16px; }
+  #parties .prow { display:flex; align-items:center; gap:6px; line-height:1.55; break-inside:avoid; }
+  #parties .chip { width:9px; height:9px; border-radius:2px; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,0.12) inset; }
+  #parties .sig { color:#ccc; flex:1; white-space:nowrap; }
+  #parties .sig .ast { color:#e0a03a; }
+  #parties .sc { color:#999; font-family:'JetBrains Mono',monospace; }
+  #parties .pfoot { color:#777; font-size:9px; margin-top:7px; }
+  #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:200px; }
+  #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
+  #controls input[type=range] { width:100%; accent-color:#7ab8ff; }
+  #controls .row { margin-bottom:10px; }
+  #controls .seg { display:flex; gap:0; border:1px solid #444; border-radius:5px; overflow:hidden; }
+  #controls .seg button {
+    flex:1; background:#222; color:#bbb; border:0; padding:6px 4px; font-size:11px;
+    font-family:'Inter',sans-serif; cursor:pointer; transition:background .15s,color .15s;
+  }
+  #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
+  #controls .seg button + button { border-left:1px solid #444; }
+  .leaflet-tooltip.tt-box {
+    background: rgba(10,14,26,0.92); backdrop-filter: blur(8px);
+    color:#eee; border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    padding:12px 14px; min-width:230px; max-width:300px;
+    font-family:'Inter',Helvetica,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,0.5);
+  }
+  .leaflet-tooltip.tt-box::before { display:none; }
+  .tt-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .tt-name { font-weight:600; font-size:14px; color:#fff; }
+  .tt-badge {
+    font-size:10px; font-weight:600; letter-spacing:0.5px; color:#ccc;
+    border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:1px 5px; flex-shrink:0;
+  }
+  .tt-sub { font-size:11px; color:#888; margin:2px 0 8px; }
+  .tt-metric { font-size:22px; font-weight:600; line-height:1.2; font-family:'JetBrains Mono',monospace; }
+  .tt-metric-label { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:8px; }
+  .tt-range { margin:2px 0 10px; }
+  .tt-range-head { display:flex; justify-content:space-between; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:3px; }
+  .tt-range-bar { position:relative; height:5px; border-radius:3px; }
+  .tt-range-marker {
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:9px; height:9px; border-radius:50%; background:#fff;
+    border:2px solid rgba(10,14,26,0.9); box-shadow:0 0 4px rgba(0,0,0,0.6);
+  }
+  .tt-range-labels { display:flex; justify-content:space-between; font-size:10px; color:#888; font-family:'JetBrains Mono',monospace; margin-top:3px; }
+  .tt-race { display:flex; flex-direction:column; gap:5px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1); }
+  .tt-cand { font-size:11px; }
+  .tt-cand-top { display:flex; justify-content:space-between; gap:8px; margin-bottom:2px; }
+  .tt-cand-party { color:#ddd; }
+  .tt-cand-pct { font-family:'JetBrains Mono',monospace; color:#fff; }
+  .tt-cand-bar { height:4px; border-radius:2px; background:rgba(255,255,255,0.1); overflow:hidden; }
+  .tt-cand-fill { height:100%; border-radius:2px; }
+  .tt-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px 14px; padding-top:8px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); }
+  .tt-cell { display:flex; justify-content:space-between; gap:8px; font-size:11px; }
+  .tt-cell .k { color:#888; }
+  .tt-cell .v { font-family:'JetBrains Mono',monospace; color:#ddd; white-space:nowrap; }
+  .leaflet-control-attribution { background:rgba(20,20,20,0.7) !important; color:#999 !important; }
+  .leaflet-control-attribution a { color:#7ab8ff !important; }
+
+  #toggle-info, #toggle-legend {
+    display:none; position:fixed; top:12px; width:42px; height:42px; z-index:1100;
+    background:rgba(20,20,20,0.88); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    color:#eee; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+  #toggle-info { left:12px; }
+  #toggle-legend { right:12px; }
+  #sheet-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
+  #sheet-backdrop.visible { display:block; }
+
+  @media (max-width: 760px) {
+    #parties { display:none; }
+    #toggle-info, #toggle-legend { display:flex; }
+    #info, #right-sheets {
+      position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
+      width:100% !important; max-width:none !important; max-height:70vh; overflow-y:auto;
+      box-sizing:border-box;
+      transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index:1080;
+    }
+    #info { border-radius:16px 16px 0 0; }
+    #info::before, #right-sheets::before {
+      content:''; display:block; width:36px; height:4px; background:rgba(255,255,255,0.15);
+      border-radius:2px; margin:-4px auto 12px;
+    }
+    #info.open, #right-sheets.open { transform:translateY(0); }
+    #right-sheets {
+      display:flex; flex-direction:column; gap:8px;
+      background:transparent; box-shadow:none; backdrop-filter:none; padding:0 0 8px;
+    }
+    #right-sheets .panel { position:static; width:100%; max-width:none; }
+    #right-sheets .panel:first-child { border-radius:16px 16px 0 0; }
+    .leaflet-tooltip.tt-box {
+      position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
+      max-width:none !important; width:100%; box-sizing:border-box; border-radius:16px 16px 0 0 !important;
+      z-index:1090;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="info" class="panel">
+  <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
+  <h1>Esquerda × Direita nas Prefeituras</h1>
+  <p>Cada ponto é um município, colorido pela <b>distribuição</b> do voto para prefeito —
+  não pela sigla de quem venceu. Cada partido recebe uma nota ideológica de 0 (esquerda) a
+  10 (direita) segundo o survey de especialistas de Bolognesi, Ribeiro &amp; Codato; a cor
+  agrega o voto de <b>todos</b> os candidatos.</p>
+  <p><b>Inclinação:</b> vermelho = município mais à esquerda, azul = mais à direita.
+  <b>Polarização:</b> quão dividido entre extremos ideológicos foi o voto — não confundir
+  com disputa apertada entre dois nomes do mesmo campo.</p>
+  <p class="xref">Cruzando com o <a href="../religioes/">mapa religioso (Censo IBGE)</a>:
+  no <b style="color:#e08a8a">Nordeste</b> — e em parte no Sudeste — municípios mais
+  <b class="blue">evangélicos</b> pendem à direita e mais <b>católicos</b> à esquerda. Mas
+  <b style="color:#ccc">não é lei nacional</b>: no <b style="color:#e08a8a">Sul</b> católicos
+  e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
+  e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
+</div>
+<div id="right-sheets">
+<div id="legend" class="panel">
+  <div id="legend-lean">
+    <div class="cap">Inclinação ideológica do voto</div>
+    <div class="bar lean"></div>
+    <div class="labels"><span>esquerda</span><span>centro</span><span>direita</span></div>
+  </div>
+  <div id="legend-polar" class="hide">
+    <div class="cap">Polarização (dispersão do voto)</div>
+    <div class="bar polar"></div>
+    <div class="labels"><span>consenso</span><span>dividido</span></div>
+  </div>
+</div>
+<div id="controls" class="panel">
+  <div class="row">
+    <label>Métrica</label>
+    <div class="seg">
+      <button id="mode-lean" class="active" data-mode="lean">Inclinação</button>
+      <button id="mode-polar" data-mode="polar">Polarização</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
+    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
+  </div>
+</div>
+</div>
+<div id="parties" class="panel">
+  <div class="phead">
+    <span class="ptitle">Nota ideológica dos partidos</span>
+    <span class="caret">▾</span>
+  </div>
+  <div class="psub">0 = esquerda · 10 = direita · pondera o voto de cada candidato</div>
+  <div class="pbody"></div>
+  <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado por herança de sigla. Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
+</div>
+<button id="toggle-info" aria-label="Sobre o mapa">☰</button>
+<button id="toggle-legend" aria-label="Legenda e controles">▤</button>
+<div id="sheet-backdrop"></div>
+<script>
+// ---- color helpers ----
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function toHex(x){ return clamp(Math.round(x),0,255).toString(16).padStart(2,'0'); }
+function mix(c1,c2,t){ return '#' + toHex(c1[0]+(c2[0]-c1[0])*t) + toHex(c1[1]+(c2[1]-c1[1])*t) + toHex(c1[2]+(c2[2]-c1[2])*t); }
+const RED=[178,24,43], PALE=[247,247,247], BLUE=[33,102,172];
+// diverging, neutral center at score 5.0; saturates at 3.5 (left) / 7.5 (right)
+function leanColor(s){
+  if (s <= 5) return mix(PALE, RED, clamp((5 - s) / 1.5, 0, 1));
+  return mix(PALE, BLUE, clamp((s - 5) / 2.5, 0, 1));
+}
+const PLASMA=[[13,8,135],[126,3,168],[177,42,144],[204,71,120],[248,149,64],[240,249,33]];
+function plasma(t){ t=clamp(t,0,1); const n=PLASMA.length-1, x=t*n, i=Math.min(n-1,Math.floor(x)); return mix(PLASMA[i],PLASMA[i+1],x-i); }
+function polarColor(v){ return plasma(v/2.0); } // clamp reference P95≈2.0
+function leanLabel(s){
+  if (s < 4.0) return 'Esquerda';
+  if (s < 4.7) return 'Centro-esquerda';
+  if (s <= 5.3) return 'Centro';
+  if (s <= 6.5) return 'Centro-direita';
+  return 'Direita';
+}
+
+// party ideology scores (single source; mirrors dados/query.sql + metodologia.md)
+const PARTY_SCORES = {
+  'PCO':0.3,'PCB':0.5,'UP':0.5,'PSTU':0.6,'PSOL':1.3,'PC do B':1.7,'PT':2.5,
+  'REDE':3.3,'PDT':3.3,'PSB':3.7,'PV':4.1,'CIDADANIA':4.6,'SOLIDARIEDADE':5.4,
+  'PMB':5.5,'MOBILIZA':5.5,'AVANTE':5.6,'MDB':5.7,'PODE':5.7,'PSD':5.9,'AGIR':6.0,
+  'PSDB':6.0,'PRD':6.8,'UNIÃO':6.9,'PP':7.0,'REPUBLICANOS':7.2,'DC':7.5,
+  'PRTB':8.0,'NOVO':8.2,'PL':8.5
+};
+const PARTY_NOSURVEY = new Set(['UP','PMB','MOBILIZA','AGIR','PRD','DC']);
+(function renderParties(){
+  const body = document.querySelector('#parties .pbody');
+  const rows = Object.entries(PARTY_SCORES).sort((a,b) => a[1]-b[1]).map(function(e){
+    const ast = PARTY_NOSURVEY.has(e[0]) ? '<span class="ast">*</span>' : '';
+    return '<div class="prow"><span class="chip" style="background:' + leanColor(e[1]) + '"></span>' +
+           '<span class="sig">' + e[0] + ast + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
+  }).join('');
+  body.innerHTML = rows;
+  const panel = document.getElementById('parties');
+  panel.querySelector('.phead').addEventListener('click', () => panel.classList.toggle('collapsed'));
+})();
+
+// record: [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir]
+let DATA = [];
+let MODE = 'lean';
+let sortedLean = [], sortedPolar = [];
+
+const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: false })
+  .setView([-14.2, -51.9], 4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd', maxZoom: 19, minZoom: 3
+}).addTo(map);
+
+const renderer = L.canvas({ padding: 0.5 });
+const fmt = new Intl.NumberFormat('pt-BR');
+const fmtPct = v => v.toFixed(1) + '%';
+let markers = [];
+let currentRadius = 3;
+
+const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
+const POLAR_GRAD = 'linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921)';
+
+function percentileOf(sortedArr, val){
+  let lo = 0, hi = sortedArr.length;
+  while (lo < hi){ const mid = (lo + hi) >> 1; if (sortedArr[mid] < val) lo = mid + 1; else hi = mid; }
+  return sortedArr.length ? lo / sortedArr.length : 0;
+}
+
+function colorFor(r){ return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]); }
+
+function tooltipHtml(r){
+  const [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir] = r;
+  const sorted = MODE === 'lean' ? sortedLean : sortedPolar;
+  const val = MODE === 'lean' ? lean : polar;
+  const pct = percentileOf(sorted, val);
+  const pShown = Math.min(99, Math.round(pct * 100));
+  const grad = MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
+  const lo = sorted[0], hi = sorted[sorted.length - 1];
+  const metricBig = MODE === 'lean'
+    ? '<div class="tt-metric" style="color:' + leanColor(lean) + '">' + leanLabel(lean) + '</div>' +
+      '<div class="tt-metric-label">nota ' + lean.toFixed(1) + ' / 10 · esq→dir</div>'
+    : '<div class="tt-metric" style="color:' + polarColor(polar) + '">' + polar.toFixed(2) + '</div>' +
+      '<div class="tt-metric-label">dispersão ideológica do voto</div>';
+  const fmtEdge = MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
+  return (
+    '<div class="tt-head"><span class="tt-name">' + nome + '</span><span class="tt-badge">' + uf + '</span></div>' +
+    '<div class="tt-sub">' + fmt.format(tot) + ' votos válidos · ' + ncand + ' candidatos</div>' +
+    metricBig +
+    '<div class="tt-range">' +
+      '<div class="tt-range-head"><span>mín · máx nacional</span><span>P' + pShown + '</span></div>' +
+      '<div class="tt-range-bar" style="background:' + grad + ';">' +
+        '<div class="tt-range-marker" style="left:' + (pct * 100).toFixed(1) + '%;"></div>' +
+      '</div>' +
+      '<div class="tt-range-labels"><span>' + fmtEdge(lo) + '</span><span>' + fmtEdge(hi) + '</span></div>' +
+    '</div>' +
+    '<div class="tt-race">' +
+      '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥇 ' + w1 + '</span><span class="tt-cand-pct">' + fmtPct(w1pct) + '</span></div>' +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w1pct,0,100) + '%;background:#7ab8ff;"></div></div></div>' +
+      (w2 ? '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥈 ' + w2 + '</span><span class="tt-cand-pct">' + fmtPct(w2pct) + '</span></div>' +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:#888;"></div></div></div>' : '') +
+    '</div>' +
+    '<div class="tt-grid">' +
+      '<div class="tt-cell"><span class="k">Voto esquerda</span><span class="v">' + fmtPct(pesq) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Voto centro</span><span class="v">' + fmtPct(pcen) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Voto direita</span><span class="v">' + fmtPct(pdir) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Margem 1º–2º</span><span class="v">' + fmtPct(Math.max(0, w1pct - w2pct)) + '</span></div>' +
+    '</div>'
+  );
+}
+
+function render(){
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  DATA.forEach(function(r){
+    const color = colorFor(r);
+    const marker = L.circleMarker([r[2], r[3]], {
+      renderer, radius: currentRadius, color, weight: 0, fillColor: color, fillOpacity: 0.85
+    });
+    marker.bindTooltip(function(){ return tooltipHtml(r); }, { sticky: true, className: 'tt-box' });
+    marker.addTo(map);
+    markers.push(marker);
+  });
+}
+
+fetch('data.json').then(r => r.json()).then(function(json){
+  DATA = json;
+  sortedLean = json.map(r => r[5]).sort((a,b) => a-b);
+  sortedPolar = json.map(r => r[6]).sort((a,b) => a-b);
+  render();
+});
+
+function setMode(mode){
+  MODE = mode;
+  document.querySelectorAll('#controls .seg button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
+  document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
+  // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
+  DATA.forEach(function(r, i){ const c = colorFor(r); markers[i].setStyle({ color: c, fillColor: c }); });
+}
+document.querySelectorAll('#controls .seg button').forEach(b =>
+  b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+const radiusSlider = document.getElementById('radiusSlider');
+const radiusValue = document.getElementById('radiusValue');
+radiusSlider.addEventListener('input', function(){
+  currentRadius = parseFloat(this.value);
+  radiusValue.textContent = currentRadius.toFixed(2);
+  markers.forEach(m => m.setRadius(currentRadius));
+});
+L.DomEvent.disableClickPropagation(document.getElementById('controls'));
+L.DomEvent.disableClickPropagation(document.getElementById('info'));
+L.DomEvent.disableClickPropagation(document.getElementById('legend'));
+L.DomEvent.disableClickPropagation(document.getElementById('parties'));
+
+(function setupMobilePanels(){
+  const toggleInfo = document.getElementById('toggle-info');
+  const toggleLegend = document.getElementById('toggle-legend');
+  const infoPanel = document.getElementById('info');
+  const rightSheets = document.getElementById('right-sheets');
+  const backdrop = document.getElementById('sheet-backdrop');
+  const allPanels = [infoPanel, rightSheets];
+  function closeAll(){ allPanels.forEach(p => p.classList.remove('open')); backdrop.classList.remove('visible'); }
+  function togglePanel(panel){
+    const isOpen = panel.classList.contains('open');
+    closeAll();
+    markers.forEach(m => { if (m.isTooltipOpen()) m.closeTooltip(); });
+    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); }
+  }
+  toggleInfo.addEventListener('click', () => togglePanel(infoPanel));
+  toggleLegend.addEventListener('click', () => togglePanel(rightSheets));
+  backdrop.addEventListener('click', closeAll);
+  L.DomEvent.disableClickPropagation(toggleInfo);
+  L.DomEvent.disableClickPropagation(toggleLegend);
+})();
+</script>
+</body>
+</html>
