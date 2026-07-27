@@ -3,7 +3,12 @@
 Cruzamento do mapa de **inclinação/polarização das prefeituras 2024** (1º turno, TSE, voto
 ponderado pela nota ideológica do partido de cada candidato) com o **perfil religioso do
 Censo 2022** (IBGE). Junção por `UF + nome normalizado`: **5.546 de 5.557** municípios
-casaram (11 perdidos por grafia). Datasets: `dataviz/eleicoes/` e `dataviz/religioes/`.
+casaram (11 perdidos por grafia).
+
+**Mapas interativos:**
+[Prefeitos 2024 — Esquerda × Direita](https://xn--2dk.xyz/dataviz/eleicoes) ·
+[Perfil Religioso dos Municípios](https://xn--2dk.xyz/dataviz/religioes) ·
+[Igrejas Geolocalizadas](https://xn--2dk.xyz/dataviz/religioes/igrejas)
 
 > **Nota de versão.** As notas ideológicas usam o survey de especialistas de Bolognesi,
 > Ribeiro & Codato, com **um override**: o **PL → 8,5** (mais à direita que o NOVO, 8,2),
