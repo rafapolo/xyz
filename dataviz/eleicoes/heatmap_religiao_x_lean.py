@@ -1,10 +1,14 @@
 """Heatmap do cruzamento perfil religioso (Censo 2022) x inclinacao/polarizacao
 das prefeituras 2024.
 
-Reconstroi a juncao usada em results/religiao_x_polarizacao.md e gera duas figuras:
+Os dados e o codigo vivem aqui; a publicacao vive no repo rodado, servida pelo
+viewer /analises/?doc=religiao-x-polarizacao. As figuras saem direto pra la:
 
-  results/heatmap_religiao_x_lean.png         associacao religiao x eixo esq<->dir
-  results/heatmap_religiao_x_polarizacao.png  o achado nulo (religiao x racha)
+  <rodado>/pages/analises/img/religiao-x-polarizacao-heatmap.png       esq<->dir
+  <rodado>/pages/analises/img/religiao-x-polarizacao-heatmap-nulo.png  achado nulo
+
+O destino vem de RODADO_DIR (default ~/Projetos/rodado). O texto que acompanha as
+figuras esta em <rodado>/pages/analises/results/religiao-x-polarizacao.md.
 
 A cor de cada celula e o *residuo padronizado* (obs - esp)/sqrt(esp) sob
 independencia, nao a contagem: um heatmap de densidade cru mostraria so a
@@ -12,6 +16,8 @@ distribuicao marginal de lean (unimodal em 5,5-6,5) e esconderia a associacao.
 """
 
 import json
+import os
+import sys
 import textwrap
 import unicodedata
 from pathlib import Path
@@ -24,7 +30,11 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 HERE = Path(__file__).parent
 RELIGIOES_DATA = HERE.parent / "religioes" / "data.json"
 PREFEITOS_DATA = HERE / "dados" / "prefeitos_2024_raw.json"
-OUT_DIR = HERE / "results"
+
+RODADO_DIR = Path(os.environ.get("RODADO_DIR", Path.home() / "Projetos" / "rodado"))
+OUT_DIR = RODADO_DIR / "pages" / "analises" / "img"
+NOME_LEAN = "religiao-x-polarizacao-heatmap.png"
+NOME_NULO = "religiao-x-polarizacao-heatmap-nulo.png"
 
 # colunas posicionais de religioes/data.json (ver religioes/mapa_estatico_conversao.py)
 RELIGIOES_COLUMNS = [
@@ -357,7 +367,12 @@ def figura(df: pl.DataFrame, coluna_x: str, bins_x: list[float],
 def main() -> None:
     df = carregar()
     correlacoes(df)
-    OUT_DIR.mkdir(exist_ok=True)
+    if not OUT_DIR.is_dir():
+        sys.exit(
+            f"destino nao encontrado: {OUT_DIR}\n"
+            "As figuras sao publicadas no repo rodado. Clone-o ao lado deste ou "
+            "aponte RODADO_DIR para onde ele esta."
+        )
 
     figura(
         df, "lean", LEAN_BINS, LEAN_BINS_REG, 1,
@@ -388,7 +403,7 @@ def main() -> None:
         ),
         vmax_br=8.0, vmax_reg=4.0,
         ticks_br=[-8, -4, -2, 0, 2, 4, 8], ticks_reg=[-4, -3, -2, 0, 2, 3, 4],
-        destino=OUT_DIR / "heatmap_religiao_x_lean.png",
+        destino=OUT_DIR / NOME_LEAN,
     )
 
     figura(
@@ -417,7 +432,7 @@ def main() -> None:
         ),
         vmax_br=8.0, vmax_reg=4.0,
         ticks_br=[-8, -4, -2, 0, 2, 4, 8], ticks_reg=[-4, -3, -2, 0, 2, 3, 4],
-        destino=OUT_DIR / "heatmap_religiao_x_polarizacao.png",
+        destino=OUT_DIR / NOME_NULO,
     )
 
 
