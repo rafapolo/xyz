@@ -55,6 +55,7 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.lines import Line2D
 
 from heatmap_religiao_x_lean import (
+    HERE,
     OUT_DIR,
     RELIGIOES_COLUMNS,
     RELIGIOES_DATA,
@@ -553,10 +554,72 @@ def figura_confrontos(df):
                   f"amplitude {sub[-1]['ev'] - sub[0]['ev']:+.1f} p.p.")
 
 
+GOVERNADOR_DATA = HERE / "dados" / "governador_2022_raw.json"
+MIN_MUNICIPIOS_UF = 20  # UFs menores que isso (AP, RR, DF) ficam de fora
+
+
+def correlacoes_governador(df):
+    """§12: o mesmo teste com governador, onde os candidatos sao constantes.
+
+    Na eleicao de prefeito cada municipio tem uma oferta de candidatos
+    diferente, entao r(religiao, voto) mistura eleitorado com oferta. Na de
+    governador, todo municipio de um estado escolhe entre os mesmos nomes —
+    entao a correlacao intraestadual isola o eleitorado.
+    """
+    gov = pl.DataFrame(json.loads(GOVERNADOR_DATA.read_text(encoding="utf-8")))
+    gov = gov.select(
+        "uf",
+        pl.col("nome").map_elements(normalizar, return_dtype=pl.Utf8).alias("chave"),
+        pl.col("lean").cast(pl.Float64).alias("lean_gov"),
+        pl.col("eleito"),
+    )
+    j = df.join(gov, on=["uf", "chave"], how="inner")
+
+    print(f"\n§12 governador 2022 x prefeito 2024 ({j.height} municipios com os tres dados)")
+    print("  nacional, municipio como unidade:")
+    for rotulo, col in (("prefeito 2024", "lean"), ("governador 2022", "lean_gov")):
+        print(f"    r(% evangelica, lean {rotulo:<16}) = "
+              f"{j.select(pl.corr('evangelicas', col)).item():+.3f}")
+
+    print(f"\n  dentro de cada UF (>= {MIN_MUNICIPIOS_UF} municipios), candidatos constantes:")
+    print(f"    {'uf':<4}{'n':>6}{'prefeito':>11}{'governador':>13}   governador eleito")
+    rp, rg = [], []
+    for uf in sorted(j.get_column("uf").unique().to_list()):
+        sub = j.filter(pl.col("uf") == uf)
+        if sub.height < MIN_MUNICIPIOS_UF:
+            continue
+        a = sub.select(pl.corr("evangelicas", "lean")).item()
+        b = sub.select(pl.corr("evangelicas", "lean_gov")).item()
+        if a is None or b is None:
+            continue
+        rp.append(a)
+        rg.append(b)
+        print(f"    {uf:<4}{sub.height:>6}{a:>+11.3f}{b:>+13.3f}   "
+              f"{sub.get_column('eleito')[0]}")
+
+    print(f"\n    UFs com r > 0 (prefeito):   {sum(x > 0 for x in rp)}/{len(rp)}"
+          f"   mediana {st.median(rp):+.3f}")
+    print(f"    UFs com r > 0 (governador): {sum(x > 0 for x in rg)}/{len(rg)}"
+          f"   mediana {st.median(rg):+.3f}")
+
+    print("\n  mediana do r intraestadual por regiao (governador):")
+    for reg in REGIOES:
+        vals = []
+        for uf in sorted(j.filter(pl.col("regiao") == reg).get_column("uf").unique().to_list()):
+            sub = j.filter(pl.col("uf") == uf)
+            if sub.height >= MIN_MUNICIPIOS_UF:
+                r = sub.select(pl.corr("evangelicas", "lean_gov")).item()
+                if r is not None:
+                    vals.append(r)
+        if vals:
+            print(f"    {reg:<14}{st.median(vals):>+7.3f}   (k={len(vals)} UFs)")
+
+
 def main():
     df, stats, total = preparar()
     ordem = sorted(stats, key=lambda p: (stats[p]["mediana"], stats[p]["media"]))
     intra = resumo(df, stats, ordem, total)
+    correlacoes_governador(df)
     print()
     figura_amplitude(stats, ordem, total)
     figura_perfil(stats, ordem)
