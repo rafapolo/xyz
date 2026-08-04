@@ -127,6 +127,7 @@ def carregar() -> pl.DataFrame:
     prefeitos = json.loads(PREFEITOS_DATA.read_text(encoding="utf-8"))
     ele = pl.DataFrame(prefeitos).select(
         "uf", "nome", "lean", "polar", "ncand", "pesq", "pcen", "pdir",
+        "w1", "w1pct", "w2",
     )
     ele = ele.with_columns(
         pl.col("nome").map_elements(normalizar, return_dtype=pl.Utf8).alias("chave")
