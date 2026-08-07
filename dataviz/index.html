@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exploring New Cartographic Technologies</title>
-<meta name="description" content="Seven cartographic explorations of Brazilian public data — IBGE, CNEFE and the Federal Revenue registry: Rio's CNPJs dot by dot, every church in the country, Nova Friburgo in 3D, ownership networks and the RAIS Wage Atlas.">
+<meta name="description" content="Nine cartographic explorations of Brazilian public data — IBGE, CNEFE, SINASC, SIM and the Federal Revenue registry: Rio's CNPJs dot by dot, every church in the country, births in numbers, Nova Friburgo in 3D, ownership networks, the RAIS Wage Atlas and the age at which each cancer kills.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Exploring New Cartographic Technologies">
-<meta property="og:description" content="Seven cartographic explorations of Brazilian public data — IBGE, CNEFE and the Federal Revenue registry.">
+<meta property="og:description" content="Nine cartographic explorations of Brazilian public data — IBGE, CNEFE, SINASC, SIM and the Federal Revenue registry.">
 <meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
 <meta property="og:url" content="https://xn--2dk.xyz/dataviz/">
 <meta name="twitter:card" content="summary_large_image">
@@ -43,7 +43,7 @@
 </nav>
 
 <main>
-  <p class="eyebrow">7 cartographic explorations · IBGE, CNEFE, Federal Revenue</p>
+  <p class="eyebrow">9 explorations · IBGE, CNEFE, Federal Revenue, SINASC, SIM</p>
   <h1>ミxploring New Cartographic Technologies</h1>
   <p class="dek">Today, through a screen, an individual can interrelate, interact, represent and navigate among millions of data points. Technological advances have drastically expanded our capacity to map territories, networks and flows.</p>
 
@@ -65,7 +65,7 @@
     <figcaption>Zooming in, the urban footprint appears drawn by the establishments alone — no satellite imagery is used.</figcaption>
   </figure>
 
-  <p>Explore the interactive version at <a href="https://xn--2dk.xyz/dataviz/rio/ibge">ミ.xyz/dataviz/rio/ibge</a>.</p>
+  <p>Explore the interactive version at <a href="https://xn--2dk.xyz/dataviz/rio/ibge">ミ.xyz/dataviz/rio/ibge</a>. The same treatment, now with precise address-level geolocation (2022 IBGE Census), is available for <a href="https://xn--2dk.xyz/dataviz/uf/">all 27 states</a>.</p>
 
   <!-- ── 02 ─────────────────────────────────────────────── -->
 
@@ -91,9 +91,10 @@
 
   <h3>The religious profile of each municipality</h3>
   <p>Crossing the IBGE Census with municipal locations, the country can be colored by the declared religious profile of its population: the more yellow, the more Catholic the municipality; purple tends to indicate Evangelical predominance.</p>
+  <p>Explore the interactive version at <a href="https://xn--2dk.xyz/dataviz/religioes">ミ.xyz/dataviz/religioes</a>.</p>
   <figure>
-    <img src="../images/image16.png" alt="Map of Brazil in kepler.gl with municipalities colored from yellow (Catholic predominance) to purple (Evangelical predominance)" width="862" height="732" loading="lazy">
-    <figcaption>Declared religious profile by municipality. Source: IBGE Census; visualization in kepler.gl + DuckDB.</figcaption>
+    <a href="https://xn--2dk.xyz/dataviz/religioes"><img src="../images/image16.png" alt="Map of Brazil with municipalities colored from yellow (Catholic predominance) to purple (Evangelical predominance)" width="862" height="732" loading="lazy"></a>
+    <figcaption>Declared religious profile by municipality. Source: IBGE Census; visualization in Leaflet + DuckDB. Click to open the interactive version.</figcaption>
   </figure>
 
   <h3>More churches than health units</h3>
@@ -117,7 +118,43 @@
 
   <!-- ── 03 ─────────────────────────────────────────────── -->
 
-  <h2 id="tema-03">03 · Nova Friburgo in three dimensions</h2>
+  <h2 id="tema-03">03 · Births in numbers</h2>
+
+  <p class="lede">The IBGE Demographic Census and SINASC (the Live Birth Information System) record, for every birth in Brazil, the mother's age, race, education and religion — crossing these variables shows how they relate to fertility and to the newborn's health at birth.</p>
+
+  <h3>The more schooling, the later the children</h3>
+  <figure>
+    <img src="natalidade/escolaridade_idade_mae_2010.png" alt="Distribution of mother's age by education level, 2010 Census" width="1965" height="1447" loading="lazy">
+    <figcaption>The mother's average age rises from 25.7 years (no schooling) to 31.7 years (completed higher education). Source: 2010 Demographic Census, IBGE.</figcaption>
+  </figure>
+
+  <h3>Fertility and education among Evangelicals</h3>
+  <figure>
+    <img src="natalidade/evangelicos_fecundidade_escolaridade.png" alt="Fertility vs. education across Evangelical denominations, 2010 Census" width="2400" height="1680" loading="lazy">
+    <figcaption>Members of Deus é Amor and Assembleia de Deus have more children and less schooling than Presbyterians and Methodists. Source: 2010 Demographic Census, IBGE.</figcaption>
+  </figure>
+
+  <h3>Fertility and education by race</h3>
+  <figure>
+    <img src="natalidade/racas_fecundidade_2010.png" alt="Fertility vs. education by race/color, 2010 Census" width="2200" height="1600" loading="lazy">
+    <figcaption>Indigenous women have 4 children on average and the lowest rate of higher education; white women, the inverse pattern. Source: 2010 Demographic Census, IBGE.</figcaption>
+  </figure>
+
+  <h3>The risk lies in age, not in the diploma</h3>
+  <figure>
+    <img src="natalidade/peso_prematuridade_idade_mae_2022.png" alt="Low birth weight and prematurity by mother's age and education, SINASC 2022" width="2151" height="1160" loading="lazy">
+    <figcaption>Babies of teenage mothers and of mothers aged 40+ are born smaller, even among mothers with more schooling. Source: SINASC 2022, Ministry of Health.</figcaption>
+  </figure>
+
+  <h3>Race shifts the risk curve</h3>
+  <figure>
+    <img src="natalidade/peso_prematuridade_idade_raca_2022.png" alt="Low birth weight and prematurity by mother's age and race, SINASC 2022" width="2125" height="1160" loading="lazy">
+    <figcaption>At every age group, Black and mixed-race mothers have more preterm births and low-weight babies than white mothers. Source: SINASC 2022, Ministry of Health.</figcaption>
+  </figure>
+
+  <!-- ── 04 ─────────────────────────────────────────────── -->
+
+  <h2 id="tema-04">04 · Nova Friburgo in three dimensions</h2>
 
   <p class="lede">The National Registry of Addresses for Statistical Purposes (CNEFE) records every address visited by IBGE. Filtering down to the municipality of Nova Friburgo (RJ), the city can be reconstructed house by house — and each residence extruded by its number of residents.</p>
 
@@ -152,9 +189,9 @@
     <figcaption>New company registrations in Nova Friburgo. Source: CNPJ registry, Federal Revenue.</figcaption>
   </figure>
 
-  <!-- ── 04 ─────────────────────────────────────────────── -->
+  <!-- ── 05 ─────────────────────────────────────────────── -->
 
-  <h2 id="tema-04">04 · Garment factories and the pandemic</h2>
+  <h2 id="tema-05">05 · Garment factories and the pandemic</h2>
 
   <p class="lede">Every CNPJ registration carries the economic activity code (CNAE), the opening date and, when applicable, the closing date. Filtering the active garment factories of Nova Friburgo's lingerie hub, we can map the sector's geography — and watch, record by record, the impact of the pandemic.</p>
 
@@ -177,9 +214,9 @@
     <figcaption>The order of closures by economic sector during the pandemic. Source: CNPJ registry, Federal Revenue.</figcaption>
   </figure>
 
-  <!-- ── 05 ─────────────────────────────────────────────── -->
+  <!-- ── 06 ─────────────────────────────────────────────── -->
 
-  <h2 id="tema-05">05 · Ownership networks</h2>
+  <h2 id="tema-06">06 · Ownership networks</h2>
 
   <p class="lede">The CNPJ registry publishes the ownership structure of every company. Linking partners to companies — and companies to other partners — turns economic power relations into a navigable graph: who stands next to whom, and through what.</p>
 
@@ -207,9 +244,9 @@
     <figcaption>The network of Swiss companies headquartered in Brazil. Source: CNPJ ownership records. Click to open the interactive graph.</figcaption>
   </figure>
 
-  <!-- ── 06 ─────────────────────────────────────────────── -->
+  <!-- ── 07 ─────────────────────────────────────────────── -->
 
-  <h2 id="tema-06">06 · Wage Atlas of Brazil</h2>
+  <h2 id="tema-07">07 · Wage Atlas of Brazil</h2>
 
   <p class="lede">The Annual Report of Social Information (RAIS) records every formal employment contract in the country. Aggregating those contracts by municipality, the atlas shows where wages concentrate — and where formal employment nearly vanishes from the map.</p>
 
@@ -220,9 +257,9 @@
 
   <p>Explore the interactive atlas at <a href="https://xn--2dk.xyz/dataviz/rais/mapa/">ミ.xyz/dataviz/rais/mapa/</a>.</p>
 
-  <!-- ── 07 ─────────────────────────────────────────────── -->
+  <!-- ── 08 ─────────────────────────────────────────────── -->
 
-  <h2 id="tema-07">07 · Housing censuses: 1970–2000</h2>
+  <h2 id="tema-08">08 · Housing censuses: 1970–2000</h2>
 
   <p class="lede">Each Sankey diagram reads an IBGE housing census in three layers: the household situation (rural, urban…), the occupancy condition (owned, rented, lent…) and the dwelling type. Following the flows across 1970, 1980 and 2000, the country's housing transformation appears all at once.</p>
 
@@ -391,6 +428,23 @@ sankey-beta
   </ul>
 
   <p>🔗 <strong><a href="https://github.com/rafapolo/IBGE13/">Source repository: IBGE housing census analysis</a></strong></p>
+
+  <!-- ── 09 ─────────────────────────────────────────────── -->
+
+  <h2 id="tema-09">09 · At what age each cancer kills</h2>
+
+  <p class="lede">Brazil's Mortality Information System (SIM) records the underlying cause and the age of every death in the country. Isolating the 2022 deaths from malignant neoplasms and spreading each tumour across age bands, cancer stops being one disease and becomes thirty diseases running on different clocks.</p>
+
+  <figure>
+    <a href="https://rodado.xyz/analises/cancer-mata-interna/#em-que-idade-cada-cancer-mata"><img src="saude/cancer-idade-perfil-2022.png" alt="Heatmap with one tumour per row and age at death across the columns: the dark band slides from the top left (testicular cancer, deaths in the twenties) to the bottom right (prostate and non-melanoma skin cancer, deaths after 75)" width="2480" height="2120" loading="lazy"></a>
+    <figcaption>Each row is one tumour and sums to 100%: the darker the cell, the larger the share of that cancer's deaths at that age; the white tick marks the median. Chart labels in Portuguese. Source: SIM 2022, Ministry of Health. Click to open the full analysis.</figcaption>
+  </figure>
+
+  <p class="pull">Testicular cancer kills at 33. Prostate cancer, at 78.</p>
+
+  <p>Read row by row, the chart sorts tumours by mechanism. A carcinoma is an accumulated copying accident: it takes decades of cell division and exposure, which is why lung, prostate, stomach and non-melanoma skin cancer barely register before 60. The exceptions are the ones that don't depend on that accumulation — <strong>leukaemia, the tumour that kills youngest, with 14.3% of its deaths before age 25</strong> (against 0.2% for lung and 0.1% for breast cancer), central nervous system tumours, and testicular cancer, which arises from germ cells and vanishes from the map after 45. Cervical cancer runs on a clock of its own: it is timed by the ten-to-twenty-year gap between HPV infection and invasive disease.</p>
+
+  <p>Read the full analysis (in Portuguese) at <a href="https://rodado.xyz/analises/cancer-mata-interna/">rodado.xyz/analises/cancer-mata-interna</a>.</p>
 
   <!-- ── about ──────────────────────────────────────────── -->
 
