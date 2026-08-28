@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
- "gerado_em": "2026-07-16",
- "gerador": "extract_municipio.py (basedosdados local em ~/rodado)",
+ "gerado_em": "2026-08-28",
+ "gerador": "rodado",
  "municipio": {
   "fonte": "br_bd_diretorios_brasil.municipio · br_ibge_censo_2022.municipio",
   "id_municipio": "3303401",
@@ -460,6 +460,137 @@
      205,
      35
     ]
+   },
+   "censo_extra": {
+    "fonte": "br_ibge_censo_2022 · br_ibge_censo2022_religiao.populacao_religiao",
+    "cor_raca": {
+     "2010": [
+      {
+       "cor_raca": "Branca",
+       "populacao": 131119
+      },
+      {
+       "cor_raca": "Parda",
+       "populacao": 34511
+      },
+      {
+       "cor_raca": "Preta",
+       "populacao": 15415
+      },
+      {
+       "cor_raca": "Amarela",
+       "populacao": 870
+      },
+      {
+       "cor_raca": "Indígena",
+       "populacao": 166
+      }
+     ],
+     "2022": [
+      {
+       "cor_raca": "Branca",
+       "populacao": 125897
+      },
+      {
+       "cor_raca": "Parda",
+       "populacao": 44773
+      },
+      {
+       "cor_raca": "Preta",
+       "populacao": 18825
+      },
+      {
+       "cor_raca": "Amarela",
+       "populacao": 301
+      },
+      {
+       "cor_raca": "Indígena",
+       "populacao": 132
+      }
+     ]
+    },
+    "alfabetizacao_por_raca": [
+     {
+      "cor_raca": "Branca",
+      "alfabetizadas": 103273,
+      "total": 106521,
+      "taxa": 96.95083598539254
+     },
+     {
+      "cor_raca": "Parda",
+      "alfabetizadas": 34529,
+      "total": 36133,
+      "taxa": 95.56084465723853
+     },
+     {
+      "cor_raca": "Preta",
+      "alfabetizadas": 15439,
+      "total": 16337,
+      "taxa": 94.5032747750505
+     },
+     {
+      "cor_raca": "Amarela",
+      "alfabetizadas": 257,
+      "total": 260,
+      "taxa": 98.84615384615385
+     },
+     {
+      "cor_raca": "Indígena",
+      "alfabetizadas": 108,
+      "total": 113,
+      "taxa": 95.57522123893806
+     }
+    ],
+    "religiao": {
+     "total_10_anos_ou_mais": 170245,
+     "grupos": [
+      {
+       "religiao": "Católica Apostólica Romana",
+       "populacao": 77917,
+       "pct": 45.7675702663808
+      },
+      {
+       "religiao": "Evangélicas",
+       "populacao": 50085,
+       "pct": 29.41936620752445
+      },
+      {
+       "religiao": "Sem religião",
+       "populacao": 24510,
+       "pct": 14.396898587330023
+      },
+      {
+       "religiao": "Outras religiosidades",
+       "populacao": 9357,
+       "pct": 5.496196657757937
+      },
+      {
+       "religiao": "Espírita",
+       "populacao": 4999,
+       "pct": 2.9363564275015417
+      },
+      {
+       "religiao": "Umbanda e Candomblé",
+       "populacao": 2933,
+       "pct": 1.7228112426209288
+      },
+      {
+       "religiao": "Não sabe",
+       "populacao": 323,
+       "pct": 0.18972657053070574
+      },
+      {
+       "religiao": "Sem declaração",
+       "populacao": 99,
+       "pct": 0.058151487562042935
+      },
+      {
+       "religiao": "Tradições indígenas",
+       "populacao": 22,
+       "pct": 0.012922552791565099
+      }
+     ]
+    }
    }
   },
   "economia": {
@@ -710,7 +841,207 @@
     "variacao_mensal": -0.21,
     "variacao_anual": 3.08,
     "variacao_doze_meses": 5.05
+   },
+   "combustiveis": {
+    "fonte": "br_anp_combustiveis.precos (nome do município + estado)",
+    "janela_dias": 60,
+    "produtos": [
+     {
+      "produto": "DIESEL S10",
+      "preco_municipio": 7.4536734693877555,
+      "preco_uf": 7.180895196506544,
+      "preco_brasil": 7.08455358112276,
+      "postos": 7,
+      "ultima_coleta": "2026-07-22"
+     },
+     {
+      "produto": "DIESEL S500",
+      "preco_municipio": 7.232352941176472,
+      "preco_uf": 7.0462537462537504,
+      "preco_brasil": 6.8250024425989375,
+      "postos": 6,
+      "ultima_coleta": "2026-07-22"
+     },
+     {
+      "produto": "ETANOL",
+      "preco_municipio": 4.976741573033709,
+      "preco_uf": 4.893025662251656,
+      "preco_brasil": 4.421222610827179,
+      "postos": 11,
+      "ultima_coleta": "2026-07-22"
+     },
+     {
+      "produto": "GASOLINA ADITIVADA",
+      "preco_municipio": 7.159000000000001,
+      "preco_uf": 6.880504532912884,
+      "preco_brasil": 6.840901029085803,
+      "postos": 10,
+      "ultima_coleta": "2026-07-22"
+     },
+     {
+      "produto": "GASOLINA COMUM",
+      "preco_municipio": 7.007499999999999,
+      "preco_uf": 6.709298682805256,
+      "preco_brasil": 6.64382842314158,
+      "postos": 12,
+      "ultima_coleta": "2026-07-22"
+     },
+     {
+      "produto": "GLP",
+      "preco_municipio": 108.06161290322581,
+      "preco_uf": 106.24099762470318,
+      "preco_brasil": 115.52725191644926,
+      "postos": 7,
+      "ultima_coleta": "2026-07-22"
+     }
+    ]
    }
+  },
+  "empresas": {
+   "fonte": "br_me_cnpj.estabelecimentos (id_municipio_rf) · br_bd_diretorios_brasil.cnae_2",
+   "competencia": "2025-09",
+   "ativas": 32255,
+   "baixadas": 36745,
+   "matrizes": 31248,
+   "filiais": 1007,
+   "registradas": 78211,
+   "idade_media_anos": 9.153526585025578,
+   "por_secao_cnae": [
+    {
+     "secao": "Comércio; Reparação De Veículos Automotores E Motocicletas",
+     "ativas": 9541
+    },
+    {
+     "secao": "Indústrias De Transformação",
+     "ativas": 5332
+    },
+    {
+     "secao": "Outras Atividades De Serviços",
+     "ativas": 3069
+    },
+    {
+     "secao": "Alojamento E Alimentação",
+     "ativas": 2473
+    },
+    {
+     "secao": "Atividades Administrativas E Serviços Complementares",
+     "ativas": 2199
+    },
+    {
+     "secao": "Transporte, Armazenagem E Correio",
+     "ativas": 2003
+    },
+    {
+     "secao": "Construção",
+     "ativas": 1920
+    },
+    {
+     "secao": "Atividades Profissionais, Científicas E Técnicas",
+     "ativas": 1499
+    }
+   ],
+   "top_atividades": [
+    {
+     "atividade": "Comércio varejista de artigos do vestuário e acessórios",
+     "ativas": 3472
+    },
+    {
+     "atividade": "Confecção de roupas íntimas",
+     "ativas": 1293
+    },
+    {
+     "atividade": "Cabeleireiros, manicure e pedicure",
+     "ativas": 1217
+    },
+    {
+     "atividade": "Obras de alvenaria",
+     "ativas": 1006
+    },
+    {
+     "atividade": "Promoção de vendas",
+     "ativas": 708
+    },
+    {
+     "atividade": "Confecção de peças do vestuário, exceto roupas íntimas e as confeccionadas sob medida",
+     "ativas": 644
+    },
+    {
+     "atividade": "Condomínios prediais",
+     "ativas": 619
+    },
+    {
+     "atividade": "Restaurantes e similares",
+     "ativas": 567
+    }
+   ],
+   "demografia_empresarial": [
+    {
+     "ano": 2015,
+     "aberturas": 2421,
+     "baixas": 1815,
+     "saldo": 606
+    },
+    {
+     "ano": 2016,
+     "aberturas": 3040,
+     "baixas": 1546,
+     "saldo": 1494
+    },
+    {
+     "ano": 2017,
+     "aberturas": 2861,
+     "baixas": 1261,
+     "saldo": 1600
+    },
+    {
+     "ano": 2018,
+     "aberturas": 3321,
+     "baixas": 2891,
+     "saldo": 430
+    },
+    {
+     "ano": 2019,
+     "aberturas": 3635,
+     "baixas": 1585,
+     "saldo": 2050
+    },
+    {
+     "ano": 2020,
+     "aberturas": 4422,
+     "baixas": 1376,
+     "saldo": 3046
+    },
+    {
+     "ano": 2021,
+     "aberturas": 5106,
+     "baixas": 2528,
+     "saldo": 2578
+    },
+    {
+     "ano": 2022,
+     "aberturas": 4497,
+     "baixas": 2091,
+     "saldo": 2406
+    },
+    {
+     "ano": 2023,
+     "aberturas": 4240,
+     "baixas": 2744,
+     "saldo": 1496
+    },
+    {
+     "ano": 2024,
+     "aberturas": 5238,
+     "baixas": 3476,
+     "saldo": 1762
+    },
+    {
+     "ano": 2025,
+     "aberturas": 4225,
+     "baixas": 2507,
+     "saldo": 1718
+    }
+   ]
   },
   "educacao": {
    "ideb": {
@@ -925,10 +1256,189 @@
     "presentes": 3132,
     "redacao": 698.4133738601823,
     "linguagens": 538.1975683890578,
-    "matematica": 577.1218710089398,
+    "matematica": 577.1218710089399,
     "humanas": 548.4902431610942,
-    "natureza": 520.0523627075353,
+    "natureza": 520.0523627075352,
     "media_geral": 579.3218030157201
+   },
+   "censo_escolar": {
+    "fonte": "br_inep_censo_escolar.escola (escolas em atividade)",
+    "ano": 2024,
+    "escolas": 200,
+    "matriculas": 44040,
+    "docentes": 3109,
+    "turmas": 2236,
+    "escolas_rurais": 53,
+    "com_internet": 200,
+    "com_biblioteca": 82,
+    "com_quadra": 74,
+    "com_laboratorio": 54,
+    "com_esgoto_rede": 154,
+    "com_rampa_acessibilidade": 119,
+    "matriculas_infantil": 8488,
+    "matriculas_fundamental": 21372,
+    "matriculas_medio": 5880,
+    "matriculas_eja": 2280,
+    "matriculas_especial": 1927,
+    "matriculas_transporte": 10783,
+    "por_rede": [
+     {
+      "rede": "Municipal",
+      "escolas": 123,
+      "matriculas": 17689,
+      "docentes": 1283
+     },
+     {
+      "rede": "Privada",
+      "escolas": 50,
+      "matriculas": 15759,
+      "docentes": 1047
+     },
+     {
+      "rede": "Estadual",
+      "escolas": 26,
+      "matriculas": 10484,
+      "docentes": 751
+     },
+     {
+      "rede": "Federal",
+      "escolas": 1,
+      "matriculas": 108,
+      "docentes": 28
+     }
+    ],
+    "serie": [
+     {
+      "ano": 2015,
+      "escolas": 212,
+      "matriculas": 42332
+     },
+     {
+      "ano": 2016,
+      "escolas": 206,
+      "matriculas": 41470
+     },
+     {
+      "ano": 2017,
+      "escolas": 209,
+      "matriculas": 41233
+     },
+     {
+      "ano": 2018,
+      "escolas": 204,
+      "matriculas": 40614
+     },
+     {
+      "ano": 2019,
+      "escolas": 206,
+      "matriculas": 40821
+     },
+     {
+      "ano": 2020,
+      "escolas": 202,
+      "matriculas": 40370
+     },
+     {
+      "ano": 2021,
+      "escolas": 201,
+      "matriculas": 38445
+     },
+     {
+      "ano": 2022,
+      "escolas": 200,
+      "matriculas": 39936
+     },
+     {
+      "ano": 2023,
+      "escolas": 198,
+      "matriculas": 42594
+     },
+     {
+      "ano": 2024,
+      "escolas": 200,
+      "matriculas": 44040
+     }
+    ]
+   },
+   "sisu": {
+    "fonte": "br_mec_sisu.microdados (residência do candidato; matrícula efetivada, não só aprovação)",
+    "ano": 2022,
+    "serie": [
+     {
+      "ano": 2017,
+      "candidatos": 2414,
+      "aprovados": 1418,
+      "matriculados": 35,
+      "nota_media": 599.5028359890553
+     },
+     {
+      "ano": 2018,
+      "candidatos": 1679,
+      "aprovados": 1371,
+      "matriculados": 251,
+      "nota_media": 611.4557527417747
+     },
+     {
+      "ano": 2019,
+      "candidatos": 2207,
+      "aprovados": 1186,
+      "matriculados": 230,
+      "nota_media": 627.9808094848734
+     },
+     {
+      "ano": 2020,
+      "candidatos": 2101,
+      "aprovados": 1074,
+      "matriculados": 213,
+      "nota_media": 618.8937660327288
+     },
+     {
+      "ano": 2021,
+      "candidatos": 1822,
+      "aprovados": 1030,
+      "matriculados": 214,
+      "nota_media": 634.0832278282671
+     },
+     {
+      "ano": 2022,
+      "candidatos": 898,
+      "aprovados": 749,
+      "matriculados": 244,
+      "nota_media": 624.1898735377805
+     }
+    ],
+    "top_cursos": [
+     {
+      "curso": "SISTEMAS DE INFORMAÇÃO",
+      "ies": "CEFET/RJ",
+      "matriculados": 44
+     },
+     {
+      "curso": "ENGENHARIA ELÉTRICA",
+      "ies": "UFMG",
+      "matriculados": 18
+     },
+     {
+      "curso": "GESTÃO DE TURISMO",
+      "ies": "CEFET/RJ",
+      "matriculados": 14
+     },
+     {
+      "curso": "FONOAUDIOLOGIA",
+      "ies": "UFF",
+      "matriculados": 13
+     },
+     {
+      "curso": "ODONTOLOGIA",
+      "ies": "UFF",
+      "matriculados": 13
+     },
+     {
+      "curso": "BIOMEDICINA",
+      "ies": "UFF",
+      "matriculados": 8
+     }
+    ]
    }
   },
   "saude": {
@@ -957,11 +1467,11 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
-     "9": 10,
      "2": 66,
+     "1": 24,
      "3": 316,
      "4": 1419,
-     "1": 24
+     "9": 10
     }
    },
    "dengue": {
@@ -973,11 +1483,11 @@
     "obitos": 0,
     "notificados_ano_anterior": 5350,
     "classificacao_bruta": {
-     "10|9": 5,
      "12|1": 2,
+     "8 |None": 18,
+     "10|9": 5,
      "10|1": 363,
      "10|None": 2,
-     "8 |None": 18,
      "11|1": 9
     }
    },
@@ -987,6 +1497,454 @@
     "criancas_acompanhadas": 0,
     "pct_baixo_peso": null,
     "pct_excesso_peso": null
+   },
+   "mortalidade": {
+    "fonte": "br_ms_sim.microdados (residência) · br_datasus_cid10",
+    "ano": 2022,
+    "populacao_referencia": 189939,
+    "obitos": 1679,
+    "obitos_infantis": 10,
+    "obitos_neonatais": 7,
+    "idade_media_obito": 71.36983040581465,
+    "homens": 870,
+    "mulheres": 807,
+    "causas_externas": 101,
+    "suicidios": 9,
+    "agressoes": 9,
+    "transporte": 13,
+    "maternas": 0,
+    "mal_definidas": 134,
+    "taxa_mortalidade_1000hab": 8.83968010782409,
+    "nascidos_vivos": 1835,
+    "taxa_mortalidade_infantil_1000nv": 5.449591280653951,
+    "por_capitulo": [
+     {
+      "capitulo": "IX.  Doenças do aparelho circulatório",
+      "obitos": 404
+     },
+     {
+      "capitulo": "II.  Neoplasias (tumores)",
+      "obitos": 281
+     },
+     {
+      "capitulo": "X.   Doenças do aparelho respiratório",
+      "obitos": 201
+     },
+     {
+      "capitulo": "IV.  Doenças endócrinas nutricionais e metabólicas",
+      "obitos": 134
+     },
+     {
+      "capitulo": "XVIII.Sint sinais e achad anorm ex clín e laborat",
+      "obitos": 134
+     },
+     {
+      "capitulo": "I.   Algumas doenças infecciosas e parasitárias",
+      "obitos": 132
+     },
+     {
+      "capitulo": "XX.  Causas externas de morbidade e mortalidade",
+      "obitos": 101
+     },
+     {
+      "capitulo": "XI.  Doenças do aparelho digestivo",
+      "obitos": 76
+     }
+    ],
+    "top_causas": [
+     {
+      "cid": "R99",
+      "descricao": "Outras causas mal definidas e as não especificadas de mortalidade",
+      "obitos": 107
+     },
+     {
+      "cid": "B342",
+      "descricao": "Infecção por coronavírus de localização não especificada",
+      "obitos": 78
+     },
+     {
+      "cid": "I219",
+      "descricao": "Infarto agudo do miocárdio não especificado",
+      "obitos": 73
+     },
+     {
+      "cid": "E149",
+      "descricao": "Diabetes mellitus não especificado - sem complicações",
+      "obitos": 59
+     },
+     {
+      "cid": "J189",
+      "descricao": "Pneumonia não especificada",
+      "obitos": 54
+     },
+     {
+      "cid": "J449",
+      "descricao": "Doença pulmonar obstrutiva crônica não especificada",
+      "obitos": 47
+     },
+     {
+      "cid": "I10",
+      "descricao": "Hipertensão essencial (primária)",
+      "obitos": 40
+     },
+     {
+      "cid": "N390",
+      "descricao": "Infecção do trato urinário de localização não especificada",
+      "obitos": 38
+     }
+    ],
+    "serie": [
+     {
+      "ano": 2011,
+      "obitos": 1778,
+      "infantis": 36
+     },
+     {
+      "ano": 2012,
+      "obitos": 1388,
+      "infantis": 26
+     },
+     {
+      "ano": 2013,
+      "obitos": 1526,
+      "infantis": 30
+     },
+     {
+      "ano": 2014,
+      "obitos": 1515,
+      "infantis": 22
+     },
+     {
+      "ano": 2015,
+      "obitos": 1563,
+      "infantis": 11
+     },
+     {
+      "ano": 2016,
+      "obitos": 1650,
+      "infantis": 32
+     },
+     {
+      "ano": 2017,
+      "obitos": 1566,
+      "infantis": 23
+     },
+     {
+      "ano": 2018,
+      "obitos": 1703,
+      "infantis": 20
+     },
+     {
+      "ano": 2019,
+      "obitos": 1620,
+      "infantis": 22
+     },
+     {
+      "ano": 2020,
+      "obitos": 1848,
+      "infantis": 23
+     },
+     {
+      "ano": 2021,
+      "obitos": 2280,
+      "infantis": 17
+     },
+     {
+      "ano": 2022,
+      "obitos": 1679,
+      "infantis": 10
+     }
+    ]
+   },
+   "internacoes": {
+    "fonte": "br_ms_sih.aihs_reduzidas (residência do paciente, id_municipio_6)",
+    "ano": 2024,
+    "internacoes": 11267,
+    "valor_total": 26760932.480000094,
+    "obitos_hospitalares": 1075,
+    "permanencia_media": 8.284281530132244,
+    "diarias_uti": 10772,
+    "no_municipio": 9792,
+    "urgencia": 9274,
+    "valor_medio_aih": 2375.160422472716,
+    "taxa_mortalidade_hospitalar": 9.541137836158693,
+    "pct_no_municipio": 86.90867134108458,
+    "ano_anterior": {
+     "internacoes": 10377,
+     "valor_total": 23628943.02000006
+    },
+    "por_capitulo": [
+     {
+      "capitulo": "IX.  Doenças do aparelho circulatório",
+      "internacoes": 1861,
+      "valor": 7971759.269999994
+     },
+     {
+      "capitulo": "XIX. Lesões enven e alg out conseq causas externas",
+      "internacoes": 1489,
+      "valor": 2459538.4299999997
+     },
+     {
+      "capitulo": "I.   Algumas doenças infecciosas e parasitárias",
+      "internacoes": 1265,
+      "valor": 4456568.639999998
+     },
+     {
+      "capitulo": "X.   Doenças do aparelho respiratório",
+      "internacoes": 1169,
+      "valor": 2773706.4799999995
+     },
+     {
+      "capitulo": "XI.  Doenças do aparelho digestivo",
+      "internacoes": 1164,
+      "valor": 2825916.4999999986
+     },
+     {
+      "capitulo": "XIV. Doenças do aparelho geniturinário",
+      "internacoes": 885,
+      "valor": 1294414.3399999999
+     },
+     {
+      "capitulo": "XV.  Gravidez parto e puerpério",
+      "internacoes": 835,
+      "valor": 413703.8900000006
+     },
+     {
+      "capitulo": "II.  Neoplasias (tumores)",
+      "internacoes": 522,
+      "valor": 2069973.4699999997
+     }
+    ],
+    "serie": [
+     {
+      "ano": 2015,
+      "internacoes": 9140,
+      "valor": 14858672.52000003
+     },
+     {
+      "ano": 2016,
+      "internacoes": 9193,
+      "valor": 14398007.060000017
+     },
+     {
+      "ano": 2017,
+      "internacoes": 9345,
+      "valor": 14780826.090000011
+     },
+     {
+      "ano": 2018,
+      "internacoes": 9659,
+      "valor": 16021076.859999985
+     },
+     {
+      "ano": 2019,
+      "internacoes": 9945,
+      "valor": 16572105.579999993
+     },
+     {
+      "ano": 2020,
+      "internacoes": 7749,
+      "valor": 14998325.309999984
+     },
+     {
+      "ano": 2021,
+      "internacoes": 9031,
+      "valor": 20613815.54000003
+     },
+     {
+      "ano": 2022,
+      "internacoes": 9254,
+      "valor": 19807955.800000023
+     },
+     {
+      "ano": 2023,
+      "internacoes": 10377,
+      "valor": 23628943.020000055
+     },
+     {
+      "ano": 2024,
+      "internacoes": 11267,
+      "valor": 26760932.480000094
+     }
+    ]
+   },
+   "ieps": {
+    "fonte": "br_ieps_saude.municipio (IEPS Data)",
+    "ano_max": 2021,
+    "indicadores": {
+     "cobertura_esf": 32.486215591291,
+     "cobertura_atencao_basica": 48.1800395484364,
+     "cobertura_plano_privado": 25.6234874725342,
+     "medicos_1000hab": 2.28003168106079,
+     "enfermeiros_1000hab": 1.07479751110077,
+     "leitos_sus_100k": 149.219467163086,
+     "leitos_uti_sus_100k": 9.39143466949463,
+     "despesa_saude_per_capita": 1132.14,
+     "pct_receita_propria_saude": 31.7,
+     "taxa_mortalidade_evitavel_100k": 149.614456176758,
+     "taxa_internacao_csap_100k": 639.139343261719,
+     "pct_prenatal_adequado": 76.0038681030273,
+     "pct_prenatal_zero": 1.40299952030182
+    },
+    "ano_por_indicador": {
+     "cobertura_esf": 2021,
+     "cobertura_atencao_basica": 2021,
+     "cobertura_plano_privado": 2021,
+     "medicos_1000hab": 2021,
+     "enfermeiros_1000hab": 2021,
+     "leitos_sus_100k": 2021,
+     "leitos_uti_sus_100k": 2021,
+     "despesa_saude_per_capita": 2021,
+     "pct_receita_propria_saude": 2021,
+     "taxa_mortalidade_evitavel_100k": 2020,
+     "taxa_internacao_csap_100k": 2021,
+     "pct_prenatal_adequado": 2020,
+     "pct_prenatal_zero": 2020
+    }
+   },
+   "imunizacao": {
+    "fonte": "br_ms_imunizacoes.municipio (cobertura vacinal, %)",
+    "ano": 2021,
+    "serie": [
+     {
+      "ano": 2010,
+      "cobertura_total": 72.42,
+      "cobertura_triplice_viral_d1": 102.73,
+      "cobertura_poliomielite": 110.43,
+      "cobertura_bcg": 133.19,
+      "cobertura_penta": null,
+      "cobertura_hepatite_b": 102.47
+     },
+     {
+      "ano": 2011,
+      "cobertura_total": 91.32,
+      "cobertura_triplice_viral_d1": 125.49,
+      "cobertura_poliomielite": 120.55,
+      "cobertura_bcg": 132.37,
+      "cobertura_penta": null,
+      "cobertura_hepatite_b": 101.21
+     },
+     {
+      "ano": 2012,
+      "cobertura_total": 77.53,
+      "cobertura_triplice_viral_d1": 96.11,
+      "cobertura_poliomielite": 95.93,
+      "cobertura_bcg": 130.72,
+      "cobertura_penta": 31.41,
+      "cobertura_hepatite_b": 97.4
+     },
+     {
+      "ano": 2013,
+      "cobertura_total": 73.38,
+      "cobertura_triplice_viral_d1": 105.35,
+      "cobertura_poliomielite": 99.65,
+      "cobertura_bcg": 104.02,
+      "cobertura_penta": 95.58,
+      "cobertura_hepatite_b": 102.87
+     },
+     {
+      "ano": 2014,
+      "cobertura_total": 90.2,
+      "cobertura_triplice_viral_d1": 120.67,
+      "cobertura_poliomielite": 96.53,
+      "cobertura_bcg": 107.72,
+      "cobertura_penta": 91.56,
+      "cobertura_hepatite_b": 91.56
+     },
+     {
+      "ano": 2015,
+      "cobertura_total": 106.33,
+      "cobertura_triplice_viral_d1": 108.08,
+      "cobertura_poliomielite": 117.04,
+      "cobertura_bcg": 120.97,
+      "cobertura_penta": 104.9,
+      "cobertura_hepatite_b": 113.58
+     },
+     {
+      "ano": 2016,
+      "cobertura_total": 55.24,
+      "cobertura_triplice_viral_d1": 122.85,
+      "cobertura_poliomielite": 126.85,
+      "cobertura_bcg": 111.54,
+      "cobertura_penta": 103.16,
+      "cobertura_hepatite_b": 172.07
+     },
+     {
+      "ano": 2017,
+      "cobertura_total": 90.24,
+      "cobertura_triplice_viral_d1": 96.04,
+      "cobertura_poliomielite": 89.26,
+      "cobertura_bcg": 111.02,
+      "cobertura_penta": 95.62,
+      "cobertura_hepatite_b": 95.62
+     },
+     {
+      "ano": 2018,
+      "cobertura_total": 83.59,
+      "cobertura_triplice_viral_d1": 107.65,
+      "cobertura_poliomielite": 98.33,
+      "cobertura_bcg": 106.95,
+      "cobertura_penta": 96.52,
+      "cobertura_hepatite_b": 96.52
+     },
+     {
+      "ano": 2019,
+      "cobertura_total": 69.24,
+      "cobertura_triplice_viral_d1": 100.66,
+      "cobertura_poliomielite": 76.04,
+      "cobertura_bcg": 98.59,
+      "cobertura_penta": 54.52,
+      "cobertura_hepatite_b": 54.52
+     },
+     {
+      "ano": 2020,
+      "cobertura_total": 57.33,
+      "cobertura_triplice_viral_d1": 80.18,
+      "cobertura_poliomielite": 67.28,
+      "cobertura_bcg": 83.57,
+      "cobertura_penta": 65.44,
+      "cobertura_hepatite_b": 65.44
+     },
+     {
+      "ano": 2021,
+      "cobertura_total": 57.99,
+      "cobertura_triplice_viral_d1": 75.48,
+      "cobertura_poliomielite": 62.12,
+      "cobertura_bcg": 80.25,
+      "cobertura_penta": 63.7,
+      "cobertura_hepatite_b": 63.7
+     }
+    ]
+   },
+   "planos_privados": {
+    "fonte": "br_ans_beneficiario.informacao_consolidada",
+    "competencia": "2025-10",
+    "beneficiarios_total": 66383,
+    "medico_hospitalar": 50413,
+    "odontologico": 15970,
+    "cobertura_pct": 24.783081060088392,
+    "por_contratacao": [
+     {
+      "tipo": "Coletivo Empresarial",
+      "beneficiarios": 42225
+     },
+     {
+      "tipo": "Individual Ou Familiar",
+      "beneficiarios": 15568
+     },
+     {
+      "tipo": "Coletivo Por Adesão",
+      "beneficiarios": 8588
+     },
+     {
+      "tipo": "Individual Ou Familiar + Coletivo Empresarial + Coletivo Por Adesão",
+      "beneficiarios": 1
+     }
+    ]
+   },
+   "farmacia_popular": {
+    "fonte": "br_saude_farmaciapopular.estabelecimentos (id_municipio_6)",
+    "estabelecimentos_credenciados": 61
    }
   },
   "seguranca": {
@@ -1093,6 +2051,137 @@
    "fbsp": {
     "disponivel": false,
     "motivo": "município fora da amostra do anuário FBSP"
+   },
+   "violencia_sinan": {
+    "fonte": "br_ms_sinan_violencia.microdados_violencia (residência da vítima, id_municipio_6; ano = ano_sinan)",
+    "ano": 2025,
+    "notificacoes": 349,
+    "feminino": 236,
+    "masculino": 113,
+    "negros": 111,
+    "brancos": 229,
+    "raca_ignorada": 8,
+    "autoprovocadas": 189,
+    "arma_fogo": 0,
+    "fisica": 120,
+    "psicologica": 14,
+    "sexual": 19,
+    "negligencia": 30,
+    "financeira": 1,
+    "tortura": 1,
+    "trafico_humano": 0,
+    "infantil_trabalho": 0,
+    "pct_feminino": 67.621776504298,
+    "pct_negros": 31.805157593123205,
+    "nota_raca": "negro = preto + pardo (CS_RACA 2 e 4), convenção IBGE",
+    "por_local": [
+     {
+      "local": "Residência",
+      "n": 237
+     },
+     {
+      "local": "Via pública",
+      "n": 43
+     },
+     {
+      "local": "Ignorado",
+      "n": 29
+     },
+     {
+      "local": "Outro",
+      "n": 17
+     },
+     {
+      "local": "Comércio/serviços",
+      "n": 7
+     },
+     {
+      "local": "Escola",
+      "n": 7
+     }
+    ],
+    "por_ciclo_vida": [
+     {
+      "ciclo": "Ignorado",
+      "n": 2
+     },
+     {
+      "ciclo": "Criança (0-9)",
+      "n": 3
+     },
+     {
+      "ciclo": "Adolescente (10-19)",
+      "n": 39
+     },
+     {
+      "ciclo": "Jovem (20-24)",
+      "n": 50
+     },
+     {
+      "ciclo": "Adulto (25-59)",
+      "n": 180
+     },
+     {
+      "ciclo": "Idoso (60+)",
+      "n": 10
+     },
+     {
+      "ciclo": "Ignorado",
+      "n": 65
+     }
+    ],
+    "serie": [
+     {
+      "ano": 2016,
+      "notificacoes": 408,
+      "autoprovocadas": 144
+     },
+     {
+      "ano": 2017,
+      "notificacoes": 561,
+      "autoprovocadas": 165
+     },
+     {
+      "ano": 2018,
+      "notificacoes": 580,
+      "autoprovocadas": 168
+     },
+     {
+      "ano": 2019,
+      "notificacoes": 495,
+      "autoprovocadas": 138
+     },
+     {
+      "ano": 2020,
+      "notificacoes": 367,
+      "autoprovocadas": 123
+     },
+     {
+      "ano": 2021,
+      "notificacoes": 406,
+      "autoprovocadas": 187
+     },
+     {
+      "ano": 2022,
+      "notificacoes": 146,
+      "autoprovocadas": 78
+     },
+     {
+      "ano": 2023,
+      "notificacoes": 533,
+      "autoprovocadas": 221
+     },
+     {
+      "ano": 2024,
+      "notificacoes": 312,
+      "autoprovocadas": 158
+     },
+     {
+      "ano": 2025,
+      "notificacoes": 349,
+      "autoprovocadas": 189
+     }
+    ]
    }
   },
   "infraestrutura": {
@@ -1132,6 +2221,179 @@
     "investimento_coleta": 12263718.1035,
     "investimento_tratamento": 18084057.24,
     "investimento_coleta_tratatamento": 30347775.3435
+   },
+   "censo_domicilios": {
+    "fonte": "br_ibge_censo_2022.caracteristica_domicilio_* (população residente, autodeclarado)",
+    "esgotamento": {
+     "total": 189311,
+     "categorias": [
+      {
+       "categoria": "Rede geral, rede pluvial ou fossa ligada à rede",
+       "populacao": 140064,
+       "pct": 73.98619203321518
+      },
+      {
+       "categoria": "Fossa séptica ou fossa filtro não ligada à rede",
+       "populacao": 32099,
+       "pct": 16.955697238934874
+      },
+      {
+       "categoria": "Fossa rudimentar ou buraco",
+       "populacao": 8374,
+       "pct": 4.423409099312771
+      },
+      {
+       "categoria": "Rio, lago, córrego ou mar",
+       "populacao": 7568,
+       "pct": 3.9976546529256094
+      },
+      {
+       "categoria": "Vala",
+       "populacao": 873,
+       "pct": 0.4611459450322485
+      },
+      {
+       "categoria": "Outra forma",
+       "populacao": 322,
+       "pct": 0.17009048602564034
+      },
+      {
+       "categoria": "Não tinham banheiro nem sanitário",
+       "populacao": 11,
+       "pct": 0.005810544553670943
+      }
+     ]
+    },
+    "agua": {
+     "total": 189311,
+     "categorias": [
+      {
+       "categoria": "Possui ligação à rede geral e a utiliza como forma principal",
+       "populacao": 146565,
+       "pct": 77.42022386443472
+      },
+      {
+       "categoria": "Não possui ligação com a rede geral",
+       "populacao": 35438,
+       "pct": 18.719461626635535
+      },
+      {
+       "categoria": "Possui ligação à rede geral, mas utiliza principalmente outra forma",
+       "populacao": 7308,
+       "pct": 3.8603145089297506
+      }
+     ]
+    },
+    "lixo": {
+     "total": 189311,
+     "categorias": [
+      {
+       "categoria": "Coletado",
+       "populacao": 188255,
+       "pct": 99.44218772284759
+      },
+      {
+       "categoria": "Queimado na propriedade",
+       "populacao": 672,
+       "pct": 0.3549714490969886
+      },
+      {
+       "categoria": "Outro destino",
+       "populacao": 271,
+       "pct": 0.14315068854952961
+      },
+      {
+       "categoria": "Jogado em terreno baldio, encosta ou área pública",
+       "populacao": 106,
+       "pct": 0.05599252024446545
+      },
+      {
+       "categoria": "Enterrado na propriedade",
+       "populacao": 7,
+       "pct": 0.003697619261426964
+      }
+     ]
+    },
+    "tipo_domicilio": {
+     "total": 189311,
+     "categorias": [
+      {
+       "categoria": "Casa",
+       "populacao": 146572,
+       "pct": 77.42392148369615
+      },
+      {
+       "categoria": "Apartamento",
+       "populacao": 34718,
+       "pct": 18.33913507403162
+      },
+      {
+       "categoria": "Casa de vila ou em condomínio",
+       "populacao": 7670,
+       "pct": 4.0515342478778305
+      },
+      {
+       "categoria": "Habitação em casa de cômodos ou cortiço",
+       "populacao": 299,
+       "pct": 0.15794116559523746
+      },
+      {
+       "categoria": "Estrutura residencial permanente degradada ou inacabada",
+       "populacao": 52,
+       "pct": 0.027468028799171734
+      }
+     ]
+    },
+    "domicilios_recenseados": [
+     {
+      "especie": "Particular",
+      "domicilios": 97094
+     },
+     {
+      "especie": "Particular permanente",
+      "domicilios": 97082
+     },
+     {
+      "especie": "Particular permanente ocupado",
+      "domicilios": 76597
+     },
+     {
+      "especie": "Particular permanente ocupado - com entrevista",
+      "domicilios": 72918
+     },
+     {
+      "especie": "Particular permanente não ocupado",
+      "domicilios": 20485
+     },
+     {
+      "especie": "Particular permanente não ocupado - vago",
+      "domicilios": 12057
+     },
+     {
+      "especie": "Particular permanente não ocupado - uso ocasional",
+      "domicilios": 8428
+     },
+     {
+      "especie": "Particular permanente ocupado - sem entrevista",
+      "domicilios": 3679
+     },
+     {
+      "especie": "Coletivo",
+      "domicilios": 105
+     },
+     {
+      "especie": "Coletivo - sem morador",
+      "domicilios": 69
+     },
+     {
+      "especie": "Coletivo - com morador",
+      "domicilios": 36
+     },
+     {
+      "especie": "Particular improvisado",
+      "domicilios": 12
+     }
+    ]
    }
   },
   "meio_ambiente": {
@@ -1485,7 +2747,7 @@
      {
       "ano": 2024,
       "focos": 561,
-      "frp_medio": 10.272595281306714,
+      "frp_medio": 10.272595281306716,
       "frp_max": 119.9
      },
      {
@@ -1650,9 +2912,9 @@
   "conectividade": {
    "fonte": "br_anatel_banda_larga_fixa · br_anatel_indice_brasileiro_conectividade",
    "banda_larga": {
-    "competencia": "2025-07",
-    "densidade_100hab": 39.448575700346,
-    "densidade_brasil": 25.659883222495
+    "competencia": "2025-09",
+    "densidade_100hab": 39.888751180359,
+    "densidade_brasil": 25.808618015253
    },
    "ibc": {
     "ano": 2024,
@@ -1671,8 +2933,8 @@
     "zonas": 2
    },
    "genero": {
-    "4": 82419,
     "0": 118,
+    "4": 82419,
     "2": 72939
    },
    "instrucao": {
@@ -1701,6 +2963,124 @@
      "votos": 67634,
      "turno": 1
     }
+   },
+   "camara_municipal": {
+    "fonte": "br_tse_eleicoes (resultados_candidato_municipio, candidatos, receitas_candidato)",
+    "ano": 2024,
+    "cadeiras_total": 21,
+    "bancadas": [
+     {
+      "partido": "PL",
+      "cadeiras": 6,
+      "votos": 11604
+     },
+     {
+      "partido": "MDB",
+      "cadeiras": 3,
+      "votos": 3787
+     },
+     {
+      "partido": "PT",
+      "cadeiras": 2,
+      "votos": 4626
+     },
+     {
+      "partido": "PODE",
+      "cadeiras": 2,
+      "votos": 2768
+     },
+     {
+      "partido": "UNIÃO",
+      "cadeiras": 2,
+      "votos": 2335
+     },
+     {
+      "partido": "SOLIDARIEDADE",
+      "cadeiras": 1,
+      "votos": 1541
+     },
+     {
+      "partido": "PSD",
+      "cadeiras": 1,
+      "votos": 1496
+     },
+     {
+      "partido": "PDT",
+      "cadeiras": 1,
+      "votos": 1489
+     },
+     {
+      "partido": "REPUBLICANOS",
+      "cadeiras": 1,
+      "votos": 1270
+     },
+     {
+      "partido": "MOBILIZA",
+      "cadeiras": 1,
+      "votos": 1160
+     },
+     {
+      "partido": "PP",
+      "cadeiras": 1,
+      "votos": 1041
+     }
+    ],
+    "perfil_candidatos": {
+     "candidatos": 378,
+     "feminino": 122,
+     "masculino": 256,
+     "negros": 123,
+     "brancos": 254,
+     "idade_media": 50.58994708994709
+    },
+    "financiamento": [
+     {
+      "cargo": "prefeito",
+      "candidatos": 6,
+      "receita": 4550546.35
+     },
+     {
+      "cargo": "vereador",
+      "candidatos": 365,
+      "receita": 3312260.03
+     }
+    ]
+   },
+   "deputados_nascidos": {
+    "fonte": "br_camara_dados_abertos.deputado (id_municipio_nascimento)",
+    "total": 6,
+    "deputados": [
+     {
+      "nome": "Glauber Braga",
+      "nascimento": "1982-06-26",
+      "falecido": false
+     },
+     {
+      "nome": "CARLOS ABICALIL",
+      "nascimento": "1962-01-23",
+      "falecido": false
+     },
+     {
+      "nome": "SADI BOGADO",
+      "nascimento": "1928-01-15",
+      "falecido": true
+     },
+     {
+      "nome": "HUMBERTO EL-JAICK",
+      "nascimento": "1922-02-11",
+      "falecido": true
+     },
+     {
+      "nome": "LUIZ LAGO",
+      "nascimento": "1912-10-25",
+      "falecido": true
+     },
+     {
+      "nome": "MOZART LAGO",
+      "nascimento": "1889-10-17",
+      "falecido": false
+     }
+    ]
    }
   },
   "transparencia": {
@@ -1806,6 +3186,527 @@
       "colocacao": 169
      }
     ]
+   },
+   "emendas": {
+    "fonte": "br_cgu_emendas_parlamentares.microdados (id_municipio_gasto)",
+    "ano": 2025,
+    "janela_autores": "2020–2025",
+    "serie": [
+     {
+      "ano": 2014,
+      "emendas": 8,
+      "empenhado": 7814743.65,
+      "pago": 0
+     },
+     {
+      "ano": 2015,
+      "emendas": 5,
+      "empenhado": 3640272,
+      "pago": 0
+     },
+     {
+      "ano": 2016,
+      "emendas": 8,
+      "empenhado": 6407050,
+      "pago": 2347010
+     },
+     {
+      "ano": 2017,
+      "emendas": 9,
+      "empenhado": 8479206.02,
+      "pago": 4500000
+     },
+     {
+      "ano": 2018,
+      "emendas": 8,
+      "empenhado": 5749989.109999999,
+      "pago": 2760500
+     },
+     {
+      "ano": 2019,
+      "emendas": 6,
+      "empenhado": 3047975,
+      "pago": 0
+     },
+     {
+      "ano": 2020,
+      "emendas": 8,
+      "empenhado": 5148633.53,
+      "pago": 2030752.53
+     },
+     {
+      "ano": 2021,
+      "emendas": 4,
+      "empenhado": 2916960,
+      "pago": 2526892
+     },
+     {
+      "ano": 2022,
+      "emendas": 8,
+      "empenhado": 5053431,
+      "pago": 2495801
+     },
+     {
+      "ano": 2023,
+      "emendas": 9,
+      "empenhado": 7621589,
+      "pago": 5282864
+     },
+     {
+      "ano": 2024,
+      "emendas": 8,
+      "empenhado": 7050000,
+      "pago": 6050000
+     },
+     {
+      "ano": 2025,
+      "emendas": 7,
+      "empenhado": 15937274,
+      "pago": 11937274
+     }
+    ],
+    "top_autores": [
+     {
+      "autor": "LUIZ LIMA",
+      "emendas": 15,
+      "pago": 12680163.0
+     },
+     {
+      "autor": "GLAUBER BRAGA",
+      "emendas": 11,
+      "pago": 8179820.0
+     },
+     {
+      "autor": "SOSTENES CAVALCANTE",
+      "emendas": 2,
+      "pago": 4500000.0
+     },
+     {
+      "autor": "CARLOS JORDY",
+      "emendas": 3,
+      "pago": 1049935.0
+     },
+     {
+      "autor": "FLAVIO BOLSONARO",
+      "emendas": 1,
+      "pago": 1000000.0
+     },
+     {
+      "autor": "HELIO LOPES",
+      "emendas": 2,
+      "pago": 687155.0
+     },
+     {
+      "autor": "ALTINEU CORTES",
+      "emendas": 1,
+      "pago": 500000.0
+     },
+     {
+      "autor": "CARLOS PORTINHO",
+      "emendas": 2,
+      "pago": 456751.0
+     }
+    ],
+    "por_funcao": [
+     {
+      "funcao": "Saúde",
+      "pago": 27800924.0
+     },
+     {
+      "funcao": "Encargos especiais",
+      "pago": 1300000.0
+     },
+     {
+      "funcao": "Assistência social",
+      "pago": 719999.53
+     },
+     {
+      "funcao": "Direitos da cidadania",
+      "pago": 500000.0
+     },
+     {
+      "funcao": "Agricultura",
+      "pago": 2660.0
+     }
+    ]
+   },
+   "compras_federais": {
+    "fonte": "br_cgu_licitacao_contrato (licitação por município · contrato por CNPJ local) · br_me_cnpj",
+    "licitacoes_no_municipio": {
+     "serie": [
+      {
+       "ano": 2015,
+       "licitacoes": 2,
+       "valor": 283982.79
+      },
+      {
+       "ano": 2017,
+       "licitacoes": 4,
+       "valor": 261751.74
+      },
+      {
+       "ano": 2018,
+       "licitacoes": 2,
+       "valor": 30683.4
+      },
+      {
+       "ano": 2019,
+       "licitacoes": 358,
+       "valor": 47052527.45
+      },
+      {
+       "ano": 2020,
+       "licitacoes": 365,
+       "valor": 36079796.46
+      },
+      {
+       "ano": 2021,
+       "licitacoes": 347,
+       "valor": 39793609.879999995
+      },
+      {
+       "ano": 2022,
+       "licitacoes": 80,
+       "valor": 36268327.54
+      },
+      {
+       "ano": 2023,
+       "licitacoes": 96,
+       "valor": 38980514.419999994
+      }
+     ],
+     "por_orgao": [
+      {
+       "orgao": "Comando da Marinha",
+       "licitacoes": 1262,
+       "valor": 198882938.36
+      }
+     ]
+    },
+    "fornecedores_locais": {
+     "snapshot_cnpj": "2025-09",
+     "serie": [
+      {
+       "ano": 2018,
+       "contratos": 7,
+       "valor": 569892.38
+      },
+      {
+       "ano": 2019,
+       "contratos": 14,
+       "valor": 6653493.76
+      },
+      {
+       "ano": 2020,
+       "contratos": 3,
+       "valor": 817903.2
+      },
+      {
+       "ano": 2021,
+       "contratos": 13,
+       "valor": 5028300.56
+      },
+      {
+       "ano": 2022,
+       "contratos": 12,
+       "valor": 1615496.31
+      },
+      {
+       "ano": 2023,
+       "contratos": 57,
+       "valor": 24836561.44
+      },
+      {
+       "ano": 2024,
+       "contratos": 57,
+       "valor": 23662615.5
+      },
+      {
+       "ano": 2025,
+       "contratos": 11,
+       "valor": 561327.41
+      }
+     ],
+     "top": [
+      {
+       "empresa": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+       "contratos": 8,
+       "valor": 10120090.17
+      },
+      {
+       "empresa": "CASA DE SAUDE SAO LUCAS SA",
+       "contratos": 2,
+       "valor": 8000000.0
+      },
+      {
+       "empresa": "MG ECCARD LTDA",
+       "contratos": 8,
+       "valor": 7106537.28
+      },
+      {
+       "empresa": "CONTRATADO : CONFEDERACAO   BRASILEIRA   DEBASKETBALL",
+       "contratos": 1,
+       "valor": 5577189.15
+      },
+      {
+       "empresa": "GLOBAL TRADE INDUSTRIA DE ALIMENTACAO LTDA",
+       "contratos": 3,
+       "valor": 5081078.38
+      },
+      {
+       "empresa": "HOSPITAL SERRANO LTDA",
+       "contratos": 1,
+       "valor": 4000000.0
+      },
+      {
+       "empresa": "VILLA TOMIAZZI PAISAGISMO LTDA",
+       "contratos": 9,
+       "valor": 2973876.4000000004
+      },
+      {
+       "empresa": "SERVICO SOCIAL DA INDUSTRIA -SESI",
+       "contratos": 7,
+       "valor": 2900000.0
+      }
+     ]
+    }
+   },
+   "diarios_oficiais": {
+    "fonte": "br_ok_queridodiario.diarios (territory_id)",
+    "total_edicoes": 634,
+    "ultima_edicao": "2025-10-03",
+    "serie": [
+     {
+      "ano": 2023,
+      "edicoes": 77,
+      "extras": 26
+     },
+     {
+      "ano": 2024,
+      "edicoes": 382,
+      "extras": 132
+     },
+     {
+      "ano": 2025,
+      "edicoes": 175,
+      "extras": 12
+     }
+    ]
+   },
+   "fiscal": {
+    "fonte": "br_firjan_ifgf.ranking · br_tesouro_capag.municipios",
+    "ifgf": [
+     {
+      "ano": 2013,
+      "indice": 0.760844541035357,
+      "ranking_estadual": 7,
+      "ranking_nacional": 429
+     },
+     {
+      "ano": 2014,
+      "indice": 0.621014155642778,
+      "ranking_estadual": 29,
+      "ranking_nacional": 1367
+     },
+     {
+      "ano": 2015,
+      "indice": 0.622006928317837,
+      "ranking_estadual": 14,
+      "ranking_nacional": 977
+     },
+     {
+      "ano": 2016,
+      "indice": 0.563140437361033,
+      "ranking_estadual": 20,
+      "ranking_nacional": 1693
+     },
+     {
+      "ano": 2017,
+      "indice": 0.577264245389596,
+      "ranking_estadual": 12,
+      "ranking_nacional": 1179
+     },
+     {
+      "ano": 2018,
+      "indice": 0.593189010659136,
+      "ranking_estadual": 22,
+      "ranking_nacional": 1468
+     },
+     {
+      "ano": 2019,
+      "indice": 0.6381582090769333,
+      "ranking_estadual": 16,
+      "ranking_nacional": 1311
+     },
+     {
+      "ano": 2020,
+      "indice": 0.6635214903201866,
+      "ranking_estadual": 15,
+      "ranking_nacional": 1668
+     },
+     {
+      "ano": 2021,
+      "indice": 0.790593343934331,
+      "ranking_estadual": 8,
+      "ranking_nacional": 1073
+     },
+     {
+      "ano": 2022,
+      "indice": 0.5536908223836308,
+      "ranking_estadual": 53,
+      "ranking_nacional": 3416
+     }
+    ],
+    "capag": {
+     "capag": null,
+     "nota_endividamento": "A",
+     "nota_poupanca_corrente": "C",
+     "nota_liquidez": "A",
+     "icf": "Cicf"
+    }
+   },
+   "consumidor": {
+    "fonte": "br_mj_consumidorgovbr.reclamacoes (nome da cidade + UF)",
+    "ano": 2024,
+    "serie": [
+     {
+      "ano": 2014,
+      "reclamacoes": 32,
+      "nota_media": 2.35,
+      "pct_respondida": 93.75
+     },
+     {
+      "ano": 2015,
+      "reclamacoes": 124,
+      "nota_media": 2.904109589041096,
+      "pct_respondida": 91.12903225806451
+     },
+     {
+      "ano": 2016,
+      "reclamacoes": 137,
+      "nota_media": 2.883116883116883,
+      "pct_respondida": 90.51094890510949
+     },
+     {
+      "ano": 2017,
+      "reclamacoes": 229,
+      "nota_media": 3.1779661016949152,
+      "pct_respondida": 93.44978165938865
+     },
+     {
+      "ano": 2018,
+      "reclamacoes": 259,
+      "nota_media": 3.028368794326241,
+      "pct_respondida": 91.89189189189189
+     },
+     {
+      "ano": 2019,
+      "reclamacoes": 30,
+      "nota_media": 2.4285714285714284,
+      "pct_respondida": 96.66666666666667
+     },
+     {
+      "ano": 2020,
+      "reclamacoes": 763,
+      "nota_media": 2.941798941798942,
+      "pct_respondida": 92.92267365661861
+     },
+     {
+      "ano": 2021,
+      "reclamacoes": 1018,
+      "nota_media": 2.785234899328859,
+      "pct_respondida": 88.60510805500982
+     },
+     {
+      "ano": 2022,
+      "reclamacoes": 876,
+      "nota_media": 3.0950118764845604,
+      "pct_respondida": 87.44292237442923
+     },
+     {
+      "ano": 2023,
+      "reclamacoes": 1111,
+      "nota_media": 2.7344398340248963,
+      "pct_respondida": 92.43924392439244
+     },
+     {
+      "ano": 2024,
+      "reclamacoes": 1054,
+      "nota_media": 3.0073710073710074,
+      "pct_respondida": 90.3225806451613
+     },
+     {
+      "ano": 2025,
+      "reclamacoes": 174,
+      "nota_media": 2.8732394366197185,
+      "pct_respondida": 91.37931034482759
+     }
+    ],
+    "top_segmentos": [
+     {
+      "segmento": "Bancos, Financeiras e Administradoras de Cartão",
+      "reclamacoes": 325
+     },
+     {
+      "segmento": "Operadoras de Telecomunicações (Telefonia, Internet, TV por assinatura)",
+      "reclamacoes": 111
+     },
+     {
+      "segmento": "Provedores de Conteúdo e Outros Serviços na Internet",
+      "reclamacoes": 73
+     },
+     {
+      "segmento": "Viagens, Turismo e Hospedagem",
+      "reclamacoes": 61
+     },
+     {
+      "segmento": "Comércio Eletrônico",
+      "reclamacoes": 58
+     },
+     {
+      "segmento": "Energia Elétrica",
+      "reclamacoes": 45
+     }
+    ],
+    "top_empresas": [
+     {
+      "empresa": "Hurb - Hotel Urbano",
+      "reclamacoes": 45
+     },
+     {
+      "empresa": "Google",
+      "reclamacoes": 40
+     },
+     {
+      "empresa": "Nubank",
+      "reclamacoes": 36
+     },
+     {
+      "empresa": "Vivo - Telefônica",
+      "reclamacoes": 31
+     },
+     {
+      "empresa": "Facebook / Instagram",
+      "reclamacoes": 30
+     },
+     {
+      "empresa": "Energisa Minas Rio",
+      "reclamacoes": 29
+     }
+    ]
+   },
+   "servidores": {
+    "fonte": "br_ibge_munic.recursos_humanos (Pesquisa MUNIC/IBGE)",
+    "ano": 2023,
+    "adm_direta": 7464,
+    "adm_indireta": 8,
+    "estatutario_adm_direta": 655,
+    "clt_adm_direta": 6225,
+    "comissionado_adm_direta": 566,
+    "estagio_adm_direta": 0,
+    "sem_vinculo_permanente_adm_direta": 18,
+    "adm_direta_ensino_superior": null,
+    "adm_direta_pos_graduacao": null
    }
   },
   "social": {
@@ -1960,7 +3861,7 @@
     "admissoes": 23203,
     "desligamentos": 22091,
     "saldo": 1112,
-    "salario_medio_admissao": 1699.6566916180725
+    "salario_medio_admissao": 1699.6566916180752
    },
    "top_empregadores": {
     "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
@@ -2180,9 +4081,17 @@
    "bpc": {
     "competencia": "2025-07",
     "beneficiarios": 3953,
-    "repasse_mensal": 6000850.939999995
+    "repasse_mensal": 6000850.939999998
    },
-   "garantia_safra": null
+   "garantia_safra": null,
+   "cadastro_unico": {
+    "fonte": "br_mc_indicadores.transferencias_municipio (CadÚnico)",
+    "competencia": "2020-08",
+    "pessoas_cadastradas": 38445,
+    "familias_cadastradas": 15944,
+    "familias_pbf": 5917,
+    "pct_populacao": 20.111635401081827
+   }
   },
   "vizinhanca": {
    "fonte": "br_bd_vizinhanca.municipio · br_ibge_populacao · br_ibge_pib",

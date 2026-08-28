@@ -36,14 +36,15 @@ function v(obj, path) {
 const fmt = n => n == null ? '' : Number(n).toLocaleString('pt-BR');
 const fmt1 = n => n == null ? '' : Number(n).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
 const fmt2 = n => n == null ? '' : Number(n).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-const pct = n => n == null ? '' : (Number(n) * 100).toFixed(1) + '%';
-const pctRaw = n => n == null ? '' : Number(n).toFixed(1) + '%';
+const pct = n => n == null ? '' : (Number(n) * 100).toFixed(1).replace('.', ',') + '%';
+const pctRaw = n => n == null ? '' : Number(n).toFixed(1).replace('.', ',') + '%';
 const real = n => n == null ? '' : 'R$ ' + Math.round(Number(n)).toLocaleString('pt-BR');
 const realBi = n => n == null ? '' : 'R$ ' + (Number(n) / 1e9).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' bi';
 const realMi = n => n == null ? '' : 'R$ ' + (Number(n) / 1e6).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' mi';
 const usd = n => n == null ? '' : 'US$ ' + Number(n).toLocaleString('pt-BR');
 const usdMi = n => n == null ? '' : 'US$ ' + (Number(n) / 1e6).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' mi';
 const hab = n => n == null ? '' : fmt(n) + ' hab';
+const fmt0 = n => n == null ? '' : Math.round(Number(n)).toLocaleString('pt-BR');
 
 function findYear(arr, year) {
   if (!arr) return null;
@@ -55,7 +56,7 @@ function getSerie(arr, year, field) {
   return item ? item[field] : null;
 }
 
-const FORMATTERS = { fmt, fmt1, fmt2, pct, pctRaw, real, realBi, realMi, usd, usdMi, hab };
+const FORMATTERS = { fmt, fmt0, fmt1, fmt2, pct, pctRaw, real, realBi, realMi, usd, usdMi, hab };
 
 function renderDataPaths(D) {
   document.querySelectorAll('[data-path]').forEach(el => {
@@ -234,6 +235,7 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--border); border-radius: 4px;
   padding: .05rem .35rem; text-transform: none;
 }
+.vintage:empty, .status:empty { display: none; }
 .vintage.old { color: var(--st-warn); border-color: rgba(250,178,25,.35); }
 .vintage.old::before { content: '⚠ '; }
 
@@ -251,6 +253,9 @@ a { color: inherit; text-decoration: none; }
 .bench b { color: var(--text2); font-weight: 500; }
 .bench-bars { margin-top: .5rem; display: grid; gap: .3rem; font-size: .68rem; color: var(--text3); }
 .bench-bars .row { display: grid; grid-template-columns: 58px 1fr auto; gap: .5rem; align-items: center; }
+/* rótulos longos (local da agressão, ciclo de vida) não cabem na coluna de 58px */
+.bench-bars.wide .row { grid-template-columns: 124px 1fr auto; }
+.bench-bars.wide .row > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bench-bars .track { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
 .bench-bars .fill { height: 100%; border-radius: 3px; background: rgba(var(--s1-rgb),.35); }
 .bench-bars .row.me .fill { background: var(--s1); }
@@ -298,7 +303,11 @@ a { color: inherit; text-decoration: none; }
   .rank-table thead { display: none; }
   .rank-table tr { padding: .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4); }
   .rank-table tr:last-child { border-bottom: none; }
-  .rank-table td { border-bottom: none; padding: .1rem 0; white-space: normal; }
+  /* especificidade tem que bater a das regras-base (.rank-table td.rank-name),
+     senão nome longo — CID-10, razão social — não quebra e estoura a tela */
+  .rank-table td, .rank-table td.rank-name, .rank-table td.area, .rank-table td.valor {
+    border-bottom: none; padding: .1rem 0; white-space: normal; overflow: visible; text-overflow: clip;
+  }
   .rank-table td.rank-name { font-size: .85rem; }
   .rank-table td.area { font-size: .72rem; }
   .rank-table td.valor {
@@ -348,6 +357,23 @@ a { color: inherit; text-decoration: none; }
 .data-list li:last-child { border-bottom: none; }
 .data-list li span:first-child { color: var(--text3); }
 .data-list li span:last-child { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* ESTADO VAZIO — fonte sem dado para este município */
+.empty {
+  font-size: .78rem; color: var(--text3);
+  display: flex; align-items: center; gap: .45rem;
+  padding: .5rem 0; line-height: 1.4;
+}
+.empty::before { content: '—'; color: var(--border-hover); font-weight: 700; flex-shrink: 0; }
+.data-list li span.empty, .rank-table td span.empty { text-align: left; justify-content: flex-start; font-weight: 400; }
+.chart-container .empty { height: 100%; justify-content: center; padding: 0; }
+.card .value.empty-val { color: var(--text3); font-weight: 600; }
+
+/* RANK-BAR — barra proporcional dentro da rank-table */
+.rank-table td.area .rank-bar { display: flex; align-items: center; gap: .45rem; }
+.rank-table td.area .rank-bar .track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; min-width: 30px; }
+.rank-table td.area .rank-bar .fill { height: 100%; border-radius: 3px; background: rgba(var(--s1-rgb),.55); }
+.rank-table td.area .rank-bar .pct { font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
 /* PROGRESSIVE DISCLOSURE */
 details.more { margin-top: .6rem; }
@@ -464,6 +490,7 @@ details.more > .more-body { margin-top: .4rem; }
 
     <div class="sidebar-group-label">Economia</div>
     <a class="sidebar-item" href="#econ"><span class="s-icon">💰</span> Finanças</a>
+    <a class="sidebar-item" href="#emp"><span class="s-icon">🏭</span> Empresas</a>
     <a class="sidebar-item" href="#trab"><span class="s-icon">💼</span> Trabalho</a>
     <a class="sidebar-item" href="#agro"><span class="s-icon">🌱</span> Agropecuária</a>
     <a class="sidebar-item" href="#comex"><span class="s-icon">📦</span> Comércio Exterior</a>
@@ -471,17 +498,19 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="sidebar-group-label">Serviços</div>
     <a class="sidebar-item" href="#educ"><span class="s-icon">📚</span> Educação</a>
     <a class="sidebar-item" href="#saude"><span class="s-icon">🏥</span> Saúde</a>
+    <a class="sidebar-item" href="#mort"><span class="s-icon">🕯️</span> Mortalidade</a>
     <a class="sidebar-item" href="#seg"><span class="s-icon">👮</span> Segurança</a>
     <a class="sidebar-item" href="#conect"><span class="s-icon">📶</span> Conectividade</a>
 
     <div class="sidebar-group-label">Governança</div>
     <a class="sidebar-item" href="#pol"><span class="s-icon">🗳️</span> Política</a>
     <a class="sidebar-item" href="#transp"><span class="s-icon">🔍</span> Transparência</a>
+    <a class="sidebar-item" href="#federal"><span class="s-icon">🏛️</span> Recursos Federais</a>
     <a class="sidebar-item" href="#social"><span class="s-icon">🤝</span> Vulnerabilidade</a>
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer">18 temas · Rodado</div>
+  <div class="sidebar-footer">21 temas · Rodado</div>
 </div>
 
 <!-- MAIN -->
@@ -514,56 +543,81 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(var(--accent-rgb),.12);color:var(--accent)">⭐</div>
     <h2>Visão Geral</h2>
-    <span class="table-name">síntese · 8 indicadores-chave</span>
+    <span class="table-name">síntese · 12 indicadores-chave</span>
   </div>
   <div class="grid-4">
     <div class="card card-metric tile st-good-b">
-      <div class="tile-top"><h3>População <span class="vintage">2024</span></h3><span class="status st-good">✓ crescendo</span></div>
+      <div class="tile-top"><h3>População <span class="vintage" id="resPopAno"></span></h3><span class="status st-good" id="stPop">✓ crescendo</span></div>
       <div class="value" id="popVal"></div>
       <div class="delta up" id="popDelta"></div>
       <div class="spark" data-spark-path="secoes.demografia.populacao_serie"></div>
     </div>
     <div class="card card-metric tile st-warn-b">
-      <div class="tile-top"><h3>PIB per capita <span class="vintage">2022</span></h3><span class="status st-warn">! abaixo RJ</span></div>
-      <div class="value">R$ <span data-path="secoes.economia.pib.pib_per_capita.valor" data-fmt="fmt"></span></div>
+      <div class="tile-top"><h3>PIB per capita <span class="vintage" id="resPibPcAno"></span></h3><span class="status st-warn" id="stPibPc">! abaixo RJ</span></div>
+      <div class="value">R$ <span data-path="secoes.economia.pib.pib_per_capita.valor" data-fmt="fmt0"></span></div>
       <div class="delta up" id="pibPcDelta">▲ <span class="vs">vs 2021 (nominal)</span></div>
-      <div class="bench"><span><b>RJ:</b> R$ <span data-path="secoes.economia.pib.pib_per_capita.uf" data-fmt="fmt"></span></span><span><b>Brasil:</b> R$ <span data-path="secoes.economia.pib.pib_per_capita.brasil" data-fmt="fmt"></span></span></div>
+      <div class="bench"><span><b>RJ:</b> R$ <span data-path="secoes.economia.pib.pib_per_capita.uf" data-fmt="fmt0"></span></span><span><b>Brasil:</b> R$ <span data-path="secoes.economia.pib.pib_per_capita.brasil" data-fmt="fmt0"></span></span></div>
     </div>
     <div class="card card-metric tile st-good-b">
-      <div class="tile-top"><h3>IDEB anos iniciais <span class="vintage">2023</span></h3><span class="status st-good">✓ acima da meta</span></div>
+      <div class="tile-top"><h3>IDEB anos iniciais <span class="vintage" id="idebIniciaisAno"></span></h3><span class="status st-good" id="idebIniciaisStatus">✓ acima do Brasil</span></div>
       <div class="value" id="idebIniciaisVal"></div>
       <div class="delta up" id="idebIniciaisDelta"></div>
       <div class="spark" data-spark-key="ideb" data-spark-path="secoes.educacao.ideb.iniciais"></div>
     </div>
-    <div class="card card-metric tile st-serious-b">
-      <div class="tile-top"><h3>Esgoto tratado <span class="vintage">2023</span></h3><span class="status st-serious">! abaixo da meta</span></div>
+    <div class="card card-metric tile st-good-b">
+      <div class="tile-top"><h3>Esgoto tratado <span class="vintage" id="esgVintage"></span></h3><span class="status st-good" id="stEsg">✓ acima da meta</span></div>
       <div class="value"><span data-path="secoes.infraestrutura.snis.indice_tratamento_esgoto" data-fmt="pctRaw"></span> <span class="unit">%</span></div>
       <div class="delta up" id="esgDelta"></div>
-      <div class="bench"><span><b>Brasil:</b> 52,2%</span><span><b>Meta 2033:</b> 90%</span></div>
+      <div class="bench"><span>Do esgoto coletado · <b>Brasil:</b> 52,2%</span><span><b>Meta 2033:</b> 90%</span></div>
+      <div class="sub" id="esgResumoSub"></div>
     </div>
     <div class="card card-metric tile st-good-b">
-      <div class="tile-top"><h3>Homicídios /100k <span class="vintage">2024</span></h3><span class="status st-good">✓ muito abaixo RJ</span></div>
+      <div class="tile-top"><h3>Homicídios /100k <span class="vintage" id="homVintage"></span></h3><span class="status st-good" id="stHom">✓ muito abaixo RJ</span></div>
       <div class="value" id="homVal"></div>
       <div class="delta down-good" id="homDelta"></div>
       <div class="bench"><span><b>RJ:</b> <span data-path="secoes.seguranca.isp_rj.taxas_100k_uf.taxa_homicidio_doloso" data-fmt="fmt1"></span></span><span><b>Brasil:</b> 21,2</span></div>
     </div>
     <div class="card card-metric tile st-good-b">
-      <div class="tile-top"><h3>Saldo de empregos <span class="vintage">2024</span></h3><span class="status st-good">✓ positivo</span></div>
+      <div class="tile-top"><h3>Saldo de empregos <span class="vintage" id="resCagedAno"></span></h3><span class="status st-good" id="stCaged">✓ positivo</span></div>
       <div class="value" id="cagedSaldo"></div>
       <div class="delta up" id="cagedDet"></div>
       <div class="spark" data-spark-key="saldo" data-spark-path="secoes.trabalho.caged"></div>
     </div>
     <div class="card card-metric tile st-warn-b">
-      <div class="tile-top"><h3>Conectividade (IBC) <span class="vintage">2025</span></h3><span class="status st-warn">! mediano</span></div>
+      <div class="tile-top"><h3>Conectividade (IBC) <span class="vintage" id="resIbcAno"></span></h3><span class="status st-warn" id="stIbc">! mediano</span></div>
       <div class="value" id="ibcVal"></div>
       <div class="delta up" id="ibcDelta"></div>
       <div class="bench"><span><b>Média Brasil:</b> <span data-path="secoes.conectividade.ibc.media_brasil" data-fmt="fmt1"></span></span></div>
     </div>
     <div class="card card-metric tile st-good-b">
-      <div class="tile-top"><h3>IDHM <span class="vintage old">2010</span></h3><span class="status st-good">✓ alto</span></div>
+      <div class="tile-top"><h3>IDHM <span class="vintage old">2010</span></h3><span class="status st-good" id="stIdhm">✓ alto</span></div>
       <div class="value" id="idhmVal"></div>
       <div class="bench"><span><b>RJ:</b> 0,761</span><span><b>Brasil:</b> 0,727</span></div>
       <div class="sub">Dado com mais de 5 anos — aguarda censo</div>
+    </div>
+    <div class="card card-metric tile st-good-b">
+      <div class="tile-top"><h3>Mortalidade infantil <span class="vintage" id="resInfAno"></span></h3><span class="status st-good" id="stInf">✓ abaixo do Brasil</span></div>
+      <div class="value" id="resInfVal"></div>
+      <div class="delta down-good" id="resInfDelta"></div>
+      <div class="bench"><span><b>Brasil:</b> 13,2</span><span><b>Meta ODS:</b> 8,0</span></div>
+    </div>
+    <div class="card card-metric tile st-warn-b">
+      <div class="tile-top"><h3>Internações SUS <span class="vintage" id="resSihAno"></span></h3><span class="status st-warn" id="stSih">! em alta</span></div>
+      <div class="value" id="resSihVal"></div>
+      <div class="delta up-bad" id="resSihDelta"></div>
+      <div class="spark" data-spark-key="internacoes" data-spark-path="secoes.saude.internacoes.serie"></div>
+    </div>
+    <div class="card card-metric tile st-serious-b">
+      <div class="tile-top"><h3>Violência notificada <span class="vintage" id="resViolAno"></span></h3><span class="status st-serious" id="stViol">! subnotificado</span></div>
+      <div class="value" id="resViolVal"></div>
+      <div class="delta" id="resViolDelta"></div>
+      <div class="spark" data-spark-key="notificacoes" data-spark-path="secoes.seguranca.violencia_sinan.serie"></div>
+    </div>
+    <div class="card card-metric tile">
+      <div class="tile-top"><h3>Empresas ativas <span class="vintage" id="resEmpAno"></span></h3><span class="status st-good" id="stEmp">✓ saldo positivo</span></div>
+      <div class="value" id="resEmpVal"></div>
+      <div class="delta up" id="resEmpDelta"></div>
+      <div class="spark" data-spark-key="saldo" data-spark-path="secoes.empresas.demografia_empresarial"></div>
     </div>
   </div>
   <div class="card mt-1">
@@ -586,10 +640,10 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric"><h3>Censo <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.populacao" data-fmt="fmt"></span> <span class="unit">hab</span></div><div class="delta up" id="censoDelta"></div></div>
     <div class="card card-metric"><h3>Domicílios <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.domicilios" data-fmt="fmt"></span></div><div class="sub" id="domicSub"></div></div>
     <div class="card card-metric"><h3>Densidade <span class="vintage">2024</span></h3><div class="value" id="densVal"></div><div class="bench"><span><b>RJ:</b> 366</span><span><b>Brasil:</b> 24</span></div></div>
-    <div class="card card-metric st-good-b"><h3>Alfabetização <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.taxa_alfabetizacao" data-fmt="pct"></span></div><div class="delta up" id="alfDelta"></div><div class="bench"><span><b>RJ:</b> 96,1%</span><span><b>Brasil:</b> 93,0%</span></div></div>
+    <div class="card card-metric st-good-b"><h3>Alfabetização <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.taxa_alfabetizacao" data-fmt="pct"></span></div><div class="sub" id="alfDelta"></div><div class="bench"><span><b>RJ:</b> 96,1%</span><span><b>Brasil:</b> 93,0%</span></div></div>
     <div class="card card-metric"><h3>Idade mediana <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.idade_mediana" data-fmt="fmt1"></span> <span class="unit">anos</span></div><div class="bench"><span><b>Brasil:</b> 35,0</span></div></div>
     <div class="card card-metric"><h3>Razão de sexo <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.razao_sexo" data-fmt="fmt1"></span></div><div class="sub">Homens por 100 mulheres</div></div>
-    <div class="card card-metric st-warn-b"><h3>Envelhecimento <span class="vintage">2022</span></h3><div class="value" id="envVal"></div><div class="delta up-bad" id="envDelta"></div><div class="bench"><span>Idosos/100 jovens · <b>Brasil:</b> 80,0</span></div></div>
+    <div class="card card-metric st-warn-b"><h3>Envelhecimento <span class="vintage">2022</span></h3><div class="value" id="envVal"></div><div class="sub" id="envDelta"></div><div class="bench"><span>Idosos/100 jovens · <b>Brasil:</b> 80,0</span></div></div>
   </div>
   <div class="grid-2 mt-1">
     <div class="card card-chart">
@@ -597,11 +651,27 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="chart-container tall"><canvas id="popAgeChart"></canvas></div>
     </div>
     <div class="card card-chart">
-      <h3>Evolução populacional <span class="vintage"></span></h3>
+      <h3>Evolução populacional <span class="vintage" id="popEvolAno"></span></h3>
       <div style="display:flex;flex:1;gap:.85rem;min-height:0">
         <div class="chart-container" style="flex:1"><canvas id="popEvolChart"></canvas></div>
         <ul class="data-list" style="width:115px;flex-shrink:0;padding-left:.65rem;border-left:1px solid var(--border)" id="popEvolList"></ul>
       </div>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>Cor ou raça <span class="vintage">2010 vs 2022</span></h3>
+      <div class="chart-container"><canvas id="racaChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="racaSub"></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Religião <span class="vintage">2022</span> <span style="text-transform:none;letter-spacing:0;color:var(--text2)">(10 anos ou mais)</span></h3>
+      <div class="chart-container"><canvas id="religiaoChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Alfabetização por cor/raça <span class="vintage">2022</span></h3>
+      <ul class="data-list" id="alfRacaList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Diferença entre o maior e o menor grupo: <b id="alfRacaGap"></b></span></div>
     </div>
   </div>
 </div>
@@ -639,7 +709,9 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-2">
     <div class="card">
       <h3>PRODES — Mata Atlântica <span class="vintage" id="prodesAno">2023</span></h3>
-      <ul class="data-list" id="prodesList">
+      <div class="meter"><div class="meter-fill" id="prodesMeter" style="width:0%"></div></div>
+      <div class="meter-legend"><span>Vegetação natural remanescente: <b style="color:var(--text)" id="prodesVegPct">—</b></span><span id="prodesAreaTotal"></span></div>
+      <ul class="data-list mt-1" id="prodesList">
       </ul>
       <div class="bench" style="margin-top:.5rem"><span><b>Mata Atlântica (BR):</b> 24% de vegetação remanescente</span></div>
     </div>
@@ -680,7 +752,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-3">
     <div class="card card-metric st-good-b"><h3>Água — atendimento <span class="vintage" id="snisAno"></span></h3><div class="value" id="aguaVal"></div><div class="delta up" id="aguaDelta"></div><div class="bench"><span><b>Brasil:</b> 84,2%</span></div></div>
     <div class="card card-metric st-warn-b"><h3>Esgoto — coleta <span class="vintage" id="snisAno2"></span></h3><div class="value" id="esgCVal"></div><div class="delta up" id="esgCDelta"></div><div class="bench"><span><b>Brasil:</b> 55,8%</span><span><b>Meta 2033:</b> 90%</span></div></div>
-    <div class="card card-metric st-serious-b"><h3>Esgoto tratado <span class="vintage" id="snisAno3"></span></h3><div class="value" id="esgTVal"></div><div class="bench"><span>Do coletado · <b>Brasil:</b> 52,2%</span></div></div>
+    <div class="card card-metric st-good-b"><h3>Esgoto tratado <span class="vintage" id="snisAno3"></span></h3><div class="value" id="esgTVal"></div><div class="bench"><span>Do coletado · <b>Brasil:</b> 52,2%</span></div><div class="sub" id="esgTSub"></div></div>
   </div>
   <div class="grid-2 mt-1">
     <div class="card">
@@ -706,6 +778,35 @@ details.more > .more-body { margin-top: .4rem; }
         <ul class="data-list more-body" id="snisDetList">
         </ul>
       </details>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Censo — esgotamento sanitário declarado <span class="vintage">2022</span></h3>
+      <div class="chart-container"><canvas id="domEsgotoChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="domEsgotoNota"></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Censo — abastecimento de água declarado <span class="vintage">2022</span></h3>
+      <div class="chart-container"><canvas id="domAguaChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="domAguaNota"></div>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card">
+      <h3>Destino do lixo <span class="vintage">2022</span></h3>
+      <div class="sub" style="margin-bottom:.55rem">% da população residente</div>
+      <div class="bench-bars wide" id="domLixoBars"></div>
+    </div>
+    <div class="card">
+      <h3>Tipo de domicílio <span class="vintage">2022</span></h3>
+      <div class="sub" style="margin-bottom:.55rem">% da população residente</div>
+      <div class="bench-bars wide" id="domTipoBars"></div>
+    </div>
+    <div class="card">
+      <h3>Domicílios recenseados <span class="vintage">2022</span></h3>
+      <div class="sub" style="margin-bottom:.55rem">Contagem de domicílios, não de moradores</div>
+      <ul class="data-list" id="domRecList"></ul>
     </div>
   </div>
 </div>
@@ -754,23 +855,53 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="bcList"></ul>
     </div>
     <div class="card">
-      <h3>Compras públicas <span class="vintage">2024</span></h3>
-      <ul class="data-list">
-        <li><span>Licitações realizadas</span><span>187</span></li>
-        <li><span>Valor total licitado</span><span>R$ 312 mi</span></li>
-        <li><span>Contratos ativos</span><span>243</span></li>
-      </ul>
+      <h3>Combustíveis — preço médio <span class="vintage" id="anpAno"></span></h3>
+      <ul class="data-list" id="anpList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span id="anpPostos"></span></div>
+      <details class="more"><summary>ver todos os produtos</summary>
+        <ul class="data-list more-body" id="anpDetList"></ul>
+      </details>
     </div>
     <div class="card">
       <h3>INPC — variação <span class="vintage" id="inpcAno"></span></h3>
       <ul class="data-list" id="inpcList"></ul>
       <details class="more"><summary>ver detalhes</summary>
-        <ul class="data-list more-body" id="inpcDetList">
-          <li><span>Acumulado no ano</span><span>4,87%</span></li>
-          <li><span>Meta de inflação (BCB)</span><span>3,0% ± 1,5 pp</span></li>
-        </ul>
+        <ul class="data-list more-body" id="inpcDetList"></ul>
       </details>
     </div>
+  </div>
+</div>
+
+<!-- EMPRESAS -->
+<div class="section" id="emp">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🏭</div>
+    <h2>Empresas & Base CNPJ</h2>
+    <span class="table-name">br_me_cnpj.estabelecimentos · cnae_2</span>
+  </div>
+  <div class="grid-4">
+    <div class="card card-metric"><h3>Estabelecimentos ativos <span class="vintage" id="cnpjComp"></span></h3><div class="value" id="cnpjAtivas"></div><div class="sub" id="cnpjPorHab"></div></div>
+    <div class="card card-metric"><h3>Matrizes / filiais <span class="vintage" id="cnpjComp2"></span></h3><div class="value" id="cnpjMatriz"></div><div class="sub" id="cnpjFilial"></div></div>
+    <div class="card card-metric"><h3>Idade média <span class="vintage" id="cnpjComp3"></span></h3><div class="value" id="cnpjIdade"></div><div class="sub">Tempo desde a abertura, entre as ativas</div></div>
+    <div class="card card-metric"><h3>Já baixados <span class="vintage" id="cnpjComp4"></span></h3><div class="value" id="cnpjBaixadas"></div><div class="sub" id="cnpjRegistradas"></div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Ativos por seção CNAE <span class="vintage" id="cnpjComp5"></span></h3>
+      <div class="chart-container tall"><canvas id="cnaeChart"></canvas></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Aberturas e baixas por ano <span class="vintage" id="cnpjDemoAno"></span></h3>
+      <div class="chart-container tall"><canvas id="cnpjDemoChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="cnpjDemoSub"></div>
+    </div>
+  </div>
+  <div class="card mt-1">
+    <h3>Atividades mais frequentes <span class="vintage" id="cnpjComp6"></span></h3>
+    <table class="rank-table">
+      <thead><tr><th>Atividade (CNAE subclasse)</th><th>% dos ativos</th><th>Estabelecimentos</th></tr></thead>
+      <tbody id="cnaeTopList"></tbody>
+    </table>
   </div>
 </div>
 
@@ -845,7 +976,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-3">
     <div class="card card-metric"><h3>Exportações <span class="vintage" id="comexAno"></span></h3><div class="value" id="expVal"></div><div class="delta up" id="expDelta"></div></div>
     <div class="card card-metric"><h3>Importações <span class="vintage" id="comexAno2"></span></h3><div class="value" id="impVal"></div><div class="delta up-bad" id="impDelta"></div></div>
-    <div class="card card-metric st-warn-b"><h3>Balança comercial <span class="vintage" id="comexAno3"></span> <span class="status st-warn">! déficit</span></h3><div class="value" id="balancaVal"></div><div class="sub">Déficit ampliado pelo 2º ano</div></div>
+    <div class="card card-metric st-warn-b"><h3>Balança comercial <span class="vintage" id="comexAno3"></span> <span class="status st-warn" id="stComex">! déficit</span></h3><div class="value" id="balancaVal"></div><div class="sub" id="balancaSub"></div></div>
   </div>
   <div class="grid-3 mt-1">
     <div class="card card-chart">
@@ -902,17 +1033,10 @@ details.more > .more-body { margin-top: .4rem; }
       </details>
     </div>
     <div class="card">
-      <h3>Atendimento escolar <span class="vintage">2023</span></h3>
-      <ul class="data-list">
-        <li><span>Creche</span><span>34,2%</span></li>
-        <li><span>Pré-escola</span><span>78,6%</span></li>
-        <li><span>EF anos iniciais</span><span>91,3%</span></li>
-      </ul>
+      <h3>Matrículas por etapa <span class="vintage" id="censoEscAno"></span></h3>
+      <div class="bench-bars wide" id="matEtapaBars"></div>
       <details class="more"><summary>ver detalhes</summary>
-        <ul class="data-list more-body">
-          <li><span>EF anos finais</span><span>87,1%</span></li>
-          <li><span>Taxa de evasão (EF)</span><span>2,3%</span></li>
-        </ul>
+        <ul class="data-list more-body" id="matEtapaDetList"></ul>
       </details>
     </div>
     <div class="card">
@@ -921,6 +1045,31 @@ details.more > .more-body { margin-top: .4rem; }
       <details class="more"><summary>ver por área</summary>
         <ul class="data-list more-body" id="enemDetList"></ul>
       </details>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Escolas em atividade <span class="vintage" id="censoEscAno2"></span></h3><div class="value" id="escTotal"></div><div class="sub" id="escRuralSub"></div></div>
+    <div class="card card-metric"><h3>Matrículas <span class="vintage" id="censoEscAno3"></span></h3><div class="value" id="escMat"></div><div class="delta up" id="escMatDelta"></div></div>
+    <div class="card card-metric"><h3>Docentes <span class="vintage" id="censoEscAno4"></span></h3><div class="value" id="escDoc"></div><div class="sub" id="escDocSub"></div></div>
+    <div class="card card-metric"><h3>Transporte escolar <span class="vintage" id="censoEscAno5"></span></h3><div class="value" id="escTransp"></div><div class="sub" id="escTranspSub"></div></div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>Matrículas por rede <span class="vintage" id="censoEscAno6"></span></h3>
+      <div class="chart-container"><canvas id="redeChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Infraestrutura das escolas <span class="vintage" id="censoEscAno7"></span></h3>
+      <div class="sub" style="margin-bottom:.6rem">Proporção das escolas em atividade que possuem cada item</div>
+      <div class="bench-bars wide" id="escInfraBars"></div>
+    </div>
+    <div class="card">
+      <h3>SISU — ingresso no superior <span class="vintage" id="sisuAno"></span></h3>
+      <ul class="data-list" id="sisuList"></ul>
+      <details class="more"><summary>cursos mais escolhidos</summary>
+        <ul class="data-list more-body" id="sisuCursosList"></ul>
+      </details>
+      <div class="sub" style="margin-top:.5rem">Conta matrícula efetivada, não só aprovação — quem foi aprovado e não foi convocado não entra</div>
     </div>
   </div>
 </div>
@@ -944,13 +1093,93 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="nasciList"></ul>
     </div>
     <div class="card">
-      <h3>Dengue <span class="vintage" id="dengueAno"></span> <span class="status st-good">✓ em queda</span></h3>
+      <h3>Dengue <span class="vintage" id="dengueAno"></span> <span class="status st-good" id="stDengue">✓ em queda</span></h3>
       <ul class="data-list" id="dengueList"></ul>
       <div class="delta down-good" style="margin-top:.4rem" id="dengueDelta"></div>
     </div>
     <div class="card">
       <h3>SISVAN — vigilância alimentar <span class="vintage" id="sisvanAno"></span></h3>
       <ul class="data-list" id="sisvanList"></ul>
+    </div>
+  </div>
+  <div class="metric-row mt-1">
+    <div class="card card-metric"><h3>Médicos /1.000 hab <span class="vintage old" id="iepsAno"></span></h3><div class="value" id="iepsMed"></div><div class="bench"><span><b>Brasil:</b> 2,4</span><span><b>OMS ref.:</b> 1,0</span></div></div>
+    <div class="card card-metric"><h3>Enfermeiros /1.000 hab <span class="vintage old" id="iepsAno2"></span></h3><div class="value" id="iepsEnf"></div><div class="bench"><span><b>Brasil:</b> 1,5</span></div></div>
+    <div class="card card-metric st-warn-b"><h3>Cobertura ESF <span class="vintage old" id="iepsAno3"></span></h3><div class="value" id="iepsEsf"></div><div class="bench"><span><b>Brasil:</b> 63%</span></div></div>
+    <div class="card card-metric"><h3>Gasto público em saúde <span class="vintage old" id="iepsAno4"></span></h3><div class="value" id="iepsGasto"></div><div class="bench" id="iepsGastoBench"></div></div>
+    <div class="card card-metric"><h3>Plano de saúde privado <span class="vintage" id="ansComp"></span></h3><div class="value" id="ansCob"></div><div class="sub" id="ansSub"></div></div>
+    <div class="card card-metric"><h3>Farmácia Popular <span class="vintage">rede atual</span></h3><div class="value" id="farmPopVal"></div><div class="sub">Estabelecimentos credenciados</div></div>
+    <div class="card card-metric st-warn-b"><h3>Internações evitáveis <span class="vintage old" id="iepsAno5"></span></h3><div class="value" id="iepsCsap"></div><div class="sub">Por 100 mil hab (condições sensíveis à atenção básica)</div></div>
+    <div class="card card-metric"><h3>Pré-natal adequado <span class="vintage old" id="iepsAno6"></span></h3><div class="value" id="iepsPrenatal"></div><div class="sub" id="iepsPrenatalSub"></div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Cobertura vacinal infantil <span class="vintage old" id="imunAno"></span></h3>
+      <div class="chart-container"><canvas id="imunChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Acima de 100% ocorre quando há mais doses aplicadas que a população-alvo estimada (demanda de fora do município)</div>
+    </div>
+    <div class="card">
+      <h3>Planos privados por tipo de contratação <span class="vintage" id="ansComp2"></span></h3>
+      <ul class="data-list" id="ansList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Beneficiários odontológicos são contados à parte — somá-los à cobertura médico-hospitalar infla o número</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MORTALIDADE & INTERNAÇÕES -->
+<div class="section" id="mort">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(var(--s8-rgb),.12);color:var(--s8)">🕯️</div>
+    <h2>Mortalidade & Internações</h2>
+    <span class="table-name">br_ms_sim · br_ms_sih · br_datasus_cid10</span>
+  </div>
+  <div class="grid-4">
+    <div class="card card-metric"><h3>Óbitos <span class="vintage" id="simAno"></span></h3><div class="value" id="simObitos"></div><div class="sub" id="simTaxa"></div></div>
+    <div class="card card-metric st-good-b"><h3>Mortalidade infantil <span class="vintage" id="simAno2"></span></h3><div class="value" id="simInfantil"></div><div class="sub" id="simNeonatalSub"></div><div class="bench"><span><b>Brasil:</b> 13,2</span><span><b>Meta ODS:</b> 8,0</span></div></div>
+    <div class="card card-metric"><h3>Idade média ao morrer <span class="vintage" id="simAno3"></span></h3><div class="value" id="simIdade"></div><div class="sub" id="simSexo"></div></div>
+    <div class="card card-metric st-warn-b"><h3>Causas mal definidas <span class="vintage" id="simAno4"></span></h3><div class="value" id="simMalDef"></div><div class="sub">Capítulo XVIII do CID-10 — indicador da qualidade do registro</div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Óbitos por capítulo CID-10 <span class="vintage" id="simAno5"></span></h3>
+      <div class="chart-container tall"><canvas id="simCapChart"></canvas></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Óbitos por ano <span class="vintage" id="simSerieAno"></span></h3>
+      <div class="chart-container tall"><canvas id="simSerieChart"></canvas></div>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card">
+      <h3>Principais causas específicas <span class="vintage" id="simAno6"></span></h3>
+      <table class="rank-table">
+        <thead><tr><th>Causa (CID-10)</th><th>Código</th><th>Óbitos</th></tr></thead>
+        <tbody id="simCausasList"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Mortes por causas externas <span class="vintage" id="simAno7"></span></h3>
+      <div class="value" id="simExternasTotal"></div>
+      <div class="sub" id="simExternasSub" style="margin-bottom:.85rem"></div>
+      <div class="bench-bars wide" id="simExternasBars"></div>
+      <ul class="data-list mt-1" id="simMaternasList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Capítulo XX do CID-10 (V01–Y98): acidentes, agressões e lesões autoprovocadas. Óbito materno é do capítulo XV — está fora dessa conta, aparece aqui só por proximidade temática.</span></div>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Internações SUS <span class="vintage" id="sihAno"></span></h3><div class="value" id="sihTotal"></div><div class="delta up" id="sihDelta"></div></div>
+    <div class="card card-metric"><h3>Gasto SUS com AIH <span class="vintage" id="sihAno2"></span></h3><div class="value" id="sihValor"></div><div class="sub" id="sihValorMedio"></div></div>
+    <div class="card card-metric st-warn-b"><h3>Mortalidade hospitalar <span class="vintage" id="sihAno3"></span></h3><div class="value" id="sihMort"></div><div class="sub" id="sihObitos"></div></div>
+    <div class="card card-metric"><h3>Internados no município <span class="vintage" id="sihAno4"></span></h3><div class="value" id="sihLocal"></div><div class="sub" id="sihLocalSub"></div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Internações por capítulo CID-10 <span class="vintage" id="sihAno5"></span></h3>
+      <div class="chart-container tall"><canvas id="sihCapChart"></canvas></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Internações e gasto SUS por ano <span class="vintage" id="sihSerieAno"></span></h3>
+      <div class="chart-container tall"><canvas id="sihSerieChart"></canvas></div>
     </div>
   </div>
 </div>
@@ -962,14 +1191,15 @@ details.more > .more-body { margin-top: .4rem; }
     <h2>Segurança Pública</h2>
     <span class="table-name">br_fbsp_absp · br_rj_isp_estatisticas</span>
   </div>
+  <div class="sub" id="fbspNota" style="margin:-.5rem 0 .8rem"></div>
   <div class="metric-row">
     <div class="card card-metric st-good-b"><h3>Homicídio doloso <span class="vintage" id="segAno"></span></h3><div class="value" id="segHomicidios"></div><div class="delta down-good" id="segHomicDelta"></div><div class="bench" id="segHomicBench"></div></div>
     <div class="card card-metric st-good-b"><h3>Letalidade violenta <span class="vintage" id="segAno2"></span></h3><div class="value" id="segLetal"></div><div class="bench" id="segLetalBench"></div></div>
-    <div class="card card-metric st-warn-b"><h3>Estupro <span class="vintage" id="segAno3"></span></h3><div class="value" id="segEstupro"></div><div class="delta up-bad" id="segEstDelta"></div></div>
+    <div class="card card-metric st-warn-b"><h3>Estupro <span class="vintage" id="segAno3"></span></h3><div class="value" id="segEstupro"></div><div class="bench" id="segEstBench"></div></div>
     <div class="card card-metric st-crit-b"><h3>Intervenção policial <span class="vintage" id="segAno4"></span></h3><div class="value" id="segInterv"></div><div class="sub">Mortes</div></div>
     <div class="card card-metric"><h3>Roubo de veículos <span class="vintage" id="segAno5"></span></h3><div class="value" id="segRoubo"></div><div class="bench" id="segRouboBench"></div></div>
     <div class="card card-metric st-warn-b"><h3>Tentativa de homicídio <span class="vintage" id="segAno6"></span></h3><div class="value" id="segTentativa"></div><div class="sub">Registros</div></div>
-    <div class="card card-metric"><h3>Latrocinio <span class="vintage" id="segAno7"></span></h3><div class="value" id="segLatroc"></div></div>
+    <div class="card card-metric"><h3>Latrocínio <span class="vintage" id="segAno7"></span></h3><div class="value" id="segLatroc"></div></div>
     <div class="card card-metric st-crit-b"><h3>CVLI <span class="vintage" id="segAno8"></span></h3><div class="value" id="segCvli"></div><div class="sub">Crimes violentos letais intencionais</div></div>
   </div>
   <div class="grid-2 mt-1">
@@ -977,9 +1207,35 @@ details.more > .more-body { margin-top: .4rem; }
       <h3>Homicídio doloso — evolução mensal <span class="vintage" id="segAno9"></span></h3>
       <div class="chart-container"><canvas id="crimeChart"></canvas></div>
     </div>
+    <div class="card card-chart">
+      <h3>Taxas por 100 mil hab — município e RJ <span class="vintage" id="segAno10"></span></h3>
+      <div class="chart-container"><canvas id="taxasChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="taxasNota"></div>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Notificações de violência <span class="vintage" id="violAno"></span></h3><div class="value" id="violTotal"></div><div class="sub">SINAN/VIVA — notificação compulsória na saúde</div></div>
+    <div class="card card-metric st-serious-b"><h3>Vítimas do sexo feminino <span class="vintage" id="violAno2"></span></h3><div class="value" id="violFem"></div><div class="sub" id="violFemSub"></div></div>
+    <div class="card card-metric"><h3>Vítimas negras <span class="vintage" id="violAno3"></span></h3><div class="value" id="violNegros"></div><div class="sub" id="violNegrosSub"></div></div>
+    <div class="card card-metric st-crit-b"><h3>Lesão autoprovocada <span class="vintage" id="violAno4"></span></h3><div class="value" id="violAuto"></div><div class="sub" id="violAutoSub"></div></div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>Notificações por ano <span class="vintage" id="violSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="violSerieChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Série pelo lote de fechamento do SINAN (<code>ano_sinan</code>); oscilações refletem também a intensidade da notificação, não só a ocorrência</div>
+    </div>
+    <div class="card card-chart">
+      <h3>Tipo de violência notificada <span class="vintage" id="violAno5"></span></h3>
+      <div class="chart-container"><canvas id="violTipoChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Uma notificação pode registrar mais de um tipo</div>
+    </div>
     <div class="card">
-      <h3>Taxas por 100k hab <span class="vintage" id="segAno10"></span></h3>
-      <ul class="data-list" id="taxasList"></ul>
+      <h3>Onde e com quem <span class="vintage" id="violAno6"></span></h3>
+      <div class="sub" style="margin-bottom:.5rem">Local da ocorrência</div>
+      <div class="bench-bars wide" id="violLocalBars"></div>
+      <div class="sub" style="margin-top:.85rem;margin-bottom:.5rem">Ciclo de vida da vítima</div>
+      <div class="bench-bars wide" id="violCicloBars"></div>
     </div>
   </div>
 </div>
@@ -1014,10 +1270,29 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card">
       <h3>Perfil do eleitorado <span class="vintage" id="polAno2"></span></h3>
       <ul class="data-list" id="polPerfilList"></ul>
+      <div class="sub" style="margin:.85rem 0 .5rem">Grau de instrução declarado</div>
+      <div class="bench-bars wide" id="polInstrucaoBars"></div>
     </div>
     <div class="card">
       <h3>Resultados — prefeito <span class="vintage" id="polAno3"></span></h3>
       <ul class="data-list" id="polResultList"></ul>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>Câmara Municipal — bancadas <span class="vintage" id="camAno"></span> <span style="text-transform:none;letter-spacing:0;color:var(--text2)" id="camTotal"></span></h3>
+      <div class="chart-container"><canvas id="camaraChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Perfil dos candidatos <span class="vintage" id="camAno2"></span></h3>
+      <ul class="data-list" id="candPerfilList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Candidatos a prefeito e vereador na eleição municipal</span></div>
+    </div>
+    <div class="card">
+      <h3>Financiamento de campanha <span class="vintage" id="camAno3"></span></h3>
+      <ul class="data-list" id="financList"></ul>
+      <div class="sub" style="margin-top:.6rem;margin-bottom:.2rem">Deputados federais nascidos no município</div>
+      <ul class="data-list" id="depNascList"></ul>
     </div>
   </div>
 </div>
@@ -1041,11 +1316,89 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="clpList"></ul>
     </div>
     <div class="card">
-      <h3>CGU — fiscalizações</h3>
-      <ul class="data-list">
-        <li><span>Último sorteio</span><span>nº 42 (2022)</span></li>
-        <li><span>Já fiscalizado?</span><span>Sim (2015, 2022)</span></li>
-      </ul>
+      <h3>Diário Oficial <span class="vintage" id="qdAno"></span></h3>
+      <ul class="data-list" id="qdList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Coletado pelo Querido Diário (Open Knowledge Brasil)</span></div>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>IFGF — índice Firjan de gestão fiscal <span class="vintage" id="ifgfAno"></span></h3>
+      <div class="chart-container"><canvas id="ifgfChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="ifgfSub"></div>
+    </div>
+    <div class="card">
+      <h3>CAPAG — capacidade de pagamento</h3>
+      <ul class="data-list" id="capagList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Tesouro Nacional · notas A–D por indicador; a nota geral só sai com a DCA entregue</span></div>
+    </div>
+    <div class="card">
+      <h3>Servidores municipais <span class="vintage" id="servAno"></span></h3>
+      <ul class="data-list" id="servList"></ul>
+      <div class="bench" style="margin-top:.5rem"><span>Pesquisa MUNIC/IBGE — administração direta</span></div>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Consumidor.gov.br — reclamações <span class="vintage" id="consAno"></span></h3>
+      <div class="chart-container"><canvas id="consChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="consSub"></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Reclamações por setor <span class="vintage" id="consAno2"></span></h3>
+      <div class="chart-container"><canvas id="consSegChart"></canvas></div>
+      <details class="more"><summary>empresas mais reclamadas</summary>
+        <ul class="data-list more-body" id="consEmpList"></ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- RECURSOS FEDERAIS -->
+<div class="section" id="federal">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(var(--s5-rgb, 25,158,112),.15);color:var(--s5)">🏛️</div>
+    <h2>Recursos Federais</h2>
+    <span class="table-name">br_cgu_emendas_parlamentares · br_cgu_licitacao_contrato · br_me_cnpj</span>
+  </div>
+  <div class="grid-4">
+    <div class="card card-metric"><h3>Emendas pagas <span class="vintage" id="emdAno"></span></h3><div class="value" id="emdPago"></div><div class="sub" id="emdSub"></div></div>
+    <div class="card card-metric"><h3>Empenhado <span class="vintage" id="emdAno2"></span></h3><div class="value" id="emdEmp"></div><div class="sub" id="emdExecSub"></div></div>
+    <div class="card card-metric"><h3>Contratos federais de empresas locais <span class="vintage" id="fornAno"></span></h3><div class="value" id="fornValor"></div><div class="sub" id="fornSub"></div></div>
+    <div class="card card-metric"><h3>Licitações federais no município <span class="vintage" id="licAno"></span></h3><div class="value" id="licValor"></div><div class="sub" id="licSub"></div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Emendas parlamentares por ano <span class="vintage" id="emdSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="emdChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Ano da emenda, não do desembolso — pago e empenhado de anos recentes ainda podem crescer</div>
+    </div>
+    <div class="card">
+      <h3>Quem destinou <span class="vintage" id="emdJanela"></span></h3>
+      <table class="rank-table">
+        <thead><tr><th>Parlamentar</th><th>Emendas</th><th>Pago</th></tr></thead>
+        <tbody id="emdAutoresList"></tbody>
+      </table>
+      <details class="more"><summary>por função de governo</summary>
+        <ul class="data-list more-body" id="emdFuncaoList"></ul>
+      </details>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card">
+      <h3>Fornecedores locais da União <span class="vintage" id="fornJanela"></span></h3>
+      <div class="sub" style="margin-bottom:.4rem">Empresas com CNPJ no município que assinaram contrato com órgão federal</div>
+      <table class="rank-table">
+        <thead><tr><th>Empresa</th><th>Contratos</th><th>Valor</th></tr></thead>
+        <tbody id="fornList"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Licitações federais realizadas no município <span class="vintage" id="licJanela"></span></h3>
+      <ul class="data-list" id="licOrgaoList"></ul>
+      <div class="sub" style="margin:.85rem 0 .5rem">Valor licitado por ano</div>
+      <div class="bench-bars wide" id="licAnoBars"></div>
+      <div class="bench" style="margin-top:.5rem"><span>Só compras do Executivo federal (Compras.gov) — não inclui licitação da prefeitura</span><span id="licNota"></span></div>
     </div>
   </div>
 </div>
@@ -1059,14 +1412,17 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
   <div class="grid-3">
     <div class="card">
-      <h3>IVS — vulnerabilidade social <span class="vintage old">2010</span> <span class="status st-good">✓ baixa</span></h3>
-      <ul class="data-list" id="ivsList"></ul>
+      <h3>IVS — vulnerabilidade social <span class="vintage old">2010</span> <span class="status st-good" id="stIvs">✓ baixa</span></h3>
+      <div class="sub" style="margin-bottom:.55rem">Escala 0–1 — quanto <b>menor</b>, melhor</div>
+      <div class="bench-bars wide" id="ivsBars"></div>
+      <div class="bench" style="margin-top:.5rem"><span><b>IVS geral do Brasil:</b> 0,326</span></div>
     </div>
     <div class="card">
-      <h3>IDHM <span class="vintage old">2010</span> <span class="status st-good">✓ alto</span></h3>
+      <h3>IDHM <span class="vintage old">2010</span> <span class="status st-good" id="stIdhm2">✓ alto</span></h3>
       <div class="value-sm" id="idhmVal2"></div>
       <div class="bench"><span><b>RJ:</b> 0,761</span><span><b>Brasil:</b> 0,727</span></div>
-      <ul class="data-list mt-1" id="idhmCompList"></ul>
+      <div class="sub" style="margin:.85rem 0 .55rem">Componentes — escala 0–1, quanto <b>maior</b>, melhor</div>
+      <div class="bench-bars wide" id="idhmCompBars"></div>
     </div>
     <div class="card">
       <h3>Primeira infância <span class="vintage" id="piAno"></span></h3>
@@ -1087,6 +1443,14 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric"><h3>Valor médio <span class="vintage" id="bfAno2"></span></h3><div class="value" id="bfValMed"></div><div class="bench"><span><b>Brasil:</b> R$ 673</span></div></div>
     <div class="card card-metric"><h3>Repasse mensal <span class="vintage" id="bfAno3"></span></h3><div class="value" id="bfRepasse"></div><div class="sub">Total transferido ao município</div></div>
     <div class="card card-metric"><h3>BPC <span class="vintage" id="bpcAno"></span></h3><div class="value" id="bpcVal"></div><div class="sub">Beneficiários</div></div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-metric"><h3>Cadastro Único — pessoas <span class="vintage old" id="cadAno"></span></h3><div class="value" id="cadPessoas"></div><div class="sub" id="cadPctSub"></div></div>
+    <div class="card card-metric"><h3>Cadastro Único — famílias <span class="vintage old" id="cadAno2"></span></h3><div class="value" id="cadFamilias"></div><div class="sub" id="cadFamSub"></div></div>
+    <div class="card">
+      <h3>O que o CadÚnico mede</h3>
+      <div class="sub">Registro de baixa renda que dá acesso a Bolsa Família, tarifa social de energia, BPC e outros programas — cobre mais gente do que recebe benefício. Última competência disponível no espelho é de 2020.</div>
+    </div>
   </div>
 </div>
 
@@ -1144,15 +1508,18 @@ details.more > .more-body { margin-top: .4rem; }
   <a href="#amb"><span class="m-icon">🌳</span>Ambiente</a>
   <a href="#infra"><span class="m-icon">🚰</span>Infra</a>
   <a href="#econ"><span class="m-icon">💰</span>Economia</a>
+  <a href="#emp"><span class="m-icon">🏭</span>Empresas</a>
   <a href="#trab"><span class="m-icon">💼</span>Trabalho</a>
   <a href="#agro"><span class="m-icon">🌱</span>Agro</a>
   <a href="#comex"><span class="m-icon">📦</span>Comex</a>
   <a href="#educ"><span class="m-icon">📚</span>Educação</a>
   <a href="#saude"><span class="m-icon">🏥</span>Saúde</a>
+  <a href="#mort"><span class="m-icon">🕯️</span>Mortal.</a>
   <a href="#seg"><span class="m-icon">👮</span>Segurança</a>
   <a href="#conect"><span class="m-icon">📶</span>Conect.</a>
   <a href="#pol"><span class="m-icon">🗳️</span>Política</a>
   <a href="#transp"><span class="m-icon">🔍</span>Transp.</a>
+  <a href="#federal"><span class="m-icon">🏛️</span>Federal</a>
   <a href="#social"><span class="m-icon">🤝</span>Social</a>
   <a href="#benef"><span class="m-icon">🫂</span>Benefícios</a>
   <a href="#vizi"><span class="m-icon">📍</span>Vizinhança</a>
@@ -1211,13 +1578,130 @@ if (themeToggleBtn) {
 }
 const fNum = n => n == null ? '' : Number(n).toLocaleString('pt-BR');
 const fNum1 = n => n == null ? '' : Number(n).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
-const fPct = n => n == null ? '' : (Number(n) * 100).toFixed(1) + '%';
+const fPct = n => n == null ? '' : (Number(n) * 100).toFixed(1).replace('.', ',') + '%';
 const fReal = n => n == null ? '' : 'R$ ' + Math.round(Number(n)).toLocaleString('pt-BR');
 
 function g(D, path) {
   if (!D) return null;
   return path.split('.').reduce((o, k) => (o && o[k] !== undefined && o[k] !== null) ? o[k] : null, D);
 }
+
+// ---- Estado vazio ----------------------------------------------------------
+// Toda seção do extrator vira {"erro": ...} quando a fonte falha, e várias
+// voltam legitimamente zeradas para municípios fora da amostra. `ok()` filtra
+// as duas coisas; os `vazio*` desenham um "sem dados" limpo no lugar do cartão
+// em branco ou do Chart.js estourando com array vazio.
+const SEM_DADO = 'Sem dados para este município';
+const ok = o => (o && typeof o === 'object' && !o.erro) ? o : null;
+const el_ = id => document.getElementById(id);
+function setTxt(id, txt) { const e = el_(id); if (e) e.textContent = txt; }
+function setHtml(id, html) { const e = el_(id); if (e) e.innerHTML = html; }
+function setCls(id, cls) { const e = el_(id); if (e) e.className = cls; }
+function vazioLista(id, msg) {
+  setHtml(id, '<li style="border-bottom:none;display:block"><span class="empty">' + (msg || SEM_DADO) + '</span></li>');
+}
+function vazioTabela(id, cols, msg) {
+  setHtml(id, '<tr><td colspan="' + (cols || 3) + '" style="border-bottom:none;width:auto"><span class="empty">' + (msg || SEM_DADO) + '</span></td></tr>');
+}
+function vazioGrafico(id, msg) {
+  const cv = el_(id); if (!cv) return;
+  const box = cv.closest('.chart-container') || cv.parentElement;
+  if (box) box.innerHTML = '<div class="empty">' + (msg || SEM_DADO) + '</div>';
+}
+function vazioValor(id) {
+  const e = el_(id); if (!e) return;
+  e.textContent = '—'; e.classList.add('empty-val');
+}
+function vazioValores(...ids) { ids.forEach(vazioValor); }
+// Os semáforos vinham escritos à mão no HTML com o veredito de Nova Friburgo — em
+// qualquer outro município eles mentiriam calados. `pill()` reescreve cada um a
+// partir do próprio dado; sem dado, o selo some em vez de afirmar algo não conferido.
+function pill(id, cls, txt) {
+  const e = el_(id); if (!e) return;
+  if (!cls) { e.style.display = 'none'; return; }
+  e.style.display = '';
+  e.className = 'status ' + cls;
+  e.textContent = txt;
+}
+// Compara com uma referência onde MAIOR é melhor (ou pior, com `maiorEhPior`)
+function pillVs(id, valor, ref, rotulos, maiorEhPior) {
+  if (valor == null || ref == null || !isFinite(valor) || !isFinite(ref)) { pill(id, null); return; }
+  const razao = valor / ref;
+  const bom = maiorEhPior ? razao <= 1 : razao >= 1;
+  if (bom) { pill(id, 'st-good', '✓ ' + rotulos[0]); return; }
+  const desvio = Math.abs(1 - razao);
+  pill(id, desvio <= 0.15 ? 'st-warn' : (desvio <= 0.4 ? 'st-serious' : 'st-crit'), '! ' + rotulos[1]);
+}
+// Soma entradas repetidas de um mesmo rótulo (o SINAN devolve "Ignorado" duas vezes)
+function agrupa(arr, chave, valor) {
+  const m = new Map();
+  (arr || []).forEach(r => m.set(r[chave], (m.get(r[chave]) || 0) + (Number(r[valor]) || 0)));
+  return [...m.entries()].map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v);
+}
+const pctDe = (n, t) => t ? (Number(n) / t * 100) : 0;
+const liRow = (a, b) => '<li><span>' + a + '</span><span>' + b + '</span></li>';
+// Barras proporcionais (.bench-bars) para recortes categóricos em cartão estreito,
+// onde um canvas do Chart.js sobraria: mesma leitura visual, sem eixo nem legenda.
+// `linhas` é a saída de agrupa(): [{k, v}]. A escala é o maior valor do próprio
+// recorte — a % ao lado é sobre o total informado, não sobre esse máximo.
+function barrasCategoria(id, linhas, total, cor, opts) {
+  const o = opts || {};
+  const alvo = el_(id); if (!alvo) return;
+  if (!linhas || !linhas.length) { alvo.innerHTML = '<div class="empty">' + (o.msgVazio || SEM_DADO) + '</div>'; return; }
+  // `escalaMax` fixa o topo da barra (índices 0–1 querem 1, não o maior da lista)
+  const max = o.escalaMax != null ? o.escalaMax : Math.max(...linhas.map(r => r.v), 1);
+  const rotulo = r => o.fmtValor ? o.fmtValor(r.v)
+    : o.soPct ? fNum1(pctDe(r.v, total)) + '%'
+    : fNum(r.v) + (total ? ' · ' + fNum1(pctDe(r.v, total)) + '%' : '');
+  alvo.innerHTML = linhas.map(r =>
+    '<div class="row"><span title="' + (r.titulo || r.k) + '">' + r.k + '</span>' +
+    '<div class="track"><div class="fill" style="width:' + (r.v / max * 100).toFixed(1) + '%' +
+    (cor ? ';background:' + cor : '') + '"></div></div>' +
+    '<span>' + rotulo(r) + '</span></div>'
+  ).join('');
+}
+// Corta no espaço mais próximo em vez de no meio da palavra, e sinaliza o corte
+function truncaPalavra(s, n) {
+  const t = String(s || '');
+  if (t.length <= n) return t;
+  const corte = t.slice(0, n);
+  const esp = corte.lastIndexOf(' ');
+  return (esp > n * 0.6 ? corte.slice(0, esp) : corte).replace(/[ ,;.]+$/, '') + '…';
+}
+// O DATASUS grava o capítulo do CID-10 abreviado a ponto de ficar ilegível num eixo
+// ("Sint sinais e achad anorm ex clín e laborat"). O algarismo romano é estável entre
+// municípios e anos, então o rótulo sai daqui; o texto original fica no tooltip.
+const CAPITULO_CID = {
+  I: 'Doenças infecciosas e parasitárias', II: 'Neoplasias (tumores)',
+  III: 'Doenças do sangue e imunitárias', IV: 'Doenças endócrinas e metabólicas',
+  V: 'Transtornos mentais e comportamentais', VI: 'Doenças do sistema nervoso',
+  VII: 'Doenças do olho e anexos', VIII: 'Doenças do ouvido',
+  IX: 'Doenças do aparelho circulatório', X: 'Doenças do aparelho respiratório',
+  XI: 'Doenças do aparelho digestivo', XII: 'Doenças da pele',
+  XIII: 'Doenças osteomusculares', XIV: 'Doenças do aparelho geniturinário',
+  XV: 'Gravidez, parto e puerpério', XVI: 'Afecções do período perinatal',
+  XVII: 'Malformações congênitas', XVIII: 'Sintomas e achados mal definidos',
+  XIX: 'Lesões e envenenamentos', XX: 'Causas externas',
+  XXI: 'Contatos com serviços de saúde', XXII: 'Códigos de propósito especial',
+};
+function capituloCurto(s) {
+  const m = /^([IVXL]+)\s*\.?\s*/.exec(String(s || ''));
+  if (m && CAPITULO_CID[m[1]]) return CAPITULO_CID[m[1]];
+  return truncaPalavra(String(s || '').replace(/^[IVXL]+\s*\.?\s*/, ''), 38);
+}
+// Fontes federais gravam nome próprio em CAIXA ALTA; minúsculo puro fica pior ainda
+const MINUSCULAS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'a', 'o', 'para', 'por', 'com']);
+// Alguns registros do Compras.gov trazem o rótulo do campo colado na razão social
+// ("Contratado : FULANO LTDA") — a etiqueta não é parte do nome da empresa
+const limpaRazao = s => String(s || '').replace(/^\s*contratad[oa]\s*:\s*/i, '').trim();
+// Siglas e códigos que perdem sentido em caixa de título ("Filo Sa", "Ferragens 3f")
+const SIGLAS = new Set(['sa', 's/a', 'me', 'epp', 'eireli', 'cnpj', 'cpf', 'ii', 'iii', 'iv']);
+const titulo = s => limpaRazao(s).toLowerCase().split(/(\s+|-)/).map((w, i) => {
+  if (!/\w/.test(w)) return w;
+  if (i > 0 && MINUSCULAS.has(w)) return w;
+  if (SIGLAS.has(w) || (w.length <= 3 && /\d/.test(w))) return w.toUpperCase();
+  return w.charAt(0).toUpperCase() + w.slice(1);
+}).join('');
 
 async function init() {
   const D = await loadData();
@@ -1244,14 +1728,18 @@ async function init() {
   document.getElementById('popVal').innerHTML = fNum(pop2024) + ' <span class="unit">hab</span>';
   if (document.getElementById('popVal2')) document.getElementById('popVal2').innerHTML = fNum(pop2024) + ' <span class="unit">hab</span>';
   document.getElementById('densVal').innerHTML = Math.round(pop2024 / area) + ' <span class="unit">hab/km²</span>';
-  document.getElementById('demoPopDelta').innerHTML = '▲ +' + ((pop2024 / pop2022 - 1) * 100).toFixed(1) + '% <span class="vs">vs 2022</span>';
+  const dDemo = (pop2024 / pop2022 - 1) * 100;
+  setCls('demoPopDelta', 'delta ' + (dDemo >= 0 ? 'up' : 'down'));
+  setHtml('demoPopDelta', (dDemo >= 0 ? '▲ +' : '▼ −') + Math.abs(dDemo).toFixed(1).replace('.', ',') + '% <span class="vs">vs censo 2022</span>');
 
   const censoAnterior = find(popSerie, 'ano', 2010);
   if (censoAnterior) {
-    document.getElementById('censoDelta').innerHTML = '▲ +' + ((pop2022 / censoAnterior.populacao - 1) * 100).toFixed(1) + '% <span class="vs">vs censo 2010</span>';
+    const dCenso = (pop2022 / censoAnterior.populacao - 1) * 100;
+    setCls('censoDelta', 'delta ' + (dCenso >= 0 ? 'up' : 'down'));
+    setHtml('censoDelta', (dCenso >= 0 ? '▲ +' : '▼ −') + Math.abs(dCenso).toFixed(1).replace('.', ',') + '% <span class="vs">vs censo 2010</span>');
   }
 
-  document.getElementById('domicSub').textContent = (pop2022 / (g(D, 'secoes.demografia.censo_2022.domicilios') || 1)).toFixed(1) + ' moradores/domicílio';
+  document.getElementById('domicSub').textContent = (pop2022 / (g(D, 'secoes.demografia.censo_2022.domicilios') || 1)).toFixed(1).replace('.', ',') + ' moradores/domicílio';
 
   // Pop evolution list
   const popEvolList = document.getElementById('popEvolList');
@@ -1270,6 +1758,7 @@ async function init() {
   // Pop evolution chart
   if (document.getElementById('popEvolChart')) {
     const selYears = [1991, 2000, 2010, 2022];
+    document.getElementById('popEvolAno').textContent = selYears[0] + '–' + selYears[selYears.length - 1] + ' (censos)';
     const yearLabels = selYears.map(String);
     const popData = selYears.map(y => { const it = find(popSerie, 'ano', y); return it ? it.populacao : 0; });
     new Chart(document.getElementById('popEvolChart'), {
@@ -1317,12 +1806,12 @@ async function init() {
     const sede = geo.sede_municipal;
     if (sede) {
       document.getElementById('geoSedeAno').textContent = sede.ano || '';
-      document.getElementById('geoSedeVal').textContent = Math.abs(sede.lat).toFixed(3) + '° S, ' + Math.abs(sede.lon).toFixed(3) + '° O';
+      document.getElementById('geoSedeVal').textContent = Math.abs(sede.lat).toFixed(3).replace('.', ',') + '° S, ' + Math.abs(sede.lon).toFixed(3).replace('.', ',') + '° O';
     }
 
     const biomas = geo.biomas || [];
     document.getElementById('geoBiomaList').innerHTML = biomas.length
-      ? biomas.map(b => '<li><span>' + b.nome + '</span><span>' + b.pct_area.toFixed(1) + '% da área</span></li>').join('')
+      ? biomas.map(b => '<li><span>' + b.nome + '</span><span>' + b.pct_area.toFixed(1).replace('.', ',') + '% da área</span></li>').join('')
       : '<li><span>Sem dado</span><span>—</span></li>';
 
     document.getElementById('geoSemiaridoVal').textContent = geo.semiarido ? 'Sim' : 'Não';
@@ -1365,11 +1854,18 @@ async function init() {
     const total = prodes.area_total || 0;
     const veg = prodes.vegetacao_natural || 0;
     const desm = prodes.desmatado || 0;
-    const vegPct = total > 0 ? (veg / total * 100).toFixed(1) : '0';
-    document.getElementById('prodesList').innerHTML =
-      '<li><span>Vegetação natural</span><span>' + fNum(Math.round(veg * 100)) + ' ha (' + vegPct + '%)</span></li>' +
-      '<li><span>Desmatado no ano</span><span>' + fNum(Math.round(desm * 100)) + ' ha</span></li>' +
-      '<li><span>Área total do bioma</span><span>' + fNum(Math.round(total * 100)) + ' ha</span></li>';
+    const vegPct = total > 0 ? veg / total * 100 : 0;
+    el_('prodesMeter').style.width = vegPct.toFixed(1) + '%';
+    setTxt('prodesVegPct', fNum1(vegPct) + '%');
+    setTxt('prodesAreaTotal', 'Área do bioma: ' + fNum(Math.round(total * 100)) + ' ha');
+    // `desmatado` do PRODES é a área acumulada, não a perda do ano: veg + desmatado = total.
+    // A perda anual é o incremento, que o gráfico ao lado calcula a partir da série.
+    setHtml('prodesList',
+      liRow('Vegetação natural', fNum(Math.round(veg * 100)) + ' ha') +
+      liRow('Desmatado (acumulado)', fNum(Math.round(desm * 100)) + ' ha (' + fNum1(total > 0 ? desm / total * 100 : 0) + '%)'));
+  } else {
+    setTxt('prodesVegPct', '—'); setTxt('prodesAreaTotal', '');
+    vazioLista('prodesList');
   }
 
   // SEEG chart
@@ -1501,33 +1997,53 @@ async function init() {
     document.getElementById('snisAno2').textContent = ano;
     document.getElementById('snisAno3').textContent = ano;
     document.getElementById('snisAno4').textContent = ano;
-    document.getElementById('aguaVal').innerHTML = (snis.indice_atendimento_total_agua || 0).toFixed(1) + ' <span class="unit">%</span>';
-    document.getElementById('esgCVal').innerHTML = (snis.indice_coleta_esgoto || 0).toFixed(1) + ' <span class="unit">%</span>';
-    document.getElementById('esgTVal').innerHTML = (snis.indice_tratamento_esgoto || 0).toFixed(1) + ' <span class="unit">%</span>';
+    document.getElementById('aguaVal').innerHTML = (snis.indice_atendimento_total_agua || 0).toFixed(1).replace('.', ',') + ' <span class="unit">%</span>';
+    document.getElementById('esgCVal').innerHTML = (snis.indice_coleta_esgoto || 0).toFixed(1).replace('.', ',') + ' <span class="unit">%</span>';
+    document.getElementById('esgTVal').innerHTML = (snis.indice_tratamento_esgoto || 0).toFixed(1).replace('.', ',') + ' <span class="unit">%</span>';
     if (snis.ano_anterior) {
       const aa = snis.ano_anterior;
-      document.getElementById('aguaDelta').innerHTML = '▲ +' + ((snis.indice_atendimento_total_agua || 0) - (aa.a || 0)).toFixed(1) + ' pp <span class="vs">vs ' + (ano - 1) + '</span>';
-      document.getElementById('esgCDelta').innerHTML = '▲ +' + ((snis.indice_coleta_esgoto || 0) - (aa.c || 0)).toFixed(1) + ' pp <span class="vs">vs ' + (ano - 1) + '</span>';
+      // Sinal e cor têm que seguir o dado: antes ficava sempre "▲ +" e verde, gerando "+-1,8 pp"
+      const ppDelta = (id, atual, anterior) => {
+        const d = (atual || 0) - (anterior || 0);
+        const e = document.getElementById(id);
+        const seta = Math.abs(d) < 0.05 ? '=' : (d > 0 ? '▲ +' : '▼ −');
+        e.className = 'delta ' + (Math.abs(d) < 0.05 ? 'flat' : (d > 0 ? 'up' : 'down'));
+        e.innerHTML = seta + ' ' + Math.abs(d).toFixed(1).replace('.', ',') + ' pp <span class="vs">vs ' + (ano - 1) + '</span>';
+      };
+      ppDelta('aguaDelta', snis.indice_atendimento_total_agua, aa.a);
+      ppDelta('esgCDelta', snis.indice_coleta_esgoto, aa.c);
     }
+    // O SNIS publica POPULAÇÃO atendida, não número de ligações: a linha "ligações de
+    // esgoto" era essa população multiplicada por 0,3 — um número inventado. Mostrar o
+    // que a fonte de fato traz, com o rótulo certo.
+    const mm3 = v => v ? fNum1(v / 1e3) + ' mi m³' : '—';
     document.getElementById('snisList').innerHTML =
-      '<li><span>Consumidores de água</span><span>' + fNum(snis.populacao_atendida_agua || 0) + '</span></li>' +
-      '<li><span>Ligações de esgoto</span><span>' + fNum(Math.round((snis.populacao_atentida_esgoto || 0) * 0.3)) + '</span></li>' +
-      '<li><span>Despesa total do serviço</span><span>' + (snis.despesa_total_servico ? 'R$ ' + Math.round(snis.despesa_total_servico / 1e6).toLocaleString('pt-BR') + ' mi' : '') + '</span></li>';
+      liRow('População atendida com água', fNum(snis.populacao_atendida_agua || 0)) +
+      liRow('População atendida com esgoto', fNum(snis.populacao_atentida_esgoto || 0)) +
+      liRow('Perdas na distribuição de água', snis.indice_perda_distribuicao_agua != null
+        ? fNum1(snis.indice_perda_distribuicao_agua) + '%' : '—') +
+      liRow('Despesa total do serviço', snis.despesa_total_servico
+        ? 'R$ ' + Math.round(snis.despesa_total_servico / 1e6).toLocaleString('pt-BR') + ' mi' : '—');
     document.getElementById('snisDetList').innerHTML =
-      '<li><span>Volume consumido</span><span>' + (snis.volume_agua_consumido ? fNum1(snis.volume_agua_consumido / 1e3) + ' mi m³' : '') + '</span></li>' +
-      '<li><span>Extensão rede de água</span><span>' + fNum(snis.extensao_rede_agua || 0) + ' km</span></li>' +
-      '<li><span>Extensão rede de esgoto</span><span>' + fNum(snis.extensao_rede_esgoto || 0) + ' km</span></li>';
+      liRow('Volume de água consumido', mm3(snis.volume_agua_consumido)) +
+      liRow('Volume de esgoto coletado', mm3(snis.volume_esgoto_coletado)) +
+      liRow('Volume de esgoto tratado', mm3(snis.volume_esgoto_tratado)) +
+      liRow('Extensão da rede de água', fNum(Math.round(snis.extensao_rede_agua || 0)) + ' km') +
+      liRow('Extensão da rede de esgoto', fNum(Math.round(snis.extensao_rede_esgoto || 0)) + ' km');
+  } else {
+    vazioValores('aguaVal', 'esgCVal', 'esgTVal');
+    vazioLista('snisList'); vazioLista('snisDetList');
   }
 
   // Atlas esgotos
   const atlas = g(D, 'secoes.infraestrutura.atlas_esgotos');
   if (atlas) {
     document.getElementById('atlasInvest').textContent = (atlas.investimento_coleta_tratatamento ? 'R$ ' + Math.round(atlas.investimento_coleta_tratatamento / 1e6).toLocaleString('pt-BR') + ' mi' : '');
-    document.getElementById('atlasCom').textContent = (atlas.indice_atendimento_com_coleta_com_tratamento != null ? (atlas.indice_atendimento_com_coleta_com_tratamento * 100).toFixed(1) + '%' : '');
-    document.getElementById('atlasSem').textContent = (atlas.indice_sem_atendimento_sem_coleta_sem_tratamento != null ? (atlas.indice_sem_atendimento_sem_coleta_sem_tratamento * 100).toFixed(1) + '%' : '');
+    document.getElementById('atlasCom').textContent = (atlas.indice_atendimento_com_coleta_com_tratamento != null ? (atlas.indice_atendimento_com_coleta_com_tratamento * 100).toFixed(1).replace('.', ',') + '%' : '');
+    document.getElementById('atlasSem').textContent = (atlas.indice_sem_atendimento_sem_coleta_sem_tratamento != null ? (atlas.indice_sem_atendimento_sem_coleta_sem_tratamento * 100).toFixed(1).replace('.', ',') + '%' : '');
     document.getElementById('atlasPop2013').textContent = fNum(atlas.populacao_urbana_2013 || 0);
     document.getElementById('atlasPop2035').textContent = fNum(atlas.populacao_urbana_2035 || 0);
-    document.getElementById('atlasSol').textContent = (atlas.indice_atendimento_solucao_individual != null ? (atlas.indice_atendimento_solucao_individual * 100).toFixed(1) + '%' : '');
+    document.getElementById('atlasSol').textContent = (atlas.indice_atendimento_solucao_individual != null ? (atlas.indice_atendimento_solucao_individual * 100).toFixed(1).replace('.', ',') + '%' : '');
   }
 
   // PIB
@@ -1538,17 +2054,22 @@ async function init() {
     document.getElementById('pibVal').innerHTML = 'R$ ' + fNum1(pibUlt.pib / 1e9) + ' <span class="unit">bi</span>';
     if (pibSerie.length > 1) {
       const pibAnt = pibSerie[pibSerie.length - 2];
-      const pibDelta = pibAnt ? ((pibUlt.pib / pibAnt.pib - 1) * 100).toFixed(1) : '';
-      document.getElementById('pibDelta').innerHTML = '▲ +' + pibDelta + '% <span class="vs">vs ' + pibAnt.ano + ' (nominal)</span>';
+      // A seta vinha fixa em "▲ +" — em ano de queda saía "▲ +-3,1%"
+      const dPib = pibAnt ? (pibUlt.pib / pibAnt.pib - 1) * 100 : 0;
+      setCls('pibDelta', 'delta ' + (dPib >= 0 ? 'up' : 'down'));
+      setHtml('pibDelta', (dPib >= 0 ? '▲ +' : '▼ −') + Math.abs(dPib).toFixed(1).replace('.', ',') +
+        '% <span class="vs">vs ' + pibAnt.ano + ' (nominal)</span>');
     }
     document.getElementById('impAno').textContent = pibUlt.ano || '';
     document.getElementById('liqImpVal').innerHTML = 'R$ ' + fNum(Math.round(pibUlt.impostos_liquidos / 1e6)) + ' <span class="unit">mi</span>';
-    document.getElementById('impSub').textContent = (pibUlt.impostos_liquidos && pibUlt.pib) ? (pibUlt.impostos_liquidos / pibUlt.pib * 100).toFixed(1) + '% do PIB' : '';
+    document.getElementById('impSub').textContent = (pibUlt.impostos_liquidos && pibUlt.pib) ? (pibUlt.impostos_liquidos / pibUlt.pib * 100).toFixed(1).replace('.', ',') + '% do PIB' : '';
     document.getElementById('vaAno').textContent = pibUlt.ano || '';
     document.getElementById('vaTotal').innerHTML = 'R$ ' + fNum1(pibUlt.va / 1e9) + ' <span class="unit">bi</span>';
     const vaServ = (pibUlt.va_servicos || 0) + (pibUlt.va_adespss || 0);
     const vaTotal = pibUlt.va || 1;
-    document.getElementById('vaSub').textContent = 'Serviços lideram (' + (vaServ / vaTotal * 100).toFixed(0) + '%)';
+    // Antes dizia "Serviços lideram (84%)" — os 84% eram serviços + adm. pública,
+    // e o cartão ao lado mostrava serviços em 56%. Nomear a conta resolve a contradição.
+    setTxt('vaSub', 'Serviços e adm. pública somam ' + (vaServ / vaTotal * 100).toFixed(0) + '% do valor adicionado');
 
     // VA chart
     if (document.getElementById('vaChart')) {
@@ -1578,10 +2099,10 @@ async function init() {
 
     // VA composition
     document.getElementById('vaComp').innerHTML =
-      '<li><span>Serviços</span><span>R$ ' + fNum1((pibUlt.va_servicos || 0) / 1e9) + ' bi · ' + ((pibUlt.va_servicos || 0) / vaTotal * 100).toFixed(1) + '%</span></li>' +
-      '<li><span>Indústria</span><span>R$ ' + fNum1((pibUlt.va_industria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_industria || 0) / vaTotal * 100).toFixed(1) + '%</span></li>' +
-      '<li><span>Adm. Pública</span><span>R$ ' + fNum1((pibUlt.va_adespss || 0) / 1e9) + ' bi · ' + ((pibUlt.va_adespss || 0) / vaTotal * 100).toFixed(1) + '%</span></li>' +
-      '<li><span>Agropecuária</span><span>R$ ' + fNum1((pibUlt.va_agropecuaria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_agropecuaria || 0) / vaTotal * 100).toFixed(1) + '%</span></li>';
+      '<li><span>Serviços</span><span>R$ ' + fNum1((pibUlt.va_servicos || 0) / 1e9) + ' bi · ' + ((pibUlt.va_servicos || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Indústria</span><span>R$ ' + fNum1((pibUlt.va_industria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_industria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Adm. Pública</span><span>R$ ' + fNum1((pibUlt.va_adespss || 0) / 1e9) + ' bi · ' + ((pibUlt.va_adespss || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Agropecuária</span><span>R$ ' + fNum1((pibUlt.va_agropecuaria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_agropecuaria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>';
   }
 
   // PIB per capita ranking
@@ -1614,8 +2135,10 @@ async function init() {
       if (pibPopUlt && pibPopAnt) {
         const pcUlt = pibPcUlt.pib / pibPopUlt.populacao;
         const pcAnt = pibPcAnt.pib / pibPopAnt.populacao;
-        const el = document.getElementById('pibPcDelta');
-        if (el) el.innerHTML = '▲ +' + ((pcUlt / pcAnt - 1) * 100).toFixed(1) + '% <span class="vs">vs ' + pibPcAnt.ano + ' (nominal)</span>';
+        const dPc = (pcUlt / pcAnt - 1) * 100;
+        setCls('pibPcDelta', 'delta ' + (dPc >= 0 ? 'up' : 'down'));
+        setHtml('pibPcDelta', (dPc >= 0 ? '▲ +' : '▼ −') + Math.abs(dPc).toFixed(1).replace('.', ',') +
+          '% <span class="vs">vs ' + pibPcAnt.ano + ' (nominal)</span>');
       }
     }
   }
@@ -1642,8 +2165,8 @@ async function init() {
       new Chart(document.getElementById('recChart'), {
         type: 'bar', data: { labels: recLabels, datasets: [{ data: recData, backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }] },
         options: { ...chartOpts, indexAxis: 'y',
-          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => fNum(ctx.parsed.x) + ' R$ mi' } } },
-          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => 'R$ ' + fNum(ctx.parsed.x) + ' mi' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => 'R$ ' + fNum(v) + ' mi' }, grid: { color: C.grid } },
                     y: { ticks: { color: C.tick, autoSkip: false, font: { size: 11 } }, grid: { display: false } } } }
       });
     }
@@ -1656,8 +2179,8 @@ async function init() {
     new Chart(document.getElementById('despChart'), {
       type: 'bar', data: { labels: despLabels, datasets: [{ data: despData, backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }] },
       options: { ...chartOpts, indexAxis: 'y',
-        plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => fNum(ctx.parsed.x) + ' R$ mi' } } },
-        scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+        plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => 'R$ ' + fNum(ctx.parsed.x) + ' mi' } } },
+        scales: { x: { ticks: { color: C.muted, callback: v => 'R$ ' + fNum(v) + ' mi' }, grid: { color: C.grid } },
                   y: { ticks: { color: C.tick, autoSkip: false, font: { size: 11 } }, grid: { display: false } } } }
     });
   }
@@ -1677,8 +2200,8 @@ async function init() {
   if (inpc) {
     document.getElementById('inpcAno').textContent = (inpc.ano || '') + '/' + String(inpc.mes || '').padStart(2, '0');
     document.getElementById('inpcList').innerHTML =
-      '<li><span>Mensal</span><span>' + (inpc.variacao_mensal != null ? (inpc.variacao_mensal > 0 ? '+' : '') + inpc.variacao_mensal.toFixed(2) + '%' : '') + '</span></li>' +
-      '<li><span>Acumulado 12 meses</span><span>' + (inpc.variacao_doze_meses != null ? inpc.variacao_doze_meses.toFixed(2) + '%' : '') + '</span></li>';
+      '<li><span>Mensal</span><span>' + (inpc.variacao_mensal != null ? (inpc.variacao_mensal > 0 ? '+' : '') + inpc.variacao_mensal.toFixed(2).replace('.', ',') + '%' : '') + '</span></li>' +
+      '<li><span>Acumulado 12 meses</span><span>' + (inpc.variacao_doze_meses != null ? inpc.variacao_doze_meses.toFixed(2).replace('.', ',') + '%' : '') + '</span></li>';
   }
 
   // IDEB overview
@@ -1689,25 +2212,43 @@ async function init() {
   const ideb2021Ini = find(idebIni, 'ano', 2021);
   const ideb2021Fin = find(idebFin, 'ano', 2021);
 
+  // As metas do PNE pararam em 2019 (2021 e 2023 vêm nulas) — não afirmar
+  // "acima da meta" quando não há meta pactuada; comparar com Brasil e RJ.
+  function pintaCartaoIdeb(cardEl, valor, refBrasil) {
+    if (!cardEl || valor == null || refBrasil == null) return;
+    cardEl.classList.remove('st-good-b', 'st-warn-b', 'st-serious-b');
+    cardEl.classList.add(valor >= refBrasil ? 'st-good-b' : (valor >= refBrasil * 0.95 ? 'st-warn-b' : 'st-serious-b'));
+  }
+  function benchIdeb(id, br, uf, ultimaMeta) {
+    document.getElementById(id).innerHTML =
+      '<span><b>Brasil:</b> ' + fNum1(br || 0) + '</span>' +
+      '<span><b>RJ:</b> ' + fNum1(uf || 0) + '</span>' +
+      (ultimaMeta ? '<span><b>Última meta PNE (' + ultimaMeta.ano + '):</b> ' + fNum1(ultimaMeta.meta) + '</span>' : '');
+  }
+  const ultMetaIni = [...idebIni].reverse().find(d => d.meta != null) || null;
+  const ultMetaFin = [...idebFin].reverse().find(d => d.meta != null) || null;
+  const brIni = g(D, 'secoes.educacao.ideb.referencia_brasil.iniciais');
+  const brFin = g(D, 'secoes.educacao.ideb.referencia_brasil.finais');
+
   if (ideb2023Ini) {
     document.getElementById('idebAno').textContent = String(ideb2023Ini.ano);
     document.getElementById('idebInitVal').textContent = fNum1(ideb2023Ini.ideb);
     const d2021Ini = ideb2021Ini ? ideb2023Ini.ideb - ideb2021Ini.ideb : 0;
-    document.getElementById('idebInitDelta').innerHTML = (d2021Ini >= 0 ? '▲ +' : '▼ ') + Math.abs(d2021Ini).toFixed(1) + ' <span class="vs">vs 2021</span>';
-    document.getElementById('idebInitBench').innerHTML =
-      '<span><b>Meta:</b> ' + fNum1(ideb2021Ini ? ideb2021Ini.meta : 0) + ' ✓</span>' +
-      '<span><b>Brasil:</b> ' + fNum1(g(D, 'secoes.educacao.ideb.referencia_brasil.iniciais') || 0) + '</span>' +
-      '<span><b>RJ:</b> ' + fNum1(g(D, 'secoes.educacao.ideb.referencia_uf.iniciais') || 0) + '</span>';
+    const elIni = document.getElementById('idebInitDelta');
+    elIni.className = 'delta ' + (d2021Ini >= 0 ? 'up' : 'down');
+    elIni.innerHTML = (d2021Ini >= 0 ? '▲ +' : '▼ ') + Math.abs(d2021Ini).toFixed(1).replace('.', ',') + ' <span class="vs">vs 2021</span>';
+    benchIdeb('idebInitBench', brIni, g(D, 'secoes.educacao.ideb.referencia_uf.iniciais'), ultMetaIni);
+    pintaCartaoIdeb(elIni.closest('.card'), ideb2023Ini.ideb, brIni);
   }
   if (ideb2023Fin) {
     document.getElementById('idebAno2').textContent = String(ideb2023Fin.ano);
     document.getElementById('idebFinalVal').textContent = fNum1(ideb2023Fin.ideb);
     const d2021Fin = ideb2021Fin ? ideb2023Fin.ideb - ideb2021Fin.ideb : 0;
-    document.getElementById('idebFinalDelta').innerHTML = (d2021Fin >= 0 ? '▲ +' : '▼ ') + Math.abs(d2021Fin).toFixed(1) + ' <span class="vs">vs 2021</span>';
-    document.getElementById('idebFinalBench').innerHTML =
-      '<span><b>Meta:</b> ' + fNum1(ideb2021Fin ? ideb2021Fin.meta : 0) + ' ✓</span>' +
-      '<span><b>Brasil:</b> ' + fNum1(g(D, 'secoes.educacao.ideb.referencia_brasil.finais') || 0) + '</span>' +
-      '<span><b>RJ:</b> ' + fNum1(g(D, 'secoes.educacao.ideb.referencia_uf.finais') || 0) + '</span>';
+    const elFin = document.getElementById('idebFinalDelta');
+    elFin.className = 'delta ' + (d2021Fin >= 0 ? 'up' : 'down');
+    elFin.innerHTML = (d2021Fin >= 0 ? '▲ +' : '▼ ') + Math.abs(d2021Fin).toFixed(1).replace('.', ',') + ' <span class="vs">vs 2021</span>';
+    benchIdeb('idebFinalBench', brFin, g(D, 'secoes.educacao.ideb.referencia_uf.finais'), ultMetaFin);
+    pintaCartaoIdeb(elFin.closest('.card'), ideb2023Fin.ideb, brFin);
   }
 
   // Aprovação
@@ -1742,7 +2283,7 @@ async function init() {
             datasets: [{ data: agg, backgroundColor: ordinal4, maxBarThickness: 24, borderRadius: 4, borderSkipped: 'start' }]
           },
           options: { ...chartOpts, plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
-            callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '% dos alunos' } } },
+            callbacks: { label: ctx => ctx.parsed.y.toFixed(1).replace('.', ',') + '% dos alunos' } } },
             scales: { x: { ticks: { color: C.muted }, grid: { display: false } },
                       y: { ticks: { color: C.muted, callback: v => v + '%' }, grid: { color: C.grid } } } }
         });
@@ -1759,10 +2300,15 @@ async function init() {
     const finMeta = idebFin.map(d => d.meta);
     const lastIni = ideb2023Ini;
     const lastFin = ideb2023Fin;
-    document.getElementById('idebMetasSub').textContent =
-      'Metas 2023: iniciais ' + (lastIni && lastIni.meta ? fNum1(lastIni.meta) : '—') +
-      ' · finais ' + (lastFin && lastFin.meta ? fNum1(lastFin.meta) : '—') +
-      ' — ' + (lastIni && lastFin && lastIni.ideb >= (lastIni.meta || 0) && lastFin.ideb >= (lastFin.meta || 0) ? 'ambas superadas' : '');
+    // As metas pactuadas do PNE só existem até 2019 — dizer isso em vez de exibir "—"
+    document.getElementById('idebMetasSub').textContent = lastIni && lastFin
+      ? (ultMetaIni
+          ? 'O INEP não pactuou meta para ' + lastIni.ano + ' — a última foi a de ' + ultMetaIni.ano +
+            ' (iniciais ' + fNum1(ultMetaIni.meta) + (ultMetaFin ? ', finais ' + fNum1(ultMetaFin.meta) : '') + '). '
+          : '') +
+        'Em ' + lastIni.ano + ': iniciais ' + fNum1(lastIni.ideb) + ' (Brasil ' + fNum1(brIni || 0) + ') · finais ' +
+        fNum1(lastFin.ideb) + ' (Brasil ' + fNum1(brFin || 0) + ').'
+      : '';
     new Chart(document.getElementById('idebChart'), {
       type: 'line', data: {
         labels: iniYears,
@@ -1781,7 +2327,7 @@ async function init() {
   if (alf != null) {
     document.getElementById('alfAno').textContent = '2022';
     const pctAlf = (alf * 100).toFixed(1);
-    document.getElementById('alfPctVal').textContent = pctAlf + '%';
+    document.getElementById('alfPctVal').textContent = pctAlf.replace('.', ',') + '%';
     document.getElementById('alfMeter').style.width = pctAlf + '%';
   }
 
@@ -1812,7 +2358,7 @@ async function init() {
     document.getElementById('cnesEstab').textContent = fNum(cnes.estabelecimentos || 0);
     const leitos = cnes.leitos ? cnes.leitos.total : 0;
     document.getElementById('cnesLeitos').textContent = fNum(leitos);
-    document.getElementById('cnesLeitosBench').innerHTML = '<span>' + (leitos && pop2024 ? (leitos / pop2024 * 1000).toFixed(1) : '') + '/1.000 hab · <b>Brasil:</b> 2,4</span>';
+    document.getElementById('cnesLeitosBench').innerHTML = '<span>' + (leitos && pop2024 ? (leitos / pop2024 * 1000).toFixed(1).replace('.', ',') : '') + '/1.000 hab · <b>Brasil:</b> 2,4</span>';
     document.getElementById('cnesProf').textContent = fNum(cnes.profissionais ? cnes.profissionais.vinculos : 0);
     document.getElementById('cnesEquip').textContent = cnes.equipes ? cnes.equipes.total : 0;
   }
@@ -1844,6 +2390,13 @@ async function init() {
   }
 
   // Segurança
+  // O FBSP aparece no cabeçalho como fonte; quando o município fica fora da amostra do
+  // anuário, dizer isso é melhor do que deixar a fonte citada sem nenhum número atrás
+  const fbsp = g(D, 'secoes.seguranca.fbsp');
+  setTxt('fbspNota', fbsp && fbsp.disponivel === false
+    ? 'Anuário FBSP: ' + (fbsp.motivo || 'sem dado para este município') + ' — os números abaixo vêm do ISP/RJ.'
+    : '');
+
   const seg = g(D, 'secoes.seguranca.isp_rj');
   if (seg) {
     const oco = seg.ocorrencias || {};
@@ -1862,7 +2415,9 @@ async function init() {
     document.getElementById('segHomicidios').textContent = oco.homicidio_doloso || 0;
     const antHom = seg.homicidio_doloso_ano_anterior;
     if (antHom) {
-      const homDelta = antHom > 0 ? ((oco.homicidio_doloso - antHom) / antHom * 100).toFixed(0) : 0;
+      const homDelta = antHom > 0 ? Math.round((oco.homicidio_doloso - antHom) / antHom * 100) : 0;
+      // Alta de homicídio é ruim — a cor acompanha o sinal, não fica fixa em verde
+      document.getElementById('segHomicDelta').className = 'delta ' + (homDelta <= 0 ? 'down-good' : 'up-bad');
       document.getElementById('segHomicDelta').innerHTML = (homDelta <= 0 ? '▼ ' : '▲ ') + Math.abs(homDelta) + '% <span class="vs">vs ' + (ano - 1) + '</span>';
     }
 
@@ -1880,12 +2435,34 @@ async function init() {
     document.getElementById('segLatroc').textContent = oco.latrocinio || 0;
     document.getElementById('segCvli').textContent = oco.cvli || 0;
 
-    // Taxas list
-    document.getElementById('taxasList').innerHTML =
-      '<li><span>Homicídio doloso</span><span>' + fNum1(tx.taxa_homicidio_doloso || 0) + ' <span style="color:var(--text3)">(RJ: ' + fNum1(txUf.taxa_homicidio_doloso || 0) + ')</span></span></li>' +
-      '<li><span>Latrocínio</span><span>' + fNum1(tx.taxa_latrocinio || 0) + ' <span style="color:var(--text3)">(RJ: ' + fNum1(txUf.taxa_latrocinio || 0) + ')</span></span></li>' +
-      '<li><span>Letalidade violenta</span><span>' + fNum1(tx.taxa_letalidade_violenta || 0) + ' <span style="color:var(--text3)">(RJ: ' + fNum1(txUf.taxa_letalidade_violenta || 0) + ')</span></span></li>' +
-      '<li><span>Tentativa de homicídio</span><span>' + fNum1(tx.taxa_tentativa_homicidio || 0) + '</span></li>';
+    // Taxas — barra agrupada município × RJ (mesma unidade, comparação direta)
+    const taxaLinhas = [
+      ['Homicídio doloso', 'taxa_homicidio_doloso'],
+      ['Letalidade violenta', 'taxa_letalidade_violenta'],
+      ['Tentativa de homicídio', 'taxa_tentativa_homicidio'],
+      ['Estupro', 'taxa_estupro'],
+      ['Latrocínio', 'taxa_latrocinio'],
+    ].filter(([, k]) => tx[k] != null || txUf[k] != null);
+    if (taxaLinhas.length) {
+      new Chart(el_('taxasChart'), {
+        type: 'bar', data: {
+          labels: taxaLinhas.map(l => l[0]),
+          datasets: [
+            { label: 'Município', data: taxaLinhas.map(([, k]) => tx[k]), backgroundColor: C.s1, maxBarThickness: 12, borderRadius: 3, borderSkipped: 'start' },
+            { label: 'Estado do RJ', data: taxaLinhas.map(([, k]) => txUf[k]), backgroundColor: C.s6, maxBarThickness: 12, borderRadius: 3, borderSkipped: 'start' },
+          ]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...chartOpts.plugins,
+            legend: { position: 'bottom', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 8, boxWidth: 8, font: { size: 10 } } },
+            tooltip: { ...chartOpts.plugins.tooltip,
+              callbacks: { label: ctx => ctx.parsed.x == null
+                ? ctx.dataset.label + ': sem taxa publicada'
+                : ctx.dataset.label + ': ' + fNum1(ctx.parsed.x) + '/100 mil hab' } } },
+          scales: { x: { beginAtZero: true, ticks: { color: C.muted, callback: v => fNum1(v) }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('taxasChart'); }
 
     // Crime chart
     if (document.getElementById('crimeChart') && seg.mensal) {
@@ -1903,7 +2480,17 @@ async function init() {
           scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
                     y: { min: 0, max: Math.max(4, ...crimeData), ticks: { color: C.muted, stepSize: 1 }, grid: { color: C.grid } } } }
       });
-    }
+    } else { vazioGrafico('crimeChart'); }
+  } else {
+    // O ISP só publica estatística do Rio de Janeiro — fora do RJ a seção fica sem fonte
+    const foraRj = (g(D, 'municipio.sigla_uf') || '') !== 'RJ';
+    const msgSeg = foraRj
+      ? 'O ISP publica estatística só para municípios do Rio de Janeiro'
+      : SEM_DADO;
+    vazioValores('segHomicidios', 'segLetal', 'segEstupro', 'segInterv',
+      'segRoubo', 'segTentativa', 'segLatroc', 'segCvli');
+    vazioGrafico('crimeChart', msgSeg); vazioGrafico('taxasChart', msgSeg);
+    setTxt('taxasNota', '');
   }
 
   // Conectividade
@@ -1914,7 +2501,10 @@ async function init() {
   document.getElementById('covAno').textContent = g(D, 'secoes.conectividade.ibc.ano') || '';
   document.getElementById('covVal').innerHTML = fNum1(g(D, 'secoes.conectividade.ibc.cobertura_pop_4g5g') || 0) + ' <span class="unit">%</span>';
   document.getElementById('fibraAno').textContent = g(D, 'secoes.conectividade.ibc.ano') || '';
-  document.getElementById('fibraVal').innerHTML = g(D, 'secoes.conectividade.ibc.fibra') || '—' + ' <span class="unit">%</span>';
+  // O `||` liga mais frouxo que o `+`: sem os parênteses o valor real saía sem a unidade
+  const fibraPct = g(D, 'secoes.conectividade.ibc.fibra');
+  if (fibraPct != null) setHtml('fibraVal', fNum1(fibraPct) + ' <span class="unit">%</span>');
+  else vazioValor('fibraVal');
 
   // Política
   const pol = g(D, 'secoes.politica');
@@ -1927,15 +2517,32 @@ async function init() {
     const eleit = pol.eleitorado || {};
     document.getElementById('polEleitList').innerHTML =
       '<li><span>Eleitores aptos</span><span>' + fNum(eleit.aptos || 0) + '</span></li>' +
-      '<li><span>Biometria coletada</span><span>' + (eleit.aptos ? (eleit.biometria / eleit.aptos * 100).toFixed(1) + '%' : '—') + '</span></li>' +
+      '<li><span>Biometria coletada</span><span>' + (eleit.aptos ? (eleit.biometria / eleit.aptos * 100).toFixed(1).replace('.', ',') + '%' : '—') + '</span></li>' +
       '<li><span>Zonas eleitorais</span><span>' + (eleit.zonas || 0) + '</span></li>';
 
     // Códigos TSE: genero 2 = feminino, 4 = masculino
     const gen = pol.genero || {};
     const totalGen = (gen['2'] || 0) + (gen['4'] || 0);
     document.getElementById('polPerfilList').innerHTML =
-      '<li><span>Feminino</span><span>' + (totalGen > 0 ? ((gen['2'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>' +
-      '<li><span>Masculino</span><span>' + (totalGen > 0 ? ((gen['4'] || 0) / totalGen * 100).toFixed(1) + '%' : '—') + '</span></li>';
+      '<li><span>Feminino</span><span>' + (totalGen > 0 ? ((gen['2'] || 0) / totalGen * 100).toFixed(1).replace('.', ',') + '%' : '—') + '</span></li>' +
+      '<li><span>Masculino</span><span>' + (totalGen > 0 ? ((gen['4'] || 0) / totalGen * 100).toFixed(1).replace('.', ',') + '%' : '—') + '</span></li>';
+
+    // Grau de instrução do eleitorado — códigos do dicionário do TSE
+    // (br_tse_eleicoes.dicionario, coluna `instrucao`). É escala ordinal:
+    // a ordem é a do grau, nunca a do volume; "não informado" fecha a lista.
+    const INSTRUCAO_TSE = [
+      ['1', 'Analfabeto'], ['2', 'Lê e escreve'],
+      ['3', 'Fundamental incompleto'], ['4', 'Fundamental completo'],
+      ['5', 'Médio incompleto'], ['6', 'Médio completo'],
+      ['7', 'Superior incompleto'], ['8', 'Superior completo'],
+      ['0', 'Não informado'],
+    ];
+    const ins = pol.instrucao || {};
+    const totalIns = Object.values(ins).reduce((s, n) => s + (Number(n) || 0), 0);
+    const linhasIns = INSTRUCAO_TSE
+      .filter(([c]) => ins[c] != null)
+      .map(([c, rot]) => ({ k: rot, v: ins[c] }));
+    barrasCategoria('polInstrucaoBars', linhasIns, totalIns, C.s1, { soPct: true });
 
     const pref = pol.prefeito || {};
     const eletPref = g(D, 'secoes.politica.eleitorado');
@@ -1943,7 +2550,7 @@ async function init() {
     document.getElementById('polResultList').innerHTML =
       '<li><span>Votos nominais</span><span>' + fNum(pref.votos_nominais || 0) + '</span></li>' +
       '<li><span>Brancos + nulos</span><span>' + fNum((pref.votos_brancos || 0) + (pref.votos_nulos || 0)) + '</span></li>' +
-      '<li><span>Abstenção</span><span>' + (pref.aptos ? (pref.abstencoes / pref.aptos * 100).toFixed(1) + '%' : '') + '</span></li>' +
+      '<li><span>Abstenção</span><span>' + (pref.aptos ? (pref.abstencoes / pref.aptos * 100).toFixed(1).replace('.', ',') + '%' : '') + '</span></li>' +
       '<li><span>Vencedor (1º turno)</span><span>' + (eleito.nome_urna || '') + ' · ' + (eleito.partido || '') + '</span></li>';
   }
 
@@ -1951,9 +2558,15 @@ async function init() {
   const ebt = g(D, 'secoes.transparencia.ebt') || [];
   const ebtUlt = ebt.length > 0 ? ebt[ebt.length - 1] : null;
   if (ebtUlt) {
+    const MEDIA_EBT = 6.61;
     document.getElementById('ebtAno').textContent = ebtUlt.ano || '';
     document.getElementById('ebtVal').textContent = fNum1(ebtUlt.nota || 0);
     document.getElementById('ebtMeter').querySelector('.meter-fill').style.width = ((ebtUlt.nota || 0) * 10) + '%';
+    // A nota estava sempre pintada de verde, mesmo abaixo da média nacional
+    const cardEbt = document.getElementById('ebtVal').closest('.card');
+    const nota = ebtUlt.nota || 0;
+    cardEbt.classList.remove('st-good-b', 'st-warn-b', 'st-serious-b');
+    cardEbt.classList.add(nota >= MEDIA_EBT ? 'st-good-b' : (nota >= MEDIA_EBT * 0.85 ? 'st-warn-b' : 'st-serious-b'));
   }
 
   const clp = g(D, 'secoes.transparencia.clp');
@@ -1973,17 +2586,23 @@ async function init() {
   // Social / IVS
   const avs = g(D, 'secoes.social.avs');
   if (avs) {
-    document.getElementById('ivsList').innerHTML =
-      '<li><span>IVS geral</span><span>' + (avs.ivs != null ? avs.ivs.toFixed(3) : '') + ' <span style="color:var(--text3)">(BR: 0,326)</span></span></li>' +
-      '<li><span>Infraestrutura urbana</span><span>' + (avs.ivs_infraestrutura_urbana != null ? avs.ivs_infraestrutura_urbana.toFixed(3) : '') + '</span></li>' +
-      '<li><span>Capital humano</span><span>' + (avs.ivs_capital_humano != null ? avs.ivs_capital_humano.toFixed(3) : '') + '</span></li>' +
-      '<li><span>Renda e trabalho</span><span>' + (avs.ivs_renda_trabalho != null ? avs.ivs_renda_trabalho.toFixed(3) : '') + '</span></li>';
-    document.getElementById('idhmVal').textContent = avs.idhm != null ? avs.idhm.toFixed(3) : '';
-    document.getElementById('idhmVal2').textContent = avs.idhm != null ? avs.idhm.toFixed(3) : '';
-    document.getElementById('idhmCompList').innerHTML =
-      '<li><span>Longevidade</span><span>' + (avs.idhm_longevidade != null ? avs.idhm_longevidade.toFixed(3) : '') + '</span></li>' +
-      '<li><span>Renda</span><span>' + (avs.idhm_renda != null ? avs.idhm_renda.toFixed(3) : '') + '</span></li>' +
-      '<li><span>Educação</span><span>' + (avs.idhm_educacao != null ? avs.idhm_educacao.toFixed(3) : '') + '</span></li>';
+    // IVS e IDHM são índices ancorados em 0 e 1 — a barra pode ser lida no absoluto,
+    // então a escala é fixa em 1 e não no maior valor da própria lista.
+    const idx3 = v => v.toFixed(3).replace('.', ',');
+    const linhasIvs = [
+      ['IVS geral', avs.ivs], ['Infraestrutura urbana', avs.ivs_infraestrutura_urbana],
+      ['Capital humano', avs.ivs_capital_humano], ['Renda e trabalho', avs.ivs_renda_trabalho],
+    ].filter(r => r[1] != null).map(r => ({ k: r[0], v: r[1] }));
+    barrasCategoria('ivsBars', linhasIvs, 0, C.s6, { escalaMax: 1, fmtValor: idx3 });
+    document.getElementById('idhmVal').textContent = avs.idhm != null ? avs.idhm.toFixed(3).replace('.', ',') : '';
+    document.getElementById('idhmVal2').textContent = avs.idhm != null ? avs.idhm.toFixed(3).replace('.', ',') : '';
+    const linhasIdhm = [
+      ['Longevidade', avs.idhm_longevidade], ['Renda', avs.idhm_renda], ['Educação', avs.idhm_educacao],
+    ].filter(r => r[1] != null).map(r => ({ k: r[0], v: r[1] }));
+    barrasCategoria('idhmCompBars', linhasIdhm, 0, C.s5, { escalaMax: 1, fmtValor: idx3 });
+  } else {
+    barrasCategoria('ivsBars', [], 0); barrasCategoria('idhmCompBars', [], 0);
+    vazioValores('idhmVal', 'idhmVal2');
   }
 
   // Primeira infância
@@ -2006,7 +2625,7 @@ async function init() {
     document.getElementById('bfValMed').innerHTML = 'R$ ' + Math.round(bf.valor_medio || 0).toLocaleString('pt-BR') + ' <span class="unit">/família·mês</span>';
     document.getElementById('bfRepasse').innerHTML = 'R$ ' + fNum1((bf.repasse_mensal || 0) / 1e6) + ' <span class="unit">mi</span>';
     const dom = g(D, 'secoes.demografia.censo_2022.domicilios') || 1;
-    document.getElementById('bfBench').innerHTML = (bf.familias / dom * 100).toFixed(1) + '% dos domicílios · <b>Brasil:</b> 19,8%';
+    document.getElementById('bfBench').innerHTML = (bf.familias / dom * 100).toFixed(1).replace('.', ',') + '% dos domicílios · <b>Brasil:</b> 19,8%';
   }
 
   // BPC
@@ -2025,12 +2644,17 @@ async function init() {
     document.getElementById('raisVinculos').textContent = fNum(rais.vinculos_ativos_3112 || 0);
     const antRais = rais.vinculos_ativos_ano_anterior;
     if (antRais) {
-      const deltaRais = ((rais.vinculos_ativos_3112 - antRais) / antRais * 100).toFixed(1);
-      document.getElementById('raisDelta').innerHTML = '▲ +' + deltaRais + '% <span class="vs">vs ' + (rais.ano - 1) + '</span>';
+      const dRais = (rais.vinculos_ativos_3112 - antRais) / antRais * 100;
+      setCls('raisDelta', 'delta ' + (dRais >= 0 ? 'up' : 'down'));
+      setHtml('raisDelta', (dRais >= 0 ? '▲ +' : '▼ −') + Math.abs(dRais).toFixed(1).replace('.', ',') +
+        '% <span class="vs">vs ' + (rais.ano - 1) + '</span>');
     }
     document.getElementById('raisEstab').textContent = fNum(rais.estabelecimentos || 0);
     document.getElementById('raisSalMed').innerHTML = 'R$ ' + fNum(Math.round(rais.remuneracao_media || 0));
-    document.getElementById('raisBench').innerHTML = Math.round((rais.vinculos_ativos_3112 || 0) / pop2024 * 100) + '% da população · <b>Brasil:</b> 26%';
+    setHtml('raisBench', '<span>' + Math.round((rais.vinculos_ativos_3112 || 0) / pop2024 * 100) +
+      '% da população</span><span><b>Brasil:</b> 26%</span>');
+  } else {
+    vazioValores('raisVinculos', 'raisEstab', 'raisSalMed');
   }
 
   // CAGED
@@ -2046,9 +2670,11 @@ async function init() {
     const nome = e.empresa || fallbackName;
     const val = e.vinculos_ativos || 0;
     const tag = e[tagField] || '';
+    // A RAIS grava razão social e setor em CAIXA ALTA; as tabelas vizinhas
+    // (emendas, fornecedores) já usam titulo(), então aqui também
     return '<tr>' +
-      '<td class="rank-name" title="' + nome + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + nome + '</b></td>' +
-      '<td class="area" title="' + tag + '">' + tag + '</td>' +
+      '<td class="rank-name" title="' + nome + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + titulo(nome) + '</b></td>' +
+      '<td class="area" title="' + tag + '">' + titulo(tag).replace('; Reparação de Veículos Automotores e Motocicletas', '') + '</td>' +
       '<td class="valor" data-label="Vínculos ativos"><span class="val">' + fNum(val) + '</span></td>' +
       '</tr>';
   };
@@ -2061,7 +2687,7 @@ async function init() {
     const rowEmpreg = (e, i) => rowEmpregRank(e, i, 'empresa não informada', 'setor');
     document.getElementById('empregList').innerHTML = empregTop.slice(0, 5).map(rowEmpreg).join('');
     document.getElementById('empregDetList').innerHTML = empregTop.slice(5).map((e, i) => rowEmpregRank(e, i + 5, 'empresa não informada', 'setor')).join('');
-  }
+  } else { vazioTabela('empregList', 3); vazioTabela('empregDetList', 3); }
 
   // Maiores empregadores públicos
   const empregPub = g(D, 'secoes.trabalho.top_empregadores_publicos');
@@ -2069,7 +2695,7 @@ async function init() {
   if (empregPubTop.length) {
     document.getElementById('empregPubAno').textContent = empregPub.ano || '';
     document.getElementById('empregPubList').innerHTML = empregPubTop.map((e, i) => rowEmpregRank(e, i, 'órgão não informado', 'natureza')).join('');
-  }
+  } else { vazioTabela('empregPubList', 3); }
 
   // Comex
   const exp = g(D, 'secoes.comercio_exterior.exportacoes');
@@ -2090,20 +2716,47 @@ async function init() {
     const bal = expVal - impVal;
     document.getElementById('balancaVal').innerHTML = (bal < 0 ? '−' : '') + 'US$ ' + fNum1(Math.abs(bal) / 1e6) + ' <span class="unit">mi</span>';
 
-    const antExp = Number(exp.ano_anterior_fob_usd || 0);
-    if (antExp > 0) {
-      document.getElementById('expDelta').innerHTML = '▲ +' + ((expVal / antExp - 1) * 100).toFixed(1) + '% <span class="vs">vs ' + (anoComex - 1) + '</span>';
-    }
-    const antImp = Number(imp.ano_anterior_fob_usd || 0);
-    if (antImp > 0) {
-      document.getElementById('impDelta').innerHTML = '▲ +' + ((impVal / antImp - 1) * 100).toFixed(1) + '% <span class="vs">vs ' + (anoComex - 1) + '</span>';
-    }
+    // A seta e a cor vinham fixas em "▲ +": com queda saía "▲ +-22,7%" em verde.
+    // `bomSeSobe` separa exportação (subir é bom) de importação (subir pesa na balança).
+    const deltaComex = (id, atual, anterior, bomSeSobe) => {
+      if (!anterior) { setTxt(id, ''); return; }
+      const d = (atual / anterior - 1) * 100;
+      const sobe = d >= 0;
+      setCls(id, 'delta ' + (sobe ? (bomSeSobe ? 'up' : 'up-bad') : (bomSeSobe ? 'down' : 'down-good')));
+      setHtml(id, (sobe ? '▲ +' : '▼ −') + Math.abs(d).toFixed(1).replace('.', ',') +
+        '% <span class="vs">vs ' + (anoComex - 1) + '</span>');
+    };
+    deltaComex('expDelta', expVal, Number(exp.ano_anterior_fob_usd || 0), true);
+    deltaComex('impDelta', impVal, Number(imp.ano_anterior_fob_usd || 0), false);
 
-    // Export destinations
+    const deficit = bal < 0;
+    pill('stComex', deficit ? 'st-warn' : 'st-good', deficit ? '! déficit' : '✓ superávit');
+    const cardBal = el_('balancaVal').closest('.card');
+    cardBal.classList.remove('st-warn-b', 'st-good-b');
+    cardBal.classList.add(deficit ? 'st-warn-b' : 'st-good-b');
+    setTxt('balancaSub', (deficit ? 'Importa mais do que exporta' : 'Exporta mais do que importa') +
+      ' · US$ ' + fNum1(Math.abs(bal) / 1e6) + ' mi de diferença em ' + anoComex);
+
+    // Export destinations — a fonte guarda ISO3; o código sozinho não diz nada a quem lê.
+    // Só os parceiros frequentes do Brasil estão mapeados; o resto cai no próprio código.
+    const PAIS_ISO3 = {
+      ARG: 'Argentina', BOL: 'Bolívia', CHL: 'Chile', COL: 'Colômbia', PRY: 'Paraguai',
+      PER: 'Peru', URY: 'Uruguai', VEN: 'Venezuela', MEX: 'México', USA: 'Estados Unidos',
+      CAN: 'Canadá', DEU: 'Alemanha', ESP: 'Espanha', FRA: 'França', GBR: 'Reino Unido',
+      ITA: 'Itália', NLD: 'Países Baixos', PRT: 'Portugal', BEL: 'Bélgica', CHE: 'Suíça',
+      RUS: 'Rússia', CHN: 'China', JPN: 'Japão', KOR: 'Coreia do Sul', IND: 'Índia',
+      IDN: 'Indonésia', VNM: 'Vietnã', THA: 'Tailândia', TUR: 'Turquia', ARE: 'Emirados Árabes',
+      SAU: 'Arábia Saudita', ZAF: 'África do Sul', AUS: 'Austrália', NGA: 'Nigéria',
+      EGY: 'Egito', MAR: 'Marrocos', ISR: 'Israel', TWN: 'Taiwan', HKG: 'Hong Kong', SGP: 'Singapura',
+    };
+    const nomePais = c => PAIS_ISO3[c] || c;
     const destinos = exp.top_paises || [];
-    document.getElementById('comexDestList').innerHTML = destinos.slice(0, 6).map(d =>
-      '<li><span>' + d.pais_iso3 + '</span><span>US$ ' + fNum1(Number(d.valor_fob_usd) / 1e6) + ' mi</span></li>'
-    ).join('');
+    setHtml('comexDestList', destinos.length
+      ? destinos.slice(0, 6).map(d => liRow(nomePais(d.pais_iso3) +
+          (PAIS_ISO3[d.pais_iso3] ? ' <span style="color:var(--text3)">' + d.pais_iso3 + '</span>' : ''),
+          'US$ ' + fNum1(Number(d.valor_fob_usd) / 1e6) + ' mi')).join('')
+      : '');
+    if (!destinos.length) vazioLista('comexDestList');
 
     // Export/Import charts
     const sh4ToLabel = { '8301': 'Metais', '6212': 'Vestuário', '2208': 'Bebidas', '2403': 'Tabaco', '8302': 'Fechaduras', '6108': 'Vestuário', '2204': 'Vinhos', '1101': 'Cereais', '3006': 'Farmac.', '3005': 'Farmac.' };
@@ -2112,27 +2765,31 @@ async function init() {
     if (topExp.length) {
       new Chart(document.getElementById('expChart'), {
         type: 'bar', data: {
-          labels: topExp.map(d => sh4ToLabel[d.id_sh4] || d.id_sh4),
+          labels: topExp.map(d => sh4ToLabel[d.id_sh4] || ('SH4 ' + d.id_sh4)),
           datasets: [{ data: topExp.map(d => Number(d.valor_fob_usd) / 1e6), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
         },
         options: { ...chartOpts, indexAxis: 'y', plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
           callbacks: { label: ctx => 'US$ ' + fNum1(ctx.parsed.x) + ' mi' } } },
-          scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+          scales: { x: { ticks: { color: C.muted, callback: v => 'US$ ' + fNum1(v) + ' mi' }, grid: { color: C.grid } },
                     y: { ticks: { color: C.tick, font: { size: 11 } }, grid: { display: false } } } }
       });
-    }
+    } else { vazioGrafico('expChart'); }
     if (topImp.length) {
       new Chart(document.getElementById('impChart'), {
         type: 'bar', data: {
-          labels: topImp.map(d => sh4ToLabel[d.id_sh4] || d.id_sh4),
+          labels: topImp.map(d => sh4ToLabel[d.id_sh4] || ('SH4 ' + d.id_sh4)),
           datasets: [{ data: topImp.map(d => Number(d.valor_fob_usd) / 1e6), backgroundColor: C.s2, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
         },
         options: { ...chartOpts, indexAxis: 'y', plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
           callbacks: { label: ctx => 'US$ ' + fNum1(ctx.parsed.x) + ' mi' } } },
-          scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+          scales: { x: { ticks: { color: C.muted, callback: v => 'US$ ' + fNum1(v) + ' mi' }, grid: { color: C.grid } },
                     y: { ticks: { color: C.tick, font: { size: 11 } }, grid: { display: false } } } }
       });
-    }
+    } else { vazioGrafico('impChart'); }
+  } else {
+    vazioValores('expVal', 'impVal', 'balancaVal');
+    setTxt('balancaSub', ''); pill('stComex', null);
+    vazioGrafico('expChart'); vazioGrafico('impChart'); vazioLista('comexDestList');
   }
 
   // Agro
@@ -2176,8 +2833,13 @@ async function init() {
 
     const acima = vizinhos.filter(v => (v.pib_per_capita || 0) > refPc).length;
     const abaixo = vizinhos.filter(v => v.pib_per_capita != null && v.pib_per_capita < refPc).length;
+    // O per capita daqui divide o PIB do ano do PIB pela população do ano corrente,
+    // então diverge do valor publicado pelo IBGE na seção Economia — dizer isso
+    const pcOficial = g(D, 'secoes.economia.pib.pib_per_capita.valor');
     document.getElementById('viziResumo').innerHTML =
-      vizinhos.length + ' municípios limítrofes (todos no ' + g(D, 'municipio.sigla_uf') + ') · <b style="color:var(--text)">' + nomeMunicipio + '</b>: R$ ' + fNum(Math.round(refPc)) + ' per capita — ' + acima + ' vizinho(s) acima, ' + abaixo + ' abaixo';
+      vizinhos.length + ' municípios limítrofes (todos no ' + g(D, 'municipio.sigla_uf') + ') · <b style="color:var(--text)">' + nomeMunicipio + '</b>: R$ ' + fNum(Math.round(refPc)) + ' per capita — ' + acima + ' vizinho(s) acima, ' + abaixo + ' abaixo' +
+      (pcOficial ? '<br>Base comparável: PIB de ' + (viziRef.pib_ano || '') + ' sobre a população de ' + (viziRef.populacao_ano || '') +
+        ' para todos os municípios. O valor oficial do IBGE em Economia (R$ ' + fNum(Math.round(pcOficial)) + ') usa a população do próprio ano do PIB.' : '');
 
     const ranking = [{ nome: nomeMunicipio, populacao: refPop, pib_per_capita: refPc, self: true }, ...vizinhos]
       .sort((a, b) => (b.populacao || 0) - (a.populacao || 0));
@@ -2200,24 +2862,1276 @@ async function init() {
     });
   }
 
+  // =========================================================================
+  // VISÃO GERAL — cartões-síntese
+  // =========================================================================
+  const sim = ok(g(D, 'secoes.saude.mortalidade'));
+  const sih = ok(g(D, 'secoes.saude.internacoes'));
+  const viol = ok(g(D, 'secoes.seguranca.violencia_sinan'));
+  const emp = ok(g(D, 'secoes.empresas'));
+  const ibc = ok(g(D, 'secoes.conectividade.ibc'));
+  const txSeg = g(D, 'secoes.seguranca.isp_rj.taxas_100k') || {};
+  const txSegUf = g(D, 'secoes.seguranca.isp_rj.taxas_100k_uf') || {};
+
+  const pop2023it = find(popSerie, 'ano', 2023);
+  if (pop2023it && pop2024) {
+    const dp = (pop2024 / pop2023it.populacao - 1) * 100;
+    setCls('popDelta', 'delta ' + (dp >= 0 ? 'up' : 'down'));
+    setHtml('popDelta', (dp >= 0 ? '▲ +' : '▼ ') + Math.abs(dp).toFixed(1).replace('.', ',') + '% <span class="vs">vs 2023</span>');
+  }
+
+  if (ideb2023Ini) {
+    setTxt('idebIniciaisVal', fNum1(ideb2023Ini.ideb));
+    setTxt('idebIniciaisAno', String(ideb2023Ini.ano || ''));
+    const acimaBr = brIni != null && ideb2023Ini.ideb >= brIni;
+    setCls('idebIniciaisStatus', 'status ' + (acimaBr ? 'st-good' : 'st-warn'));
+    setTxt('idebIniciaisStatus', acimaBr ? '✓ acima do Brasil' : '! abaixo do Brasil');
+    if (ideb2021Ini) {
+      const di = ideb2023Ini.ideb - ideb2021Ini.ideb;
+      setCls('idebIniciaisDelta', 'delta ' + (di >= 0 ? 'up' : 'down'));
+      setHtml('idebIniciaisDelta', (di >= 0 ? '▲ +' : '▼ ') + Math.abs(di).toFixed(1).replace('.', ',') + ' <span class="vs">vs 2021</span>');
+    }
+  } else { vazioValor('idebIniciaisVal'); }
+
+  if (snis) {
+    setTxt('esgVintage', String(snis.ano || ''));
+    if (snis.ano_anterior) {
+      const dt = (snis.indice_tratamento_esgoto || 0) - (snis.ano_anterior.t || 0);
+      setCls('esgDelta', 'delta ' + (dt >= 0 ? 'up' : 'down'));
+      setHtml('esgDelta', (dt >= 0 ? '▲ +' : '▼ ') + Math.abs(dt).toFixed(1).replace('.', ',') + ' pp <span class="vs">vs ' + ((snis.ano || 0) - 1) + '</span>');
+    }
+    // O índice é sobre o coletado; o alcance real depende também da coleta
+    const efetivo = (snis.indice_coleta_esgoto || 0) * (snis.indice_tratamento_esgoto || 0) / 100;
+    const textoEfetivo = 'Cobertura efetiva ≈ ' + fNum1(efetivo) + '% do esgoto gerado (coleta × tratamento)';
+    setTxt('esgResumoSub', textoEfetivo);
+    setTxt('esgTSub', textoEfetivo);
+  }
+
+  if (txSeg.taxa_homicidio_doloso != null) {
+    setHtml('homVal', fNum1(txSeg.taxa_homicidio_doloso) + ' <span class="unit">/100k hab</span>');
+    setTxt('homVintage', String(txSeg.ano || ''));
+    setCls('homDelta', 'delta flat');
+    setHtml('homDelta', '<span class="vs">' + (txSegUf.taxa_homicidio_doloso ? Math.round(txSegUf.taxa_homicidio_doloso / txSeg.taxa_homicidio_doloso) + '× abaixo da taxa fluminense' : 'taxa ISP mais recente') + '</span>');
+  } else { vazioValor('homVal'); }
+
+  if (caged) setHtml('cagedDet', '<span class="vs">' + fNum(caged.admissoes || 0) + ' admissões − ' + fNum(caged.desligamentos || 0) + ' desligamentos</span>');
+
+  if (ibc) {
+    setTxt('ibcVal', fNum1(ibc.ibc));
+    const dibc = (ibc.ibc || 0) - (ibc.media_brasil || 0);
+    setCls('ibcDelta', 'delta ' + (dibc >= 0 ? 'up' : 'down'));
+    setHtml('ibcDelta', (dibc >= 0 ? '▲ +' : '▼ ') + fNum1(Math.abs(dibc)) + ' <span class="vs">vs média nacional</span>');
+  } else { vazioValor('ibcVal'); }
+
+  // Mortalidade infantil (resumo)
+  if (sim && sim.taxa_mortalidade_infantil_1000nv != null) {
+    setTxt('resInfAno', String(sim.ano || ''));
+    setHtml('resInfVal', fNum1(sim.taxa_mortalidade_infantil_1000nv) + ' <span class="unit">/1.000 nasc.</span>');
+    const serieSim = sim.serie || [];
+    const antSim = serieSim.length > 1 ? serieSim[serieSim.length - 2] : null;
+    if (antSim && antSim.infantis != null) {
+      const dif = (sim.obitos_infantis || 0) - antSim.infantis;
+      setCls('resInfDelta', 'delta ' + (dif <= 0 ? 'down-good' : 'up-bad'));
+      setHtml('resInfDelta', (dif <= 0 ? '▼ ' : '▲ +') + Math.abs(dif) + ' óbito(s) <span class="vs">vs ' + antSim.ano + '</span>');
+    }
+  } else { vazioValor('resInfVal'); }
+
+  // Internações SUS (resumo)
+  if (sih && sih.internacoes != null) {
+    setTxt('resSihAno', String(sih.ano || ''));
+    setHtml('resSihVal', fNum(sih.internacoes) + ' <span class="unit">AIH</span>');
+    const antSih = sih.ano_anterior;
+    if (antSih && antSih.internacoes) {
+      const ds = (sih.internacoes / antSih.internacoes - 1) * 100;
+      setCls('resSihDelta', 'delta ' + (ds >= 0 ? 'up-bad' : 'down-good'));
+      setHtml('resSihDelta', (ds >= 0 ? '▲ +' : '▼ ') + Math.abs(ds).toFixed(1).replace('.', ',') + '% <span class="vs">vs ' + ((sih.ano || 0) - 1) + '</span>');
+    }
+  } else { vazioValor('resSihVal'); }
+
+  // Violência notificada (resumo)
+  if (viol && viol.notificacoes != null) {
+    setTxt('resViolAno', String(viol.ano || ''));
+    setHtml('resViolVal', fNum(viol.notificacoes) + ' <span class="unit">notificações</span>');
+    setCls('resViolDelta', 'delta flat');
+    setHtml('resViolDelta', '<span class="vs">' + fNum1(viol.pct_feminino || 0) + '% das vítimas são mulheres</span>');
+  } else { vazioValor('resViolVal'); pill('stViol', null); }
+
+  // Empresas ativas (resumo)
+  if (emp && emp.ativas != null) {
+    setTxt('resEmpAno', (emp.competencia || '').slice(0, 4));
+    setHtml('resEmpVal', fNum(emp.ativas) + ' <span class="unit">CNPJ</span>');
+    const dem = emp.demografia_empresarial || [];
+    const ultDem = dem.length ? dem[dem.length - 1] : null;
+    if (ultDem) {
+      setCls('resEmpDelta', 'delta ' + (ultDem.saldo >= 0 ? 'up' : 'down'));
+      setHtml('resEmpDelta', (ultDem.saldo >= 0 ? '▲ +' : '▼ ') + fNum(Math.abs(ultDem.saldo)) + ' <span class="vs">saldo em ' + ultDem.ano + '</span>');
+    }
+  } else { vazioValor('resEmpVal'); }
+
+  // ---- Semáforos derivados do dado ----------------------------------------
+  // Cada selo abaixo estava escrito à mão no HTML com o resultado de Nova Friburgo.
+  // Aqui cada um passa a sair do próprio número, com a referência explícita no rótulo.
+  if (pop2023it && pop2024) {
+    const cresce = pop2024 >= pop2023it.populacao;
+    pill('stPop', cresce ? 'st-good' : 'st-warn', cresce ? '✓ crescendo' : '! encolhendo');
+  } else { pill('stPop', null); }
+
+  pillVs('stPibPc', pibPc && pibPc.valor, pibPc && pibPc.uf, ['acima do RJ', 'abaixo do RJ']);
+  setTxt('resPibPcAno', pibPc && pibPc.ano ? String(pibPc.ano) : '');
+  setTxt('resPopAno', pop2024item && pop2024item.ano ? String(pop2024item.ano) : '');
+  setTxt('resCagedAno', caged && caged.ano ? String(caged.ano) : '');
+  setTxt('resIbcAno', ibc && ibc.ano ? String(ibc.ano) : '');
+  pillVs('stEsg', snis && snis.indice_tratamento_esgoto, 90, ['acima da meta', 'abaixo da meta 2033']);
+  pillVs('stIbc', ibc && ibc.ibc, ibc && ibc.media_brasil, ['acima da média BR', 'abaixo da média BR']);
+  pillVs('stInf', sim && sim.taxa_mortalidade_infantil_1000nv, 13.2, ['abaixo do Brasil', 'acima do Brasil'], true);
+
+  if (txSeg.taxa_homicidio_doloso != null && txSegUf.taxa_homicidio_doloso) {
+    const r = txSeg.taxa_homicidio_doloso / txSegUf.taxa_homicidio_doloso;
+    if (r <= 0.5) pill('stHom', 'st-good', '✓ muito abaixo RJ');
+    else if (r <= 1) pill('stHom', 'st-good', '✓ abaixo do RJ');
+    else if (r <= 1.3) pill('stHom', 'st-warn', '! acima do RJ');
+    else pill('stHom', 'st-crit', '✕ muito acima RJ');
+  } else { pill('stHom', null); }
+
+  if (caged && caged.saldo != null) {
+    pill('stCaged', caged.saldo >= 0 ? 'st-good' : 'st-crit', caged.saldo >= 0 ? '✓ positivo' : '✕ negativo');
+  } else { pill('stCaged', null); }
+
+  if (sih && sih.ano_anterior && sih.ano_anterior.internacoes) {
+    const sobe = sih.internacoes >= sih.ano_anterior.internacoes;
+    pill('stSih', sobe ? 'st-warn' : 'st-good', sobe ? '! em alta' : '✓ em queda');
+  } else { pill('stSih', null); }
+
+  const ultDemoEmp = emp && (emp.demografia_empresarial || []).slice(-1)[0];
+  if (ultDemoEmp) {
+    pill('stEmp', ultDemoEmp.saldo >= 0 ? 'st-good' : 'st-crit',
+      ultDemoEmp.saldo >= 0 ? '✓ saldo positivo' : '✕ saldo negativo');
+  } else { pill('stEmp', null); }
+
+  // Faixas do PNUD para o IDHM e do IPEA para o IVS — nomes oficiais, não adjetivos soltos
+  const idhmV = avs && avs.idhm;
+  if (idhmV != null) {
+    const faixa = idhmV >= 0.8 ? ['st-good', '✓ muito alto'] : idhmV >= 0.7 ? ['st-good', '✓ alto']
+      : idhmV >= 0.6 ? ['st-warn', '! médio'] : idhmV >= 0.5 ? ['st-serious', '! baixo'] : ['st-crit', '✕ muito baixo'];
+    pill('stIdhm', faixa[0], faixa[1]); pill('stIdhm2', faixa[0], faixa[1]);
+  } else { pill('stIdhm', null); pill('stIdhm2', null); }
+
+  const ivsV = avs && avs.ivs;
+  if (ivsV != null) {
+    const faixa = ivsV <= 0.2 ? ['st-good', '✓ muito baixa'] : ivsV <= 0.3 ? ['st-good', '✓ baixa']
+      : ivsV <= 0.4 ? ['st-warn', '! média'] : ivsV <= 0.5 ? ['st-serious', '! alta'] : ['st-crit', '✕ muito alta'];
+    pill('stIvs', faixa[0], faixa[1]);
+  } else { pill('stIvs', null); }
+
+  if (dengue && dengue.notificados_ano_anterior) {
+    const cai = (dengue.notificados || 0) <= dengue.notificados_ano_anterior;
+    pill('stDengue', cai ? 'st-good' : 'st-warn', cai ? '✓ em queda' : '! em alta');
+  } else { pill('stDengue', null); }
+
+  // =========================================================================
+  // DEMOGRAFIA — censo 2022 ampliado (cor/raça, religião, alfabetização)
+  // =========================================================================
+  const cx = ok(g(D, 'secoes.demografia.censo_extra'));
+
+  if (alf != null) {
+    // A taxa do censo é sobre a população em idade de alfabetização, não sobre o total —
+    // usar a base real quando ela vem no recorte por cor/raça
+    const baseAlf = ((cx && cx.alfabetizacao_por_raca) || []).reduce((s, r) => s + (r.total || 0), 0) || pop2022;
+    setTxt('alfDelta', '≈ ' + fNum(Math.round(baseAlf * (1 - alf))) + ' não alfabetizadas entre ' + fNum(baseAlf) + ' na base do censo');
+  }
+  if (env != null) {
+    const dEnv = env - 80.0;
+    setTxt('envDelta', (dEnv >= 0 ? '+' : '−') + fNum1(Math.abs(dEnv)) + ' acima da média nacional');
+  }
+
+  // Cor ou raça — 2010 vs 2022
+  const raca2010 = (cx && cx.cor_raca && cx.cor_raca['2010']) || [];
+  const raca2022 = (cx && cx.cor_raca && cx.cor_raca['2022']) || [];
+  if (raca2010.length && raca2022.length) {
+    const cats = raca2022.map(r => r.cor_raca);
+    const v10 = cats.map(c => (raca2010.find(r => r.cor_raca === c) || {}).populacao || 0);
+    const v22 = cats.map(c => (raca2022.find(r => r.cor_raca === c) || {}).populacao || 0);
+    new Chart(el_('racaChart'), {
+      type: 'bar', data: {
+        labels: cats,
+        datasets: [
+          { label: '2010', data: v10, backgroundColor: C.s1, maxBarThickness: 18, borderRadius: 3 },
+          { label: '2022', data: v22, backgroundColor: C.s5, maxBarThickness: 18, borderRadius: 3 },
+        ]
+      },
+      options: { ...chartOpts, indexAxis: 'y',
+        plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum(ctx.parsed.x) + ' hab' } } },
+        scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                  y: { ticks: { color: C.tick, autoSkip: false, font: { size: 11 } }, grid: { display: false } } } }
+    });
+    const variacoes = cats.map((c, i) => ({ c, pct: v10[i] ? (v22[i] / v10[i] - 1) * 100 : 0, base: v10[i] }))
+      .filter(x => x.base > 5000).sort((a, b) => b.pct - a.pct);
+    if (variacoes.length > 1) {
+      const sobe = variacoes[0], desce = variacoes[variacoes.length - 1];
+      setTxt('racaSub', 'Entre os censos, ' + sobe.c.toLowerCase() + ' ' + (sobe.pct >= 0 ? '+' : '−') + fNum1(Math.abs(sobe.pct)) + '% e ' +
+        desce.c.toLowerCase() + ' ' + (desce.pct >= 0 ? '+' : '−') + fNum1(Math.abs(desce.pct)) + '% — autodeclaração, muda mais que a composição real da população');
+    }
+  } else { vazioGrafico('racaChart'); }
+
+  // Religião — censo 2022
+  const relig = (cx && cx.religiao) || null;
+  const grupos = (relig && relig.grupos) || [];
+  if (grupos.length) {
+    const top = grupos.slice(0, 6);
+    const resto = grupos.slice(6).reduce((s, r) => s + (r.populacao || 0), 0);
+    const labels = top.map(r => r.religiao.replace('Católica Apostólica Romana', 'Católica'));
+    const dados = top.map(r => r.populacao);
+    if (resto > 0) { labels.push('Demais'); dados.push(resto); }
+    new Chart(el_('religiaoChart'), {
+      type: 'doughnut', data: {
+        labels, datasets: [{ data: dados, backgroundColor: [C.s1, C.s2, C.s3, C.s4, C.s5, C.s6, C.s7], borderColor: C.surface, borderWidth: 2 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '58%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: C.tick, padding: 8, usePointStyle: true, boxWidth: 8, font: { size: 10 } } },
+          tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.label + ': ' + fNum(ctx.parsed) + ' (' + pctDe(ctx.parsed, relig.total_10_anos_ou_mais).toFixed(1).replace('.', ',') + '%)' } }
+        }
+      }
+    });
+  } else { vazioGrafico('religiaoChart'); }
+
+  // Alfabetização por cor/raça
+  const alfRaca = (cx && cx.alfabetizacao_por_raca) || [];
+  if (alfRaca.length) {
+    setHtml('alfRacaList', alfRaca.map(r =>
+      liRow(r.cor_raca + ' <span style="color:var(--text3)">(' + fNum(r.total) + ')</span>', fNum1(r.taxa) + '%')).join(''));
+    const relevantes = alfRaca.filter(r => (r.total || 0) >= 1000);
+    if (relevantes.length > 1) {
+      const taxas = relevantes.map(r => r.taxa);
+      setTxt('alfRacaGap', fNum1(Math.max(...taxas) - Math.min(...taxas)) + ' pp (grupos com 1.000+ pessoas)');
+    } else { setTxt('alfRacaGap', '—'); }
+  } else { vazioLista('alfRacaList'); setTxt('alfRacaGap', '—'); }
+
+  // =========================================================================
+  // INFRAESTRUTURA — domicílios do censo 2022
+  // =========================================================================
+  const dom = ok(g(D, 'secoes.infraestrutura.censo_domicilios'));
+
+  // Categoria do censo vem como frase inteira; o eixo só cabe se ela for encurtada
+  // por regra explícita — cortar em N caracteres deixava "…ligada" e "…não ligada"
+  // indistinguíveis no eixo do esgotamento.
+  const CURTO_CENSO = {
+    'Rede geral, rede pluvial ou fossa ligada à rede': 'Rede geral / pluvial',
+    'Fossa séptica ou fossa filtro não ligada à rede': 'Fossa séptica (isolada)',
+    'Fossa rudimentar ou buraco': 'Fossa rudimentar',
+    'Rio, lago, córrego ou mar': 'Rio, lago ou mar',
+    'Não tinham banheiro nem sanitário': 'Sem banheiro',
+  };
+  const curtoCenso = s => CURTO_CENSO[s] || truncaPalavra(s, 30);
+
+  function barraCategorias(canvasId, bloco, unidade) {
+    const cats = (bloco && bloco.categorias) || [];
+    if (!cats.length) { vazioGrafico(canvasId); return null; }
+    const dados = cats.slice(0, 7);
+    new Chart(el_(canvasId), {
+      type: 'bar', data: {
+        labels: dados.map(c => curtoCenso(c.categoria)),
+        datasets: [{ data: dados.map(c => c.pct), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+      },
+      options: { ...chartOpts, indexAxis: 'y',
+        plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+          callbacks: { title: ctx => dados[ctx[0].dataIndex].categoria,
+            label: ctx => fNum1(ctx.parsed.x) + '% · ' + fNum(dados[ctx.dataIndex].populacao) + ' ' + (unidade || 'hab') } } },
+        scales: { x: { ticks: { color: C.muted, callback: v => v + '%' }, grid: { color: C.grid } },
+                  y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+    });
+    return dados;
+  }
+
+  if (dom) {
+    barraCategorias('domEsgotoChart', dom.esgotamento);
+    // Água: 3 categorias — rosca lê melhor que barra
+    const agua = (dom.agua && dom.agua.categorias) || [];
+    if (agua.length) {
+      new Chart(el_('domAguaChart'), {
+        type: 'doughnut', data: {
+          labels: agua.map(c => c.categoria.replace('Possui ligação à rede geral e a utiliza como forma principal', 'Rede geral (principal)')
+            .replace('Possui ligação à rede geral, mas utiliza principalmente outra forma', 'Rede geral (secundária)')
+            .replace('Não possui ligação com a rede geral', 'Sem rede geral')),
+          datasets: [{ data: agua.map(c => c.populacao), backgroundColor: [C.s1, C.s6, C.s4], borderColor: C.surface, borderWidth: 2 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '58%',
+          plugins: {
+            legend: { position: 'bottom', labels: { color: C.tick, padding: 8, usePointStyle: true, boxWidth: 8, font: { size: 10 } } },
+            tooltip: { ...chartOpts.plugins.tooltip,
+              callbacks: { label: ctx => ctx.label + ': ' + fNum(ctx.parsed) + ' hab (' + pctDe(ctx.parsed, dom.agua.total).toFixed(1).replace('.', ',') + '%)' } }
+          }
+        }
+      });
+    } else { vazioGrafico('domAguaChart'); }
+
+    // Rótulos do censo são frases inteiras — encurtar antes de virar eixo de barra
+    // (o texto completo fica no `title`, acessível no hover)
+    const curto = s => String(s)
+      .replace('Jogado em terreno baldio, encosta ou área pública', 'Terreno baldio')
+      .replace('Queimado na propriedade', 'Queimado')
+      .replace('Enterrado na propriedade', 'Enterrado')
+      .replace('Habitação em casa de cômodos ou cortiço', 'Cômodos / cortiço')
+      .replace('Estrutura residencial permanente degradada ou inacabada', 'Degradado')
+      .replace('Casa de vila ou em condomínio', 'Vila / condomínio')
+      ; // encurtado por regra acima; o resto cai no truncador por palavra
+    const curtoDom = s => truncaPalavra(curto(s), 22);
+    const catBarras = cats => cats.map(c => ({ k: curtoDom(c.categoria), titulo: c.categoria, v: c.populacao }));
+
+    const lixo = (dom.lixo && dom.lixo.categorias) || [];
+    barrasCategoria('domLixoBars', catBarras(lixo), (dom.lixo || {}).total, C.s5, { soPct: true });
+
+    const tipos = (dom.tipo_domicilio && dom.tipo_domicilio.categorias) || [];
+    barrasCategoria('domTipoBars', catBarras(tipos), (dom.tipo_domicilio || {}).total, C.s1, { soPct: true });
+
+    // Espécies do censo aninham entre si — mostrar as mutuamente exclusivas
+    const rec = dom.domicilios_recenseados || [];
+    const acha = n => (rec.find(r => r.especie === n) || {}).domicilios;
+    const linhas = [
+      ['Ocupados', acha('Particular permanente ocupado')],
+      ['Vagos', acha('Particular permanente não ocupado - vago')],
+      ['Uso ocasional', acha('Particular permanente não ocupado - uso ocasional')],
+      ['Coletivos', acha('Coletivo')],
+    ].filter(r => r[1] != null);
+    setHtml('domRecList', linhas.length
+      ? linhas.map(r => liRow(r[0], fNum(r[1]))).join('')
+      : '');
+    if (!linhas.length) vazioLista('domRecList');
+  } else {
+    vazioGrafico('domEsgotoChart'); vazioGrafico('domAguaChart');
+    barrasCategoria('domLixoBars', [], 0); barrasCategoria('domTipoBars', [], 0);
+    vazioLista('domRecList');
+  }
+
+  // Notas de leitura — SNIS (prestador) e censo (morador) medem coisas diferentes
+  const esgRede = dom && dom.esgotamento && (dom.esgotamento.categorias || [])[0];
+  setTxt('domEsgotoNota', 'Declarado pelo morador (IBGE)' +
+    (snis ? ' — o SNIS registra ' + fNum1(snis.indice_coleta_esgoto || 0) + '% de coleta no mesmo município, contra ' +
+      (esgRede ? fNum1(esgRede.pct) : '—') + '% ligados à rede aqui' : '') +
+    '. As duas medidas divergem por construção: uma é o cadastro do prestador, a outra é a percepção de quem mora.');
+  const aguaRede = dom && dom.agua && (dom.agua.categorias || [])[0];
+  setTxt('domAguaNota', 'Declarado pelo morador (IBGE)' +
+    (snis ? ' — SNIS: ' + fNum1(snis.indice_atendimento_total_agua || 0) + '% de atendimento; censo: ' +
+      (aguaRede ? fNum1(aguaRede.pct) : '—') + '% usam a rede geral como forma principal' : '') + '.');
+
+  // =========================================================================
+  // ECONOMIA — PIB per capita, combustíveis (ANP), INPC
+  // =========================================================================
+  if (pibPc) setHtml('pibPcVal', 'R$ ' + fNum(Math.round(pibPc.valor || 0)));
+
+  const anp = ok(g(D, 'secoes.economia.combustiveis'));
+  const produtos = (anp && anp.produtos) || [];
+  if (produtos.length) {
+    const coleta = produtos[0].ultima_coleta || '';
+    setTxt('anpAno', coleta ? coleta.slice(5, 7) + '/' + coleta.slice(0, 4) : '');
+    // GLP é vendido por botijão de 13 kg — nunca comparar com o litro
+    const unidade = p => /GLP/.test(p.produto) ? '/13 kg' : '/l';
+    const linhaAnp = p => {
+      const d = (p.preco_municipio || 0) - (p.preco_brasil || 0);
+      const cor = d > 0 ? 'var(--delta-bad)' : 'var(--delta-good)';
+      // titulo() preserva "S10"/"GLP" — charAt+toLowerCase devolvia "Diesel s10"
+      return liRow(titulo(p.produto).replace(/\bS10\b/i, 'S10').replace(/\bGlp\b/, 'GLP'),
+        'R$ ' + fmt2(p.preco_municipio) + ' <span style="color:var(--text3)">' + unidade(p) + '</span>' +
+        ' <span style="color:' + cor + ';font-size:.72rem">' + (d >= 0 ? '+' : '−') + fmt2(Math.abs(d)) + ' vs BR</span>');
+    };
+    const destaque = ['GASOLINA COMUM', 'ETANOL', 'DIESEL S10'];
+    const principais = destaque.map(n => produtos.find(p => p.produto === n)).filter(Boolean);
+    setHtml('anpList', (principais.length ? principais : produtos.slice(0, 3)).map(linhaAnp).join(''));
+    setHtml('anpDetList', produtos.map(linhaAnp).join(''));
+    const postos = Math.max(...produtos.map(p => p.postos || 0));
+    setTxt('anpPostos', 'Até ' + postos + ' postos pesquisados · média dos últimos ' + (anp.janela_dias || 60) + ' dias até ' +
+      (coleta ? coleta.split('-').reverse().join('/') : '—'));
+  } else {
+    vazioLista('anpList'); vazioLista('anpDetList');
+    setTxt('anpPostos', 'A ANP não coletou preço neste município na janela');
+  }
+
+  if (inpc) {
+    setHtml('inpcDetList',
+      liRow('Acumulado no ano', (inpc.variacao_anual != null ? inpc.variacao_anual.toFixed(2).replace('.', ',') + '%' : '—')) +
+      liRow('Referência', 'Brasil — o INPC não é apurado por município'));
+  }
+
+  // =========================================================================
+  // EMPRESAS — base CNPJ da Receita Federal
+  // =========================================================================
+  if (emp) {
+    const comp = emp.competencia || '';
+    ['cnpjComp', 'cnpjComp2', 'cnpjComp3', 'cnpjComp4', 'cnpjComp5', 'cnpjComp6']
+      .forEach(id => setTxt(id, comp ? comp.split('-').reverse().join('/') : ''));
+    setTxt('cnpjAtivas', fNum(emp.ativas || 0));
+    setTxt('cnpjPorHab', pop2024 ? fNum1((emp.ativas || 0) / pop2024 * 100) + ' por 100 habitantes' : '');
+    setTxt('cnpjMatriz', fNum(emp.matrizes || 0));
+    setTxt('cnpjFilial', fNum(emp.filiais || 0) + ' filiais · ' +
+      fNum1(pctDe(emp.matrizes, (emp.matrizes || 0) + (emp.filiais || 0))) + '% dos ativos são matriz');
+    setHtml('cnpjIdade', fNum1(emp.idade_media_anos || 0) + ' <span class="unit">anos</span>');
+    setTxt('cnpjBaixadas', fNum(emp.baixadas || 0));
+    setTxt('cnpjRegistradas', fNum(emp.registradas || 0) + ' CNPJ já registrados no município');
+
+    const secoes = emp.por_secao_cnae || [];
+    if (secoes.length) {
+      new Chart(el_('cnaeChart'), {
+        type: 'bar', data: {
+          labels: secoes.map(s => {
+            const n = titulo(s.secao).replace('; Reparação de Veículos Automotores e Motocicletas', '')
+              .replace('Atividades Administrativas e Serviços Complementares', 'Ativ. administrativas')
+              .replace('Atividades Profissionais, Científicas e Técnicas', 'Ativ. profissionais/técnicas')
+              .replace('Transporte, Armazenagem E Correio', 'Transporte e armazenagem');
+            return truncaPalavra(n, 34);
+          }),
+          datasets: [{ data: secoes.map(s => s.ativas), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { title: ctx => secoes[ctx[0].dataIndex].secao, label: ctx => fNum(ctx.parsed.x) + ' estabelecimentos ativos' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('cnaeChart'); }
+
+    const demoEmp = emp.demografia_empresarial || [];
+    if (demoEmp.length > 1) {
+      setTxt('cnpjDemoAno', demoEmp[0].ano + '–' + demoEmp[demoEmp.length - 1].ano);
+      new Chart(el_('cnpjDemoChart'), {
+        type: 'bar', data: {
+          labels: demoEmp.map(r => r.ano),
+          datasets: [
+            { label: 'Aberturas', data: demoEmp.map(r => r.aberturas), backgroundColor: C.s5, maxBarThickness: 16, borderRadius: 3, order: 2 },
+            { label: 'Baixas', data: demoEmp.map(r => r.baixas), backgroundColor: C.s6, maxBarThickness: 16, borderRadius: 3, order: 2 },
+            { label: 'Saldo', data: demoEmp.map(r => r.saldo), type: 'line', borderColor: C.s1, backgroundColor: C.s1, pointBackgroundColor: C.s1, ...lineStyle, pointRadius: 3, fill: false, order: 1 },
+          ]
+        },
+        options: { ...chartOpts,
+          plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum(ctx.parsed.y) } } },
+          scales: { x: { ticks: { color: C.muted }, grid: { display: false } },
+                    y: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } } } }
+      });
+      const ultDemo = demoEmp[demoEmp.length - 1];
+      const pico = demoEmp.reduce((a, b) => (b.saldo > a.saldo ? b : a), demoEmp[0]);
+      setTxt('cnpjDemoSub', 'Saldo positivo em todos os anos da série · maior saldo em ' + pico.ano +
+        ' (+' + fNum(pico.saldo) + ') · ' + ultDemo.ano + ' fechou em +' + fNum(ultDemo.saldo) +
+        '. Ano corrente pode estar incompleto no espelho.');
+    } else { vazioGrafico('cnpjDemoChart'); }
+
+    // Ranking com barra proporcional — nomes de CNAE são longos demais pra um eixo
+    const ativs = emp.top_atividades || [];
+    if (ativs.length) {
+      const maxAtiv = Math.max(...ativs.map(a => a.ativas || 0), 1);
+      setHtml('cnaeTopList', ativs.map((a, i) =>
+        '<tr>' +
+        '<td class="rank-name" title="' + a.atividade + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + a.atividade + '</b></td>' +
+        '<td class="area"><div class="rank-bar"><div class="track"><div class="fill" style="width:' + (a.ativas / maxAtiv * 100).toFixed(0) + '%"></div></div>' +
+        '<span class="pct">' + fNum1(pctDe(a.ativas, emp.ativas)) + '%</span></div></td>' +
+        '<td class="valor" data-label="Estabelecimentos"><span class="val">' + fNum(a.ativas) + '</span></td>' +
+        '</tr>').join(''));
+    } else { vazioTabela('cnaeTopList', 3); }
+  } else {
+    vazioValores('cnpjAtivas', 'cnpjMatriz', 'cnpjIdade', 'cnpjBaixadas');
+    vazioGrafico('cnaeChart'); vazioGrafico('cnpjDemoChart'); vazioTabela('cnaeTopList', 3);
+  }
+
+  // =========================================================================
+  // TRABALHO — complementos
+  // =========================================================================
+  if (caged) {
+    setTxt('cagedSaldoVal', (caged.saldo > 0 ? '+' : '') + fNum(caged.saldo || 0));
+  } else { vazioValor('cagedSaldoVal'); }
+  if (rais) {
+    setHtml('raisSalBench', '<span>Média das remunerações da RAIS · <b>Brasil:</b> R$ 3.507</span>' +
+      (caged && caged.salario_medio_admissao ? '<span><b>Admissão (CAGED ' + caged.ano + '):</b> R$ ' + fNum(Math.round(caged.salario_medio_admissao)) + '</span>' : ''));
+  }
+
+  // =========================================================================
+  // EDUCAÇÃO — censo escolar e SISU
+  // =========================================================================
+  const ce = ok(g(D, 'secoes.educacao.censo_escolar'));
+  if (ce) {
+    const anoCe = String(ce.ano || '');
+    ['censoEscAno', 'censoEscAno2', 'censoEscAno3', 'censoEscAno4', 'censoEscAno5', 'censoEscAno6', 'censoEscAno7'].forEach(id => setTxt(id, anoCe));
+
+    // Ordem etária, não por volume: infantil → fundamental → médio é a leitura natural
+    const etapas = [
+      ['Educação infantil', ce.matriculas_infantil],
+      ['Ensino fundamental', ce.matriculas_fundamental],
+      ['Ensino médio', ce.matriculas_medio],
+    ].filter(e => e[1] != null).map(e => ({ k: e[0], v: e[1] }));
+    barrasCategoria('matEtapaBars', etapas, ce.matriculas, C.s1);
+    setHtml('matEtapaDetList',
+      liRow('EJA', fNum(ce.matriculas_eja || 0)) +
+      liRow('Educação especial (incluída)', fNum(ce.matriculas_especial || 0)) +
+      liRow('Total de matrículas', fNum(ce.matriculas || 0)) +
+      liRow('Turmas', fNum(ce.turmas || 0)));
+
+    setTxt('escTotal', fNum(ce.escolas || 0));
+    setTxt('escRuralSub', fNum(ce.escolas_rurais || 0) + ' na zona rural (' + fNum1(pctDe(ce.escolas_rurais, ce.escolas)) + '%)');
+    setTxt('escMat', fNum(ce.matriculas || 0));
+    const serieCe = ce.serie || [];
+    const antCe = serieCe.length > 1 ? serieCe[serieCe.length - 2] : null;
+    if (antCe && antCe.matriculas) {
+      const dce = (ce.matriculas / antCe.matriculas - 1) * 100;
+      setCls('escMatDelta', 'delta ' + (dce >= 0 ? 'up' : 'down'));
+      setHtml('escMatDelta', (dce >= 0 ? '▲ +' : '▼ ') + Math.abs(dce).toFixed(1).replace('.', ',') + '% <span class="vs">vs ' + antCe.ano + '</span>');
+    }
+    setTxt('escDoc', fNum(ce.docentes || 0));
+    setTxt('escDocSub', ce.docentes ? fNum1((ce.matriculas || 0) / ce.docentes) + ' matrículas por docente' : '');
+    setTxt('escTransp', fNum(ce.matriculas_transporte || 0));
+    setTxt('escTranspSub', fNum1(pctDe(ce.matriculas_transporte, ce.matriculas)) + '% das matrículas usam transporte escolar');
+
+    const redes = ce.por_rede || [];
+    if (redes.length) {
+      new Chart(el_('redeChart'), {
+        type: 'doughnut', data: {
+          labels: redes.map(r => r.rede),
+          datasets: [{ data: redes.map(r => r.matriculas), backgroundColor: [C.s1, C.s4, C.s5, C.s3], borderColor: C.surface, borderWidth: 2 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '58%',
+          plugins: {
+            legend: { position: 'bottom', labels: { color: C.tick, padding: 10, usePointStyle: true, boxWidth: 8, font: { size: 10 } } },
+            tooltip: { ...chartOpts.plugins.tooltip,
+              callbacks: { label: ctx => {
+                const r = redes[ctx.dataIndex];
+                return r.rede + ': ' + fNum(r.matriculas) + ' matrículas · ' + fNum(r.escolas) + ' escolas';
+              } } }
+          }
+        }
+      });
+    } else { vazioGrafico('redeChart'); }
+
+    const infra = [
+      ['Internet', ce.com_internet], ['Esgoto na rede', ce.com_esgoto_rede],
+      ['Rampa de acesso', ce.com_rampa_acessibilidade], ['Biblioteca', ce.com_biblioteca],
+      ['Quadra', ce.com_quadra], ['Laboratório', ce.com_laboratorio],
+    ].filter(r => r[1] != null);
+    setHtml('escInfraBars', infra.length ? infra.map(r => {
+      const p = pctDe(r[1], ce.escolas);
+      return '<div class="row"><span>' + r[0] + '</span><div class="track"><div class="fill" style="width:' +
+        p.toFixed(0) + '%;background:' + (p >= 80 ? C.s5 : p >= 50 ? C.s4 : C.s6) + '"></div></div><span>' + fNum1(p) + '%</span></div>';
+    }).join('') : '<div class="empty">' + SEM_DADO + '</div>');
+  } else {
+    barrasCategoria('matEtapaBars', [], 0); vazioLista('matEtapaDetList');
+    vazioValores('escTotal', 'escMat', 'escDoc', 'escTransp');
+    vazioGrafico('redeChart'); setHtml('escInfraBars', '<div class="empty">' + SEM_DADO + '</div>');
+  }
+
+  const sisu = ok(g(D, 'secoes.educacao.sisu'));
+  const sisuSerie = (sisu && sisu.serie) || [];
+  const sisuUlt = sisuSerie.length ? sisuSerie[sisuSerie.length - 1] : null;
+  if (sisuUlt) {
+    setTxt('sisuAno', String(sisuUlt.ano || ''));
+    setHtml('sisuList',
+      liRow('Candidatos do município', fNum(sisuUlt.candidatos || 0)) +
+      liRow('Aprovados', fNum(sisuUlt.aprovados || 0)) +
+      liRow('Matrículas efetivadas', fNum(sisuUlt.matriculados || 0)) +
+      liRow('Nota média', fNum1(sisuUlt.nota_media || 0)));
+    const cursos = sisu.top_cursos || [];
+    setHtml('sisuCursosList', cursos.length
+      ? cursos.map(c => liRow(titulo(c.curso) + ' <span style="color:var(--text3)">· ' + c.ies + '</span>', fNum(c.matriculados))).join('')
+      : '');
+    if (!cursos.length) vazioLista('sisuCursosList');
+  } else {
+    vazioLista('sisuList'); vazioLista('sisuCursosList');
+  }
+
+  // =========================================================================
+  // SAÚDE — SISVAN, IEPS, ANS, Farmácia Popular, cobertura vacinal
+  // =========================================================================
+  const sisvan = ok(g(D, 'secoes.saude.sisvan'));
+  if (sisvan && (sisvan.criancas_acompanhadas || 0) > 0) {
+    setTxt('sisvanAno', String(sisvan.ano || ''));
+    setHtml('sisvanList',
+      liRow('Crianças acompanhadas', fNum(sisvan.criancas_acompanhadas)) +
+      liRow('Baixo peso', sisvan.pct_baixo_peso != null ? fNum1(sisvan.pct_baixo_peso) + '%' : '—') +
+      liRow('Excesso de peso', sisvan.pct_excesso_peso != null ? fNum1(sisvan.pct_excesso_peso) + '%' : '—'));
+  } else {
+    setTxt('sisvanAno', sisvan && sisvan.ano ? String(sisvan.ano) : '');
+    vazioLista('sisvanList', 'Nenhuma criança acompanhada registrada no SISVAN para este município no ano');
+  }
+
+  const ieps = ok(g(D, 'secoes.saude.ieps'));
+  const ind = (ieps && ieps.indicadores) || {};
+  const anosInd = (ieps && ieps.ano_por_indicador) || {};
+  if (ieps && Object.keys(ind).length) {
+    const anoDe = k => String(anosInd[k] || ieps.ano_max || '');
+    setTxt('iepsAno', anoDe('medicos_1000hab'));
+    setTxt('iepsAno2', anoDe('enfermeiros_1000hab'));
+    setTxt('iepsAno3', anoDe('cobertura_esf'));
+    setTxt('iepsAno4', anoDe('despesa_saude_per_capita'));
+    setTxt('iepsAno5', anoDe('taxa_internacao_csap_100k'));
+    setTxt('iepsAno6', anoDe('pct_prenatal_adequado'));
+    setTxt('iepsMed', fNum1(ind.medicos_1000hab || 0));
+    setTxt('iepsEnf', fNum1(ind.enfermeiros_1000hab || 0));
+    setHtml('iepsEsf', fNum1(ind.cobertura_esf || 0) + ' <span class="unit">%</span>');
+    setHtml('iepsGasto', 'R$ ' + fNum(Math.round(ind.despesa_saude_per_capita || 0)) + ' <span class="unit">/hab·ano</span>');
+    setHtml('iepsGastoBench', '<span>' + fNum1(ind.pct_receita_propria_saude || 0) + '% da receita própria · <b>mínimo legal:</b> 15%</span>');
+    setTxt('iepsCsap', fNum(Math.round(ind.taxa_internacao_csap_100k || 0)));
+    setHtml('iepsPrenatal', fNum1(ind.pct_prenatal_adequado || 0) + ' <span class="unit">%</span>');
+    setTxt('iepsPrenatalSub', '7 consultas ou mais · ' + fNum1(ind.pct_prenatal_zero || 0) + '% das gestantes não fizeram nenhuma');
+  } else {
+    vazioValores('iepsMed', 'iepsEnf', 'iepsEsf', 'iepsGasto', 'iepsCsap', 'iepsPrenatal');
+  }
+
+  const ans = ok(g(D, 'secoes.saude.planos_privados'));
+  if (ans) {
+    const compAns = (ans.competencia || '').split('-').reverse().join('/');
+    setTxt('ansComp', compAns); setTxt('ansComp2', compAns);
+    setHtml('ansCob', fNum1(ans.cobertura_pct || 0) + ' <span class="unit">%</span>');
+    setTxt('ansSub', fNum(ans.medico_hospitalar || 0) + ' beneficiários médico-hospitalares (ANS) · o IEPS mede o mesmo em ' +
+      (ind.cobertura_plano_privado != null ? fNum1(ind.cobertura_plano_privado) + '% para ' + (anosInd.cobertura_plano_privado || ieps && ieps.ano_max) : 'ano anterior'));
+    const contr = ans.por_contratacao || [];
+    const relevante = contr.filter(c => (c.beneficiarios || 0) >= 10);
+    setHtml('ansList', relevante.length
+      ? relevante.map(c => liRow(c.tipo, fNum(c.beneficiarios) + ' <span style="color:var(--text3)">(' + fNum1(pctDe(c.beneficiarios, ans.beneficiarios_total)) + '%)</span>')).join('') +
+        liRow('Odontológico (à parte)', fNum(ans.odontologico || 0))
+      : '');
+    if (!relevante.length) vazioLista('ansList');
+  } else {
+    vazioValor('ansCob'); vazioLista('ansList');
+  }
+
+  const farm = ok(g(D, 'secoes.saude.farmacia_popular'));
+  if (farm && farm.estabelecimentos_credenciados != null) setTxt('farmPopVal', fNum(farm.estabelecimentos_credenciados));
+  else vazioValor('farmPopVal');
+
+  const imun = ok(g(D, 'secoes.saude.imunizacao'));
+  const imunSerie = (imun && imun.serie) || [];
+  if (imunSerie.length > 1) {
+    setTxt('imunAno', imunSerie[0].ano + '–' + imunSerie[imunSerie.length - 1].ano);
+    const linhas = [
+      ['Tríplice viral (D1)', 'cobertura_triplice_viral_d1', C.s1],
+      ['Poliomielite', 'cobertura_poliomielite', C.s5],
+      ['BCG', 'cobertura_bcg', C.s4],
+      ['Pentavalente', 'cobertura_penta', C.s3],
+      ['Cobertura total', 'cobertura_total', C.s8],
+    ];
+    new Chart(el_('imunChart'), {
+      type: 'line', data: {
+        labels: imunSerie.map(r => r.ano),
+        datasets: linhas.map(([rot, k, cor]) => ({
+          label: rot, data: imunSerie.map(r => r[k]),
+          borderColor: cor, backgroundColor: cor, pointBackgroundColor: cor,
+          ...lineStyle, pointRadius: 2, fill: false, spanGaps: false,
+          borderWidth: k === 'cobertura_total' ? 3 : 1.8,
+        }))
+      },
+      options: { ...chartOpts,
+        plugins: { ...chartOpts.plugins,
+          legend: { position: 'bottom', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 8, boxWidth: 8, font: { size: 10 } } },
+          tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.parsed.y == null ? 'sem registro' : fNum1(ctx.parsed.y) + '%') } } },
+        scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+                  y: { ticks: { color: C.muted, callback: v => v + '%' }, grid: { color: C.grid } } } }
+    });
+  } else { vazioGrafico('imunChart'); }
+
+  // =========================================================================
+  // MORTALIDADE (SIM) e INTERNAÇÕES (SIH/AIH)
+  // =========================================================================
+  if (sim) {
+    const anoSim = String(sim.ano || '');
+    ['simAno', 'simAno2', 'simAno3', 'simAno4', 'simAno5', 'simAno6', 'simAno7'].forEach(id => setTxt(id, anoSim));
+    setTxt('simObitos', fNum(sim.obitos || 0));
+    setTxt('simTaxa', fNum1(sim.taxa_mortalidade_1000hab || 0) + ' óbitos por 1.000 habitantes');
+    setHtml('simInfantil', fNum1(sim.taxa_mortalidade_infantil_1000nv || 0) + ' <span class="unit">/1.000 nasc.</span>');
+    setTxt('simNeonatalSub', sim.obitos_infantis != null
+      ? fNum(sim.obitos_infantis) + ' óbitos de menores de 1 ano' +
+        (sim.obitos_neonatais != null ? ', ' + fNum(sim.obitos_neonatais) + ' deles no período neonatal' : '')
+      : '');
+    setHtml('simIdade', fNum1(sim.idade_media_obito || 0) + ' <span class="unit">anos</span>');
+    setTxt('simSexo', fNum(sim.homens || 0) + ' homens · ' + fNum(sim.mulheres || 0) + ' mulheres');
+    setHtml('simMalDef', fNum1(pctDe(sim.mal_definidas, sim.obitos)) + ' <span class="unit">%</span>');
+
+    const caps = sim.por_capitulo || [];
+    if (caps.length) {
+      new Chart(el_('simCapChart'), {
+        type: 'bar', data: {
+          labels: caps.map(c => capituloCurto(c.capitulo)),
+          datasets: [{ data: caps.map(c => c.obitos), backgroundColor: C.s8, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { title: ctx => caps[ctx[0].dataIndex].capitulo, label: ctx => fNum(ctx.parsed.x) + ' óbitos (' + fNum1(pctDe(ctx.parsed.x, sim.obitos)) + '% do total)' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('simCapChart'); }
+
+    const serieSim = sim.serie || [];
+    if (serieSim.length > 1) {
+      setTxt('simSerieAno', serieSim[0].ano + '–' + serieSim[serieSim.length - 1].ano);
+      new Chart(el_('simSerieChart'), {
+        type: 'line', data: {
+          labels: serieSim.map(r => r.ano),
+          datasets: [
+            // Escalas muito diferentes (milhares vs dezenas): encoding distinto evita
+            // ler a linha vermelha como se fosse a série maior
+            { label: 'Óbitos infantis', type: 'bar', data: serieSim.map(r => r.infantis), backgroundColor: C.s8 + '66', borderColor: C.s8, borderWidth: 1, maxBarThickness: 18, borderRadius: 3, yAxisID: 'y1', order: 2 },
+            { label: 'Óbitos totais', data: serieSim.map(r => r.obitos), borderColor: C.s1, backgroundColor: C.s1fill, fill: true, pointBackgroundColor: C.s1, ...lineStyle, pointRadius: 3, yAxisID: 'y', order: 1 },
+          ]
+        },
+        options: { ...chartOpts,
+          scales: {
+            x: { ticks: { color: C.muted }, grid: { display: false } },
+            y: { position: 'left', ticks: { color: C.s1, callback: v => fNum(v) }, grid: { color: C.grid }, title: { display: true, text: 'Total', color: C.s1 } },
+            y1: { position: 'right', beginAtZero: true, ticks: { color: C.s8, stepSize: 10 }, grid: { display: false }, title: { display: true, text: 'Infantis', color: C.s8 } },
+          } }
+      });
+    } else { vazioGrafico('simSerieChart'); }
+
+    const causas = sim.top_causas || [];
+    setHtml('simCausasList', causas.length
+      ? causas.map((c, i) =>
+        '<tr><td class="rank-name" title="' + c.descricao + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + c.descricao + '</b></td>' +
+        '<td class="area">' + c.cid + '</td>' +
+        '<td class="valor" data-label="Óbitos"><span class="val">' + fNum(c.obitos) + '</span></td></tr>').join('')
+      : '');
+    if (!causas.length) vazioTabela('simCausasList', 3);
+
+    const extTot = sim.causas_externas || 0;
+    setHtml('simExternasTotal', fNum(extTot) + ' <span class="unit">óbitos</span>');
+    setTxt('simExternasSub', fNum1(pctDe(extTot, sim.obitos)) + '% de todos os óbitos do ano');
+    // O restante (quedas, afogamentos, envenenamentos…) não vem detalhado na extração;
+    // nomear a sobra é mais honesto do que deixar o gráfico somar menos que o total
+    const extDet = [
+      { k: 'Acidentes de transporte', v: sim.transporte || 0 },
+      { k: 'Agressões', v: sim.agressoes || 0 },
+      { k: 'Lesões autoprovocadas', v: sim.suicidios || 0 },
+    ];
+    const extResto = extTot - extDet.reduce((s, r) => s + r.v, 0);
+    if (extResto > 0) extDet.push({ k: 'Demais', titulo: 'Demais causas externas (quedas, afogamentos, envenenamentos e outras)', v: extResto });
+    barrasCategoria('simExternasBars', extDet, extTot, C.s6);
+    setHtml('simMaternasList', liRow('Óbitos maternos <span style="color:var(--text3)">(cap. XV)</span>', fNum(sim.maternas || 0)));
+  } else {
+    vazioValores('simObitos', 'simInfantil', 'simIdade', 'simMalDef');
+    vazioGrafico('simCapChart'); vazioGrafico('simSerieChart');
+    vazioTabela('simCausasList', 3);
+    vazioValor('simExternasTotal'); setTxt('simExternasSub', '');
+    barrasCategoria('simExternasBars', [], 0); setHtml('simMaternasList', '');
+  }
+
+  if (sih) {
+    const anoSih = String(sih.ano || '');
+    ['sihAno', 'sihAno2', 'sihAno3', 'sihAno4', 'sihAno5'].forEach(id => setTxt(id, anoSih));
+    setTxt('sihTotal', fNum(sih.internacoes || 0));
+    const antSih = sih.ano_anterior;
+    if (antSih && antSih.internacoes) {
+      const dsih = (sih.internacoes / antSih.internacoes - 1) * 100;
+      setCls('sihDelta', 'delta ' + (dsih >= 0 ? 'up' : 'down'));
+      setHtml('sihDelta', (dsih >= 0 ? '▲ +' : '▼ ') + Math.abs(dsih).toFixed(1).replace('.', ',') + '% <span class="vs">vs ' + ((sih.ano || 0) - 1) + '</span>');
+    }
+    setHtml('sihValor', 'R$ ' + fNum1((sih.valor_total || 0) / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('sihValorMedio', 'R$ ' + fNum(Math.round(sih.valor_medio_aih || 0)) + ' por internação · ' + fNum(sih.diarias_uti || 0) + ' diárias de UTI' +
+      (sih.permanencia_media != null ? ' · permanência média de ' + fNum1(sih.permanencia_media) + ' dias' : ''));
+    setHtml('sihMort', fNum1(sih.taxa_mortalidade_hospitalar || 0) + ' <span class="unit">%</span>');
+    setTxt('sihObitos', fNum(sih.obitos_hospitalares || 0) + ' óbitos durante a internação');
+    setHtml('sihLocal', fNum1(sih.pct_no_municipio || 0) + ' <span class="unit">%</span>');
+    setTxt('sihLocalSub', fNum(sih.no_municipio || 0) + ' das ' + fNum(sih.internacoes || 0) + ' internações · ' + fNum(sih.urgencia || 0) + ' foram urgência');
+
+    const capsSih = sih.por_capitulo || [];
+    if (capsSih.length) {
+      new Chart(el_('sihCapChart'), {
+        type: 'bar', data: {
+          labels: capsSih.map(c => capituloCurto(c.capitulo)),
+          datasets: [{ data: capsSih.map(c => c.internacoes), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { title: ctx => capsSih[ctx[0].dataIndex].capitulo,
+              label: ctx => fNum(ctx.parsed.x) + ' internações · R$ ' + fNum1(capsSih[ctx.dataIndex].valor / 1e6) + ' mi' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('sihCapChart'); }
+
+    const serieSih = sih.serie || [];
+    if (serieSih.length > 1) {
+      setTxt('sihSerieAno', serieSih[0].ano + '–' + serieSih[serieSih.length - 1].ano);
+      new Chart(el_('sihSerieChart'), {
+        type: 'bar', data: {
+          labels: serieSih.map(r => r.ano),
+          datasets: [
+            { label: 'Internações', data: serieSih.map(r => r.internacoes), backgroundColor: C.s1, maxBarThickness: 20, borderRadius: 3, yAxisID: 'y', order: 2 },
+            { label: 'Gasto SUS (R$ mi)', type: 'line', data: serieSih.map(r => r.valor / 1e6), borderColor: C.s4, backgroundColor: C.s4, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3, fill: false, yAxisID: 'y1', order: 1 },
+          ]
+        },
+        options: { ...chartOpts,
+          plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.datasetIndex === 0 ? fNum(ctx.parsed.y) + ' internações' : 'R$ ' + fNum1(ctx.parsed.y) + ' mi' } } },
+          scales: {
+            x: { ticks: { color: C.muted }, grid: { display: false } },
+            y: { position: 'left', ticks: { color: C.s1, callback: v => fNum(v) }, grid: { color: C.grid } },
+            y1: { position: 'right', ticks: { color: C.s4, callback: v => 'R$ ' + fNum(v) + ' mi' }, grid: { display: false } },
+          } }
+      });
+    } else { vazioGrafico('sihSerieChart'); }
+  } else {
+    vazioValores('sihTotal', 'sihValor', 'sihMort', 'sihLocal');
+    vazioGrafico('sihCapChart'); vazioGrafico('sihSerieChart');
+  }
+
+  // =========================================================================
+  // SEGURANÇA — complementos ISP e violência notificada (SINAN/VIVA)
+  // =========================================================================
+  if (txSeg.taxa_estupro != null) {
+    setHtml('segEstBench', '<span>' + fNum1(txSeg.taxa_estupro) + '/100k (' + (txSeg.ano || '') + ') · <b>RJ:</b> ' + fNum1(txSegUf.taxa_estupro || 0) + '</span>');
+  }
+  if (txSeg.ano) {
+    setTxt('segAno10', String(txSeg.ano));
+    setTxt('taxasNota', 'As taxas por 100 mil habitantes do ISP têm ano-base próprio (' + txSeg.ano +
+      '), anterior ao das ocorrências absolutas acima (' + (g(D, 'secoes.seguranca.isp_rj.ano') || '—') + ') — não são a mesma safra de dado.');
+  }
+  if (txSeg.taxa_roubo_veiculo == null) {
+    setHtml('segRouboBench', '<span>Sem taxa/100k no ISP · <b>RJ:</b> ' + fNum1(txSegUf.taxa_roubo_veiculo || 0) + '/100k</span>');
+  }
+
+  if (viol) {
+    const anoV = String(viol.ano || '');
+    ['violAno', 'violAno2', 'violAno3', 'violAno4', 'violAno5', 'violAno6'].forEach(id => setTxt(id, anoV));
+    setTxt('violTotal', fNum(viol.notificacoes || 0));
+    setTxt('violFem', fNum(viol.feminino || 0));
+    setTxt('violFemSub', fNum1(viol.pct_feminino || 0) + '% das notificações · ' + fNum(viol.masculino || 0) + ' do sexo masculino');
+    setTxt('violNegros', fNum(viol.negros || 0));
+    setTxt('violNegrosSub', fNum1(viol.pct_negros || 0) + '% · ' + (viol.nota_raca || '') + ' · ' + fNum(viol.raca_ignorada || 0) + ' sem raça informada');
+    setTxt('violAuto', fNum(viol.autoprovocadas || 0));
+    setTxt('violAutoSub', fNum1(pctDe(viol.autoprovocadas, viol.notificacoes)) + '% das notificações — tentativa de suicídio e automutilação');
+
+    const serieV = viol.serie || [];
+    if (serieV.length > 1) {
+      setTxt('violSerieAno', serieV[0].ano + '–' + serieV[serieV.length - 1].ano);
+      new Chart(el_('violSerieChart'), {
+        type: 'line', data: {
+          labels: serieV.map(r => r.ano),
+          datasets: [
+            { label: 'Total notificado', data: serieV.map(r => r.notificacoes), borderColor: C.s1, backgroundColor: C.s1fill, fill: true, pointBackgroundColor: C.s1, ...lineStyle, pointRadius: 3 },
+            { label: 'Autoprovocadas', data: serieV.map(r => r.autoprovocadas), borderColor: C.s8, backgroundColor: C.s8, pointBackgroundColor: C.s8, ...lineStyle, pointRadius: 3, fill: false },
+          ]
+        },
+        options: { ...chartOpts,
+          plugins: { ...chartOpts.plugins,
+            legend: { position: 'bottom', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 8, boxWidth: 8, font: { size: 10 } } } },
+          scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+                    y: { beginAtZero: true, ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } } } }
+      });
+    } else { vazioGrafico('violSerieChart'); }
+
+    const tipos = [
+      ['Física', viol.fisica], ['Negligência', viol.negligencia], ['Sexual', viol.sexual],
+      ['Psicológica', viol.psicologica], ['Financeira', viol.financeira], ['Tortura', viol.tortura],
+      ['Por arma de fogo', viol.arma_fogo], ['Tráfico de pessoas', viol.trafico_humano],
+      ['Trabalho infantil', viol.infantil_trabalho],
+    ].filter(t => (t[1] || 0) > 0).sort((a, b) => b[1] - a[1]);
+    if (tipos.length) {
+      new Chart(el_('violTipoChart'), {
+        type: 'bar', data: {
+          labels: tipos.map(t => t[0]),
+          datasets: [{ data: tipos.map(t => t[1]), backgroundColor: C.s3, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => fNum(ctx.parsed.x) + ' notificações' } } },
+          scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 11 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('violTipoChart', 'Nenhum tipo de violência com registro no ano'); }
+
+    const locais = agrupa(viol.por_local, 'local', 'n');
+    barrasCategoria('violLocalBars', locais, viol.notificacoes, C.s3);
+
+    // O SINAN devolve "Ignorado" em mais de um código — agrupar antes de exibir.
+    // Ciclo de vida é ordinal: ordenar por volume destruiria o eixo etário.
+    const ORDEM_CICLO = ['Criança (0-9)', 'Adolescente (10-19)', 'Jovem (20-24)', 'Adulto (25-59)', 'Idoso (60+)'];
+    const ciclos = agrupa(viol.por_ciclo_vida, 'ciclo', 'n').sort((a, b) => {
+      const ia = ORDEM_CICLO.indexOf(a.k), ib = ORDEM_CICLO.indexOf(b.k);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    barrasCategoria('violCicloBars', ciclos, viol.notificacoes, C.s8);
+  } else {
+    vazioValores('violTotal', 'violFem', 'violNegros', 'violAuto');
+    vazioGrafico('violSerieChart'); vazioGrafico('violTipoChart');
+    barrasCategoria('violLocalBars', [], 0); barrasCategoria('violCicloBars', [], 0);
+  }
+
+  // =========================================================================
+  // POLÍTICA — Câmara Municipal, perfil de candidatos, financiamento
+  // =========================================================================
+  const cam = ok(g(D, 'secoes.politica.camara_municipal'));
+  if (cam) {
+    const anoCam = String(cam.ano || '');
+    ['camAno', 'camAno2', 'camAno3'].forEach(id => setTxt(id, anoCam));
+    const banc = (cam.bancadas || []).slice().sort((a, b) => (b.cadeiras - a.cadeiras) || (b.votos - a.votos));
+    setTxt('camTotal', '· ' + (cam.cadeiras_total || banc.reduce((s, b) => s + b.cadeiras, 0)) + ' cadeiras');
+    if (banc.length) {
+      new Chart(el_('camaraChart'), {
+        type: 'bar', data: {
+          labels: banc.map(b => b.partido),
+          datasets: [{ data: banc.map(b => b.cadeiras), backgroundColor: C.s1, maxBarThickness: 14, borderRadius: 3, borderSkipped: 'start' }]
+        },
+        options: { ...chartOpts, indexAxis: 'y',
+          plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => banc[ctx.dataIndex].cadeiras + ' cadeira(s) · ' + fNum(banc[ctx.dataIndex].votos) + ' votos de legenda' } } },
+          scales: { x: { beginAtZero: true, ticks: { color: C.muted, stepSize: 1, precision: 0 }, grid: { color: C.grid } },
+                    y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+      });
+    } else { vazioGrafico('camaraChart'); }
+
+    const pc = cam.perfil_candidatos || {};
+    setHtml('candPerfilList', pc.candidatos
+      ? liRow('Candidatos', fNum(pc.candidatos)) +
+        liRow('Mulheres', fNum(pc.feminino || 0) + ' <span style="color:var(--text3)">(' + fNum1(pctDe(pc.feminino, pc.candidatos)) + '%)</span>') +
+        liRow('Negros (pretos + pardos)', fNum(pc.negros || 0) + ' <span style="color:var(--text3)">(' + fNum1(pctDe(pc.negros, pc.candidatos)) + '%)</span>') +
+        liRow('Idade média', fNum1(pc.idade_media || 0) + ' anos')
+      : '');
+    if (!pc.candidatos) vazioLista('candPerfilList');
+
+    const fin2 = cam.financiamento || [];
+    setHtml('financList', fin2.length
+      ? fin2.map(f => liRow(f.cargo.charAt(0).toUpperCase() + f.cargo.slice(1) + ' <span style="color:var(--text3)">(' + fNum(f.candidatos) + ')</span>',
+          'R$ ' + fNum1((f.receita || 0) / 1e6) + ' mi')).join('') +
+        liRow('Média por candidato', 'R$ ' + fNum(Math.round(
+          fin2.reduce((s, f) => s + f.receita, 0) / Math.max(1, fin2.reduce((s, f) => s + f.candidatos, 0)))))
+      : '');
+    if (!fin2.length) vazioLista('financList');
+  } else {
+    vazioGrafico('camaraChart'); vazioLista('candPerfilList'); vazioLista('financList');
+  }
+
+  const dep = ok(g(D, 'secoes.politica.deputados_nascidos'));
+  const deps = (dep && dep.deputados) || [];
+  setHtml('depNascList', deps.length
+    ? deps.map(d2 => liRow(titulo(d2.nome),
+        (d2.nascimento ? d2.nascimento.slice(0, 4) : '—') + (d2.falecido ? ' <span style="color:var(--text3)">†</span>' : ''))).join('')
+    : '');
+  if (!deps.length) vazioLista('depNascList', 'Nenhum deputado federal registrado como nascido aqui');
+
+  // =========================================================================
+  // TRANSPARÊNCIA — Querido Diário, IFGF, CAPAG, servidores, consumidor
+  // =========================================================================
+  const qd = ok(g(D, 'secoes.transparencia.diarios_oficiais'));
+  if (qd && qd.total_edicoes) {
+    const serieQd = qd.serie || [];
+    setTxt('qdAno', serieQd.length ? serieQd[0].ano + '–' + serieQd[serieQd.length - 1].ano : '');
+    setHtml('qdList',
+      liRow('Edições coletadas', fNum(qd.total_edicoes)) +
+      liRow('Última edição', qd.ultima_edicao ? qd.ultima_edicao.split('-').reverse().join('/') : '—') +
+      serieQd.slice().reverse().map(r => liRow(r.ano, fNum(r.edicoes) + ' edições <span style="color:var(--text3)">(' + fNum(r.extras) + ' extras)</span>')).join(''));
+  } else {
+    vazioLista('qdList', 'Município ainda não coberto pelo Querido Diário');
+  }
+
+  const fiscal = ok(g(D, 'secoes.transparencia.fiscal'));
+  const ifgf = (fiscal && fiscal.ifgf) || [];
+  if (ifgf.length > 1) {
+    setTxt('ifgfAno', ifgf[0].ano + '–' + ifgf[ifgf.length - 1].ano);
+    new Chart(el_('ifgfChart'), {
+      type: 'line', data: {
+        labels: ifgf.map(r => r.ano),
+        datasets: [{ label: 'IFGF', data: ifgf.map(r => r.indice), borderColor: C.s1, backgroundColor: C.s1fill, fill: true, pointBackgroundColor: C.s1, ...lineStyle, pointRadius: 3 }]
+      },
+      options: { ...chartOpts, plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+        callbacks: { label: ctx => {
+          const r = ifgf[ctx.dataIndex];
+          return 'IFGF ' + fmt2(r.indice) + ' · ' + r.ranking_estadual + 'º no RJ, ' + fNum(r.ranking_nacional) + 'º no país';
+        } } } },
+        scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
+                  y: { min: 0, max: 1, ticks: { color: C.muted, callback: v => fmt2(v) }, grid: { color: C.grid } } } }
+    });
+    const ultIfgf = ifgf[ifgf.length - 1];
+    setTxt('ifgfSub', 'Escala 0–1 · ' + ultIfgf.ano + ': ' + fmt2(ultIfgf.indice) + ' — ' + ultIfgf.ranking_estadual +
+      'º entre os municípios do RJ e ' + fNum(ultIfgf.ranking_nacional) + 'º no país. Acima de 0,8 é gestão de excelência; abaixo de 0,4, crítica.');
+  } else { vazioGrafico('ifgfChart'); }
+
+  const capag = (fiscal && fiscal.capag) || null;
+  if (capag) {
+    // A é boa, B aceitável, C/D preocupante — a letra sozinha não diz isso a quem lê
+    const CLASSE_CAPAG = { A: 'st-good', B: 'st-good', C: 'st-warn', D: 'st-crit' };
+    const nota = n => n
+      ? '<span class="status ' + (CLASSE_CAPAG[n] || 'st-warn') + '">' + n + '</span>'
+      : '<span class="empty" style="padding:0">não divulgada</span>';
+    setHtml('capagList',
+      liRow('Nota geral (CAPAG)', nota(capag.capag)) +
+      liRow('Endividamento', nota(capag.nota_endividamento)) +
+      liRow('Poupança corrente', nota(capag.nota_poupanca_corrente)) +
+      liRow('Liquidez', nota(capag.nota_liquidez)));
+  } else { vazioLista('capagList'); }
+
+  const serv = ok(g(D, 'secoes.transparencia.servidores'));
+  if (serv && serv.adm_direta != null) {
+    setTxt('servAno', String(serv.ano || ''));
+    setHtml('servList',
+      liRow('Administração direta', fNum(serv.adm_direta)) +
+      liRow('Estatutários', fNum(serv.estatutario_adm_direta || 0)) +
+      liRow('Celetistas', fNum(serv.clt_adm_direta || 0)) +
+      liRow('Comissionados', fNum(serv.comissionado_adm_direta || 0) + ' <span style="color:var(--text3)">(' + fNum1(pctDe(serv.comissionado_adm_direta, serv.adm_direta)) + '%)</span>') +
+      liRow('Administração indireta', fNum(serv.adm_indireta || 0)));
+  } else { vazioLista('servList'); }
+
+  const cons = ok(g(D, 'secoes.transparencia.consumidor'));
+  const serieCons = (cons && cons.serie) || [];
+  if (serieCons.length > 1) {
+    setTxt('consAno', serieCons[0].ano + '–' + serieCons[serieCons.length - 1].ano);
+    setTxt('consAno2', String(cons.ano || ''));
+    new Chart(el_('consChart'), {
+      type: 'bar', data: {
+        labels: serieCons.map(r => r.ano),
+        datasets: [
+          { label: 'Reclamações', data: serieCons.map(r => r.reclamacoes), backgroundColor: C.s1, maxBarThickness: 18, borderRadius: 3, yAxisID: 'y', order: 2 },
+          { label: 'Nota média (0–5)', type: 'line', data: serieCons.map(r => r.nota_media), borderColor: C.s4, backgroundColor: C.s4, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3, fill: false, yAxisID: 'y1', order: 1 },
+        ]
+      },
+      options: { ...chartOpts,
+        plugins: { ...chartOpts.plugins,
+          legend: { position: 'bottom', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 8, boxWidth: 8, font: { size: 10 } } },
+          tooltip: { ...chartOpts.plugins.tooltip,
+            callbacks: { label: ctx => ctx.datasetIndex === 0 ? fNum(ctx.parsed.y) + ' reclamações' : 'nota ' + fmt2(ctx.parsed.y) } } },
+        scales: {
+          x: { ticks: { color: C.muted }, grid: { display: false } },
+          y: { position: 'left', beginAtZero: true, ticks: { color: C.s1, callback: v => fNum(v) }, grid: { color: C.grid } },
+          y1: { position: 'right', min: 0, max: 5, ticks: { color: C.s4, callback: v => fmt2(v) }, grid: { display: false } },
+        } }
+    });
+    const ultCons = serieCons.find(r => r.ano === cons.ano) || serieCons[serieCons.length - 1];
+    setTxt('consSub', ultCons.ano + ': ' + fNum(ultCons.reclamacoes) + ' reclamações, ' + fNum1(ultCons.pct_respondida) +
+      '% respondidas pelas empresas, nota média ' + fmt2(ultCons.nota_media) + ' de 5. O ano corrente pode estar parcial.');
+  } else { vazioGrafico('consChart'); }
+
+  const segms = (cons && cons.top_segmentos) || [];
+  if (segms.length) {
+    const totSeg = segms.reduce((s, r) => s + (r.reclamacoes || 0), 0);
+    new Chart(el_('consSegChart'), {
+      type: 'bar', data: {
+        labels: segms.map(s => s.segmento
+          .replace('Bancos, Financeiras e Administradoras de Cartão', 'Bancos e cartões')
+          .replace(/^Operadoras de Telecomunicações.*/, 'Telecomunicações')
+          .replace('Provedores de Conteúdo e Outros Serviços na Internet', 'Serviços de internet')
+          .replace(/^(.*)$/, m => truncaPalavra(m, 30))
+          ),
+        datasets: [{ data: segms.map(s => s.reclamacoes), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }]
+      },
+      options: { ...chartOpts, indexAxis: 'y',
+        plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+          callbacks: { title: ctx => segms[ctx[0].dataIndex].segmento,
+            label: ctx => fNum(ctx.parsed.x) + ' reclamações (' + fNum1(pctDe(ctx.parsed.x, totSeg)) + '% do top ' + segms.length + ')' } } },
+        scales: { x: { beginAtZero: true, ticks: { color: C.muted, callback: v => fNum(v) }, grid: { color: C.grid } },
+                  y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } } }
+    });
+  } else { vazioGrafico('consSegChart'); }
+  const emps = (cons && cons.top_empresas) || [];
+  setHtml('consEmpList', emps.length
+    ? emps.map(e => liRow(e.empresa, fNum(e.reclamacoes))).join('')
+    : '');
+  if (!emps.length) vazioLista('consEmpList');
+
+  // =========================================================================
+  // RECURSOS FEDERAIS — emendas, contratos e licitações da União
+  // =========================================================================
+  const emd = ok(g(D, 'secoes.transparencia.emendas'));
+  const serieEmd = (emd && emd.serie) || [];
+  if (serieEmd.length) {
+    const ultEmd = serieEmd.find(r => r.ano === emd.ano) || serieEmd[serieEmd.length - 1];
+    setTxt('emdAno', String(ultEmd.ano)); setTxt('emdAno2', String(ultEmd.ano));
+    setHtml('emdPago', 'R$ ' + fNum1((ultEmd.pago || 0) / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('emdSub', fNum(ultEmd.emendas || 0) + ' emendas destinadas ao município em ' + ultEmd.ano);
+    setHtml('emdEmp', 'R$ ' + fNum1((ultEmd.empenhado || 0) / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('emdExecSub', ultEmd.empenhado ? fNum1(pctDe(ultEmd.pago, ultEmd.empenhado)) + '% do empenhado já foi pago' : '');
+    setTxt('emdSerieAno', serieEmd[0].ano + '–' + serieEmd[serieEmd.length - 1].ano);
+    new Chart(el_('emdChart'), {
+      type: 'bar', data: {
+        labels: serieEmd.map(r => r.ano),
+        datasets: [
+          { label: 'Empenhado', data: serieEmd.map(r => r.empenhado / 1e6), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 3 },
+          { label: 'Pago', data: serieEmd.map(r => r.pago / 1e6), backgroundColor: C.s5, maxBarThickness: 16, borderRadius: 3 },
+        ]
+      },
+      options: { ...chartOpts,
+        plugins: { ...chartOpts.plugins,
+          legend: { position: 'bottom', labels: { color: C.tick, usePointStyle: true, pointStyle: 'circle', padding: 8, boxWidth: 8, font: { size: 10 } } },
+          tooltip: { ...chartOpts.plugins.tooltip, callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + fNum1(ctx.parsed.y) + ' mi' } } },
+        scales: { x: { ticks: { color: C.muted }, grid: { display: false } },
+                  y: { beginAtZero: true, ticks: { color: C.muted, callback: v => 'R$ ' + fNum(v) + ' mi' }, grid: { color: C.grid } } } }
+    });
+    setTxt('emdJanela', emd.janela_autores || '');
+    const autores = emd.top_autores || [];
+    setHtml('emdAutoresList', autores.length
+      ? autores.map((a, i) =>
+        '<tr><td class="rank-name" title="' + a.autor + '"><span class="rk-num">' + (i + 1) + '.</span><b>' +
+        titulo(a.autor) + '</b></td>' +
+        '<td class="area">' + fNum(a.emendas) + ' emenda(s)</td>' +
+        '<td class="valor" data-label="Pago"><span class="val">R$ ' + fNum1(a.pago / 1e6) + ' mi</span></td></tr>').join('')
+      : '');
+    if (!autores.length) vazioTabela('emdAutoresList', 3);
+    const funcoes = emd.por_funcao || [];
+    setHtml('emdFuncaoList', funcoes.length
+      ? funcoes.map(f => liRow(f.funcao, 'R$ ' + fNum1((f.pago || 0) / 1e6) + ' mi')).join('')
+      : '');
+    if (!funcoes.length) vazioLista('emdFuncaoList');
+  } else {
+    vazioValores('emdPago', 'emdEmp'); vazioGrafico('emdChart');
+    vazioTabela('emdAutoresList', 3); vazioLista('emdFuncaoList');
+  }
+
+  const compras = ok(g(D, 'secoes.transparencia.compras_federais'));
+  const forn = (compras && compras.fornecedores_locais) || null;
+  const serieForn = (forn && forn.serie) || [];
+  if (serieForn.length) {
+    const totForn = serieForn.reduce((s, r) => s + (r.valor || 0), 0);
+    const nContratos = serieForn.reduce((s, r) => s + (r.contratos || 0), 0);
+    const janelaForn = serieForn[0].ano + '–' + serieForn[serieForn.length - 1].ano;
+    setTxt('fornAno', janelaForn); setTxt('fornJanela', janelaForn);
+    setHtml('fornValor', 'R$ ' + fNum1(totForn / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('fornSub', fNum(nContratos) + ' contratos no período · CNPJ localizado no município (snapshot ' + (forn.snapshot_cnpj || '—') + ')');
+    const topForn = forn.top || [];
+    setHtml('fornList', topForn.length
+      ? topForn.map((f, i) =>
+        '<tr><td class="rank-name" title="' + f.empresa + '"><span class="rk-num">' + (i + 1) + '.</span><b>' +
+        titulo(f.empresa) + '</b></td>' +
+        '<td class="area">' + fNum(f.contratos) + ' contrato(s)</td>' +
+        '<td class="valor" data-label="Valor"><span class="val">R$ ' + fNum1(f.valor / 1e6) + ' mi</span></td></tr>').join('')
+      : '');
+    if (!topForn.length) vazioTabela('fornList', 3);
+  } else {
+    vazioValor('fornValor'); vazioTabela('fornList', 3);
+  }
+
+  const lic = (compras && compras.licitacoes_no_municipio) || null;
+  const serieLic = (lic && lic.serie) || [];
+  if (serieLic.length) {
+    const janelaLic = serieLic[0].ano + '–' + serieLic[serieLic.length - 1].ano;
+    const orgaos = lic.por_orgao || [];
+    // A série por ano e o total por órgão não fecham: algumas licitações vêm sem ano
+    // na fonte. O total oficial é o do órgão; a diferença é dita, não escondida.
+    const nSerie = serieLic.reduce((s, r) => s + (r.licitacoes || 0), 0);
+    const nOrgao = orgaos.reduce((s, r) => s + (r.licitacoes || 0), 0);
+    const totLic = orgaos.length
+      ? orgaos.reduce((s, r) => s + (r.valor || 0), 0)
+      : serieLic.reduce((s, r) => s + (r.valor || 0), 0);
+    const nLic = nOrgao || nSerie;
+    setTxt('licAno', janelaLic); setTxt('licJanela', janelaLic);
+    setHtml('licValor', 'R$ ' + fNum1(totLic / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('licSub', fNum(nLic) + ' licitações no período');
+    setHtml('licOrgaoList', orgaos.length
+      ? orgaos.map(o => liRow(o.orgao, fNum(o.licitacoes) + ' licit. · R$ ' + fNum1((o.valor || 0) / 1e6) + ' mi')).join('')
+      : '');
+    if (!orgaos.length) vazioLista('licOrgaoList');
+    setTxt('licNota', nOrgao > nSerie
+      ? fNum(nOrgao - nSerie) + ' licitações não trazem ano na fonte e ficam fora do gráfico por ano'
+      : '');
+    barrasCategoria('licAnoBars',
+      serieLic.slice().reverse().map(r => ({ k: String(r.ano), v: r.valor || 0 })),
+      0, C.s5, { fmtValor: v => 'R$ ' + fNum1(v / 1e6) + ' mi' });
+  } else {
+    vazioValor('licValor'); vazioLista('licOrgaoList');
+    barrasCategoria('licAnoBars', [], 0); setTxt('licNota', '');
+  }
+
+  // =========================================================================
+  // BENEFÍCIOS — Cadastro Único
+  // =========================================================================
+  const cad = ok(g(D, 'secoes.beneficios.cadastro_unico'));
+  if (cad) {
+    const compCad = (cad.competencia || '').split('-').reverse().join('/');
+    setTxt('cadAno', compCad); setTxt('cadAno2', compCad);
+    setTxt('cadPessoas', fNum(cad.pessoas_cadastradas || 0));
+    setTxt('cadPctSub', fNum1(cad.pct_populacao || 0) + '% da população na competência');
+    setTxt('cadFamilias', fNum(cad.familias_cadastradas || 0));
+    setTxt('cadFamSub', fNum(cad.familias_pbf || 0) + ' delas recebiam Bolsa Família (' +
+      fNum1(pctDe(cad.familias_pbf, cad.familias_cadastradas)) + '%)');
+  } else {
+    vazioValores('cadPessoas', 'cadFamilias');
+  }
+
   // Insights
+  // Cada destaque só entra se o dado por trás dele existir: no fixture vazio a lista
+  // antiga escrevia "mortalidade infantil de — ... menos da metade da média brasileira",
+  // isto é, afirmava a comparação sem ter o número. Nada de dado, nada de frase.
   const insights = document.getElementById('insightsList');
   if (insights) {
     const hom = g(D, 'secoes.seguranca.isp_rj.taxas_100k.taxa_homicidio_doloso');
     const homUf = g(D, 'secoes.seguranca.isp_rj.taxas_100k_uf.taxa_homicidio_doloso');
-    const idebIniVal = ideb2023Ini ? ideb2023Ini.ideb : 0;
-    const idebFinVal = ideb2023Fin ? ideb2023Fin.ideb : 0;
-    const alfPctV = alf != null ? (alf * 100).toFixed(1) : '—';
     const pibPcV = g(D, 'secoes.economia.pib.pib_per_capita.valor');
     const pibPcUf = g(D, 'secoes.economia.pib.pib_per_capita.uf');
     const envV = g(D, 'secoes.demografia.censo_2022.indice_envelhecimento');
     const esgT = g(D, 'secoes.infraestrutura.snis.indice_tratamento_esgoto');
-    insights.innerHTML =
-      '<li><span class="status st-good">✓ forte</span><span><b>Segurança:</b> taxa de homicídios de ' + fNum1(hom || 0) + '/100k hab — cerca de ' + (homUf && hom ? Math.round(homUf / hom) : '—') + '× abaixo da média fluminense (' + fNum1(homUf || 0) + ').</span></li>' +
-      '<li><span class="status st-good">✓ forte</span><span><b>Educação:</b> IDEB dos anos iniciais (' + fNum1(idebIniVal) + ') e finais (' + fNum1(idebFinVal) + ') acima das metas pactuadas; alfabetização de ' + alfPctV + '% supera a média nacional (93,0%).</span></li>' +
-      '<li><span class="status st-warn">! atenção</span><span><b>Economia:</b> PIB per capita ' + (pibPcV && pibPcUf ? Math.round((1 - pibPcV / pibPcUf) * 100) : '—') + '% abaixo da média estadual; saldo de empregos positivo, mas balança comercial deficitária em US$ ' + (exp && imp ? fNum1(Math.abs(Number(imp.total_fob_usd) - Number(exp.total_fob_usd)) / 1e6) : '—') + ' mi.</span></li>' +
-      '<li><span class="status st-warn">! atenção</span><span><b>Demografia:</b> envelhecimento acelerado — ' + fNum1(envV || 0) + ' idosos por 100 jovens, acima da média nacional (80,0).</span></li>' +
-      '<li><span class="status st-serious">! crítico</span><span><b>Saneamento:</b> só ' + fNum1(esgT || 0) + '% do esgoto coletado é tratado; a ANA estima R$ ' + (atlas ? fNum(Math.round(atlas.investimento_coleta_tratatamento / 1e6)) : '—') + ' mi de investimento necessário até 2035.</span></li>';
+    const linhas = [];
+    const add = (cls, rot, html) => linhas.push(
+      '<li><span class="status ' + cls + '">' + rot + '</span><span>' + html + '</span></li>');
+
+    if (hom != null && homUf) {
+      const razao = homUf / hom;
+      add(hom <= homUf ? 'st-good' : 'st-crit', hom <= homUf ? '✓ forte' : '✕ crítico',
+        '<b>Segurança:</b> taxa de homicídios de ' + fNum1(hom) + '/100 mil hab — ' +
+        (hom <= homUf ? 'cerca de ' + fNum1(razao) + '× abaixo' : fNum1(1 / razao) + '× acima') +
+        ' da média fluminense (' + fNum1(homUf) + ').');
+    }
+    if (ideb2023Ini || ideb2023Fin) {
+      const acimaFin = ideb2023Fin && brFin != null && ideb2023Fin.ideb >= brFin;
+      const partes = [];
+      if (ideb2023Ini) partes.push('IDEB dos anos iniciais em ' + fNum1(ideb2023Ini.ideb) +
+        (brIni != null ? ' (' + (ideb2023Ini.ideb >= brIni ? 'acima' : 'abaixo') + ' do Brasil, ' + fNum1(brIni) + ')' : ''));
+      if (ideb2023Fin) partes.push('anos finais em ' + fNum1(ideb2023Fin.ideb) +
+        (brFin != null ? ' (' + (acimaFin ? 'acima' : 'abaixo') + ' da média nacional, ' + fNum1(brFin) + ')' : ''));
+      if (alf != null) partes.push('alfabetização de ' + fNum1(alf * 100) + '%' +
+        (alf * 100 >= 93 ? ', acima da média do país (93,0%)' : ', abaixo da média do país (93,0%)'));
+      add(acimaFin ? 'st-good' : 'st-warn', acimaFin ? '✓ forte' : '! atenção',
+        '<b>Educação:</b> ' + partes.join('; ') + '.');
+    }
+    if (pibPcV && pibPcUf) {
+      const dif = Math.round((1 - pibPcV / pibPcUf) * 100);
+      add(dif <= 0 ? 'st-good' : 'st-warn', dif <= 0 ? '✓ forte' : '! atenção',
+        '<b>Economia:</b> PIB per capita ' + Math.abs(dif) + '% ' + (dif > 0 ? 'abaixo' : 'acima') +
+        ' da média estadual' +
+        (caged && caged.saldo != null ? '; saldo de empregos de ' + (caged.saldo >= 0 ? '+' : '−') + fNum(Math.abs(caged.saldo)) + ' em ' + caged.ano : '') +
+        (exp && imp ? '; balança comercial ' +
+          (Number(exp.total_fob_usd) >= Number(imp.total_fob_usd) ? 'superavitária' : 'deficitária') +
+          ' em US$ ' + fNum1(Math.abs(Number(imp.total_fob_usd) - Number(exp.total_fob_usd)) / 1e6) + ' mi' : '') + '.');
+    }
+    if (envV != null) {
+      const acima = envV >= 80;
+      add(acima ? 'st-warn' : 'st-good', acima ? '! atenção' : '✓ forte',
+        '<b>Demografia:</b> ' + fNum1(envV) + ' idosos por 100 jovens, ' +
+        (acima ? 'acima' : 'abaixo') + ' da média nacional (80,0).');
+    }
+    if (sim && sim.taxa_mortalidade_infantil_1000nv != null) {
+      const tmi = sim.taxa_mortalidade_infantil_1000nv;
+      add(tmi <= 13.2 ? 'st-good' : 'st-crit', tmi <= 13.2 ? '✓ forte' : '✕ crítico',
+        '<b>Saúde materno-infantil:</b> mortalidade infantil de ' + fNum1(tmi) +
+        ' por 1.000 nascidos vivos em ' + sim.ano + ', ' + (tmi <= 13.2 ? 'abaixo' : 'acima') +
+        ' da média brasileira (13,2)' +
+        (sim.obitos ? ' — mas ' + fNum1(pctDe(sim.mal_definidas, sim.obitos)) + '% dos óbitos ainda entram como causa mal definida' : '') + '.');
+    }
+    if (sih && sih.internacoes != null) {
+      const sobe = sih.ano_anterior && sih.ano_anterior.internacoes && sih.internacoes >= sih.ano_anterior.internacoes;
+      add(sobe ? 'st-warn' : 'st-good', sobe ? '! atenção' : '✓ forte',
+        '<b>Rede hospitalar:</b> ' + fNum(sih.internacoes) + ' internações pelo SUS em ' + sih.ano +
+        (sih.ano_anterior && sih.ano_anterior.internacoes
+          ? ', ' + fNum1(Math.abs(sih.internacoes / sih.ano_anterior.internacoes - 1) * 100) + '% ' + (sobe ? 'acima' : 'abaixo') + ' do ano anterior' : '') +
+        (sih.valor_total ? ' e R$ ' + fNum1(sih.valor_total / 1e6) + ' mi de gasto federal' : '') +
+        (sih.pct_no_municipio != null ? '; ' + fNum1(sih.pct_no_municipio) + '% ocorrem no próprio município' : '') + '.');
+    }
+    if (viol && viol.notificacoes != null) {
+      add('st-serious', '! crítico',
+        '<b>Violência notificada:</b> ' + fNum(viol.notificacoes) + ' notificações do SINAN em ' + viol.ano +
+        ', ' + fNum1(viol.pct_feminino || 0) + '% contra mulheres e ' +
+        fNum1(pctDe(viol.autoprovocadas, viol.notificacoes)) +
+        '% de lesões autoprovocadas — um retrato da saúde, não da polícia, e sabidamente subnotificado.');
+    }
+    if (snis) {
+      const acimaBr = (snis.indice_coleta_esgoto || 0) >= 55.8;
+      add(acimaBr ? 'st-warn' : 'st-serious', '! atenção',
+        '<b>Saneamento:</b> o SNIS registra ' + fNum1(snis.indice_coleta_esgoto || 0) + '% de coleta e ' +
+        fNum1(esgT || 0) + '% de tratamento do coletado — ' + (acimaBr ? 'acima' : 'abaixo') + ' da média do Brasil (55,8%)' +
+        (dom && dom.esgotamento && dom.esgotamento.categorias[0]
+          ? ', mas no censo 2022 só ' + fNum1(dom.esgotamento.categorias[0].pct) + '% dos moradores declaram estar ligados à rede' : '') +
+        (atlas && atlas.investimento_coleta_tratatamento
+          ? '; a ANA ainda estima R$ ' + fNum(Math.round(atlas.investimento_coleta_tratatamento / 1e6)) + ' mi de investimento até 2035' : '') + '.');
+    }
+
+    insights.innerHTML = linhas.length
+      ? linhas.join('')
+      : '<li><span class="empty">Sem indicadores suficientes para destacar neste município</span></li>';
   }
 
   // Sparklines
