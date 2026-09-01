@@ -568,14 +568,14 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="tile-top"><h3>Esgoto tratado <span class="vintage" id="esgVintage"></span></h3><span class="status st-good" id="stEsg">✓ acima da meta</span></div>
       <div class="value"><span data-path="secoes.infraestrutura.snis.indice_tratamento_esgoto" data-fmt="pctRaw"></span> <span class="unit">%</span></div>
       <div class="delta up" id="esgDelta"></div>
-      <div class="bench"><span>Do esgoto coletado · <b>Brasil:</b> 52,2%</span><span><b>Meta 2033:</b> 90%</span></div>
+      <div class="bench"><span>Percentual do esgoto coletado que recebe tratamento</span></div>
       <div class="sub" id="esgResumoSub"></div>
     </div>
     <div class="card card-metric tile st-good-b">
       <div class="tile-top"><h3>Homicídios /100k <span class="vintage" id="homVintage"></span></h3><span class="status st-good" id="stHom">✓ muito abaixo RJ</span></div>
       <div class="value" id="homVal"></div>
       <div class="delta down-good" id="homDelta"></div>
-      <div class="bench"><span><b>RJ:</b> <span data-path="secoes.seguranca.isp_rj.taxas_100k_uf.taxa_homicidio_doloso" data-fmt="fmt1"></span></span><span><b>Brasil:</b> 21,2</span></div>
+      <div class="bench"><span><b>RJ:</b> <span data-path="secoes.seguranca.isp_rj.taxas_100k_uf.taxa_homicidio_doloso" data-fmt="fmt1"></span></span></div>
     </div>
     <div class="card card-metric tile st-good-b">
       <div class="tile-top"><h3>Saldo de empregos <span class="vintage" id="resCagedAno"></span></h3><span class="status st-good" id="stCaged">✓ positivo</span></div>
@@ -592,14 +592,12 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric tile st-good-b">
       <div class="tile-top"><h3>IDHM <span class="vintage old">2010</span></h3><span class="status st-good" id="stIdhm">✓ alto</span></div>
       <div class="value" id="idhmVal"></div>
-      <div class="bench"><span><b>RJ:</b> 0,761</span><span><b>Brasil:</b> 0,727</span></div>
       <div class="sub">Dado com mais de 5 anos — aguarda censo</div>
     </div>
     <div class="card card-metric tile st-good-b">
       <div class="tile-top"><h3>Mortalidade infantil <span class="vintage" id="resInfAno"></span></h3><span class="status st-good" id="stInf">✓ abaixo do Brasil</span></div>
       <div class="value" id="resInfVal"></div>
       <div class="delta down-good" id="resInfDelta"></div>
-      <div class="bench"><span><b>Brasil:</b> 13,2</span><span><b>Meta ODS:</b> 8,0</span></div>
     </div>
     <div class="card card-metric tile st-warn-b">
       <div class="tile-top"><h3>Internações SUS <span class="vintage" id="resSihAno"></span></h3><span class="status st-warn" id="stSih">! em alta</span></div>
@@ -624,7 +622,7 @@ details.more > .more-body { margin-top: .4rem; }
     <h3>Destaques</h3>
     <ul class="insights" id="insightsList">
     </ul>
-    <div class="criteria">Semáforo: <span style="color:var(--st-good)">✓ verde</span> = igual ou melhor que a referência (média BR/RJ ou meta) · <span style="color:var(--st-warn)">! amarelo</span> = até 15% abaixo · <span style="color:var(--st-serious)">! laranja</span> / <span style="color:var(--st-crit)">✕ vermelho</span> = mais de 15% abaixo ou tendência de piora. Anos de referência aparecem em cada cartão; ⚠ indica dado com mais de 5 anos.</div>
+    <div class="criteria">Semáforo: cada selo compara o município com uma referência que também vem do JSON (média do RJ ou do Brasil na mesma fonte) ou, quando a fonte não publica referência, com o ano anterior do próprio município. <span style="color:var(--st-good)">✓ verde</span> = igual ou melhor · <span style="color:var(--st-warn)">! amarelo</span> = até 15% pior · <span style="color:var(--st-serious)">! laranja</span> / <span style="color:var(--st-crit)">✕ vermelho</span> = mais de 15% pior. Anos de referência aparecem em cada cartão; ⚠ indica dado com mais de 5 anos.</div>
   </div>
 </div>
 
@@ -639,11 +637,11 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric"><h3>População <span class="vintage">2024</span></h3><div class="value" id="popVal2"></div><div class="delta up" id="demoPopDelta"></div><div class="sub">Estimativa IBGE</div></div>
     <div class="card card-metric"><h3>Censo <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.populacao" data-fmt="fmt"></span> <span class="unit">hab</span></div><div class="delta up" id="censoDelta"></div></div>
     <div class="card card-metric"><h3>Domicílios <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.domicilios" data-fmt="fmt"></span></div><div class="sub" id="domicSub"></div></div>
-    <div class="card card-metric"><h3>Densidade <span class="vintage">2024</span></h3><div class="value" id="densVal"></div><div class="bench"><span><b>RJ:</b> 366</span><span><b>Brasil:</b> 24</span></div></div>
-    <div class="card card-metric st-good-b"><h3>Alfabetização <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.taxa_alfabetizacao" data-fmt="pct"></span></div><div class="sub" id="alfDelta"></div><div class="bench"><span><b>RJ:</b> 96,1%</span><span><b>Brasil:</b> 93,0%</span></div></div>
-    <div class="card card-metric"><h3>Idade mediana <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.idade_mediana" data-fmt="fmt1"></span> <span class="unit">anos</span></div><div class="bench"><span><b>Brasil:</b> 35,0</span></div></div>
+    <div class="card card-metric"><h3>Densidade <span class="vintage">2024</span></h3><div class="value" id="densVal"></div></div>
+    <div class="card card-metric"><h3>Alfabetização <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.taxa_alfabetizacao" data-fmt="pct"></span></div><div class="sub" id="alfDelta"></div></div>
+    <div class="card card-metric"><h3>Idade mediana <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.idade_mediana" data-fmt="fmt1"></span> <span class="unit">anos</span></div></div>
     <div class="card card-metric"><h3>Razão de sexo <span class="vintage">2022</span></h3><div class="value"><span data-path="secoes.demografia.censo_2022.razao_sexo" data-fmt="fmt1"></span></div><div class="sub">Homens por 100 mulheres</div></div>
-    <div class="card card-metric st-warn-b"><h3>Envelhecimento <span class="vintage">2022</span></h3><div class="value" id="envVal"></div><div class="sub" id="envDelta"></div><div class="bench"><span>Idosos/100 jovens · <b>Brasil:</b> 80,0</span></div></div>
+    <div class="card card-metric"><h3>Envelhecimento <span class="vintage">2022</span></h3><div class="value" id="envVal"></div><div class="sub" id="envDelta"></div><div class="bench"><span>Idosos de 65+ por 100 jovens de 0–14</span></div></div>
   </div>
   <div class="grid-2 mt-1">
     <div class="card card-chart">
@@ -713,7 +711,6 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="meter-legend"><span>Vegetação natural remanescente: <b style="color:var(--text)" id="prodesVegPct">—</b></span><span id="prodesAreaTotal"></span></div>
       <ul class="data-list mt-1" id="prodesList">
       </ul>
-      <div class="bench" style="margin-top:.5rem"><span><b>Mata Atlântica (BR):</b> 24% de vegetação remanescente</span></div>
     </div>
     <div class="card card-chart">
       <h3>SEEG — emissões por setor <span class="vintage" id="seegAno"></span> <span style="text-transform:none;letter-spacing:0;color:var(--text2)" id="seegTotal"></span></h3>
@@ -750,9 +747,9 @@ details.more > .more-body { margin-top: .4rem; }
     <span class="table-name">br_ana_atlas_esgotos · br_mdr_snis</span>
   </div>
   <div class="grid-3">
-    <div class="card card-metric st-good-b"><h3>Água — atendimento <span class="vintage" id="snisAno"></span></h3><div class="value" id="aguaVal"></div><div class="delta up" id="aguaDelta"></div><div class="bench"><span><b>Brasil:</b> 84,2%</span></div></div>
-    <div class="card card-metric st-warn-b"><h3>Esgoto — coleta <span class="vintage" id="snisAno2"></span></h3><div class="value" id="esgCVal"></div><div class="delta up" id="esgCDelta"></div><div class="bench"><span><b>Brasil:</b> 55,8%</span><span><b>Meta 2033:</b> 90%</span></div></div>
-    <div class="card card-metric st-good-b"><h3>Esgoto tratado <span class="vintage" id="snisAno3"></span></h3><div class="value" id="esgTVal"></div><div class="bench"><span>Do coletado · <b>Brasil:</b> 52,2%</span></div><div class="sub" id="esgTSub"></div></div>
+    <div class="card card-metric"><h3>Água — atendimento <span class="vintage" id="snisAno"></span></h3><div class="value" id="aguaVal"></div><div class="delta up" id="aguaDelta"></div></div>
+    <div class="card card-metric"><h3>Esgoto — coleta <span class="vintage" id="snisAno2"></span></h3><div class="value" id="esgCVal"></div><div class="delta up" id="esgCDelta"></div></div>
+    <div class="card card-metric"><h3>Esgoto tratado <span class="vintage" id="snisAno3"></span></h3><div class="value" id="esgTVal"></div><div class="bench"><span>Percentual do esgoto coletado</span></div><div class="sub" id="esgTSub"></div></div>
   </div>
   <div class="grid-2 mt-1">
     <div class="card">
@@ -836,7 +833,6 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card">
       <h3>Composição do VA</h3>
       <ul class="data-list" id="vaComp"></ul>
-      <div class="bench" style="margin-top:.6rem"><span><b>Brasil (serviços):</b> 58,9% do VA</span><span><b>RJ:</b> 65,4%</span></div>
     </div>
   </div>
   <div class="grid-2 mt-1">
@@ -1004,7 +1000,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-4">
     <div class="card card-metric st-good-b"><h3>IDEB anos iniciais <span class="vintage" id="idebAno"></span></h3><div class="value" id="idebInitVal"></div><div class="delta up" id="idebInitDelta"></div><div class="bench" id="idebInitBench"></div></div>
     <div class="card card-metric st-good-b"><h3>IDEB anos finais <span class="vintage" id="idebAno2"></span></h3><div class="value" id="idebFinalVal"></div><div class="delta up" id="idebFinalDelta"></div><div class="bench" id="idebFinalBench"></div></div>
-    <div class="card card-metric st-good-b"><h3>Aprovação (EF) <span class="vintage" id="aproAno"></span></h3><div class="value" id="aproVal"></div><div class="bench"><span><b>Brasil:</b> 91,2%</span></div><div class="sub">Média iniciais + finais</div></div>
+    <div class="card card-metric"><h3>Aprovação (EF) <span class="vintage" id="aproAno"></span></h3><div class="value" id="aproVal"></div><div class="sub">Média iniciais + finais</div></div>
     <div class="card card-metric"><h3>SAEB português <span class="vintage" id="saebAno"></span></h3><div class="value" id="saebPortVal"></div><div class="bench" id="saebBench"></div></div>
   </div>
   <div class="grid-2 mt-1">
@@ -1021,16 +1017,9 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
   <div class="grid-3 mt-1">
     <div class="card">
-      <h3>Alfabetização — meta <span class="vintage" id="alfAno"></span></h3>
-      <div class="meter"><div class="meter-fill" id="alfMeter" style="width:96.2%"></div></div>
-      <div class="meter-legend"><span>Atual: <b style="color:var(--text)" id="alfPctVal">96,2%</b></span><span>Meta 2030: 98,5%</span></div>
-      <details class="more"><summary>ver metas intermediárias</summary>
-        <ul class="data-list more-body">
-          <li><span>Meta 2024</span><span>96,0% ✓</span></li>
-          <li><span>Meta 2026</span><span>97,0%</span></li>
-          <li><span>Meta 2030</span><span>98,5%</span></li>
-        </ul>
-      </details>
+      <h3>Alfabetização <span class="vintage" id="alfAno"></span></h3>
+      <div class="meter"><div class="meter-fill" id="alfMeter" style="width:0%"></div></div>
+      <div class="meter-legend"><span>Atual: <b style="color:var(--text)" id="alfPctVal"></b></span><span>Pessoas de 15+ anos · Censo</span></div>
     </div>
     <div class="card">
       <h3>Matrículas por etapa <span class="vintage" id="censoEscAno"></span></h3>
@@ -1103,9 +1092,9 @@ details.more > .more-body { margin-top: .4rem; }
     </div>
   </div>
   <div class="metric-row mt-1">
-    <div class="card card-metric"><h3>Médicos /1.000 hab <span class="vintage old" id="iepsAno"></span></h3><div class="value" id="iepsMed"></div><div class="bench"><span><b>Brasil:</b> 2,4</span><span><b>OMS ref.:</b> 1,0</span></div></div>
-    <div class="card card-metric"><h3>Enfermeiros /1.000 hab <span class="vintage old" id="iepsAno2"></span></h3><div class="value" id="iepsEnf"></div><div class="bench"><span><b>Brasil:</b> 1,5</span></div></div>
-    <div class="card card-metric st-warn-b"><h3>Cobertura ESF <span class="vintage old" id="iepsAno3"></span></h3><div class="value" id="iepsEsf"></div><div class="bench"><span><b>Brasil:</b> 63%</span></div></div>
+    <div class="card card-metric"><h3>Médicos /1.000 hab <span class="vintage old" id="iepsAno"></span></h3><div class="value" id="iepsMed"></div></div>
+    <div class="card card-metric"><h3>Enfermeiros /1.000 hab <span class="vintage old" id="iepsAno2"></span></h3><div class="value" id="iepsEnf"></div></div>
+    <div class="card card-metric"><h3>Cobertura ESF <span class="vintage old" id="iepsAno3"></span></h3><div class="value" id="iepsEsf"></div></div>
     <div class="card card-metric"><h3>Gasto público em saúde <span class="vintage old" id="iepsAno4"></span></h3><div class="value" id="iepsGasto"></div><div class="bench" id="iepsGastoBench"></div></div>
     <div class="card card-metric"><h3>Plano de saúde privado <span class="vintage" id="ansComp"></span></h3><div class="value" id="ansCob"></div><div class="sub" id="ansSub"></div></div>
     <div class="card card-metric"><h3>Farmácia Popular <span class="vintage">rede atual</span></h3><div class="value" id="farmPopVal"></div><div class="sub">Estabelecimentos credenciados</div></div>
@@ -1135,7 +1124,7 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
   <div class="grid-4">
     <div class="card card-metric"><h3>Óbitos <span class="vintage" id="simAno"></span></h3><div class="value" id="simObitos"></div><div class="sub" id="simTaxa"></div></div>
-    <div class="card card-metric st-good-b"><h3>Mortalidade infantil <span class="vintage" id="simAno2"></span></h3><div class="value" id="simInfantil"></div><div class="sub" id="simNeonatalSub"></div><div class="bench"><span><b>Brasil:</b> 13,2</span><span><b>Meta ODS:</b> 8,0</span></div></div>
+    <div class="card card-metric"><h3>Mortalidade infantil <span class="vintage" id="simAno2"></span></h3><div class="value" id="simInfantil"></div><div class="sub" id="simNeonatalSub"></div></div>
     <div class="card card-metric"><h3>Idade média ao morrer <span class="vintage" id="simAno3"></span></h3><div class="value" id="simIdade"></div><div class="sub" id="simSexo"></div></div>
     <div class="card card-metric st-warn-b"><h3>Causas mal definidas <span class="vintage" id="simAno4"></span></h3><div class="value" id="simMalDef"></div><div class="sub">Capítulo XVIII do CID-10 — indicador da qualidade do registro</div></div>
   </div>
@@ -1250,7 +1239,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-4">
     <div class="card card-metric"><h3>Banda larga fixa <span class="vintage" id="blAno"></span></h3><div class="value" id="blVal"></div><div class="bench"><span><b>Brasil:</b> <span data-path="secoes.conectividade.banda_larga.densidade_brasil" data-fmt="fmt1"></span></span></div></div>
     <div class="card card-metric st-warn-b"><h3>IBC <span class="vintage" id="ibcAno2"></span></h3><div class="value" id="ibcVal2"></div><div class="bench"><span><b>Média Brasil:</b> <span data-path="secoes.conectividade.ibc.media_brasil" data-fmt="fmt1"></span></span></div><div class="sub">Índice Brasileiro de Conectividade</div></div>
-    <div class="card card-metric st-good-b"><h3>Cobertura 4G/5G <span class="vintage" id="covAno"></span></h3><div class="value" id="covVal"></div><div class="bench"><span><b>Brasil:</b> 89,0%</span></div></div>
+    <div class="card card-metric"><h3>Cobertura 4G/5G <span class="vintage" id="covAno"></span></h3><div class="value" id="covVal"></div></div>
     <div class="card card-metric"><h3>Fibra óptica <span class="vintage" id="fibraAno"></span></h3><div class="value" id="fibraVal"></div><div class="sub">Domicílios com acesso</div></div>
   </div>
 </div>
@@ -1308,8 +1297,8 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric st-good-b">
       <h3>Escala Brasil Transparente <span class="vintage" id="ebtAno"></span></h3>
       <div class="value" id="ebtVal"></div>
-      <div class="meter" id="ebtMeter"><div class="meter-fill" style="width:78.4%"></div></div>
-      <div class="meter-legend"><span>Nota 0–10</span><span><b style="color:var(--text2)">Média nacional: 6,61</b></span></div>
+      <div class="meter" id="ebtMeter"><div class="meter-fill" style="width:0%"></div></div>
+      <div class="meter-legend"><span>Nota 0–10</span><span id="ebtRank"></span></div>
     </div>
     <div class="card">
       <h3>Ranking de competitividade <span class="vintage" id="clpAno"></span></h3>
@@ -1415,12 +1404,10 @@ details.more > .more-body { margin-top: .4rem; }
       <h3>IVS — vulnerabilidade social <span class="vintage old">2010</span> <span class="status st-good" id="stIvs">✓ baixa</span></h3>
       <div class="sub" style="margin-bottom:.55rem">Escala 0–1 — quanto <b>menor</b>, melhor</div>
       <div class="bench-bars wide" id="ivsBars"></div>
-      <div class="bench" style="margin-top:.5rem"><span><b>IVS geral do Brasil:</b> 0,326</span></div>
     </div>
     <div class="card">
       <h3>IDHM <span class="vintage old">2010</span> <span class="status st-good" id="stIdhm2">✓ alto</span></h3>
       <div class="value-sm" id="idhmVal2"></div>
-      <div class="bench"><span><b>RJ:</b> 0,761</span><span><b>Brasil:</b> 0,727</span></div>
       <div class="sub" style="margin:.85rem 0 .55rem">Componentes — escala 0–1, quanto <b>maior</b>, melhor</div>
       <div class="bench-bars wide" id="idhmCompBars"></div>
     </div>
@@ -1440,7 +1427,7 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
   <div class="grid-4">
     <div class="card card-metric"><h3>Bolsa Família <span class="vintage" id="bfAno"></span></h3><div class="value" id="bfFamilias"></div><div class="bench"><span id="bfBench"></span></div></div>
-    <div class="card card-metric"><h3>Valor médio <span class="vintage" id="bfAno2"></span></h3><div class="value" id="bfValMed"></div><div class="bench"><span><b>Brasil:</b> R$ 673</span></div></div>
+    <div class="card card-metric"><h3>Valor médio <span class="vintage" id="bfAno2"></span></h3><div class="value" id="bfValMed"></div></div>
     <div class="card card-metric"><h3>Repasse mensal <span class="vintage" id="bfAno3"></span></h3><div class="value" id="bfRepasse"></div><div class="sub">Total transferido ao município</div></div>
     <div class="card card-metric"><h3>BPC <span class="vintage" id="bpcAno"></span></h3><div class="value" id="bpcVal"></div><div class="sub">Beneficiários</div></div>
   </div>
@@ -1462,7 +1449,7 @@ details.more > .more-body { margin-top: .4rem; }
     <span class="table-name">br_bd_vizinhanca · br_ibge_populacao · br_ibge_pib</span>
   </div>
   <div class="grid-2">
-    <div class="card card-center-map">
+    <div class="card card-center-map" id="miniMapCard" hidden>
       <h3>Mapa esquemático <span style="text-transform:none;letter-spacing:0;color:var(--text3)">(posição aproximada)</span></h3>
       <svg class="minimap" viewBox="0 0 460 300" role="img" aria-label="Mapa esquemático dos municípios vizinhos de Nova Friburgo">
         <!-- N -->
@@ -1494,7 +1481,7 @@ details.more > .more-body { margin-top: .4rem; }
 
 <!-- FOOTER -->
 <div style="text-align:center;padding:2rem 0;color:var(--text3);font-size:.75rem;border-top:1px solid var(--border);margin-top:2rem">
-  Dashboard simulado · <span data-path="municipio.nome"></span> / <span data-path="municipio.sigla_uf"></span> · Rodado · Dados e referências comparativas (RJ/Brasil) ilustrativos, baseados em fontes oficiais (IBGE, INEP, SNIS, TSE, FBSP, ANA, SEEG etc.)<br>
+  <span data-path="municipio.nome"></span> / <span data-path="municipio.sigla_uf"></span> · Rodado · Todos os números vêm de <code><span id="footerJson"></span></code>, extraído da Base dos Dados (IBGE, INEP, SNIS, TSE, ISP-RJ, CGU, ANATEL, DATASUS etc.). Nada nesta página é estimado ou preenchido à mão: onde a fonte não publica o dado, o cartão fica vazio.<br>
   Gerado em <span data-path="gerado_em"></span>
 </div>
 
@@ -1712,6 +1699,9 @@ async function init() {
 
   // data-path elements
   renderDataPaths(D);
+
+  // O rodapé nomeia o arquivo que alimentou a página
+  setTxt('footerJson', JSON_PATH);
 
   // Helper: find item in array by {key: val}
   function find(arr, key, val) {
@@ -2265,7 +2255,7 @@ async function init() {
     const provaLP5 = (saebData.provas || []).find(p => p.disciplina === 'LP' && p.serie === 5);
     if (provaLP5) {
       document.getElementById('saebPortVal').textContent = fNum1(provaLP5.media);
-      document.getElementById('saebBench').innerHTML = '<span>5º ano EF · <b>Brasil:</b> 227,9</span>';
+      document.getElementById('saebBench').innerHTML = '<span>Prova Brasil/SAEB — 5º ano EF</span>';
     }
 
     // SAEB chart (LP 5º ano)
@@ -2338,7 +2328,7 @@ async function init() {
     document.getElementById('enemList').innerHTML =
       '<li><span>Inscritos</span><span>' + fNum(enem.inscritos || 0) + '</span></li>' +
       '<li><span>Presentes</span><span>' + fNum(enem.presentes || 0) + '</span></li>' +
-      '<li><span>Média geral</span><span>' + fNum1(enem.media_geral || 0) + ' <span style="color:var(--text3)">(BR: 533)</span></span></li>' +
+      '<li><span>Média geral</span><span>' + fNum1(enem.media_geral || 0) + '</span></li>' +
       '<li><span>Redação</span><span>' + fNum1(enem.redacao || 0) + '</span></li>';
     document.getElementById('enemDetList').innerHTML =
       '<li><span>Linguagens</span><span>' + fNum1(enem.linguagens || 0) + '</span></li>' +
@@ -2358,7 +2348,7 @@ async function init() {
     document.getElementById('cnesEstab').textContent = fNum(cnes.estabelecimentos || 0);
     const leitos = cnes.leitos ? cnes.leitos.total : 0;
     document.getElementById('cnesLeitos').textContent = fNum(leitos);
-    document.getElementById('cnesLeitosBench').innerHTML = '<span>' + (leitos && pop2024 ? (leitos / pop2024 * 1000).toFixed(1).replace('.', ',') : '') + '/1.000 hab · <b>Brasil:</b> 2,4</span>';
+    document.getElementById('cnesLeitosBench').innerHTML = '<span>' + (leitos && pop2024 ? (leitos / pop2024 * 1000).toFixed(1).replace('.', ',') : '') + '/1.000 hab</span>';
     document.getElementById('cnesProf').textContent = fNum(cnes.profissionais ? cnes.profissionais.vinculos : 0);
     document.getElementById('cnesEquip').textContent = cnes.equipes ? cnes.equipes.total : 0;
   }
@@ -2558,15 +2548,16 @@ async function init() {
   const ebt = g(D, 'secoes.transparencia.ebt') || [];
   const ebtUlt = ebt.length > 0 ? ebt[ebt.length - 1] : null;
   if (ebtUlt) {
-    const MEDIA_EBT = 6.61;
     document.getElementById('ebtAno').textContent = ebtUlt.ano || '';
     document.getElementById('ebtVal').textContent = fNum1(ebtUlt.nota || 0);
     document.getElementById('ebtMeter').querySelector('.meter-fill').style.width = ((ebtUlt.nota || 0) * 10) + '%';
-    // A nota estava sempre pintada de verde, mesmo abaixo da média nacional
+    // A nota estava sempre pintada de verde. Sem média nacional no JSON, a faixa
+    // sai da própria escala 0–10 da CGU e o ranking do ano vai na legenda.
     const cardEbt = document.getElementById('ebtVal').closest('.card');
     const nota = ebtUlt.nota || 0;
     cardEbt.classList.remove('st-good-b', 'st-warn-b', 'st-serious-b');
-    cardEbt.classList.add(nota >= MEDIA_EBT ? 'st-good-b' : (nota >= MEDIA_EBT * 0.85 ? 'st-warn-b' : 'st-serious-b'));
+    cardEbt.classList.add(nota >= 8 ? 'st-good-b' : (nota >= 5 ? 'st-warn-b' : 'st-serious-b'));
+    setTxt('ebtRank', ebtUlt.ranking ? ebtUlt.ranking + 'º no ranking CGU' : '');
   }
 
   const clp = g(D, 'secoes.transparencia.clp');
@@ -2577,7 +2568,7 @@ async function init() {
     const inst = pilares.find(p => p.pilar_dimensao === 'Dimensão: Instituições');
     const capital = pilares.find(p => p.pilar_dimensao === 'Capital humano');
     document.getElementById('clpList').innerHTML =
-      '<li><span>Colocação nacional</span><span>' + (geral ? geral.colocacao + 'º / 418' : '') + '</span></li>' +
+      '<li><span>Colocação nacional</span><span>' + (geral ? geral.colocacao + 'º' : '') + '</span></li>' +
       '<li><span>Nota geral</span><span>' + (geral ? fNum1(geral.nota_geral) : '') + '</span></li>' +
       '<li><span>Pilar: instituições</span><span>' + (inst ? fNum1(inst.nota_geral) : '') + '</span></li>' +
       '<li><span>Pilar: capital humano</span><span>' + (capital ? fNum1(capital.nota_geral) : '') + '</span></li>';
@@ -2625,7 +2616,7 @@ async function init() {
     document.getElementById('bfValMed').innerHTML = 'R$ ' + Math.round(bf.valor_medio || 0).toLocaleString('pt-BR') + ' <span class="unit">/família·mês</span>';
     document.getElementById('bfRepasse').innerHTML = 'R$ ' + fNum1((bf.repasse_mensal || 0) / 1e6) + ' <span class="unit">mi</span>';
     const dom = g(D, 'secoes.demografia.censo_2022.domicilios') || 1;
-    document.getElementById('bfBench').innerHTML = (bf.familias / dom * 100).toFixed(1).replace('.', ',') + '% dos domicílios · <b>Brasil:</b> 19,8%';
+    document.getElementById('bfBench').innerHTML = (bf.familias / dom * 100).toFixed(1).replace('.', ',') + '% dos domicílios';
   }
 
   // BPC
@@ -2652,7 +2643,7 @@ async function init() {
     document.getElementById('raisEstab').textContent = fNum(rais.estabelecimentos || 0);
     document.getElementById('raisSalMed').innerHTML = 'R$ ' + fNum(Math.round(rais.remuneracao_media || 0));
     setHtml('raisBench', '<span>' + Math.round((rais.vinculos_ativos_3112 || 0) / pop2024 * 100) +
-      '% da população</span><span><b>Brasil:</b> 26%</span>');
+      '% da população</span>');
   } else {
     vazioValores('raisVinculos', 'raisEstab', 'raisSalMed');
   }
@@ -2853,6 +2844,12 @@ async function init() {
         '</div>';
     }).join('');
 
+    // O minimapa tem as posições relativas desenhadas à mão para Nova Friburgo —
+    // o JSON não traz coordenada de vizinho, então em outro município ele seria
+    // um mapa inventado. Só aparece quando os dados são os de Nova Friburgo.
+    const ehFriburgo = String(g(D, 'municipio.id_municipio')) === '3303401';
+    const mapCard = el_('miniMapCard');
+    if (mapCard) mapCard.hidden = !ehFriburgo;
     // Minimapa: mostra PIB per capita de cada vizinho no lugar do código IBGE
     const pcById = new Map(vizinhos.map(v => [String(v.id_municipio), v.pib_per_capita]));
     pcById.set(String(g(D, 'municipio.id_municipio')), refPc);
@@ -2981,9 +2978,18 @@ async function init() {
   setTxt('resPopAno', pop2024item && pop2024item.ano ? String(pop2024item.ano) : '');
   setTxt('resCagedAno', caged && caged.ano ? String(caged.ano) : '');
   setTxt('resIbcAno', ibc && ibc.ano ? String(ibc.ano) : '');
-  pillVs('stEsg', snis && snis.indice_tratamento_esgoto, 90, ['acima da meta', 'abaixo da meta 2033']);
+  const esgAnt = snis && snis.ano_anterior && snis.ano_anterior.indice_tratamento_esgoto;
+  if (snis && snis.indice_tratamento_esgoto != null && esgAnt != null) {
+    const sobe = snis.indice_tratamento_esgoto >= esgAnt;
+    pill('stEsg', sobe ? 'st-good' : 'st-warn', sobe ? '✓ em alta' : '! em queda');
+  } else { pill('stEsg', null); }
   pillVs('stIbc', ibc && ibc.ibc, ibc && ibc.media_brasil, ['acima da média BR', 'abaixo da média BR']);
-  pillVs('stInf', sim && sim.taxa_mortalidade_infantil_1000nv, 13.2, ['abaixo do Brasil', 'acima do Brasil'], true);
+  const simSerie = (sim && sim.serie) || [];
+  const simAnt = simSerie.length > 1 ? simSerie[simSerie.length - 2] : null;
+  if (sim && sim.obitos_infantis != null && simAnt && simAnt.infantis != null) {
+    const cai = sim.obitos_infantis <= simAnt.infantis;
+    pill('stInf', cai ? 'st-good' : 'st-warn', cai ? '✓ em queda' : '! em alta');
+  } else { pill('stInf', null); }
 
   if (txSeg.taxa_homicidio_doloso != null && txSegUf.taxa_homicidio_doloso) {
     const r = txSeg.taxa_homicidio_doloso / txSegUf.taxa_homicidio_doloso;
@@ -3039,10 +3045,16 @@ async function init() {
     const baseAlf = ((cx && cx.alfabetizacao_por_raca) || []).reduce((s, r) => s + (r.total || 0), 0) || pop2022;
     setTxt('alfDelta', '≈ ' + fNum(Math.round(baseAlf * (1 - alf))) + ' não alfabetizadas entre ' + fNum(baseAlf) + ' na base do censo');
   }
-  if (env != null) {
-    const dEnv = env - 80.0;
-    setTxt('envDelta', (dEnv >= 0 ? '+' : '−') + fNum1(Math.abs(dEnv)) + ' acima da média nacional');
-  }
+  // Sem índice de envelhecimento nacional no JSON, o subtítulo descreve o próprio
+  // número em vez de compará-lo com uma média que a página não tem.
+  const pir65 = g(D, 'secoes.demografia.piramide_etaria_2022');
+  const idosos65 = pir65 && pir65.grupos ? pir65.grupos.reduce((acc, rot, i) => {
+    const ini = parseInt(rot, 10);
+    return acc + (ini >= 65 ? (pir65.homens[i] || 0) + (pir65.mulheres[i] || 0) : 0);
+  }, 0) : null;
+  if (env != null && idosos65) {
+    setTxt('envDelta', fNum(idosos65) + ' pessoas de 65 anos ou mais no censo 2022');
+  } else { setTxt('envDelta', ''); }
 
   // Cor ou raça — 2010 vs 2022
   const raca2010 = (cx && cx.cor_raca && cx.cor_raca['2010']) || [];
@@ -3342,7 +3354,7 @@ async function init() {
     setTxt('cagedSaldoVal', (caged.saldo > 0 ? '+' : '') + fNum(caged.saldo || 0));
   } else { vazioValor('cagedSaldoVal'); }
   if (rais) {
-    setHtml('raisSalBench', '<span>Média das remunerações da RAIS · <b>Brasil:</b> R$ 3.507</span>' +
+    setHtml('raisSalBench', '<span>Média das remunerações da RAIS' + (rais.ano ? ' ' + rais.ano : '') + '</span>' +
       (caged && caged.salario_medio_admissao ? '<span><b>Admissão (CAGED ' + caged.ano + '):</b> R$ ' + fNum(Math.round(caged.salario_medio_admissao)) + '</span>' : ''));
   }
 
@@ -4073,8 +4085,7 @@ async function init() {
         (brIni != null ? ' (' + (ideb2023Ini.ideb >= brIni ? 'acima' : 'abaixo') + ' do Brasil, ' + fNum1(brIni) + ')' : ''));
       if (ideb2023Fin) partes.push('anos finais em ' + fNum1(ideb2023Fin.ideb) +
         (brFin != null ? ' (' + (acimaFin ? 'acima' : 'abaixo') + ' da média nacional, ' + fNum1(brFin) + ')' : ''));
-      if (alf != null) partes.push('alfabetização de ' + fNum1(alf * 100) + '%' +
-        (alf * 100 >= 93 ? ', acima da média do país (93,0%)' : ', abaixo da média do país (93,0%)'));
+      if (alf != null) partes.push('alfabetização de ' + fNum1(alf * 100) + '% das pessoas de 15 anos ou mais');
       add(acimaFin ? 'st-good' : 'st-warn', acimaFin ? '✓ forte' : '! atenção',
         '<b>Educação:</b> ' + partes.join('; ') + '.');
     }
@@ -4088,19 +4099,24 @@ async function init() {
           (Number(exp.total_fob_usd) >= Number(imp.total_fob_usd) ? 'superavitária' : 'deficitária') +
           ' em US$ ' + fNum1(Math.abs(Number(imp.total_fob_usd) - Number(exp.total_fob_usd)) / 1e6) + ' mi' : '') + '.');
     }
+    // O JSON não traz índice de envelhecimento do Brasil — o destaque relata o
+    // número do censo, sem afirmar posição relativa que a página não pode checar.
+    const idadeMed = g(D, 'secoes.demografia.censo_2022.idade_mediana');
     if (envV != null) {
-      const acima = envV >= 80;
-      add(acima ? 'st-warn' : 'st-good', acima ? '! atenção' : '✓ forte',
-        '<b>Demografia:</b> ' + fNum1(envV) + ' idosos por 100 jovens, ' +
-        (acima ? 'acima' : 'abaixo') + ' da média nacional (80,0).');
+      add('st-warn', '! atenção',
+        '<b>Demografia:</b> ' + fNum1(envV) + ' idosos de 65+ para cada 100 jovens de 0–14 no censo 2022' +
+        (idadeMed != null ? ', com idade mediana de ' + fNum1(idadeMed) + ' anos' : '') + '.');
     }
     if (sim && sim.taxa_mortalidade_infantil_1000nv != null) {
       const tmi = sim.taxa_mortalidade_infantil_1000nv;
-      add(tmi <= 13.2 ? 'st-good' : 'st-crit', tmi <= 13.2 ? '✓ forte' : '✕ crítico',
+      const serieTmi = sim.serie || [];
+      const antTmi = serieTmi.length > 1 ? serieTmi[serieTmi.length - 2] : null;
+      const caiTmi = antTmi && antTmi.infantis != null ? (sim.obitos_infantis || 0) <= antTmi.infantis : null;
+      add(caiTmi === false ? 'st-warn' : 'st-good', caiTmi === false ? '! atenção' : '✓ forte',
         '<b>Saúde materno-infantil:</b> mortalidade infantil de ' + fNum1(tmi) +
-        ' por 1.000 nascidos vivos em ' + sim.ano + ', ' + (tmi <= 13.2 ? 'abaixo' : 'acima') +
-        ' da média brasileira (13,2)' +
-        (sim.obitos ? ' — mas ' + fNum1(pctDe(sim.mal_definidas, sim.obitos)) + '% dos óbitos ainda entram como causa mal definida' : '') + '.');
+        ' por 1.000 nascidos vivos em ' + sim.ano +
+        (antTmi ? ' (' + fNum(sim.obitos_infantis || 0) + ' óbitos, ante ' + fNum(antTmi.infantis) + ' em ' + antTmi.ano + ')' : '') +
+        (sim.obitos ? ' — ' + fNum1(pctDe(sim.mal_definidas, sim.obitos)) + '% dos óbitos ainda entram como causa mal definida' : '') + '.');
     }
     if (sih && sih.internacoes != null) {
       const sobe = sih.ano_anterior && sih.ano_anterior.internacoes && sih.internacoes >= sih.ano_anterior.internacoes;
@@ -4119,10 +4135,9 @@ async function init() {
         '% de lesões autoprovocadas — um retrato da saúde, não da polícia, e sabidamente subnotificado.');
     }
     if (snis) {
-      const acimaBr = (snis.indice_coleta_esgoto || 0) >= 55.8;
-      add(acimaBr ? 'st-warn' : 'st-serious', '! atenção',
+      add('st-warn', '! atenção',
         '<b>Saneamento:</b> o SNIS registra ' + fNum1(snis.indice_coleta_esgoto || 0) + '% de coleta e ' +
-        fNum1(esgT || 0) + '% de tratamento do coletado — ' + (acimaBr ? 'acima' : 'abaixo') + ' da média do Brasil (55,8%)' +
+        fNum1(esgT || 0) + '% de tratamento do coletado' +
         (dom && dom.esgotamento && dom.esgotamento.categorias[0]
           ? ', mas no censo 2022 só ' + fNum1(dom.esgotamento.categorias[0].pct) + '% dos moradores declaram estar ligados à rede' : '') +
         (atlas && atlas.investimento_coleta_tratatamento
