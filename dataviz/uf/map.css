@@ -80,13 +80,11 @@ html, body {
   gap: 8px;
 }
 
-/* Live readout of what the zoom curve in map.js (autoParams) produced, after
-   the three sliders' trims — kept visible so ZOOM_AUTO can be tuned by eye. */
 .uf-zoom-row {
+  text-align: right;
   color: #888;
   font-size: 10px;
   letter-spacing: 0.02em;
-  white-space: nowrap;
 }
 
 .uf-zoom-row span {

@@ -200,61 +200,70 @@
     });
   }
 
-  // The three sliders are TRIMS on top of the zoom-driven auto values, not
-  // absolute settings: 1 means "whatever autoParams() says for the current
-  // zoom", and dragging multiplies that. They share one rebuild path with the
-  // zoom listener so moving any one reflects the others' current positions
-  // (and the current zoom) instead of resetting them.
+  // The three sliders are ABSOLUTE readouts-and-controls, not trims: the zoom
+  // curve writes the computed value straight into each slider's `value`, so the
+  // knob slides on its own as you zoom and its position *is* the current value.
+  // Their min/max are therefore the real parameter ranges (alpha 0.02-1, gain
+  // 0.02-4, radius 0.1-20px), widened past what autoParams() actually emits so
+  // there is manual headroom past both ends of the curve.
+  //
+  // Dragging a slider overrides that value until the next zoom, which
+  // re-asserts the curve — the cost of having the knobs track the zoom.
   function wireControls(binaryData, layerCfg, overlay, map) {
     var opacity = document.getElementById("opacity");
     var brightness = document.getElementById("brightness");
     var dotsize = document.getElementById("dotsize");
-    var readout = {
-      zoom: document.getElementById("zoomval"),
-      r: document.getElementById("rval"),
-      a: document.getElementById("aval"),
-      g: document.getElementById("gval"),
-    };
+    var zoomval = document.getElementById("zoomval");
     var zMin = map.getMinZoom();
     var zMax = map.getMaxZoom();
 
-    function trim(el) {
-      return el ? parseFloat(el.value) : 1;
+    function set(el, v) {
+      if (el) el.value = v;
     }
 
-    function apply() {
+    function get(el, fallback) {
+      var v = el ? parseFloat(el.value) : NaN;
+      return isNaN(v) ? fallback : v;
+    }
+
+    // fromZoom: recompute from the curve and push the values into the sliders.
+    // Otherwise the user just dragged one, so read the sliders as-is.
+    function apply(fromZoom) {
       var z = map.getZoom();
-      var auto = autoParams(z, zMin, zMax);
-      var radius = Math.max(layerCfg.radius * auto.radius * trim(dotsize), 0.1);
-      var alpha = clamp(auto.alpha * trim(opacity), 0.02, 1);
-      var gain = clamp(auto.gain * trim(brightness), 0.02, 4);
+      if (fromZoom) {
+        var auto = autoParams(z, zMin, zMax);
+        set(opacity, auto.alpha.toFixed(2));
+        set(brightness, auto.gain.toFixed(2));
+        set(dotsize, (layerCfg.radius * auto.radius).toFixed(2));
+      }
+      var alpha = clamp(get(opacity, 1), 0.02, 1);
+      var gain = clamp(get(brightness, 1), 0.02, 4);
+      var radius = Math.max(get(dotsize, layerCfg.radius), 0.1);
       overlay.setProps({ layers: [buildLayer(binaryData, layerCfg, alpha, gain, radius)] });
-      if (readout.zoom) readout.zoom.textContent = z.toFixed(2);
-      if (readout.r) readout.r.textContent = radius.toFixed(2);
-      if (readout.a) readout.a.textContent = alpha.toFixed(2);
-      if (readout.g) readout.g.textContent = gain.toFixed(2);
+      if (zoomval) zoomval.textContent = z.toFixed(2);
     }
 
     // "zoom" fires many times per second during a wheel/pinch — coalesce to at
     // most one rebuild per animation frame.
-    var pending = false;
-    function schedule() {
-      if (pending) return;
-      pending = true;
+    var pendingFrame = false;
+    var pendingZoom = false;
+    function schedule(fromZoom) {
+      if (fromZoom) pendingZoom = true;
+      if (pendingFrame) return;
+      pendingFrame = true;
       requestAnimationFrame(function () {
-        pending = false;
-        apply();
+        pendingFrame = false;
+        var wasZoom = pendingZoom;
+        pendingZoom = false;
+        apply(wasZoom);
       });
     }
 
     [opacity, brightness, dotsize].forEach(function (el) {
-      if (el) {
-        el.value = 1;
-        el.addEventListener("input", schedule);
-      }
+      if (el) el.addEventListener("input", function () { schedule(false); });
     });
-    map.on("zoom", schedule);
-    apply();
+    map.on("zoom", function () { schedule(true); });
+    apply(true);
   }
 
   function render(points, bbox, layerCfg, mapState) {
