@@ -32,8 +32,12 @@
   //   needs real pixel area plus more alpha and more gain (see the additive
   //   blending note on buildLayer below — far out, thousands of dots stack per
   //   pixel and clamp to white; close in, dots are isolated and need the gain).
-  // The top of each pair is its slider's max, so the curve never extrapolates
-  // past the control. The BOTTOM is deliberately NOT the slider's min: t=0 is
+  // No pair goes past its slider's max, so the curve never extrapolates beyond
+  // the control. radius stops at HALF its slider max (1.25 of the 2.5), so the
+  // largest dot the zoom produces on its own is half what the track allows and
+  // the top half of the tamanho slider is manual headroom.
+  //
+  // The BOTTOM is deliberately NOT the slider's min: t=0 is
   // the zoom every page opens at, so it is anchored to the values that were the
   // fixed defaults before any of this existed (radius 1.0x, alpha 0.8, gain
   // 1.0) — the kepler-matched look that is known to read correctly.
@@ -44,10 +48,14 @@
   // nothing. The slider still reaches those minimums by hand; the curve just
   // does not go there on its own.
   var ZOOM_AUTO = {
-    radius: [1.0, 2.5],  // multiplier of the kepler-matched base radius
+    radius: [1.0, 1.25], // multiplier of the kepler-matched base radius
     alpha: [0.8, 1.0],   // vertex color alpha (quantized to 8-bit)
-    gain: [1.0, 2.5],    // layer `opacity` float uniform
   };
+
+  // brilho is NOT on the zoom curve. It is set once to half its slider range
+  // and left there — the zoom never moves it, so it stays a stable reference
+  // while radius and alpha do the work. Dragging it still overrides freely.
+  var BRILHO_FIXED = 1.25;  // half of the slider's 2.5 max
 
   // Everything hangs off one normalized position in the page's own interactive
   // zoom range — normalized per page because BR fits at ~zoom 3.7 while a small
@@ -65,10 +73,9 @@
   //
   //   f(t) = a + (b - a) * t
   //
-  // alpha and gain stay GEOMETRIC: they are light contributions summed by
-  // additive blending, and perceived brightness responds to ratios, not
-  // differences — a constant ratio per zoom level is what reads as an even
-  // ramp there.
+  // alpha stays GEOMETRIC: it is a light contribution summed by additive
+  // blending, and perceived brightness responds to ratios, not differences —
+  // a constant ratio per zoom level is what reads as an even ramp there.
   //
   //   f(t) = a * (b / a)^t
   function lerpLinear(range, t) {
@@ -88,7 +95,6 @@
     return {
       radius: lerpLinear(ZOOM_AUTO.radius, t),
       alpha: lerpGeom(ZOOM_AUTO.alpha, t),
-      gain: lerpGeom(ZOOM_AUTO.gain, t),
     };
   }
 
@@ -222,9 +228,10 @@
     });
   }
 
-  // The three sliders are ABSOLUTE readouts-and-controls, not trims: the zoom
-  // curve writes the computed value straight into each slider's `value`, so the
-  // knob slides on its own as you zoom and its position *is* the current value.
+  // The sliders are ABSOLUTE readouts-and-controls, not trims: the zoom curve
+  // writes the computed value straight into opacidade's and tamanho's `value`,
+  // so those knobs slide on their own as you zoom and their position *is* the
+  // current value. brilho is pinned to BRILHO_FIXED and never moves on zoom.
   // Their min/max are the originals (alpha 0.05-1, gain 0.02-2.5, radius
   // multiplier 0.1-2.5) and ZOOM_AUTO spans exactly those, so the knob travels
   // the full width of its track and nothing is reachable only by extrapolation.
@@ -255,11 +262,10 @@
       if (fromZoom) {
         var auto = autoParams(z, zMin, zMax);
         set(opacity, auto.alpha.toFixed(2));
-        set(brightness, auto.gain.toFixed(2));
         set(dotsize, auto.radius.toFixed(2));
       }
       var alpha = clamp(get(opacity, 1), 0.05, 1);
-      var gain = clamp(get(brightness, 1), 0.02, 2.5);
+      var gain = clamp(get(brightness, BRILHO_FIXED), 0.02, 2.5);
       var radius = layerCfg.radius * Math.max(get(dotsize, 1), 0.1);
       overlay.setProps({ layers: [buildLayer(binaryData, layerCfg, alpha, gain, radius)] });
       if (zoomval) zoomval.textContent = z.toFixed(2);
@@ -281,6 +287,7 @@
       });
     }
 
+    set(brightness, BRILHO_FIXED);
     [opacity, brightness, dotsize].forEach(function (el) {
       if (el) el.addEventListener("input", function () { schedule(false); });
     });
