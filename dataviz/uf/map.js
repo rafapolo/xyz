@@ -16,6 +16,60 @@
   // template radius changes.
   var KEPLER_RADIUS_TO_PIXELS = 1 / 3;
 
+  // Zoom-driven dot geometry.
+  //
+  // radiusUnits:"pixels" keeps a dot the same size on screen at every zoom
+  // while the points themselves spread apart 2x per zoom level. So a single
+  // fixed tuning can only ever look right at one zoom: tune it for the fitted
+  // "whole state" view and zooming in dilutes the cloud into invisible specks;
+  // tune it for the close view and the far view saturates into white mush.
+  //
+  // These two endpoints are the two pictures we actually want:
+  // - t=0 (min zoom): a top-down aerial plate. Sub-pixel dots, low alpha and
+  //   low gain, so a city reads as continuous glowing texture whose *density*
+  //   is the signal rather than as separate discs.
+  // - t=1 (max zoom): a night perspective. Each dot is one visible lamp, so it
+  //   needs real pixel area plus more alpha and more gain (see the additive
+  //   blending note on buildLayer below — far out, thousands of dots stack per
+  //   pixel and clamp to white; close in, dots are isolated and need the gain).
+  var ZOOM_AUTO = {
+    radius: [0.5, 7.0],  // multiplier of the kepler-matched base radius
+    alpha: [0.35, 1.0],  // vertex color alpha (quantized to 8-bit)
+    gain: [0.55, 1.8],   // layer `opacity` float uniform, may exceed 1
+  };
+
+  // Geometric, NOT linear, interpolation: both perceived dot size and
+  // on-screen dot density change *multiplicatively* with zoom, so a constant
+  // ratio per zoom level is what reads as uniform.
+  //
+  //   t     = (z - zMin) / (zMax - zMin)      clamped to [0,1]
+  //   f(t)  = a * (b / a)^t
+  //
+  // For radius that is equivalent to rMin * 2^(gamma * (z - zMin)) with
+  // gamma = log2(rMax/rMin) / (zMax - zMin). gamma == 1 would be true
+  // geographic scaling (dots pinned to the ground, i.e. radiusUnits:"meters");
+  // gamma < 1 is the compromise that keeps the far view from turning to mush
+  // and the near view from turning into overlapping poker chips. t is
+  // normalized against each page's own interactive zoom range, because BR fits
+  // at ~zoom 3-4 while a small state fits above 8 — the same absolute zoom
+  // means a very different altitude depending on the page.
+  function lerpGeom(range, t) {
+    return range[0] * Math.pow(range[1] / range[0], t);
+  }
+
+  function clamp(v, lo, hi) {
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  function autoParams(z, zMin, zMax) {
+    var t = clamp((z - zMin) / Math.max(zMax - zMin, 1e-9), 0, 1);
+    return {
+      radius: lerpGeom(ZOOM_AUTO.radius, t),
+      alpha: lerpGeom(ZOOM_AUTO.alpha, t),
+      gain: lerpGeom(ZOOM_AUTO.gain, t),
+    };
+  }
+
   function setLoading(msg) {
     var el = document.getElementById("loading");
     if (el) el.textContent = msg;
@@ -115,16 +169,17 @@
   //   to white, this float gain is what actually controls how many stacked
   //   establishments it takes to saturate a "stacked" pixel to white,
   //   largely independent of how transparent a single isolated dot looks.
-  function buildLayer(points, layerCfg, opacityAlpha, brilhoGain, radius) {
+  //
+  // `binaryData` MUST be the same object reference across every rebuild: a
+  // fresh wrapper makes deck.gl treat the data as changed and re-upload the
+  // whole multi-million-point Float32Array, which is fatal now that we rebuild
+  // on every zoom frame. With a stable reference and constant (non-function)
+  // getFillColor/getRadius/opacity, a rebuild is just a uniform update.
+  function buildLayer(binaryData, layerCfg, opacityAlpha, brilhoGain, radius) {
     var color = layerCfg.color.concat([Math.round(255 * opacityAlpha)]);
     return new deck.ScatterplotLayer({
       id: "estabelecimentos",
-      data: {
-        length: points.n,
-        attributes: {
-          getPosition: { value: points.positions, size: 2 },
-        },
-      },
+      data: binaryData,
       getFillColor: color,
       getRadius: radius,
       radiusUnits: "pixels",
@@ -145,27 +200,61 @@
     });
   }
 
-  // "tamanho" (dotsize) is a multiplier of the default radius — 1 means the
-  // current/default size (the kepler-matched radius). All three sliders
-  // share one rebuild so moving any one reflects the others' current
-  // positions instead of resetting them.
-  function wireSliders(points, layerCfg, overlay) {
+  // The three sliders are TRIMS on top of the zoom-driven auto values, not
+  // absolute settings: 1 means "whatever autoParams() says for the current
+  // zoom", and dragging multiplies that. They share one rebuild path with the
+  // zoom listener so moving any one reflects the others' current positions
+  // (and the current zoom) instead of resetting them.
+  function wireControls(binaryData, layerCfg, overlay, map) {
     var opacity = document.getElementById("opacity");
     var brightness = document.getElementById("brightness");
     var dotsize = document.getElementById("dotsize");
-    if (!opacity || !brightness || !dotsize) return;
-    opacity.value = layerCfg.opacity;
-    brightness.value = 1;
-    dotsize.value = 1;
-    function rebuild() {
-      var opacityAlpha = parseFloat(opacity.value);
-      var brilhoGain = parseFloat(brightness.value);
-      var radius = layerCfg.radius * parseFloat(dotsize.value);
-      overlay.setProps({ layers: [buildLayer(points, layerCfg, opacityAlpha, brilhoGain, radius)] });
+    var readout = {
+      zoom: document.getElementById("zoomval"),
+      r: document.getElementById("rval"),
+      a: document.getElementById("aval"),
+      g: document.getElementById("gval"),
+    };
+    var zMin = map.getMinZoom();
+    var zMax = map.getMaxZoom();
+
+    function trim(el) {
+      return el ? parseFloat(el.value) : 1;
     }
-    opacity.addEventListener("input", rebuild);
-    brightness.addEventListener("input", rebuild);
-    dotsize.addEventListener("input", rebuild);
+
+    function apply() {
+      var z = map.getZoom();
+      var auto = autoParams(z, zMin, zMax);
+      var radius = Math.max(layerCfg.radius * auto.radius * trim(dotsize), 0.1);
+      var alpha = clamp(auto.alpha * trim(opacity), 0.02, 1);
+      var gain = clamp(auto.gain * trim(brightness), 0.02, 4);
+      overlay.setProps({ layers: [buildLayer(binaryData, layerCfg, alpha, gain, radius)] });
+      if (readout.zoom) readout.zoom.textContent = z.toFixed(2);
+      if (readout.r) readout.r.textContent = radius.toFixed(2);
+      if (readout.a) readout.a.textContent = alpha.toFixed(2);
+      if (readout.g) readout.g.textContent = gain.toFixed(2);
+    }
+
+    // "zoom" fires many times per second during a wheel/pinch — coalesce to at
+    // most one rebuild per animation frame.
+    var pending = false;
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        apply();
+      });
+    }
+
+    [opacity, brightness, dotsize].forEach(function (el) {
+      if (el) {
+        el.value = 1;
+        el.addEventListener("input", schedule);
+      }
+    });
+    map.on("zoom", schedule);
+    apply();
   }
 
   function render(points, bbox, layerCfg, mapState) {
@@ -191,27 +280,25 @@
       dragRotate: mapState.dragRotate,
     });
 
+    // Built once, then shared by every rebuild — see buildLayer().
+    var binaryData = {
+      length: points.n,
+      attributes: {
+        getPosition: { value: points.positions, size: 2 },
+      },
+    };
+
     map.on("load", function () {
       hideRoads(map);
       var overlay = new deck.MapboxOverlay({
         interleaved: false,
-        layers: [buildLayer(points, layerCfg, layerCfg.opacity, 1, layerCfg.radius)],
+        layers: [],
       });
       map.addControl(overlay);
-      wireSliders(points, layerCfg, overlay);
-      wireZoomReadout(map);
+      // wireControls() does the first apply(), which builds the layer at the
+      // auto values for the initial (fitted) zoom.
+      wireControls(binaryData, layerCfg, overlay, map);
     });
-  }
-
-  function wireZoomReadout(map) {
-    var el = document.getElementById("zoomval");
-    function update() {
-      var z = map.getZoom().toFixed(2);
-      if (el) el.textContent = z;
-      console.log("zoom:", z);
-    }
-    map.on("move", update);
-    update();
   }
 
   function main() {
@@ -229,7 +316,6 @@
         var layerCfg = {
           color: layerConfig.color,
           radius: layerConfig.visConfig.radius * KEPLER_RADIUS_TO_PIXELS,
-          opacity: layerConfig.visConfig.opacity,
         };
         var mapState = template.config.config.mapState;
 
