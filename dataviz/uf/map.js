@@ -32,15 +32,21 @@
   //   needs real pixel area plus more alpha and more gain (see the additive
   //   blending note on buildLayer below — far out, thousands of dots stack per
   //   pixel and clamp to white; close in, dots are isolated and need the gain).
-  // Each endpoint pair is exactly its slider's min/max, so the curve never
-  // extrapolates past the control: at min zoom the knob sits hard against the
-  // left stop, at max zoom against the right, and every value in between is
-  // reachable both by zooming and by dragging. Changing a slider's min/max in
-  // the page template means changing the matching pair here.
+  // The top of each pair is its slider's max, so the curve never extrapolates
+  // past the control. The BOTTOM is deliberately NOT the slider's min: t=0 is
+  // the zoom every page opens at, so it is anchored to the values that were the
+  // fixed defaults before any of this existed (radius 1.0x, alpha 0.8, gain
+  // 1.0) — the kepler-matched look that is known to read correctly.
+  //
+  // Running the curve all the way down to the slider minimums instead made the
+  // opening view a 0.1px dot at alpha*gain = 0.001 against the old 0.8, i.e.
+  // 800x less light through 1% of the dot area. The page loaded fine and drew
+  // nothing. The slider still reaches those minimums by hand; the curve just
+  // does not go there on its own.
   var ZOOM_AUTO = {
-    radius: [0.1, 2.5],  // multiplier of the kepler-matched base radius
-    alpha: [0.05, 1.0],  // vertex color alpha (quantized to 8-bit)
-    gain: [0.02, 2.5],   // layer `opacity` float uniform
+    radius: [1.0, 2.5],  // multiplier of the kepler-matched base radius
+    alpha: [0.8, 1.0],   // vertex color alpha (quantized to 8-bit)
+    gain: [1.0, 2.5],    // layer `opacity` float uniform
   };
 
   // Everything hangs off one normalized position in the page's own interactive
