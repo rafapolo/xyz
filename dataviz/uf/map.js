@@ -32,10 +32,15 @@
   //   needs real pixel area plus more alpha and more gain (see the additive
   //   blending note on buildLayer below — far out, thousands of dots stack per
   //   pixel and clamp to white; close in, dots are isolated and need the gain).
+  // Each endpoint pair is exactly its slider's min/max, so the curve never
+  // extrapolates past the control: at min zoom the knob sits hard against the
+  // left stop, at max zoom against the right, and every value in between is
+  // reachable both by zooming and by dragging. Changing a slider's min/max in
+  // the page template means changing the matching pair here.
   var ZOOM_AUTO = {
-    radius: [0.5, 7.0],  // multiplier of the kepler-matched base radius
-    alpha: [0.35, 1.0],  // vertex color alpha (quantized to 8-bit)
-    gain: [0.55, 1.8],   // layer `opacity` float uniform, may exceed 1
+    radius: [0.1, 2.5],  // multiplier of the kepler-matched base radius
+    alpha: [0.05, 1.0],  // vertex color alpha (quantized to 8-bit)
+    gain: [0.02, 2.5],   // layer `opacity` float uniform
   };
 
   // Geometric, NOT linear, interpolation: both perceived dot size and
@@ -203,9 +208,9 @@
   // The three sliders are ABSOLUTE readouts-and-controls, not trims: the zoom
   // curve writes the computed value straight into each slider's `value`, so the
   // knob slides on its own as you zoom and its position *is* the current value.
-  // Their min/max are therefore the real parameter ranges (alpha 0.02-1, gain
-  // 0.02-4, radius 0.1-20px), widened past what autoParams() actually emits so
-  // there is manual headroom past both ends of the curve.
+  // Their min/max are the originals (alpha 0.05-1, gain 0.02-2.5, radius
+  // multiplier 0.1-2.5) and ZOOM_AUTO spans exactly those, so the knob travels
+  // the full width of its track and nothing is reachable only by extrapolation.
   //
   // Dragging a slider overrides that value until the next zoom, which
   // re-asserts the curve — the cost of having the knobs track the zoom.
@@ -234,11 +239,11 @@
         var auto = autoParams(z, zMin, zMax);
         set(opacity, auto.alpha.toFixed(2));
         set(brightness, auto.gain.toFixed(2));
-        set(dotsize, (layerCfg.radius * auto.radius).toFixed(2));
+        set(dotsize, auto.radius.toFixed(2));
       }
-      var alpha = clamp(get(opacity, 1), 0.02, 1);
-      var gain = clamp(get(brightness, 1), 0.02, 4);
-      var radius = Math.max(get(dotsize, layerCfg.radius), 0.1);
+      var alpha = clamp(get(opacity, 1), 0.05, 1);
+      var gain = clamp(get(brightness, 1), 0.02, 2.5);
+      var radius = layerCfg.radius * Math.max(get(dotsize, 1), 0.1);
       overlay.setProps({ layers: [buildLayer(binaryData, layerCfg, alpha, gain, radius)] });
       if (zoomval) zoomval.textContent = z.toFixed(2);
     }

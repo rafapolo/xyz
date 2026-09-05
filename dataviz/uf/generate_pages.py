@@ -36,15 +36,15 @@ PAGE_TEMPLATE = """<!doctype html>
   <div class="uf-brightness">
     <div class="uf-slider-row">
       <label for="opacity">opacidade</label>
-      <input type="range" id="opacity" min="0.02" max="1" step="0.01" value="1">
+      <input type="range" id="opacity" min="0.05" max="1" step="0.01" value="0.8">
     </div>
     <div class="uf-slider-row">
       <label for="brightness">brilho</label>
-      <input type="range" id="brightness" min="0.02" max="4" step="0.01" value="1">
+      <input type="range" id="brightness" min="0.02" max="2.5" step="0.01" value="1">
     </div>
     <div class="uf-slider-row">
       <label for="dotsize">tamanho</label>
-      <input type="range" id="dotsize" min="0.1" max="20" step="0.01" value="1">
+      <input type="range" id="dotsize" min="0.1" max="2.5" step="0.01" value="1">
     </div>
     <div class="uf-zoom-row">zoom: <span id="zoomval">-</span></div>
   </div>
