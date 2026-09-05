@@ -43,21 +43,32 @@
     gain: [0.02, 2.5],   // layer `opacity` float uniform
   };
 
-  // Geometric, NOT linear, interpolation: both perceived dot size and
-  // on-screen dot density change *multiplicatively* with zoom, so a constant
-  // ratio per zoom level is what reads as uniform.
+  // Everything hangs off one normalized position in the page's own interactive
+  // zoom range — normalized per page because BR fits at ~zoom 3.7 while a small
+  // state fits above 8, so the same absolute zoom is a very different altitude.
   //
-  //   t     = (z - zMin) / (zMax - zMin)      clamped to [0,1]
-  //   f(t)  = a * (b / a)^t
+  //   t = (z - zMin) / (zMax - zMin)          clamped to [0,1]
   //
-  // For radius that is equivalent to rMin * 2^(gamma * (z - zMin)) with
-  // gamma = log2(rMax/rMin) / (zMax - zMin). gamma == 1 would be true
-  // geographic scaling (dots pinned to the ground, i.e. radiusUnits:"meters");
-  // gamma < 1 is the compromise that keeps the far view from turning to mush
-  // and the near view from turning into overlapping poker chips. t is
-  // normalized against each page's own interactive zoom range, because BR fits
-  // at ~zoom 3-4 while a small state fits above 8 — the same absolute zoom
-  // means a very different altitude depending on the page.
+  // The two knob families interpolate differently on purpose.
+  //
+  // radius is LINEAR in t: the dot grows in direct proportion to how far the
+  // zoom has travelled, so half way between the two zoom stops is half way
+  // between the smallest and largest dot. A geometric curve here spends most of
+  // its travel down near the minimum and then rushes the last stretch, which
+  // makes the middle zooms feel stuck.
+  //
+  //   f(t) = a + (b - a) * t
+  //
+  // alpha and gain stay GEOMETRIC: they are light contributions summed by
+  // additive blending, and perceived brightness responds to ratios, not
+  // differences — a constant ratio per zoom level is what reads as an even
+  // ramp there.
+  //
+  //   f(t) = a * (b / a)^t
+  function lerpLinear(range, t) {
+    return range[0] + (range[1] - range[0]) * t;
+  }
+
   function lerpGeom(range, t) {
     return range[0] * Math.pow(range[1] / range[0], t);
   }
@@ -69,7 +80,7 @@
   function autoParams(z, zMin, zMax) {
     var t = clamp((z - zMin) / Math.max(zMax - zMin, 1e-9), 0, 1);
     return {
-      radius: lerpGeom(ZOOM_AUTO.radius, t),
+      radius: lerpLinear(ZOOM_AUTO.radius, t),
       alpha: lerpGeom(ZOOM_AUTO.alpha, t),
       gain: lerpGeom(ZOOM_AUTO.gain, t),
     };
