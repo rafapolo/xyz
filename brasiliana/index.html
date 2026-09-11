@@ -340,6 +340,7 @@ function buildGrid(handles, mapEntries, tpr) {
       basePos: mesh.position.clone(),
       targetPos: mesh.position.clone(),
       targetScale: 1,
+      targetOpacity: 1, // dimmed (not hidden) by the filter panel — keeps the grid layout intact
     };
     tileGroup.add(mesh);
     tileMeshes.push(mesh);
@@ -354,6 +355,7 @@ function updateTileAnimation() {
     m.position.lerp(m.userData.targetPos, 0.16);
     _scaleScratch.setScalar(m.userData.targetScale);
     m.scale.lerp(_scaleScratch, 0.16);
+    m.material.opacity = THREE.MathUtils.lerp(m.material.opacity, m.userData.targetOpacity, 0.16);
   });
 }
 
@@ -482,6 +484,127 @@ function tick() {
   renderer.render(scene, camera);
 }
 
+// ─── filter panel: instituição / década / autor / tipo ─────────────────────
+// tiles that don't match are dimmed (targetOpacity), never removed — the
+// grid layout stays intact so navigation and the atlas UVs never shift.
+document.getElementById('filters-head').addEventListener('click', () => {
+  document.getElementById('filters').classList.toggle('open');
+});
+
+function yearOf(meta) {
+  const m = String((meta || {}).date || '').match(/(1[5-9]\d{2}|20\d{2})/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function setupFilters(mapData) {
+  const entries = Object.values(mapData.map);
+  const instCounts = new Map(), typeCounts = new Map(), authorCounts = new Map();
+  let minYear = Infinity, maxYear = -Infinity;
+
+  entries.forEach(e => {
+    const meta = e.meta || {};
+    if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
+    if (meta.type) typeCounts.set(meta.type, (typeCounts.get(meta.type) || 0) + 1);
+    if (meta.contributor) authorCounts.set(meta.contributor, (authorCounts.get(meta.contributor) || 0) + 1);
+    const y = yearOf(meta);
+    if (y != null) { if (y < minYear) minYear = y; if (y > maxYear) maxYear = y; }
+  });
+  if (minYear > maxYear) { minYear = 1860; maxYear = 1930; } // no dated items — shouldn't happen, but stay safe
+
+  const selInst = document.getElementById('f-institution');
+  [...instCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${name} (${n.toLocaleString('pt-BR')})`;
+    selInst.appendChild(opt);
+  });
+
+  const selType = document.getElementById('f-type');
+  [...typeCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${name.replace('/', ' / ')} (${n.toLocaleString('pt-BR')})`;
+    selType.appendChild(opt);
+  });
+
+  const authorListEl = document.getElementById('f-author-list');
+  [...authorCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 300).forEach(([name]) => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    authorListEl.appendChild(opt);
+  });
+
+  const decadeMin = Math.floor(minYear / 10) * 10;
+  const decadeMax = Math.floor(maxYear / 10) * 10;
+  const loSlider = document.getElementById('f-year-lo');
+  const hiSlider = document.getElementById('f-year-hi');
+  loSlider.min = hiSlider.min = decadeMin;
+  loSlider.max = hiSlider.max = decadeMax;
+  loSlider.step = hiSlider.step = 10;
+  loSlider.value = decadeMin;
+  hiSlider.value = decadeMax;
+
+  const yearReadout = document.getElementById('f-year-readout');
+  const yearHint = document.getElementById('f-year-hint');
+  const authorInput = document.getElementById('f-author');
+  const clearBtn = document.getElementById('f-clear');
+  const countBadge = document.getElementById('filters-count');
+
+  const state = { institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '' };
+
+  function matches(meta) {
+    if (state.institution && meta.community !== state.institution) return false;
+    if (state.yearTouched) {
+      const y = yearOf(meta);
+      if (y == null || y < state.yearLo || y > state.yearHi + 9) return false;
+    }
+    if (state.type && meta.type !== state.type) return false;
+    if (state.author) {
+      const q = state.author.trim().toLowerCase();
+      if (q && !(meta.contributor || '').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  }
+
+  function apply() {
+    const activeCount = [state.institution, state.yearTouched, state.author.trim(), state.type].filter(Boolean).length;
+    let shown = 0;
+    tileMeshes.forEach(m => {
+      const ok = matches(m.userData.meta || {});
+      m.userData.targetOpacity = ok ? 1 : 0.08;
+      if (ok) shown++;
+    });
+
+    countBadge.style.display = activeCount ? 'inline-block' : 'none';
+    countBadge.textContent = activeCount;
+    clearBtn.classList.toggle('disabled', activeCount === 0);
+    yearReadout.textContent = state.yearTouched
+      ? `${state.yearLo}–${state.yearHi + 9}`
+      : `${decadeMin}–${decadeMax + 9}`;
+    yearHint.textContent = activeCount ? `${shown.toLocaleString('pt-BR')} peças` : 'arraste as alças';
+  }
+
+  selInst.addEventListener('change', () => { state.institution = selInst.value; apply(); });
+  selType.addEventListener('change', () => { state.type = selType.value; apply(); });
+  authorInput.addEventListener('input', () => { state.author = authorInput.value; apply(); });
+
+  function onYear() {
+    let lo = parseInt(loSlider.value, 10), hi = parseInt(hiSlider.value, 10);
+    if (lo > hi) [lo, hi] = [hi, lo];
+    state.yearLo = lo; state.yearHi = hi; state.yearTouched = true;
+    apply();
+  }
+  loSlider.addEventListener('input', onYear);
+  hiSlider.addEventListener('input', onYear);
+
+  clearBtn.addEventListener('click', () => {
+    state.institution = ''; state.type = ''; state.author = ''; state.yearTouched = false;
+    selInst.value = ''; selType.value = ''; authorInput.value = '';
+    loSlider.value = decadeMin; hiSlider.value = decadeMax;
+    apply();
+  });
+
+  apply();
+}
+
 // ─── load atlas + map, build scene ───────────────────────────────────────────
 async function main() {
   const mapData = await fetch('atlas/atlas-map.json').then(r => r.json());
@@ -489,7 +612,7 @@ async function main() {
   atlasEntries = mapData.map;
   const handles = Object.keys(mapData.map);
 
-  document.getElementById('badge').textContent = mapData.placeholder
+  document.getElementById('filters-label').textContent = mapData.placeholder
     ? `protótipo — as fotos ainda são um placeholder (uma única imagem de teste, tonalizada por item); os metadados abaixo são reais, do catalogo.jsonl`
     : `${handles.length} peças do acervo Brasiliana Fotográfica`;
 
@@ -558,9 +681,13 @@ async function main() {
     tex.generateMipmaps = false;
     tex.minFilter = THREE.LinearFilter;
     tex.needsUpdate = true;
-    return new THREE.MeshBasicMaterial({ map: tex });
+    return new THREE.MeshBasicMaterial({ map: tex, transparent: true });
   });
-  tileMeshes.forEach(m => { m.material = atlasMats[m.userData.atlas]; });
+  // each tile gets its own material instance (cheap — shares the texture by
+  // reference) so the filter panel can dim individual tiles independently
+  tileMeshes.forEach(m => { m.material = atlasMats[m.userData.atlas].clone(); });
+
+  setupFilters(mapData);
 
   // ── ready — start rendering the wall right away, behind a translucent
   //    title card, so the visitor sees it live before deciding to enter ──
