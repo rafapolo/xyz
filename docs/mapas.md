@@ -20,6 +20,7 @@ mesmo fix já aplicado no [swissviz](https://github.com/rafapolo/swissviz) (`d78
 | [friba/friba-madeiras](../dataviz/friba/friba-madeiras.html) | `/dataviz/friba/friba-madeiras.html` | Madeireiras/serrarias de Nova Friburgo — export kepler.gl |
 | [friba/pop_3d](../dataviz/friba/pop_3d.html) | `/dataviz/friba/pop_3d.html` | População de Nova Friburgo em colunas 3D — export kepler.gl |
 | [friba/friburgo-confeccoes-ativas](../dataviz/friba/friburgo-confeccoes-ativas.html) | `/dataviz/friba/friburgo-confeccoes-ativas.html` | Confecções ativas em Nova Friburgo — export kepler.gl |
+| [malafaia](../malafaia/) | `/malafaia/` | Estabelecimentos ligados a Silas Malafaia, 1971–2025 — único caso de deck.gl puro: o basemap era um `TileLayer` raster, agora é MapLibre com estilo `dark` e o deck. por cima via `MapboxOverlay` |
 
 ## Fora do escopo (não usam basemap)
 
@@ -33,6 +34,11 @@ estáticos sem Leaflet/MapLibre/CartoDB envolvido.
 - `eleicoes`, `religioes`, `racas` (Leaflet): ponte via `@maplibre/maplibre-gl-leaflet`
   para não reescrever markers/tooltips/controles existentes
 - `religioes/igrejas`, `rais/mapa` (MapLibre nativo): troca direta de `style:`
+- `malafaia/index.html`: era `new deck.Deck({container})` desenhando o próprio
+  basemap num `TileLayer` raster. Virou `maplibregl.Map` + `deck.MapboxOverlay`
+  (padrão do swissviz): o MapLibre passa a dona da câmera e do resize, o deck.
+  só desenha ícones e rótulos. Ficou de fora da primeira leva por não estar sob
+  `dataviz/`
 - `uf/map.js`: único caso sem basemap nenhum — a pedido, já que só existia pra ser
   achatado em preto sólido pelo `hideRoads()`
 - `rio/*.js`, `friba/*.html`: exports kepler.gl de 11–57MB sem fonte separada,

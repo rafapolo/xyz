@@ -4,6 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Império Malafaia</title>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css"
+        />
         <style>
             * {
                 margin: 0;
@@ -456,6 +460,7 @@
 
         <!-- Load required libraries from CDN -->
         <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
+        <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
         <script src="https://unpkg.com/d3-dsv@3.0.1/dist/d3-dsv.min.js"></script>
 
         <!-- Fallback for older browsers -->
@@ -482,49 +487,28 @@
             let globalData = [];
             let selectedCompany = null;
             let selectedMinYear = 2025;
-            let baseMapLayer = null;
             let isSliderActive = false;
 
-            // Ensure container is ready
-            const mapContainer = document.getElementById("map");
-
-            const deckgl = new deck.Deck({
-                container: mapContainer,
-                width: window.innerWidth,
-                height: window.innerHeight,
-                initialViewState: {
-                    longitude: -43.2096, // Rio de Janeiro longitude
-                    latitude: -22.9035, // Rio de Janeiro latitude
-                    zoom: 10, // Zoom level for ~15km view
-                    pitch: 0,
-                    bearing: 0, // 0 = North is up (default orientation)
-                },
-                controller: true, // Enable full 3D controls including rotation and pitch
-                canvas: null, // Let Deck.gl create its own canvas
-                onLoad: () => {
-                    console.log("Deck.gl loaded successfully");
-                },
-                onError: (error) => {
-                    console.error("Deck.gl error:", error);
-                },
-                onResize: ({ width, height }) => {
-                    console.log("Deck resized:", width, height);
-                },
+            // Basemap — MapLibre + OpenFreeMap (tiles vetoriais OSM, sem API
+            // key e sem rate limit). Era um deck.TileLayer raster do CartoDB,
+            // que em 2026-09 passou a responder 200 com marca d'agua de "api
+            // key required" gravada no proprio tile. Mesma migracao do resto
+            // do dataviz/ (docs/mapas.md) e do swissviz.
+            const map = new maplibregl.Map({
+                container: "map",
+                style: "https://tiles.openfreemap.org/styles/dark",
+                center: [-43.2096, -22.9035], // Rio de Janeiro
+                zoom: 10, // ~15km de campo de visao
+                pitch: 0,
+                bearing: 0, // 0 = norte pra cima
+                attributionControl: false,
             });
 
-            // Handle window resize events to ensure map resizes to 100%
-            function handleResize() {
-                const newWidth = window.innerWidth;
-                const newHeight = window.innerHeight;
-
-                deckgl.setProps({
-                    width: newWidth,
-                    height: newHeight,
-                });
-            }
-
-            // Add resize event listener
-            window.addEventListener("resize", handleResize);
+            // deck.gl deixa de desenhar o mapa e vira so a camada de cima; o
+            // MapLibre controla pan/zoom/rotacao e se redimensiona sozinho (o
+            // handleResize manual saiu junto com o Deck autonomo).
+            const deckgl = new deck.MapboxOverlay({ layers: [] });
+            map.addControl(deckgl);
 
             // Function to parse CSV data directly
             function parseCSVData() {
@@ -899,7 +883,7 @@ ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.859572,-42.343261,2024-05-13`;
 
                 // Update deck with new layers
                 deckgl.setProps({
-                    layers: [baseMapLayer, iconLayer, textLayer],
+                    layers: [iconLayer, textLayer],
                 });
 
                 // Update legend UI
@@ -1014,25 +998,8 @@ ASSEMBLEIA DE DEUS VITORIA EM CRISTO,-22.859572,-42.343261,2024-05-13`;
                 const iconLayer = createIconLayer(data);
                 const textLayer = createTextLayer(data);
 
-                // Use CartoDB dark tiles which are more reliable
-                baseMapLayer = new deck.TileLayer({
-                    id: "base-map",
-                    data: "https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png",
-                    minZoom: 0,
-                    maxZoom: 18,
-                    tileSize: 256,
-                    renderSubLayers: (props) => {
-                        const { west, south, east, north } = props.tile.bbox;
-                        return new deck.BitmapLayer(props, {
-                            data: null,
-                            image: props.data,
-                            bounds: [west, south, east, north],
-                        });
-                    },
-                });
-
                 deckgl.setProps({
-                    layers: [baseMapLayer, iconLayer, textLayer],
+                    layers: [iconLayer, textLayer],
                 });
 
                 // Setup legend interactivity
