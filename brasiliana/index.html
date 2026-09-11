@@ -25,7 +25,8 @@
   #loading {
     position: fixed; inset: 0; background: #0b0b0c;
     display: flex; align-items: center; justify-content: center; z-index: 100;
-    transition: opacity .8s ease, background-color 1.2s ease;
+    /* linear, not ease: an eased 3s fade is perceptually over in half that */
+    transition: opacity 3s linear, background-color 2s ease;
   }
   #loading.ready { background: rgba(11,11,12,.78); } /* the wall renders live behind the title card */
   #loading p { font-size: .8rem; letter-spacing: .15em; text-transform: uppercase; color: #999; }
@@ -1343,7 +1344,7 @@ async function main() {
   const cover = document.getElementById('loading');
   cover.style.opacity = '0';
   cover.style.pointerEvents = 'none'; // the wall is usable during the fade, not after it
-  setTimeout(() => cover.remove(), 800);
+  setTimeout(() => cover.remove(), 3100); // matches the 3s fade in the stylesheet
 
   // on a phone the hint sits over the wall itself — it retires once read
   if (isTouch) setTimeout(() => { document.getElementById('hint').style.opacity = '0'; }, 7000);
