@@ -25,14 +25,22 @@
   #loading {
     position: fixed; inset: 0; background: #0b0b0c;
     display: flex; align-items: center; justify-content: center; z-index: 100;
-    /* linear, not ease: an eased 3s fade is perceptually over in half that */
-    transition: opacity 3s linear, background-color 2s ease;
+    /* linear, not ease: an eased fade is perceptually over in half its time */
+    transition: opacity 2s linear, background-color 1.4s ease;
   }
   #loading.ready { background: rgba(11,11,12,.78); } /* the wall renders live behind the title card */
-  #loading p { font-size: .8rem; letter-spacing: .15em; text-transform: uppercase; color: #999; }
+  /* scoped to the id, not to every <p> under the cover — the title screen's
+     own subtitle is a <p> too, and it is not an uppercase tracking-out line */
+  #loading-msg { font-size: .8rem; letter-spacing: .15em; text-transform: uppercase; color: #999; }
 
-  /* ── opening title screen (shown once data is ready, before entering) ──── */
+  /* ── opening title screen (shown once data is ready, before entering) ────
+       It overlays the cover rather than sitting beside the loading line: as a
+       flex sibling it still claimed its share of the row while invisible, which
+       squeezed "carregando mural…" into a narrow column down one side — the
+       first thing anyone saw, and it read as a page with no stylesheet. */
   #title-screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
     text-align: center;
     padding: 0 24px;
     padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
@@ -136,9 +144,18 @@
     background: rgba(217,138,114,.15); color: var(--f-danger);
     border-color: rgba(217,138,114,.34);
   }
+  /* it appears the moment the first filter bites — as `hidden` it did so by
+     growing the header, nudging everything under it down mid-drag. It keeps
+     its box instead, so the panel's geometry never depends on its state. */
+  #filters-count.empty { visibility: hidden; }
 
-  /* ── active-filter chips: visible collapsed *and* open, each one removable ─ */
+  /* ── active-filter chips: the panel's state while it is *closed*, each one
+       removable. Open, they are redundant (every filter is visible in its own
+       control) and actively harmful: a chip appearing on the first drag frame
+       inserted a whole row above the body and slid the slider out from under
+       the finger. An open panel is a fixed layout, top to bottom. ─────────── */
   #filters-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 11px 9px; }
+  #filters.open #filters-chips { display: none; }
   .chip {
     display: inline-flex; align-items: center; gap: 3px; max-width: 100%;
     font-size: .62rem; line-height: 1.7; background: var(--f-accent-soft); color: var(--f-accent);
@@ -364,7 +381,11 @@
 
     #card-wrap { align-items: flex-end; }
     #card {
-      width: 100%; max-width: none; max-height: 86dvh;
+      /* the sheet is capped short of the screen on purpose: the band of wall it
+         leaves above is where the opened piece goes, and at 86dvh there was no
+         band — the piece rose straight behind the sheet */
+      width: 100%; max-width: none; max-height: min(66dvh, 560px);
+      overscroll-behavior: contain;
       border-radius: 16px 16px 0 0; background: rgba(6,6,8,.94);
       padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
       transform: translateY(26px) scale(1);
@@ -422,7 +443,7 @@
   <div id="filters-head" role="button" tabindex="0" aria-expanded="false" aria-controls="filters-body">
     <span class="label">filtros</span>
     <span class="right">
-      <span id="filters-count" hidden></span>
+      <span id="filters-count" class="empty"></span>
       <span class="chevron" aria-hidden="true">▾</span>
     </span>
   </div>
@@ -432,7 +453,7 @@
     <div class="f-row">
       <label for="f-search">Busca livre</label>
       <div class="f-field">
-        <input type="search" id="f-search" autocomplete="off" placeholder="título, autor, instituição, ano…">
+        <input type="search" id="f-search" autocomplete="off" placeholder="qualquer palavra dos metadados…">
         <button type="button" class="f-x" id="f-search-x" aria-label="limpar busca" hidden>×</button>
       </div>
     </div>
@@ -592,7 +613,7 @@ function endPointer(e) {
   if (!p) return;
   pointers.delete(e.pointerId);
   if (pointers.size) { rebase(); return; } // other fingers still down
-  if (!p.moved && !multi && e.type === 'pointerup') handleTap(e.clientX, e.clientY);
+  if (!p.moved && !multi && e.type === 'pointerup') handleTap(e.clientX, e.clientY, e.pointerType !== 'mouse');
   multi = false;
   gesture = null;
 }
@@ -601,9 +622,9 @@ window.addEventListener('pointercancel', endPointer);
 
 // on a phone the open panel covers most of the wall — a tap on the wall means
 // "let me see it", so the first tap puts the panel away rather than selecting
-function handleTap(x, y) {
+function handleTap(x, y, touch) {
   if (isMobile && filtersEl.classList.contains('open')) { toggleFilters(false); return; }
-  doRaycast(x, y);
+  doRaycast(x, y, touch);
 }
 
 // ─── grid of tiles ──────────────────────────────────────────────────────────
@@ -713,6 +734,7 @@ function buildGrid(handles, mapEntries, tpr, nPages) {
 
     page.tiles.push(tile);
     tileMeshes.push(tile);
+    tileByHandle.set(handle, tile);
   });
 
   pages.forEach(p => { p.mesh.instanceMatrix.needsUpdate = true; p.mesh.geometry.attributes.aUv.needsUpdate = true; });
@@ -721,7 +743,6 @@ function buildGrid(handles, mapEntries, tpr, nPages) {
 
 // a tile only costs anything on the frames where it is actually moving
 function markAnimating(tile) { animating.add(tile); }
-function markAllAnimating() { for (const t of tileMeshes) animating.add(t); }
 
 const _m4 = new THREE.Matrix4();
 function updateTileAnimation() {
@@ -767,20 +788,30 @@ function firstLiveHit() {
   return null;
 }
 
-function doRaycast(cx, cy) {
-  pointer.x = (cx / window.innerWidth) * 2 - 1;
-  pointer.y = -(cy / window.innerHeight) * 2 + 1;
+// the canvas' own box, not the window: on iOS the two drift apart whenever the
+// URL bar slides and the picked point lands a tile or two off the finger
+function pickAt(cx, cy) {
+  const r = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((cx - r.left) / r.width) * 2 - 1;
+  pointer.y = -((cy - r.top) / r.height) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  const m = firstLiveHit();
-  if (m) selectTile(m);
+  return firstLiveHit();
+}
+
+// A fingertip covers far more wall than a tile does at the opening zoom (a tile
+// is ~50 px there), so a tap that looks dead-on often lands in a gutter. On
+// touch, sweep a small ring around the point before calling it a miss.
+const TAP_RING = [[0, 0], [0, -11], [11, 0], [0, 11], [-11, 0], [-8, -8], [8, -8], [8, 8], [-8, 8]];
+function doRaycast(cx, cy, touch) {
+  for (const [ox, oy] of (touch ? TAP_RING : [[0, 0]])) {
+    const m = pickAt(cx + ox, cy + oy);
+    if (m) { openTile(m); return; }
+  }
 }
 
 renderer.domElement.addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse' || pointers.size || selected) return; // no hover state on a finger
-  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const m = firstLiveHit();
+  const m = pickAt(e.clientX, e.clientY);
   if (m !== hovered) {
     if (hovered) { hovered.userData.targetScale = 1; markAnimating(hovered); }
     hovered = m;
@@ -798,55 +829,123 @@ let atlasEntries = null, TPR = 1;
 let selected = null;
 let selectedAt = 0;
 
+// Where the opened piece goes and how big it gets. On a desktop that is simply
+// the middle of the screen; on a phone the card is a bottom sheet, so the piece
+// is centred in whatever band of wall is left above it — measured off the sheet
+// that was just filled in, because its height depends on how much metadata the
+// item carries. Guessed at a fixed fraction, the piece ended up behind the sheet.
+function framing(visH) {
+  if (!isMobile) return { lift: 0, scale: 3.4 };
+  const vh = window.innerHeight;
+  // the panel's header, not the panel: open or closed, the header is the line
+  // the wall actually begins under (and a tap on the wall closes the rest)
+  const top = filtersEl.getBoundingClientRect().top + filtersHead.offsetHeight + 10;
+  const bottom = vh - cardEl.offsetHeight - 10;
+  const band = bottom - top;
+  if (band < 70) return { lift: 0, scale: Math.min(3.4, visH * 0.18) }; // no room to speak of
+  return {
+    lift: (vh / 2 - (top + bottom) / 2) / vh * visH,
+    scale: THREE.MathUtils.clamp((band / vh) * visH * 0.82, 1.2, 3.4),
+  };
+}
+
 function selectTile(mesh) {
   selected = mesh;
   selectedAt = performance.now();
   hovered = null;
 
+  showCard(mesh.userData); // fill the card first: its height decides the framing
+
   const centerZ = mesh.userData.basePos.z;
   const cx = camTarget.x, cy = camTarget.y;
-  // on a phone the card is a bottom sheet, so the opened piece is raised into
-  // the band of wall that stays visible above it instead of hiding behind it
   const visH = visibleHeight();
-  const lift = isMobile ? visH * 0.22 : 0;
+  const { lift, scale } = framing(visH);
+
+  // Beyond the edge of the screen the parting is invisible, and moving every
+  // one of twelve thousand instances for it costs a phone the whole animation.
+  const reach = Math.hypot(visH * camera.aspect, visH) * 0.5 + 8;
 
   tileMeshes.forEach(m => {
     if (m === mesh) return;
     const dx = m.userData.basePos.x - cx;
     const dy = m.userData.basePos.y - cy;
     const dist = Math.hypot(dx, dy) || 0.001;
+    if (dist > reach) { rest(m); return; }
     const ux = dx / dist, uy = dy / dist;
     const push = THREE.MathUtils.clamp(6.5 - dist * 0.5, 1.5, 6.5); // closer tiles get shoved further
-    m.userData.targetPos = m.userData.basePos.clone().add(new THREE.Vector3(ux * push, uy * push, -1.5));
-    m.userData.targetScale = 1;
+    aim(m, m.userData.basePos.clone().add(new THREE.Vector3(ux * push, uy * push, -1.5)), 1);
   });
 
-  mesh.userData.targetPos = new THREE.Vector3(cx, cy + lift, centerZ + 4);
-  mesh.userData.targetScale = isMobile ? Math.min(3.4, visH * 0.24) : 3.4;
-  markAllAnimating();
-
-  showCard(mesh.userData);
+  aim(mesh, new THREE.Vector3(cx, cy + lift, centerZ + 4), scale);
 }
 
+// a tile only joins the animation set when it has somewhere to go
+function aim(m, pos, scale) {
+  m.userData.targetPos = pos;
+  m.userData.targetScale = scale;
+  if (m.pos.distanceToSquared(pos) > 1e-6 || Math.abs(m.scl - scale) > 1e-4) markAnimating(m);
+}
+function rest(m) { aim(m, m.userData.basePos, 1); }
+
 function deselect() {
-  tileMeshes.forEach(m => {
-    m.userData.targetPos = m.userData.basePos.clone();
-    m.userData.targetScale = 1;
-  });
-  markAllAnimating();
+  tileMeshes.forEach(rest);
   document.getElementById('card-wrap').classList.remove('open');
   selected = null;
 }
-document.getElementById('card-back').addEventListener('click', deselect);
+document.getElementById('card-back').addEventListener('click', () => closeCard());
 // A tap is pointerup *then* a compatibility click. The card opens on the
 // pointerup, so that click lands on whatever the card just put under the
 // finger — the backdrop (closing it again) or a button on the sheet. Swallow
 // anything that arrives within a moment of the card opening.
+// stopImmediatePropagation, not stopPropagation: when the click lands on the
+// backdrop itself the closing listener below is on that same element, and
+// plain stopPropagation does not reach listeners on the target node — so every
+// tap that opened a card in the upper half of a phone screen closed it again.
 document.getElementById('card-wrap').addEventListener('click', e => {
-  if (performance.now() - selectedAt < 400) { e.stopPropagation(); e.preventDefault(); }
+  if (performance.now() - selectedAt < 400) { e.stopImmediatePropagation(); e.preventDefault(); }
 }, true);
 document.getElementById('card-wrap').addEventListener('click', e => {
-  if (e.target.id === 'card-wrap') deselect();
+  if (e.target.id === 'card-wrap') closeCard();
+});
+
+/* ─── browser history ────────────────────────────────────────────────────────
+   Opening a piece is an event worth going back from: each one becomes a history
+   entry carrying its handle, so the phone's back gesture (and the browser's own
+   back button) closes the card instead of leaving the wall, and back/forward
+   retrace the pieces you opened — including the ones you stepped to with
+   ‹ anterior / próxima ›. The handle also lands in the URL, so a piece can be
+   linked to and re-opened straight from the address bar.
+   Everything that changes the view goes through openTile/closeCard; selectTile
+   and deselect are the raw moves, used as-is when *history* is the one asking. */
+const tileByHandle = new Map(); // filled in buildGrid
+let historyReady = false;       // no entries before the wall can answer for them
+
+function openTile(tile) {
+  selectTile(tile);
+  if (!historyReady) return;
+  const h = tile.userData.handle;
+  // holding an arrow key walks the wall faster than Safari allows entries to be
+  // pushed (100 per 30s); the wall keeps working, it just stops recording
+  try { history.pushState({ h }, '', `#${encodeURIComponent(h)}`); } catch {}
+}
+
+function closeCard() {
+  // stepping back is what put the card on screen — unwind it the same way, so
+  // forward can bring the piece back instead of a dead entry
+  if (historyReady && history.state && history.state.h) { history.back(); return; }
+  deselect();
+}
+
+const handleFromHash = () => {
+  try { return decodeURIComponent(location.hash.slice(1)); } catch { return ''; }
+};
+
+window.addEventListener('popstate', e => {
+  if (!historyReady) return;
+  const h = (e.state && e.state.h) || handleFromHash();
+  const tile = h ? tileByHandle.get(h) : null;
+  if (tile) { if (tile !== selected) selectTile(tile); }
+  else if (selected) deselect();
 });
 const filtersEl = document.getElementById('filters');
 const filtersHead = document.getElementById('filters-head');
@@ -859,7 +958,7 @@ function toggleFilters(force) {
 window.addEventListener('keydown', e => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
   if (e.key === 'Escape') {
-    if (selected) deselect();
+    if (selected) closeCard();
     else if (typing) e.target.blur();
     else toggleFilters(false);
     return;
@@ -887,7 +986,7 @@ function stepSelection(step) {
   let i = tileMeshes.indexOf(selected);
   for (let k = 0; k < n; k++) {
     i = (i + step + n) % n;
-    if (!tileMeshes[i].userData.filteredOut) { selectTile(tileMeshes[i]); return; }
+    if (!tileMeshes[i].userData.filteredOut) { openTile(tileMeshes[i]); return; }
   }
 }
 
@@ -908,7 +1007,7 @@ cardEl.addEventListener('touchend', e => {
   const dy = e.changedTouches[0].clientY - swipe.y;
   swipe = null;
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) stepSelection(dx < 0 ? 1 : -1);
-  else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && cardEl.scrollTop <= 0) deselect();
+  else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && cardEl.scrollTop <= 0) closeCard();
 }, { passive: true });
 
 function showCard(data) {
@@ -959,6 +1058,15 @@ filtersHead.addEventListener('keydown', e => {
 
 // pt-BR catalogue text is full of accents and nobody types them into a filter
 const deburr = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// everything a record carries, flattened into one string — naming the fields
+// would quietly drop whatever the catalogue gains later
+function flattenMeta(value) {
+  if (value == null) return '';
+  if (Array.isArray(value)) return value.map(flattenMeta).join(' ');
+  if (typeof value === 'object') return Object.values(value).map(flattenMeta).join(' ');
+  return String(value);
+}
 
 function yearOf(meta) {
   const m = String((meta || {}).date || '').match(/(1[5-9]\d{2}|20\d{2})/);
@@ -1032,10 +1140,8 @@ function setupFilters(mapData) {
     const meta = m.userData.meta || {};
     m.userData._year = yearOf(meta);
     m.userData._author = deburr(meta.contributor || '');
-    // one haystack per piece for the free-text box: everything the card shows
-    m.userData._hay = deburr([
-      meta.title, meta.contributor, meta.community, meta.type, meta.date, meta.handle,
-    ].filter(Boolean).join(' '));
+    // one haystack per piece: every metadata field, not a chosen few
+    m.userData._hay = deburr(flattenMeta(meta));
   });
 
   const bars = [];
@@ -1114,7 +1220,7 @@ function setupFilters(mapData) {
     authorX.hidden = !state.author;
     clearBtn.classList.toggle('disabled', active.length === 0);
 
-    countBadge.hidden = active.length === 0;
+    countBadge.classList.toggle('empty', active.length === 0);
     countBadge.textContent = shown.toLocaleString('pt-BR');
     countBadge.classList.toggle('none', shown === 0);
     resultEl.classList.toggle('none', shown === 0);
@@ -1224,8 +1330,38 @@ function setupFilters(mapData) {
 }
 
 // ─── load atlas + map, build scene ───────────────────────────────────────────
+// content-length is the *compressed* size when a server gzips, while the
+// reader hands back inflated bytes — so a raw ratio can sail past 100%
+const pctOf = (loaded, total) => (total ? Math.min(100, Math.round((loaded / total) * 100)) : 0);
+const asMB = bytes => `${(bytes / 1048576).toFixed(1)} MB`;
+
+// read a body in chunks so the wait is legible instead of a frozen line
+async function fetchWithProgress(url, onProgress) {
+  const res = await fetch(url);
+  const total = parseInt(res.headers.get('content-length') || '0', 10);
+  const reader = res.body.getReader();
+  const chunks = [];
+  let loaded = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.length;
+    onProgress(loaded, total);
+  }
+  return { blob: new Blob(chunks), total };
+}
+
 async function main() {
-  const mapData = await fetch('atlas/atlas-map.json').then(r => r.json());
+  // the catalogue is megabytes of its own, and until now nothing said so
+  const loadingMsg = document.getElementById('loading-msg');
+  const catalogue = await fetchWithProgress('atlas/atlas-map.json', (loaded, total) => {
+    // a gzipped response often carries no content-length: count bytes instead
+    loadingMsg.textContent = total
+      ? `carregando catálogo… ${pctOf(loaded, total)}%`
+      : `carregando catálogo… ${asMB(loaded)}`;
+  });
+  const mapData = JSON.parse(await catalogue.blob.text());
   TPR = mapData.size / mapData.tile;
   atlasEntries = mapData.map;
   const handles = Object.keys(mapData.map);
@@ -1266,19 +1402,42 @@ async function main() {
 
   // ── fetch each atlas with byte-level progress, build both the GPU texture
   //    and the plain <img> (for the card crop) from the same downloaded blob ──
-  const fileBytes = new Array(mapData.atlases.length).fill(0);
-  const fileTotals = new Array(mapData.atlases.length).fill(0);
+  // Decoding four 8192² pages takes about as long as fetching them does, so the
+  // bar covers both: parked at 100% for the whole decode, it read as stuck.
+  const nAtlases = mapData.atlases.length;
+  const fileBytes = new Array(nAtlases).fill(0);
+  const fileTotals = new Array(nAtlases).fill(0);
+  let pagesReady = 0;
+  let shownPct = 0;   // a progress bar that retreats is worse than a coarse one
+  let painting = false;
+  // the readers hand over thousands of chunks; repainting on each one is a few
+  // thousand pointless style invalidations, so coalesce to one write per frame
   function reportProgress() {
+    if (painting) return;
+    painting = true;
+    requestAnimationFrame(() => { painting = false; paintProgress(); });
+  }
+  function paintProgress() {
     const loaded = fileBytes.reduce((a, b) => a + b, 0);
     const total = fileTotals.reduce((a, b) => a + b, 0);
-    const pct = total ? Math.round((loaded / total) * 100) : 0;
-    enterLabel.textContent = `carregando imagens… ${pct}%`;
+    const down = total ? Math.min(1, loaded / total) : 0;
+    // download 70%, decoding 20%, the first render's texture upload the last 10%
+    const pct = shownPct = Math.max(shownPct, Math.round((down * 0.7 + (pagesReady / nAtlases) * 0.2) * 100));
+    enterLabel.textContent = total
+      ? `${down < 1 ? 'carregando' : 'preparando'} imagens… ${pct}%`
+      : `carregando imagens… ${asMB(loaded)}`;
     progressBar.style.width = `${pct}%`;
   }
 
-  const blobs = await Promise.all(mapData.atlases.map(async (name, idx) => {
-    const res = await fetch(`atlas/${name}`);
+  // every response's headers first, bodies second: reading as they arrived meant
+  // the last file's size landed mid-download and the percentage fell backwards
+  const responses = await Promise.all(mapData.atlases.map(name => fetch(`atlas/${name}`)));
+  responses.forEach((res, idx) => {
     fileTotals[idx] = parseInt(res.headers.get('content-length') || '0', 10);
+  });
+  reportProgress();
+
+  const blobs = await Promise.all(responses.map(async (res, idx) => {
     const reader = res.body.getReader();
     const chunks = [];
     for (;;) {
@@ -1327,6 +1486,14 @@ async function main() {
     tex.minFilter = THREE.LinearFilter;
     tex.needsUpdate = true;
     atlasMats.push(tileMaterial(tex, TPR));
+
+    // upload this page now rather than letting all four land on the first
+    // render; the cost then falls inside the bar instead of after it
+    renderer.initTexture(tex);
+    pagesReady++;
+    reportProgress();
+    // let the bar actually repaint between pages
+    await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
   }
   // dimming rides on a per-instance attribute, so one material per page is
   // enough — and an opaque one, which spares the renderer a depth sort of the
@@ -1335,9 +1502,18 @@ async function main() {
 
   setupFilters(mapData);
 
+  // The first render hands every atlas to the GPU — on a phone that is seconds
+  // of frozen main thread, and it used to happen with the bar already at 100%,
+  // which is what made the loader look permanently finished. Name the step, and
+  // let the browser actually paint that frame before the freeze begins.
+  enterLabel.textContent = 'montando o mural… 90%';
+  progressBar.style.width = '90%';
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
   // ── ready — start rendering the wall right away, behind a translucent
   //    title card, so the wall is already alive when the cover lifts ──
   tick();
+  progressBar.style.width = '100%';
   enterLabel.textContent = 'entrando…';
   enterLabel.classList.add('ready');
   document.getElementById('progress-track').style.display = 'none';
@@ -1356,7 +1532,17 @@ async function main() {
   // blend into one gesture instead of reading as two separate steps
   await new Promise(res => setTimeout(res, 1500));
   cover.style.opacity = '0';
-  setTimeout(() => cover.remove(), 3100); // matches the 3s fade in the stylesheet
+  setTimeout(() => cover.remove(), 2100); // matches the 2s fade in the stylesheet
+
+  // ── history opens for business only now that every handle can be resolved ──
+  // The entry the wall starts from carries no piece and no hash, so the first
+  // back out of a card always lands on the bare wall and never off the site.
+  const deepLink = handleFromHash();
+  history.replaceState({ h: null }, '', location.pathname + location.search);
+  historyReady = true;
+  // a link straight to a piece: open it *as* a step, so back returns to the wall
+  const linked = deepLink && tileByHandle.get(deepLink);
+  if (linked) openTile(linked);
 
   // on a phone the hint sits over the wall itself — it retires once read
   if (isTouch) setTimeout(() => { document.getElementById('hint').style.opacity = '0'; }, 7000);
