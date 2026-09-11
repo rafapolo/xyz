@@ -175,7 +175,9 @@ const ATLAS = (() => {
     const view = Object.assign({}, INITIAL_VIEW_STATE, overrides || {});
     const map = new maplibregl.Map({
       container: containerId,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      // OpenFreeMap "dark" vector style (OSM data, no API key, no rate limit) —
+      // replaces the CartoDB dark-matter-gl-style carto deprecated for anonymous use
+      style: 'https://tiles.openfreemap.org/styles/dark',
       center: [view.longitude, view.latitude],
       zoom: view.zoom,
       pitch: view.pitch,
@@ -186,18 +188,22 @@ const ATLAS = (() => {
     });
     map._atlasHome = view; // "home" view used by the reset action
 
-    // Apply swissviz tint
+    // Tint the OpenFreeMap base layers to match the app's dark-navy palette
+    // (same fix as swissviz — dark-matter-gl-style is gone, so the old
+    // raster-* paint properties never matched a vector style's layers)
     map.on('load', () => {
       try {
-        map.getStyle().layers.forEach(l => {
-          if (l.type === 'raster') {
-            map.setPaintProperty(l.id, 'raster-brightness-min', 0.07);
-            map.setPaintProperty(l.id, 'raster-hue-rotate', 210);
-            map.setPaintProperty(l.id, 'raster-saturation', 0.4);
-            map.setPaintProperty(l.id, 'raster-contrast', -0.1);
-          }
-        });
+        map.setPaintProperty('background', 'background-color', '#0b0f1a');
+        map.setPaintProperty('water', 'fill-color', 'rgba(20, 30, 55, 1)');
       } catch (_) {}
+      map.addControl(
+        new maplibregl.AttributionControl({
+          compact: true,
+          customAttribution:
+            "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors, tiles by <a href='https://openfreemap.org'>OpenFreeMap</a>",
+        }),
+        'bottom-left',
+      );
     });
 
     const deckOverlay = new deck.MapboxOverlay({

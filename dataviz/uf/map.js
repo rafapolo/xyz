@@ -4,7 +4,17 @@
   var config = window.UF_CONFIG || {};
   var uf = config.uf;
   var ufLower = uf.toLowerCase();
-  var DARK_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+  // No basemap at all: the CartoDB style.json this used to load
+  // (basemaps.cartocdn.com) was deprecated for anonymous use and started
+  // flashing broken/watermarked tiles for ~1s before failing. hideRoads()
+  // below already flattened every basemap layer to black so only the dot
+  // cloud reads as signal — a plain black background gets the same result
+  // with no network fetch and nothing left to break.
+  var DARK_STYLE = {
+    version: 8,
+    sources: {},
+    layers: [{ id: "background", type: "background", paint: { "background-color": "#000000" } }],
+  };
   // kepler.gl's exported "radius" config value is NOT a literal deck.gl
   // ScatterplotLayer pixel radius — kepler applies its own internal scaling
   // before handing radius to deck.gl. Feeding the raw config value (3)
