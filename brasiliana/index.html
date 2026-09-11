@@ -259,6 +259,13 @@
   }
   #f-clear:hover { border-color: var(--f-danger); background: rgba(217,138,114,.12); }
   #f-clear.disabled { opacity: .35; pointer-events: none; }
+  /* the sheet's backdrop: mobile only, and only while the sheet is up */
+  #filters-scrim {
+    display: none; position: fixed; inset: 0; z-index: 14;
+    background: rgba(0,0,0,.45); opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+  }
+
   #hint {
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10;
     font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .06em; color: #999;
@@ -347,16 +354,45 @@
     #title-screen .stats { gap: 18px; }
     #title-screen .enter { margin-top: 34px; }
 
+    /* The panel becomes what a phone expects at the bottom of the screen: a
+       sheet parked on the edge showing only its handle, its title and whatever
+       filters are active, which rises when you pull it up. It also puts the
+       controls where the thumb already is, instead of at the top of the screen.
+       --sheet-peek (measured in JS: the body's offset inside the panel) is how
+       much of it stays visible while it is down. */
     #filters {
-      left: 8px; right: 8px; width: auto; max-width: none;
-      top: calc(8px + env(safe-area-inset-top));
+      left: 0; right: 0; width: auto; max-width: none;
+      top: auto; bottom: 0;
+      border-radius: 16px 16px 0 0;
+      border-left: 0; border-right: 0; border-bottom: 0;
+      box-shadow: 0 -14px 44px rgba(0,0,0,.6);
+      padding-bottom: env(safe-area-inset-bottom);
+      transform: translateY(var(--sheet-hide, 340px));
+      transition: transform .34s cubic-bezier(.32, .72, 0, 1);
+      touch-action: none; /* dragging the sheet is never a page scroll */
     }
-    #filters-head { padding: 12px 13px; }
+    #filters.open { transform: translateY(0); }
+    #filters::before { /* grab handle — the sheet reads as draggable before it is touched */
+      content: ''; display: block; width: 40px; height: 4px; margin: 9px auto 1px;
+      border-radius: 2px; background: rgba(255,255,255,.24);
+    }
+    #filters-scrim { display: block; }
+    #filters-scrim.on { opacity: 1; pointer-events: auto; }
+
+    #filters-head { padding: 11px 14px 12px; }
     #filters-head .label { font-size: .72rem; }
+    /* the chevron means "this way": up while the sheet is parked, down once
+       it is up. Anchored at the bottom, the desktop sense of it is backwards. */
+    #filters-head .chevron { transform: rotate(180deg); }
+    #filters.open #filters-head .chevron { transform: rotate(0deg); }
     #filters-count { font-size: .66rem; padding: 2px 7px; }
+    /* the transform does the hiding, so the body is always laid out — that is
+       what makes the peek measurable and the slide animate */
     #filters-body {
-      max-height: min(52dvh, 430px); overflow-y: auto; overscroll-behavior: contain;
+      display: block; padding-left: 14px; padding-right: 14px;
+      max-height: min(64dvh, 540px); overflow-y: auto; overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch; padding-bottom: 14px;
+      touch-action: pan-y;
     }
     .f-row select, .f-row input { font-size: 16px; padding: 8px 9px; } /* 16px: no iOS focus-zoom */
     .f-field input { padding-right: 34px; }
@@ -375,7 +411,7 @@
 
     #hint {
       left: 8px; right: 8px; transform: none; text-align: center; white-space: normal;
-      bottom: calc(10px + env(safe-area-inset-bottom));
+      bottom: calc(var(--sheet-peek, 56px) + 12px + env(safe-area-inset-bottom));
       font-size: .66rem; line-height: 1.5;
     }
 
@@ -439,6 +475,7 @@
   </div>
 </div>
 
+<div id="filters-scrim" aria-hidden="true"></div>
 <div id="filters">
   <div id="filters-head" role="button" tabindex="0" aria-expanded="false" aria-controls="filters-body">
     <span class="label">filtros</span>
@@ -837,9 +874,12 @@ let selectedAt = 0;
 function framing(visH) {
   if (!isMobile) return { lift: 0, scale: 3.4 };
   const vh = window.innerHeight;
-  // the panel's header, not the panel: open or closed, the header is the line
-  // the wall actually begins under (and a tap on the wall closes the rest)
-  const top = filtersEl.getBoundingClientRect().top + filtersHead.offsetHeight + 10;
+  // Where the wall begins depends on where the filter panel is anchored: as a
+  // bar at the top it is the line under its header (open or closed — a tap on
+  // the wall closes the rest of it); as a sheet on the bottom edge it takes
+  // nothing off the top at all, and it sits behind the card either way.
+  const fr = filtersEl.getBoundingClientRect();
+  const top = (fr.bottom < vh - 1 ? fr.top + filtersHead.offsetHeight : 0) + 10;
   const bottom = vh - cardEl.offsetHeight - 10;
   const band = bottom - top;
   if (band < 70) return { lift: 0, scale: Math.min(3.4, visH * 0.18) }; // no room to speak of
@@ -949,11 +989,64 @@ window.addEventListener('popstate', e => {
 });
 const filtersEl = document.getElementById('filters');
 const filtersHead = document.getElementById('filters-head');
+const filtersScrim = document.getElementById('filters-scrim');
+const filtersBodyEl = document.getElementById('filters-body');
+
 function toggleFilters(force) {
   const open = force !== undefined ? force : !filtersEl.classList.contains('open');
   filtersEl.classList.toggle('open', open);
   filtersHead.setAttribute('aria-expanded', String(open));
+  filtersScrim.classList.toggle('on', open && isMobile);
 }
+filtersScrim.addEventListener('click', () => toggleFilters(false));
+
+// ── the mobile sheet ──────────────────────────────────────────────────────
+// Parked on the bottom edge it shows only its handle, title and active chips;
+// everything below that is translated off-screen. Both distances are measured
+// rather than guessed, because the chips change the panel's height as filters
+// come and go.
+let sheetHide = 340; // px of panel hanging below the screen while it is down
+function measureSheet() {
+  const peek = filtersBodyEl.offsetTop;              // handle + head + chips
+  sheetHide = Math.max(0, filtersEl.offsetHeight - peek);
+  const root = document.documentElement.style;
+  root.setProperty('--sheet-peek', `${peek}px`);     // the hint clears this
+  root.setProperty('--sheet-hide', `${sheetHide}px`);
+}
+if (isMobile) {
+  measureSheet();
+  // the chips row appears and disappears with the filters, changing the peek
+  new ResizeObserver(measureSheet).observe(filtersEl);
+  window.addEventListener('orientationchange', () => setTimeout(measureSheet, 260));
+}
+
+// drag the handle to raise or drop it, following the finger the whole way
+let sheetDrag = null;
+filtersEl.addEventListener('touchstart', e => {
+  if (!isMobile || e.touches.length !== 1) return;
+  if (e.target.closest('#filters-body')) return; // that area scrolls and holds controls
+  sheetDrag = {
+    y: e.touches[0].clientY, moved: 0,
+    base: filtersEl.classList.contains('open') ? 0 : sheetHide,
+  };
+  filtersEl.style.transition = 'none';
+}, { passive: true });
+window.addEventListener('touchmove', e => {
+  if (!sheetDrag || !e.touches.length) return;
+  sheetDrag.moved = e.touches[0].clientY - sheetDrag.y;
+  const y = Math.min(sheetHide, Math.max(0, sheetDrag.base + sheetDrag.moved));
+  filtersEl.style.transform = `translateY(${y}px)`;
+}, { passive: true });
+function endSheetDrag() {
+  if (!sheetDrag) return;
+  const { moved } = sheetDrag;
+  sheetDrag = null;
+  filtersEl.style.transition = '';
+  filtersEl.style.transform = ''; // back to whatever the open/closed class says
+  if (Math.abs(moved) > 40) toggleFilters(moved < 0); // up opens, down closes
+}
+window.addEventListener('touchend', endSheetDrag);
+window.addEventListener('touchcancel', endSheetDrag);
 
 window.addEventListener('keydown', e => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
