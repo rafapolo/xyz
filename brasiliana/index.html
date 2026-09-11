@@ -286,7 +286,9 @@ const camTarget = new THREE.Vector3(0, 0, 26); // camera eases toward this each 
 renderer.domElement.addEventListener('wheel', e => {
   e.preventDefault();
   if (selected) return; // navigation is frozen while a card is open
-  camTarget.z = THREE.MathUtils.clamp(camTarget.z + e.deltaY * 0.02, 4, 60);
+  // upper bound generous enough to fit the whole wall (thousands of tiles,
+  // ~180 units wide) in view at once, well under the camera's far plane (500)
+  camTarget.z = THREE.MathUtils.clamp(camTarget.z + e.deltaY * 0.02, 4, 400);
 }, { passive: false });
 
 let dragging = null;
