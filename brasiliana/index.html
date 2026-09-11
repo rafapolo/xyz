@@ -36,9 +36,16 @@
     text-align: center;
     padding: 0 24px;
     padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
-    opacity: 0; transition: opacity .9s ease;
+    opacity: 0; filter: blur(0px); transform: scale(1);
+    transition: opacity .9s ease;
   }
   #title-screen.show { opacity: 1; }
+  /* the words go before the dark does: they blur out and drift open, the way a
+     memory clears — and the veil only lifts once they're gone */
+  #title-screen.dissolve {
+    opacity: 0; filter: blur(8px); transform: scale(1.04);
+    transition: opacity 1.8s linear, filter 1.8s ease-in, transform 2.2s ease-out;
+  }
   #title-screen .eyebrow {
     font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .28em;
     text-transform: uppercase; color: #d8b04a; margin-bottom: 22px;
@@ -1342,8 +1349,13 @@ async function main() {
   await new Promise(res => setTimeout(res, Math.max(0, MIN_COVER_MS - (performance.now() - coverShownAt))));
 
   const cover = document.getElementById('loading');
+  cover.style.pointerEvents = 'none'; // the wall is usable from here on, not after the fade
+  titleScreen.classList.add('dissolve');
+
+  // the black waits for the words — a slight overlap so the two readings
+  // blend into one gesture instead of reading as two separate steps
+  await new Promise(res => setTimeout(res, 1500));
   cover.style.opacity = '0';
-  cover.style.pointerEvents = 'none'; // the wall is usable during the fade, not after it
   setTimeout(() => cover.remove(), 3100); // matches the 3s fade in the stylesheet
 
   // on a phone the hint sits over the wall itself — it retires once read
