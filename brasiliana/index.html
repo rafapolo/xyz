@@ -70,71 +70,97 @@
 
   [hidden] { display: none !important; }
 
-  /* ── compact filter panel, top-left — the "mesa de luz" as a physical
-       light table object sitting on the dark wall, not more wall-chrome ──── */
+  /* ── compact filter panel, top-left — dark chrome, so it reads as part of
+       the wall's own darkness instead of a lit slab thrown on top of it.
+       Every colour below comes from these tokens: retheme by editing them. ─── */
   #filters {
+    --f-surface: rgba(13,13,15,.9);
+    --f-border: rgba(255,255,255,.14);
+    --f-line: rgba(255,255,255,.09);
+    --f-text: #eae7e0;
+    --f-muted: #8e8e87;
+    --f-faint: #6e6e68;
+    --f-field: rgba(255,255,255,.055);
+    --f-field-border: rgba(255,255,255,.16);
+    --f-accent: #7fa8c9;
+    --f-accent-soft: rgba(127,168,201,.15);
+    --f-accent-line: rgba(127,168,201,.34);
+    --f-gold: #d8b04a;
+    --f-danger: #d98a72;
+
     position: fixed; top: 14px; left: 14px; z-index: 15;
     width: 262px; max-width: calc(100vw - 28px);
     font-family: 'Public Sans', system-ui, sans-serif;
-    background: rgba(238,241,238,.97); border: 1px solid #c7cfc6;
-    border-radius: 8px; color: #1b2320;
-    box-shadow: 0 14px 34px rgba(0,0,0,.4);
+    background: var(--f-surface); border: 1px solid var(--f-border);
+    border-radius: 8px; color: var(--f-text);
+    box-shadow: 0 16px 40px rgba(0,0,0,.55);
+    backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+    color-scheme: dark; /* native select popups, caret and scrollbars follow suit */
+    accent-color: var(--f-accent);
   }
   #filters-head {
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     padding: 9px 11px; cursor: pointer; user-select: none; border-radius: 8px;
   }
-  #filters-head:focus-visible { outline: 2px solid #2f5480; outline-offset: -2px; }
+  #filters-head:focus-visible { outline: 2px solid var(--f-accent); outline-offset: -2px; }
   #filters-head .label {
     font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
-    color: #5c665f; font-weight: 700;
+    color: var(--f-muted); font-weight: 700;
   }
   #filters-head .right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-  #filters-head .chevron { font-size: .72rem; line-height: 1; color: #8a6428; transition: transform .2s ease; }
+  #filters-head .chevron { font-size: .82rem; line-height: 1; color: var(--f-gold); transition: transform .2s ease; }
   #filters.open #filters-head .chevron { transform: rotate(180deg); }
   /* live count of matching pieces — the panel stays informative while collapsed */
   #filters-count {
-    font-variant-numeric: tabular-nums; background: #dde6ee; color: #2f5480;
-    border-radius: 3px; padding: 1px 6px; font-size: .62rem; font-weight: 600;
+    font-variant-numeric: tabular-nums; background: var(--f-accent-soft); color: var(--f-accent);
+    border: 1px solid var(--f-accent-line);
+    border-radius: 3px; padding: 0 6px; font-size: .62rem; font-weight: 600;
   }
-  #filters-count.none { background: #f3ddd7; color: #a5452f; }
+  #filters-count.none {
+    background: rgba(217,138,114,.15); color: var(--f-danger);
+    border-color: rgba(217,138,114,.34);
+  }
 
   /* ── active-filter chips: visible collapsed *and* open, each one removable ─ */
   #filters-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 11px 9px; }
   .chip {
     display: inline-flex; align-items: center; gap: 3px; max-width: 100%;
-    font-size: .62rem; line-height: 1.7; background: #dde6ee; color: #2f5480;
-    border: 1px solid #c3d2e2; border-radius: 999px; padding: 0 3px 0 8px;
+    font-size: .62rem; line-height: 1.7; background: var(--f-accent-soft); color: var(--f-accent);
+    border: 1px solid var(--f-accent-line); border-radius: 999px; padding: 0 3px 0 8px;
   }
   .chip .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chip button {
     all: unset; cursor: pointer; flex-shrink: 0;
     width: 14px; height: 14px; border-radius: 50%;
-    text-align: center; line-height: 13px; font-size: .72rem; color: #5b7ea6;
+    text-align: center; line-height: 13px; font-size: .72rem; color: var(--f-accent);
   }
-  .chip button:hover { background: rgba(47,84,128,.2); color: #23405f; }
+  .chip button:hover { background: rgba(127,168,201,.28); color: #dcebf6; }
 
-  #filters-body { display: none; padding: 2px 11px 11px; border-top: 1px solid #d6dcd4; }
+  #filters-body { display: none; padding: 2px 11px 11px; border-top: 1px solid var(--f-line); }
   #filters.open #filters-body { display: block; }
   .f-note {
-    margin-top: 8px; font-size: .6rem; line-height: 1.45; color: #8a938c;
+    margin-top: 8px; font-size: .6rem; line-height: 1.45; color: var(--f-faint);
   }
   .f-row { margin-top: 11px; }
   .f-row label {
     display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
     font-size: .6rem; letter-spacing: .08em; text-transform: uppercase;
-    color: #8a938c; margin-bottom: 4px; font-weight: 600;
+    color: var(--f-muted); margin-bottom: 4px; font-weight: 600;
   }
   .f-row label .val {
     text-transform: none; letter-spacing: 0; font-size: .66rem; font-weight: 600;
-    color: #1b2320; font-variant-numeric: tabular-nums;
+    color: var(--f-text); font-variant-numeric: tabular-nums;
   }
   .f-row select, .f-row input[type="text"] {
     width: 100%; font-family: 'Public Sans', system-ui, sans-serif; font-size: .76rem;
-    background: #fff; color: #1b2320; border: 1px solid #c7cfc6;
+    background: var(--f-field); color: var(--f-text); border: 1px solid var(--f-field-border);
     border-radius: 5px; padding: 5px 7px; outline: none;
   }
-  .f-row select:focus, .f-row input[type="text"]:focus { border-color: #2f5480; }
+  /* the popup list is painted by the OS — give it a real ground, not the
+     panel's translucent one, or it inherits the wall behind the field */
+  .f-row option { background: #15151a; color: var(--f-text); }
+  .f-row input[type="text"]::placeholder { color: var(--f-faint); }
+  .f-row select:focus, .f-row input[type="text"]:focus { border-color: var(--f-accent); }
 
   /* text field with an inline clear button */
   .f-field { position: relative; }
@@ -142,28 +168,28 @@
   .f-field .f-x {
     all: unset; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
     width: 17px; height: 17px; border-radius: 50%; cursor: pointer;
-    text-align: center; line-height: 16px; font-size: .8rem; color: #8a938c;
+    text-align: center; line-height: 16px; font-size: .8rem; color: var(--f-muted);
   }
-  .f-field .f-x:hover { background: #e2e7e1; color: #1b2320; }
+  .f-field .f-x:hover { background: rgba(255,255,255,.12); color: var(--f-text); }
 
   /* ── decade histogram: distribution of the *currently* filtered set, so the
        slider is aimed at something instead of guessed at. Bars are clickable. ─ */
   .f-hist { display: flex; align-items: flex-end; gap: 1px; height: 28px; margin-bottom: 4px; }
   .f-hist .bar {
     flex: 1 1 0; min-width: 0; min-height: 2px; cursor: pointer;
-    background: #ccd4cb; border-radius: 1px 1px 0 0;
+    background: rgba(255,255,255,.16); border-radius: 1px 1px 0 0;
     transition: background .15s ease, height .2s ease;
   }
-  .f-hist .bar.in { background: #2f5480; }
-  .f-hist .bar:hover { background: #a97a3a; }
+  .f-hist .bar.in { background: var(--f-accent); }
+  .f-hist .bar:hover { background: var(--f-gold); }
 
   /* dual-handle range: two overlaid inputs, only the thumbs take pointer events */
   .f-range { position: relative; height: 20px; }
   .f-range-track {
     position: absolute; left: 7px; right: 7px; top: 8px; height: 4px;
-    background: #d3dad1; border-radius: 2px;
+    background: rgba(255,255,255,.13); border-radius: 2px;
   }
-  .f-range-fill { position: absolute; top: 0; bottom: 0; background: #2f5480; border-radius: 2px; }
+  .f-range-fill { position: absolute; top: 0; bottom: 0; background: var(--f-accent); border-radius: 2px; }
   .f-range input[type="range"] {
     position: absolute; left: 0; top: 0; width: 100%; height: 20px; margin: 0;
     -webkit-appearance: none; appearance: none; background: transparent;
@@ -174,29 +200,29 @@
   .f-range input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none; pointer-events: auto; cursor: grab;
     width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
-    background: #fff; border: 2px solid #2f5480; box-shadow: 0 1px 3px rgba(0,0,0,.35);
+    background: #dfeaf2; border: 2px solid #38536b; box-shadow: 0 1px 4px rgba(0,0,0,.6);
   }
   .f-range input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
   .f-range input[type="range"]::-moz-range-thumb {
     pointer-events: auto; cursor: grab;
     width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
-    background: #fff; border: 2px solid #2f5480; box-shadow: 0 1px 3px rgba(0,0,0,.35);
+    background: #dfeaf2; border: 2px solid #38536b; box-shadow: 0 1px 4px rgba(0,0,0,.6);
   }
   .f-range input[type="range"]::-moz-range-track { background: transparent; border: 0; }
-  .f-range input[type="range"]:focus-visible::-webkit-slider-thumb { border-color: #a97a3a; }
-  .f-range input[type="range"]:focus-visible::-moz-range-thumb { border-color: #a97a3a; }
+  .f-range input[type="range"]:focus-visible::-webkit-slider-thumb { border-color: var(--f-gold); }
+  .f-range input[type="range"]:focus-visible::-moz-range-thumb { border-color: var(--f-gold); }
 
   #f-result {
-    margin-top: 12px; font-size: .66rem; color: #5c665f; text-align: center;
+    margin-top: 12px; font-size: .66rem; color: var(--f-muted); text-align: center;
     font-variant-numeric: tabular-nums;
   }
-  #f-result.none { color: #a5452f; }
+  #f-result.none { color: var(--f-danger); }
   #f-clear {
     all: unset; display: block; margin-top: 7px; cursor: pointer;
-    font-size: .66rem; letter-spacing: .04em; color: #a5452f; text-align: center;
-    padding: 5px; border-radius: 5px; border: 1px dashed #c7cfc6;
+    font-size: .66rem; letter-spacing: .04em; color: var(--f-danger); text-align: center;
+    padding: 5px; border-radius: 5px; border: 1px dashed var(--f-field-border);
   }
-  #f-clear:hover { border-color: #a5452f; background: rgba(165,69,47,.08); }
+  #f-clear:hover { border-color: var(--f-danger); background: rgba(217,138,114,.12); }
   #f-clear.disabled { opacity: .35; pointer-events: none; }
   #hint {
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10;
