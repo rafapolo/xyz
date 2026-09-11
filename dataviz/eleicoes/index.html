@@ -255,13 +255,12 @@ let DATA = [];
 let MODE = 'lean';
 let sortedLean = [], sortedPolar = [];
 
-const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: true })
+const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: false })
   .setView([-14.2, -51.9], 4);
 // MapLibre GL basemap (OpenFreeMap "dark" vector style, OSM data, no API key, no rate limit)
 // replaces the CartoDB dark_all raster tiles carto deprecated for anonymous use
 L.maplibreGL({
-  style: 'https://tiles.openfreemap.org/styles/dark',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://openfreemap.org">OpenFreeMap</a>'
+  style: 'https://tiles.openfreemap.org/styles/dark'
 }).addTo(map);
 
 const renderer = L.canvas({ padding: 0.5 });

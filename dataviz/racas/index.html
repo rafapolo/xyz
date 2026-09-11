@@ -199,14 +199,13 @@ function textColorFor(hex){
 let DATA_BY_YEAR = {};
 // record: [uf, municipio, lat, lon, population, branca, preta, parda, amarela, indigena]
 
-const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: true })
+const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: false })
   .setView([-14.2, -51.9], 4);
 
 // MapLibre GL basemap (OpenFreeMap "positron" vector style, OSM data, no API key, no rate limit)
 // replaces the CartoDB voyager raster tiles carto deprecated for anonymous use
 L.maplibreGL({
-  style: 'https://tiles.openfreemap.org/styles/positron',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://openfreemap.org">OpenFreeMap</a>'
+  style: 'https://tiles.openfreemap.org/styles/positron'
 }).addTo(map);
 
 

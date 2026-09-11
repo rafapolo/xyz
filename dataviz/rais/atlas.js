@@ -196,14 +196,6 @@ const ATLAS = (() => {
         map.setPaintProperty('background', 'background-color', '#0b0f1a');
         map.setPaintProperty('water', 'fill-color', 'rgba(20, 30, 55, 1)');
       } catch (_) {}
-      map.addControl(
-        new maplibregl.AttributionControl({
-          compact: true,
-          customAttribution:
-            "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors, tiles by <a href='https://openfreemap.org'>OpenFreeMap</a>",
-        }),
-        'bottom-left',
-      );
     });
 
     const deckOverlay = new deck.MapboxOverlay({
