@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Brasiliana Fotográfica — Mural do Acervo</title>
 <script type="importmap">
 {
@@ -13,8 +13,14 @@
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0b0c; font-family: Georgia, 'Times New Roman', serif; color: #eee; }
-  #canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  html, body {
+    width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #0b0b0c;
+    font-family: Georgia, 'Times New Roman', serif; color: #eee;
+    overscroll-behavior: none; /* no rubber-banding the page behind the wall */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  #canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; touch-action: none; }
 
   #loading {
     position: fixed; inset: 0; background: #0b0b0c;
@@ -26,7 +32,9 @@
 
   /* ── opening title screen (shown once data is ready, before entering) ──── */
   #title-screen {
-    text-align: center; padding: 0 24px;
+    text-align: center;
+    padding: 0 24px;
+    padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
     opacity: 0; transition: opacity .9s ease;
   }
   #title-screen.show { opacity: 1; }
@@ -151,20 +159,22 @@
     text-transform: none; letter-spacing: 0; font-size: .66rem; font-weight: 600;
     color: var(--f-text); font-variant-numeric: tabular-nums;
   }
-  .f-row select, .f-row input[type="text"] {
-    width: 100%; font-family: 'Public Sans', system-ui, sans-serif; font-size: .76rem;
+  .f-row select, .f-row input[type="text"], .f-row input[type="search"] {
+    width: 100%; -webkit-appearance: none; appearance: none; font-family: 'Public Sans', system-ui, sans-serif; font-size: .76rem;
     background: var(--f-field); color: var(--f-text); border: 1px solid var(--f-field-border);
     border-radius: 5px; padding: 5px 7px; outline: none;
   }
   /* the popup list is painted by the OS — give it a real ground, not the
      panel's translucent one, or it inherits the wall behind the field */
   .f-row option { background: #15151a; color: var(--f-text); }
-  .f-row input[type="text"]::placeholder { color: var(--f-faint); }
-  .f-row select:focus, .f-row input[type="text"]:focus { border-color: var(--f-accent); }
+  .f-row input::placeholder { color: var(--f-faint); }
+  .f-row input[type="search"]::-webkit-search-decoration,
+  .f-row input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .f-row select:focus, .f-row input:focus { border-color: var(--f-accent); }
 
   /* text field with an inline clear button */
   .f-field { position: relative; }
-  .f-field input[type="text"] { padding-right: 25px; }
+  .f-field input { padding-right: 25px; }
   .f-field .f-x {
     all: unset; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
     width: 17px; height: 17px; border-radius: 50%; cursor: pointer;
@@ -186,8 +196,8 @@
   /* dual-handle range: two overlaid inputs, only the thumbs take pointer events */
   .f-range { position: relative; height: 20px; }
   .f-range-track {
-    position: absolute; left: 7px; right: 7px; top: 8px; height: 4px;
-    background: rgba(255,255,255,.13); border-radius: 2px;
+    position: absolute; left: 7px; right: 7px; top: 50%; transform: translateY(-50%);
+    height: 4px; background: rgba(255,255,255,.13); border-radius: 2px;
   }
   .f-range-fill { position: absolute; top: 0; bottom: 0; background: var(--f-accent); border-radius: 2px; }
   .f-range input[type="range"] {
@@ -228,7 +238,12 @@
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10;
     font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .06em; color: #999;
     background: rgba(4,4,5,.92); border-radius: 4px; padding: 6px 10px; white-space: nowrap;
-    pointer-events: none;
+    pointer-events: none; transition: opacity 1s ease;
+  }
+  #hint .touch { display: none; }
+  @media (pointer: coarse) {
+    #hint .desk { display: none; }
+    #hint .touch { display: inline; }
   }
 
   /* ── metadata card ────────────────────────────────────────────────── */
@@ -287,15 +302,91 @@
   #card-footer a:hover { text-decoration: underline; }
   #card-rights { margin-top: 6px; font-size: .68rem; color: #777; }
 
-  @media (max-width: 560px) {
-    /* the panel spans the width instead of crowding one corner of the wall */
-    #filters { left: 8px; right: 8px; top: 8px; width: auto; max-width: none; }
-    #filters-body { max-height: 54vh; overflow-y: auto; overscroll-behavior: contain; }
-    .f-row select, .f-row input[type="text"] { font-size: 16px; } /* no iOS focus-zoom */
-    #hint { display: none; }
+  /* stepping between pieces without a keyboard */
+  #card-nav { display: flex; gap: 9px; margin-top: 16px; }
+  #card-nav button {
+    all: unset; flex: 1 1 0; box-sizing: border-box; cursor: pointer; text-align: center;
+    font-family: system-ui, sans-serif; font-size: .7rem; letter-spacing: .05em; color: #cdd8e0;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 6px; padding: 9px 6px;
   }
-  @media (max-width: 480px) {
-    #card { padding: 28px 20px 20px; }
+  #card-nav button:hover { background: rgba(255,255,255,.13); }
+  #card-nav button:active { background: rgba(255,255,255,.2); }
+
+  /* ── small screens / fingers ─────────────────────────────────────────────
+       Two things change shape here: the filter panel spans the width instead
+       of crowding a corner, and the card becomes a bottom sheet so the piece
+       you just tapped stays visible on the strip of wall above it. Every hit
+       target is grown to something a thumb can actually land on. ─────────── */
+  @media (max-width: 640px) {
+    #title-screen .stats { gap: 18px; }
+    #title-screen .enter { margin-top: 34px; }
+
+    #filters {
+      left: 8px; right: 8px; width: auto; max-width: none;
+      top: calc(8px + env(safe-area-inset-top));
+    }
+    #filters-head { padding: 12px 13px; }
+    #filters-head .label { font-size: .72rem; }
+    #filters-count { font-size: .66rem; padding: 2px 7px; }
+    #filters-body {
+      max-height: min(52dvh, 430px); overflow-y: auto; overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch; padding-bottom: 14px;
+    }
+    .f-row select, .f-row input { font-size: 16px; padding: 8px 9px; } /* 16px: no iOS focus-zoom */
+    .f-field input { padding-right: 34px; }
+    .f-field .f-x { width: 26px; height: 26px; line-height: 25px; right: 4px; font-size: 1rem; }
+    #filters-chips { gap: 6px; padding-bottom: 11px; }
+    .chip { font-size: .7rem; line-height: 2; padding: 0 4px 0 10px; }
+    .chip button { width: 19px; height: 19px; line-height: 18px; font-size: .82rem; }
+    .f-hist { height: 34px; gap: 2px; }
+    .f-range { height: 32px; }
+    .f-range input[type="range"] { height: 32px; }
+    .f-range input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; }
+    .f-range input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+    .f-range-track { left: 11px; right: 11px; }
+    #f-result { font-size: .72rem; }
+    #f-clear { width: 100%; padding: 9px; font-size: .72rem; }
+
+    #hint {
+      left: 8px; right: 8px; transform: none; text-align: center; white-space: normal;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      font-size: .66rem; line-height: 1.5;
+    }
+
+    #card-wrap { align-items: flex-end; }
+    #card {
+      width: 100%; max-width: none; max-height: 86dvh;
+      border-radius: 16px 16px 0 0; background: rgba(6,6,8,.94);
+      padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
+      transform: translateY(26px) scale(1);
+    }
+    #card::before { /* grab handle — says "sheet", and it can be swiped */
+      content: ''; display: block; width: 40px; height: 4px; margin: 0 auto 12px;
+      border-radius: 2px; background: rgba(255,255,255,.24);
+    }
+    #card-back { top: 8px; left: 8px; width: 34px; height: 34px; line-height: 32px; }
+    #card-type { font-size: 1.3rem; }
+    #card-seealso { margin-bottom: 14px; }
+    #card-img-wrap { max-width: min(210px, 48vw); margin-bottom: 14px; }
+    #card-nav button { padding: 12px 6px; font-size: .74rem; }
+  }
+
+  @media (max-width: 380px) {
+    #card { padding-left: 14px; padding-right: 14px; }
+    #card-img-wrap { max-width: 165px; }
+  }
+
+  /* a phone held sideways: a full-height sheet would swallow the screen */
+  @media (max-height: 460px) and (max-width: 900px) {
+    #card-wrap { align-items: center; }
+    #card {
+      width: min(460px, 92vw); max-height: 92dvh; border-radius: 8px;
+      padding: 12px 18px 14px;
+    }
+    #card::before { display: none; }
+    #card-img-wrap { max-width: 150px; margin-bottom: 10px; }
+    #filters-body { max-height: 58dvh; }
   }
 </style>
 </head>
@@ -331,6 +422,13 @@
   <div id="filters-body">
     <p class="f-note" id="filters-label">carregando…</p>
     <div class="f-row">
+      <label for="f-search">Busca livre</label>
+      <div class="f-field">
+        <input type="search" id="f-search" autocomplete="off" placeholder="título, autor, instituição, ano…">
+        <button type="button" class="f-x" id="f-search-x" aria-label="limpar busca" hidden>×</button>
+      </div>
+    </div>
+    <div class="f-row">
       <label for="f-institution">Instituição</label>
       <select id="f-institution"><option value="">todas</option></select>
     </div>
@@ -359,7 +457,10 @@
     <button id="f-clear" class="disabled">limpar filtros</button>
   </div>
 </div>
-<p id="hint">arraste para deslocar · scroll para aproximar · clique numa peça · setas navegam com a ficha aberta · <b style="font-weight:600;color:#bbb">f</b> abre os filtros</p>
+<p id="hint">
+  <span class="desk">arraste para deslocar · scroll para aproximar · clique numa peça · setas navegam com a ficha aberta · <b style="font-weight:600;color:#bbb">f</b> filtros · <b style="font-weight:600;color:#bbb">/</b> busca</span>
+  <span class="touch">arraste para deslocar · pinça para aproximar · toque numa peça</span>
+</p>
 
 <div id="card-wrap">
   <div id="card">
@@ -374,116 +475,273 @@
       <div><a id="card-link" href="#" target="_blank" rel="noopener">ver item original ↗</a> · <span id="card-handle"></span></div>
       <div id="card-rights"></div>
     </div>
+    <div id="card-nav">
+      <button type="button" id="card-prev" aria-label="peça anterior">‹ anterior</button>
+      <button type="button" id="card-next" aria-label="próxima peça">próxima ›</button>
+    </div>
   </div>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
+const isMobile = window.matchMedia('(max-width: 640px)').matches;
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
 
 // ─── renderer / scene / camera ─────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isTouch ? 1.75 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0c);
 
+const START_Z = isMobile ? 17 : 26;
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
-camera.position.set(0, 0, 26);
+camera.position.set(0, 0, START_Z);
 
-new ResizeObserver(() => {
+function resize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-}).observe(document.documentElement);
+}
+new ResizeObserver(resize).observe(document.documentElement);
+// iOS collapses/expands its URL bar without resizing the documentElement
+window.visualViewport?.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 250));
 
 // ─── pan / zoom over the flat wall (no orbit — it's a wall, not a globe) ───
 // the camera itself never moves on selection — only the tiles do (see selectTile below)
-const camTarget = new THREE.Vector3(0, 0, 26); // camera eases toward this each frame
+// one pointer pans, two pinch to zoom; the wheel keeps doing the desktop job.
+// upper bound generous enough to fit the whole wall (thousands of tiles,
+// ~180 units wide) in view at once, well under the camera's far plane (500)
+const MIN_Z = 4, MAX_Z = 400;
+const camTarget = new THREE.Vector3(0, 0, START_Z); // camera eases toward this each frame
+
+// world units per screen pixel at a given distance — panning then tracks the
+// finger exactly at every zoom level instead of racing away when zoomed in
+// (at the default distance this works out to the old fixed 0.03 factor)
+const HALF_FOV_TAN = Math.tan(THREE.MathUtils.degToRad(50 / 2));
+const worldPerPx = (z = camTarget.z) => (2 * z * HALF_FOV_TAN) / window.innerHeight;
+const visibleHeight = (z = camTarget.z) => 2 * z * HALF_FOV_TAN;
 
 renderer.domElement.addEventListener('wheel', e => {
   e.preventDefault();
   if (selected) return; // navigation is frozen while a card is open
-  // upper bound generous enough to fit the whole wall (thousands of tiles,
-  // ~180 units wide) in view at once, well under the camera's far plane (500)
-  camTarget.z = THREE.MathUtils.clamp(camTarget.z + e.deltaY * 0.02, 4, 400);
+  camTarget.z = THREE.MathUtils.clamp(camTarget.z + e.deltaY * 0.02, MIN_Z, MAX_Z);
 }, { passive: false });
 
-let dragging = null;
+const pointers = new Map(); // live pointers on the canvas, by pointerId
+let gesture = null;         // camera + finger state sampled when the set changed
+let multi = false;          // this gesture was ever a pinch → the last lift isn't a tap
+
+function centroid() {
+  let x = 0, y = 0;
+  for (const p of pointers.values()) { x += p.x; y += p.y; }
+  return { x: x / pointers.size, y: y / pointers.size };
+}
+function spread() {
+  const [a, b] = [...pointers.values()];
+  return Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
+}
+// re-baselined whenever a finger lands or lifts, so the view never jumps
+function rebase() {
+  const c = centroid();
+  gesture = {
+    cx: c.x, cy: c.y,
+    camX: camTarget.x, camY: camTarget.y, camZ: camTarget.z,
+    spread: pointers.size > 1 ? spread() : 0,
+    k: worldPerPx(),
+  };
+}
+
 renderer.domElement.addEventListener('pointerdown', e => {
   if (selected) return; // navigation is frozen while a card is open
-  dragging = { x: e.clientX, y: e.clientY, cx: camTarget.x, cy: camTarget.y, moved: false };
-});
-renderer.domElement.addEventListener('pointermove', e => {
-  if (!dragging) return;
-  const dx = e.clientX - dragging.x, dy = e.clientY - dragging.y;
-  if (Math.hypot(dx, dy) > 4) dragging.moved = true;
-  camTarget.x = dragging.cx - dx * 0.03;
-  camTarget.y = dragging.cy + dy * 0.03;
-});
-window.addEventListener('pointerup', e => {
-  if (dragging && !dragging.moved) doRaycast(e.clientX, e.clientY);
-  dragging = null;
+  renderer.domElement.setPointerCapture?.(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, ox: e.clientX, oy: e.clientY, moved: false });
+  if (pointers.size > 1) multi = true;
+  rebase();
 });
 
+renderer.domElement.addEventListener('pointermove', e => {
+  const p = pointers.get(e.pointerId);
+  if (!p || !gesture) return;
+  p.x = e.clientX; p.y = e.clientY;
+  // a finger wobbles far more than a mouse does on a click
+  if (Math.hypot(p.x - p.ox, p.y - p.oy) > (e.pointerType === 'mouse' ? 4 : 12)) p.moved = true;
+
+  if (pointers.size > 1) camTarget.z = THREE.MathUtils.clamp(gesture.camZ * (gesture.spread / spread()), MIN_Z, MAX_Z);
+  const c = centroid();
+  const k = pointers.size > 1 ? worldPerPx() : gesture.k; // pinching also drags the midpoint
+  camTarget.x = gesture.camX - (c.x - gesture.cx) * k;
+  camTarget.y = gesture.camY + (c.y - gesture.cy) * k;
+});
+
+function endPointer(e) {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  pointers.delete(e.pointerId);
+  if (pointers.size) { rebase(); return; } // other fingers still down
+  if (!p.moved && !multi && e.type === 'pointerup') handleTap(e.clientX, e.clientY);
+  multi = false;
+  gesture = null;
+}
+window.addEventListener('pointerup', endPointer);
+window.addEventListener('pointercancel', endPointer);
+
+// on a phone the open panel covers most of the wall — a tap on the wall means
+// "let me see it", so the first tap puts the panel away rather than selecting
+function handleTap(x, y) {
+  if (isMobile && filtersEl.classList.contains('open')) { toggleFilters(false); return; }
+  doRaycast(x, y);
+}
+
 // ─── grid of tiles ──────────────────────────────────────────────────────────
-const tileMeshes = [];
+// A mesh per piece meant 12.552 draw calls a frame, every one of them a
+// transparent object the renderer had to depth-sort first — which is what made
+// zooming out stutter: the further you pull back, the more of them are on
+// screen. Instead there is one InstancedMesh per atlas page (four in all), and
+// a tile is a plain object holding its own animation state. Draw calls no
+// longer depend on the zoom level.
+const tileMeshes = [];     // Tile[], in grid order — arrow navigation walks this
+const pages = [];          // one per atlas page: { mesh, tiles, dims, dimAttr, dirty }
+const pageMeshes = [];     // the raycast targets, kept as a stable array
+const animating = new Set(); // tiles still easing toward their target
 const tileGroup = new THREE.Group();
 scene.add(tileGroup);
 
 const GUTTER = 1.12; // spacing multiplier so tiles don't touch
 let GRID_COLS = 1; // set by buildGrid, used by arrow-key navigation to move by row/col
 
-function buildGrid(handles, mapEntries, tpr) {
+// every tile is the same quad — only its instance matrix, atlas offset and
+// dimming differ, so the geometry is built once and shared
+const tileGeo = new THREE.PlaneGeometry(1, 1);
+const placeholderMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+
+// MeshBasicMaterial knows nothing about per-instance atlas windows or dimming,
+// so both are fed in as instanced attributes and patched into its shader
+function tileMaterial(tex, tpr) {
+  const mat = new THREE.MeshBasicMaterial({ map: tex });
+  mat.onBeforeCompile = shader => {
+    shader.uniforms.uUvScale = { value: 1 / tpr };
+    shader.vertexShader = `
+      attribute vec2 aUv;
+      attribute float aDim;
+      uniform float uUvScale;
+      varying float vDim;
+    ` + shader.vertexShader.replace(
+      '#include <uv_vertex>',
+      'vMapUv = uv * uUvScale + aUv;\n vDim = aDim;'
+    );
+    // the dim factor is a perceptual one (0.07 reads as "nearly gone"), but it
+    // lands in linear space — decode it or a dimmed wall comes out four times
+    // brighter than the old alpha blend did
+    shader.fragmentShader = 'varying float vDim;\n' + shader.fragmentShader.replace(
+      '#include <map_fragment>',
+      '#include <map_fragment>\n diffuseColor.rgb *= pow( vDim, 2.2 );'
+    );
+  };
+  return mat;
+}
+
+function buildGrid(handles, mapEntries, tpr, nPages) {
   const n = handles.length;
   const cols = Math.max(1, Math.round(Math.sqrt(n * (window.innerWidth / window.innerHeight) * 1.4)));
   const rows = Math.ceil(n / cols);
   GRID_COLS = cols;
 
+  const counts = new Array(nPages).fill(0);
+  handles.forEach(h => counts[mapEntries[h].atlas || 0]++);
+
+  for (let i = 0; i < nPages; i++) {
+    const count = Math.max(1, counts[i]);
+    const geo = tileGeo.clone(); // the quad is shared; the per-instance attributes are not
+    const uvAttr = new THREE.InstancedBufferAttribute(new Float32Array(count * 2), 2);
+    const dims = new Float32Array(count).fill(1);
+    const dimAttr = new THREE.InstancedBufferAttribute(dims, 1);
+    dimAttr.setUsage(THREE.DynamicDrawUsage);
+    geo.setAttribute('aUv', uvAttr);
+    geo.setAttribute('aDim', dimAttr);
+
+    const mesh = new THREE.InstancedMesh(geo, placeholderMat, count);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.frustumCulled = false; // the wall's bounds shift as tiles animate, and four objects cost nothing
+    mesh.userData.page = i;
+    tileGroup.add(mesh);
+    pages.push({ mesh, tiles: [], dims, dimAttr, dirty: false });
+    pageMeshes.push(mesh);
+  }
+
+  const m4 = new THREE.Matrix4();
   handles.forEach((handle, i) => {
     const col = i % cols, row = Math.floor(i / cols);
     const entry = mapEntries[handle];
-    const geo = new THREE.PlaneGeometry(1, 1);
-    const uv = geo.attributes.uv;
-    const u0 = entry.col / tpr, u1 = (entry.col + 1) / tpr;
-    const v1 = 1 - entry.row / tpr, v0 = 1 - (entry.row + 1) / tpr;
-    uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0);
+    const page = pages[entry.atlas || 0];
+    const iid = page.tiles.length;
 
-    const mesh = new THREE.Mesh(geo, baseMat); // material swapped once atlas texture is ready
-    mesh.position.set(
+    const pos = new THREE.Vector3(
       (col - cols / 2) * GUTTER,
       (rows / 2 - row) * GUTTER,
       (Math.random() - 0.5) * 0.6 // slight depth jitter, like the reference photo
     );
-    mesh.userData = {
-      handle, meta: entry.meta, atlas: entry.atlas || 0,
-      basePos: mesh.position.clone(),
-      targetPos: mesh.position.clone(),
-      targetScale: 1,
-      targetOpacity: 1, // dimmed (not hidden) by the filter panel — keeps the grid layout intact
+    const tile = {
+      page: entry.atlas || 0, iid,
+      pos: pos.clone(), scl: 1, dim: 1,
+      userData: {
+        handle, meta: entry.meta,
+        basePos: pos.clone(),
+        targetPos: pos.clone(),
+        targetScale: 1,
+        targetOpacity: 1, // dimmed (not hidden) by the filter panel — keeps the grid layout intact
+      },
     };
-    tileGroup.add(mesh);
-    tileMeshes.push(mesh);
+
+    // the tile's window into the atlas, as a uv offset off the shared quad
+    page.mesh.geometry.attributes.aUv.setXY(iid, entry.col / tpr, 1 - (entry.row + 1) / tpr);
+    m4.makeScale(1, 1, 1).setPosition(pos);
+    page.mesh.setMatrixAt(iid, m4);
+
+    page.tiles.push(tile);
+    tileMeshes.push(tile);
   });
 
+  pages.forEach(p => { p.mesh.instanceMatrix.needsUpdate = true; p.mesh.geometry.attributes.aUv.needsUpdate = true; });
   return { cols, rows };
 }
 
-const _scaleScratch = new THREE.Vector3();
-function updateTileAnimation() {
-  tileMeshes.forEach(m => {
-    m.position.lerp(m.userData.targetPos, 0.16);
-    _scaleScratch.setScalar(m.userData.targetScale);
-    m.scale.lerp(_scaleScratch, 0.16);
-    m.material.opacity = THREE.MathUtils.lerp(m.material.opacity, m.userData.targetOpacity, 0.16);
-  });
-}
+// a tile only costs anything on the frames where it is actually moving
+function markAnimating(tile) { animating.add(tile); }
+function markAllAnimating() { for (const t of tileMeshes) animating.add(t); }
 
-const baseMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+const _m4 = new THREE.Matrix4();
+function updateTileAnimation() {
+  if (!animating.size) return;
+  for (const t of animating) {
+    const d = t.userData;
+    let settled = true;
+    if (t.pos.distanceToSquared(d.targetPos) > 1e-6) { t.pos.lerp(d.targetPos, 0.16); settled = false; }
+    else t.pos.copy(d.targetPos);
+    if (Math.abs(t.scl - d.targetScale) > 1e-4) { t.scl += (d.targetScale - t.scl) * 0.16; settled = false; }
+    else t.scl = d.targetScale;
+    if (Math.abs(t.dim - d.targetOpacity) > 1e-4) { t.dim += (d.targetOpacity - t.dim) * 0.16; settled = false; }
+    else t.dim = d.targetOpacity;
+
+    const page = pages[t.page];
+    _m4.makeScale(t.scl, t.scl, 1).setPosition(t.pos);
+    page.mesh.setMatrixAt(t.iid, _m4);
+    page.dims[t.iid] = t.dim;
+    page.dirty = true;
+    if (settled) animating.delete(t);
+  }
+  for (const page of pages) {
+    if (!page.dirty) continue;
+    page.mesh.instanceMatrix.needsUpdate = true;
+    page.dimAttr.needsUpdate = true;
+    page.dirty = false;
+  }
+}
 
 // ─── raycasting ─────────────────────────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
@@ -493,8 +751,11 @@ let hovered = null;
 // dimmed-out tiles are inert: they can't be hovered, clicked or stepped onto,
 // so an active filter behaves like a real subset and not just a paint job
 function firstLiveHit() {
-  const hits = raycaster.intersectObjects(tileGroup.children, false);
-  for (const h of hits) if (!h.object.userData.filteredOut) return h.object;
+  const hits = raycaster.intersectObjects(pageMeshes, false);
+  for (const h of hits) {
+    const tile = pages[h.object.userData.page].tiles[h.instanceId];
+    if (tile && !tile.userData.filteredOut) return tile;
+  }
   return null;
 }
 
@@ -507,16 +768,15 @@ function doRaycast(cx, cy) {
 }
 
 renderer.domElement.addEventListener('pointermove', e => {
-  if (dragging) return;
+  if (e.pointerType !== 'mouse' || pointers.size || selected) return; // no hover state on a finger
   pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  if (dragging || selected) return;
   const m = firstLiveHit();
   if (m !== hovered) {
-    if (hovered) hovered.userData.targetScale = 1;
+    if (hovered) { hovered.userData.targetScale = 1; markAnimating(hovered); }
     hovered = m;
-    if (hovered) hovered.userData.targetScale = 1.08;
+    if (hovered) { hovered.userData.targetScale = 1.08; markAnimating(hovered); }
     renderer.domElement.style.cursor = m ? 'pointer' : '';
   }
 });
@@ -525,16 +785,22 @@ renderer.domElement.addEventListener('pointermove', e => {
 // the camera never moves here — the *tiles* do: the clicked one grows and
 // moves to screen-center, the rest part radially away from that same point
 // (the "hole" always opens in the middle, wherever you clicked).
-let atlasImgs = []; // plain <img>[], one per atlas page, used to crop the tile into the card canvas
+let atlasSources = []; // { source, size } per atlas page — used to crop the tile into the card canvas
 let atlasEntries = null, TPR = 1;
 let selected = null;
+let selectedAt = 0;
 
 function selectTile(mesh) {
   selected = mesh;
+  selectedAt = performance.now();
   hovered = null;
 
   const centerZ = mesh.userData.basePos.z;
   const cx = camTarget.x, cy = camTarget.y;
+  // on a phone the card is a bottom sheet, so the opened piece is raised into
+  // the band of wall that stays visible above it instead of hiding behind it
+  const visH = visibleHeight();
+  const lift = isMobile ? visH * 0.22 : 0;
 
   tileMeshes.forEach(m => {
     if (m === mesh) return;
@@ -547,8 +813,9 @@ function selectTile(mesh) {
     m.userData.targetScale = 1;
   });
 
-  mesh.userData.targetPos = new THREE.Vector3(cx, cy, centerZ + 4);
-  mesh.userData.targetScale = 3.4;
+  mesh.userData.targetPos = new THREE.Vector3(cx, cy + lift, centerZ + 4);
+  mesh.userData.targetScale = isMobile ? Math.min(3.4, visH * 0.24) : 3.4;
+  markAllAnimating();
 
   showCard(mesh.userData);
 }
@@ -558,10 +825,18 @@ function deselect() {
     m.userData.targetPos = m.userData.basePos.clone();
     m.userData.targetScale = 1;
   });
+  markAllAnimating();
   document.getElementById('card-wrap').classList.remove('open');
   selected = null;
 }
 document.getElementById('card-back').addEventListener('click', deselect);
+// A tap is pointerup *then* a compatibility click. The card opens on the
+// pointerup, so that click lands on whatever the card just put under the
+// finger — the backdrop (closing it again) or a button on the sheet. Swallow
+// anything that arrives within a moment of the card opening.
+document.getElementById('card-wrap').addEventListener('click', e => {
+  if (performance.now() - selectedAt < 400) { e.stopPropagation(); e.preventDefault(); }
+}, true);
 document.getElementById('card-wrap').addEventListener('click', e => {
   if (e.target.id === 'card-wrap') deselect();
 });
@@ -582,20 +857,51 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (e.key === 'f' && !typing && !selected) { toggleFilters(); return; }
+  if (e.key === '/' && !typing && !selected) { // straight into the search box
+    e.preventDefault();
+    toggleFilters(true);
+    document.getElementById('f-search').focus();
+    return;
+  }
   if (!selected || typing) return; // arrow navigation only makes sense with a card open
   // move by actual row/col in the grid, not raw array index — Up/Down jump
   // a full row (GRID_COLS), Left/Right move one column, both wrap at the ends.
-  // filtered-out tiles are skipped over, so stepping stays inside the subset.
   const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: GRID_COLS, ArrowUp: -GRID_COLS }[e.key];
   if (!step) return;
   e.preventDefault();
+  stepSelection(step);
+});
+
+// filtered-out tiles are skipped over, so stepping stays inside the subset
+function stepSelection(step) {
+  if (!selected) return;
   const n = tileMeshes.length;
   let i = tileMeshes.indexOf(selected);
   for (let k = 0; k < n; k++) {
     i = (i + step + n) % n;
     if (!tileMeshes[i].userData.filteredOut) { selectTile(tileMeshes[i]); return; }
   }
-});
+}
+
+// the same step, reachable without a keyboard
+document.getElementById('card-prev').addEventListener('click', () => stepSelection(-1));
+document.getElementById('card-next').addEventListener('click', () => stepSelection(1));
+
+// ...and by swiping the card sideways. Vertical stays free for scrolling the
+// card's own body, and a downward flick on the sheet closes it.
+const cardEl = document.getElementById('card');
+let swipe = null;
+cardEl.addEventListener('touchstart', e => {
+  swipe = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, top: cardEl.scrollTop } : null;
+}, { passive: true });
+cardEl.addEventListener('touchend', e => {
+  if (!swipe || !e.changedTouches.length) return;
+  const dx = e.changedTouches[0].clientX - swipe.x;
+  const dy = e.changedTouches[0].clientY - swipe.y;
+  swipe = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) stepSelection(dx < 0 ? 1 : -1);
+  else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && cardEl.scrollTop <= 0) deselect();
+}, { passive: true });
 
 function showCard(data) {
   const meta = data.meta || {};
@@ -612,14 +918,15 @@ function showCard(data) {
   // crop this tile out of the atlas image for a (still small, but framed) preview
   const entry = atlasEntries[data.handle];
   const img = document.getElementById('card-img');
-  const atlasImg = atlasImgs[entry?.atlas || 0];
-  if (atlasImg && entry) {
-    const S = atlasImg.naturalWidth / TPR;
+  const page = atlasSources[entry?.atlas || 0];
+  if (page && entry) {
+    const S = page.size / TPR;
+    const out = Math.min(512, Math.round(S * 4)); // no point upscaling past 4x
     const c = document.createElement('canvas');
-    c.width = c.height = 512;
+    c.width = c.height = out;
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(atlasImg, entry.col * S, entry.row * S, S, S, 0, 0, 512, 512);
+    ctx.drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, out, out);
     img.src = c.toDataURL('image/jpeg', 0.92);
   }
   document.getElementById('card-wrap').classList.add('open');
@@ -641,6 +948,9 @@ filtersHead.addEventListener('click', () => toggleFilters());
 filtersHead.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFilters(); }
 });
+
+// pt-BR catalogue text is full of accents and nobody types them into a filter
+const deburr = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 function yearOf(meta) {
   const m = String((meta || {}).date || '').match(/(1[5-9]\d{2}|20\d{2})/);
@@ -701,17 +1011,23 @@ function setupFilters(mapData) {
   const histEl = document.getElementById('f-hist');
   const authorInput = document.getElementById('f-author');
   const authorX = document.getElementById('f-author-x');
+  const searchInput = document.getElementById('f-search');
+  const searchX = document.getElementById('f-search-x');
   const clearBtn = document.getElementById('f-clear');
   const countBadge = document.getElementById('filters-count');
   const chipsEl = document.getElementById('filters-chips');
   const resultEl = document.getElementById('f-result');
 
-  // parse each tile's year and lowercase its author once — apply() runs on
-  // every keystroke and drag frame, so it must stay free of string work
+  // parse each tile's year and fold its text once — apply() runs on every
+  // keystroke and drag frame, so it must stay free of string work
   tileMeshes.forEach(m => {
     const meta = m.userData.meta || {};
     m.userData._year = yearOf(meta);
-    m.userData._author = (meta.contributor || '').toLowerCase();
+    m.userData._author = deburr(meta.contributor || '');
+    // one haystack per piece for the free-text box: everything the card shows
+    m.userData._hay = deburr([
+      meta.title, meta.contributor, meta.community, meta.type, meta.date, meta.handle,
+    ].filter(Boolean).join(' '));
   });
 
   const bars = [];
@@ -732,7 +1048,7 @@ function setupFilters(mapData) {
     bars.push(bar);
   }
 
-  const state = { institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '' };
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '' };
 
   function resetYear() {
     state.yearTouched = false;
@@ -741,7 +1057,9 @@ function setupFilters(mapData) {
   }
 
   function apply() {
-    const q = state.author.trim().toLowerCase();
+    const q = deburr(state.author.trim());
+    // free text is AND across terms, so "rio 1900" narrows instead of widening
+    const terms = deburr(state.search.trim()).split(/\s+/).filter(Boolean);
     const decCounts = new Array(nDecades).fill(0);
     let shown = 0;
 
@@ -752,7 +1070,8 @@ function setupFilters(mapData) {
       const okRest =
         (!state.institution || meta.community === state.institution) &&
         (!state.type || meta.type === state.type) &&
-        (!q || d._author.includes(q));
+        (!q || d._author.includes(q)) &&
+        terms.every(t => d._hay.includes(t));
       if (okRest && d._year != null) {
         const i = Math.floor((d._year - decadeMin) / 10);
         if (i >= 0 && i < nDecades) decCounts[i]++;
@@ -761,7 +1080,7 @@ function setupFilters(mapData) {
         (d._year != null && d._year >= state.yearLo && d._year <= state.yearHi + 9);
       const ok = okRest && okYear;
       d.filteredOut = !ok;
-      d.targetOpacity = ok ? 1 : 0.07;
+      if (d.targetOpacity !== (ok ? 1 : 0.07)) { d.targetOpacity = ok ? 1 : 0.07; markAnimating(m); }
       if (ok) shown++;
     });
 
@@ -783,6 +1102,7 @@ function setupFilters(mapData) {
 
     const active = activeFilters();
     renderChips(active);
+    searchX.hidden = !state.search;
     authorX.hidden = !state.author;
     clearBtn.classList.toggle('disabled', active.length === 0);
 
@@ -803,6 +1123,7 @@ function setupFilters(mapData) {
 
   function activeFilters() {
     const out = [];
+    if (state.search.trim()) out.push({ key: 'search', text: `“${state.search.trim()}”` });
     if (state.institution) out.push({ key: 'institution', text: state.institution });
     if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
     if (state.author.trim()) out.push({ key: 'author', text: state.author.trim() });
@@ -811,6 +1132,7 @@ function setupFilters(mapData) {
   }
 
   function clearOne(key) {
+    if (key === 'search') { state.search = ''; searchInput.value = ''; }
     if (key === 'institution') { state.institution = ''; selInst.value = ''; }
     if (key === 'type') { state.type = ''; selType.value = ''; }
     if (key === 'author') { state.author = ''; authorInput.value = ''; }
@@ -842,6 +1164,18 @@ function setupFilters(mapData) {
   selType.addEventListener('change', () => { state.type = selType.value; apply(); });
 
   // typing re-tests every tile, so hold off until the burst settles
+  let searchTimer = null;
+  searchInput.addEventListener('input', () => {
+    searchX.hidden = !searchInput.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { state.search = searchInput.value; apply(); }, 160);
+  });
+  searchInput.addEventListener('search', () => { // the field's own clear affordance
+    clearTimeout(searchTimer);
+    state.search = searchInput.value; apply();
+  });
+  searchX.addEventListener('click', () => { clearTimeout(searchTimer); clearOne('search'); searchInput.focus(); });
+
   let authorTimer = null;
   authorInput.addEventListener('input', () => {
     authorX.hidden = !authorInput.value;
@@ -870,9 +1204,9 @@ function setupFilters(mapData) {
   hiSlider.addEventListener('input', onYear);
 
   clearBtn.addEventListener('click', () => {
-    clearTimeout(authorTimer);
-    state.institution = ''; state.type = ''; state.author = '';
-    selInst.value = ''; selType.value = ''; authorInput.value = '';
+    clearTimeout(authorTimer); clearTimeout(searchTimer);
+    state.search = ''; state.institution = ''; state.type = ''; state.author = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; authorInput.value = '';
     resetYear();
     apply();
   });
@@ -894,7 +1228,7 @@ async function main() {
   note.hidden = !mapData.placeholder;
   note.textContent = 'protótipo — as fotos ainda são um placeholder (uma única imagem de teste, tonalizada por item); os metadados são reais, do catalogo.jsonl';
 
-  buildGrid(handles, mapData.map, TPR);
+  buildGrid(handles, mapData.map, TPR, mapData.atlases.length);
 
   // ── stats for the title screen: item count, year span, institution count ──
   let minYear = Infinity, maxYear = -Infinity;
@@ -934,7 +1268,7 @@ async function main() {
     progressBar.style.width = `${pct}%`;
   }
 
-  const atlasImages = await Promise.all(mapData.atlases.map(async (name, idx) => {
+  const blobs = await Promise.all(mapData.atlases.map(async (name, idx) => {
     const res = await fetch(`atlas/${name}`);
     fileTotals[idx] = parseInt(res.headers.get('content-length') || '0', 10);
     const reader = res.body.getReader();
@@ -946,25 +1280,50 @@ async function main() {
       fileBytes[idx] += value.length;
       reportProgress();
     }
-    const blob = new Blob(chunks, { type: 'image/webp' });
-    const img = new Image();
-    img.src = URL.createObjectURL(blob);
-    await img.decode().catch(() => {});
-    return img;
+    return new Blob(chunks, { type: 'image/webp' });
   }));
-  atlasImgs = atlasImages;
 
-  const atlasMats = atlasImages.map(img => {
-    const tex = new THREE.Texture(img);
+  // Each page is 8192² — ~268 MB of RGBA once it's a texture, and over
+  // maxTextureSize on plenty of phones (where the upload silently fails, or
+  // the tab is killed for holding four of them). Cap the page at what the
+  // device will actually take; at this zoom a tile is ~50 px on screen either
+  // way. Pages are decoded one at a time and released as we go, so the peak
+  // is one bitmap rather than the whole set.
+  const maxTex = Math.min(renderer.capabilities.maxTextureSize, isTouch ? 4096 : 8192);
+
+  const atlasMats = [];
+  atlasSources = [];
+  for (const blob of blobs) {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.src = url;
+    await img.decode().catch(() => {});
+
+    let source = img, size = img.naturalWidth || mapData.size;
+    if (size > maxTex) {
+      const c = document.createElement('canvas');
+      c.width = c.height = maxTex;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, maxTex, maxTex);
+      source = c; size = maxTex;
+      img.src = ''; // drop the full-size bitmap before decoding the next page
+    }
+    URL.revokeObjectURL(url);
+    atlasSources.push({ source, size });
+
+    const tex = new THREE.Texture(source);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.generateMipmaps = false;
     tex.minFilter = THREE.LinearFilter;
     tex.needsUpdate = true;
-    return new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-  });
-  // each tile gets its own material instance (cheap — shares the texture by
-  // reference) so the filter panel can dim individual tiles independently
-  tileMeshes.forEach(m => { m.material = atlasMats[m.userData.atlas].clone(); });
+    atlasMats.push(tileMaterial(tex, TPR));
+  }
+  // dimming rides on a per-instance attribute, so one material per page is
+  // enough — and an opaque one, which spares the renderer a depth sort of the
+  // whole wall on every frame
+  pages.forEach((p, i) => { p.mesh.material = atlasMats[i]; });
 
   setupFilters(mapData);
 
@@ -985,6 +1344,9 @@ async function main() {
   cover.style.opacity = '0';
   cover.style.pointerEvents = 'none'; // the wall is usable during the fade, not after it
   setTimeout(() => cover.remove(), 800);
+
+  // on a phone the hint sits over the wall itself — it retires once read
+  if (isTouch) setTimeout(() => { document.getElementById('hint').style.opacity = '0'; }, 7000);
 }
 
 main().catch(err => {
