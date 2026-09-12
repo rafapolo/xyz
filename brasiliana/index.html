@@ -267,9 +267,14 @@
        chrome, not content: it never takes a click away from the wall. ─────── */
   #wordmark {
     position: fixed; z-index: 26; pointer-events: none; user-select: none;
-    top: calc(15px + env(safe-area-inset-top)); left: 17px;
+    top: calc(7px + env(safe-area-inset-top)); left: 9px;
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 1.06rem; line-height: 1.2; letter-spacing: .015em; color: #f4f1e8;
+    /* a sombra sozinha sumia sobre peça clara -- e peça clara é metade do
+       acervo (papel, álbum, anotação em nanquim). O fundo é o mesmo preto da
+       dica lá embaixo, e o padding recua a posição no mesmo tanto pra letra
+       continuar caindo onde caía. */
+    background: rgba(4,4,5,.92); border-radius: 4px; padding: 8px 10px 9px;
     text-shadow: 0 2px 16px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.8);
   }
   #wordmark .a {
@@ -443,7 +448,7 @@
       font-size: .66rem; line-height: 1.5;
     }
 
-    #wordmark { font-size: .96rem; left: 14px; }
+    #wordmark { font-size: .96rem; left: 6px; }
 
     /* both are sheets on the same edge, and the filter sheet now sits above the
        card: park the card on top of its peek instead of under it, or the peek
@@ -1442,7 +1447,7 @@ function setupFilters(mapData) {
     resultEl.textContent = shown === 0
       ? 'nenhuma peça corresponde'
       : active.length === 0
-        ? `${shown.toLocaleString('pt-BR')} peças no acervo`
+        ? `${shown.toLocaleString('pt-BR')} peças com imagem`
         : `${shown.toLocaleString('pt-BR')} de ${tileMeshes.length.toLocaleString('pt-BR')} peças`;
 
     // the subset just changed under the open piece — fold the card away so the
