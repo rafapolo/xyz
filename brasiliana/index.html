@@ -1190,6 +1190,11 @@ cardEl.addEventListener('touchend', e => {
   else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && cardEl.scrollTop <= 0) closeCard();
 }, { passive: true });
 
+// Every item's page is the same address with its handle in it, so the map used
+// to spend 1,2 MB repeating that prefix 12.552 times — and meta.handle another
+// 0,4 MB repeating the key it was already filed under. Both are derived here.
+const sourceUrl = h => `https://brasilianafotografica.bn.gov.br/brasiliana/handle/${h}?show=full`;
+
 function showCard(data) {
   const meta = data.meta || {};
   document.getElementById('card-type').textContent = meta.type || 'Fotografia';
@@ -1198,8 +1203,8 @@ function showCard(data) {
   document.getElementById('card-title').textContent = meta.title || '(sem título)';
   document.getElementById('card-date').textContent = meta.date || '';
   document.getElementById('card-contrib').textContent = meta.contributor ? meta.contributor : '';
-  document.getElementById('card-handle').textContent = meta.handle || '';
-  document.getElementById('card-link').href = meta.source_url || '#';
+  document.getElementById('card-handle').textContent = data.handle || '';
+  document.getElementById('card-link').href = data.handle ? sourceUrl(data.handle) : '#';
   document.getElementById('card-rights').textContent = meta.rights ? `Direitos: ${meta.rights}` : '';
 
   // crop this tile out of the atlas image for a (still small, but framed) preview
@@ -1349,7 +1354,9 @@ function setupFilters(mapData) {
     m.userData._year = yearOf(meta);
     m.userData._author = deburr(meta.contributor || '');
     // one haystack per piece: every metadata field, not a chosen few
-    m.userData._hay = deburr(flattenMeta(meta));
+    // the handle is the map's key, not a field of meta — it still has to be
+    // searchable (people paste a handle or its number straight into the box)
+    m.userData._hay = deburr(m.userData.handle + ' ' + flattenMeta(meta));
   });
 
   const bars = [];
