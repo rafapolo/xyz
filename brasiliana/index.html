@@ -94,6 +94,24 @@
 
   [hidden] { display: none !important; }
 
+  /* shown instead of a frozen bar: a load that dies or stalls says so, and the
+     retry is the reader's call — never an automatic reload, which on a phone
+     that just ran out of memory is exactly how the loop starts */
+  #falha {
+    position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; padding: 0 24px;
+    background: rgba(11,11,12,.94); color: #ddd; text-align: center;
+    font-family: system-ui, sans-serif; font-size: .9rem; line-height: 1.5;
+  }
+  #falha small { color: #888; font-size: .72rem; max-width: 34em; }
+  #falha button, #lento button {
+    font: inherit; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    color: #0b0b0c; background: #7fa8c9; border: 0; border-radius: 3px; padding: 10px 16px;
+  }
+  #lento { margin-top: 18px; font-family: system-ui, sans-serif; font-size: .7rem; color: #999; }
+  #lento button { margin-top: 8px; font-size: .64rem; padding: 7px 12px; }
+  #aviso-leve { margin-top: 10px; font-family: system-ui, sans-serif; font-size: .62rem; color: #777; }
+
   /* ── compact filter panel, top-left — dark chrome, so it reads as part of
        the wall's own darkness instead of a lit slab thrown on top of it.
        Every colour below comes from these tokens: retheme by editing them. ─── */
@@ -513,6 +531,7 @@
     </div>
     <div class="enter" id="enter-label">carregando imagens… 0%</div>
     <div id="progress-track"><div id="progress-bar"></div></div>
+    <div id="aviso-leve" hidden>modo leve — a tentativa anterior não terminou de carregar</div>
   </div>
 </div>
 
@@ -603,6 +622,44 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPre
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, isTouch ? 1.75 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ─── light mode and the crash-loop guard ──────────────────────────────────
+// On an iPhone, running out of memory throws nothing: the system kills the tab
+// and reloads it by itself, the page starts the very same load, dies again — a
+// loop. A mark in sessionStorage survives that automatic reload, so the next
+// attempt knows the last one never finished and goes straight to the light
+// atlas instead of repeating the crash.
+const LOAD_MARK = 'mural_carregando';
+const store = (kind, fn) => { try { return fn(window[kind]); } catch (e) { return null; } };
+const previousLoadDied = !!store('sessionStorage', s => s.getItem(LOAD_MARK));
+const lightMode = isTouch || previousLoadDied
+  || store('localStorage', s => s.getItem('mural_leve')) === '1'
+  || renderer.capabilities.maxTextureSize < 8192
+  || (navigator.deviceMemory !== undefined && navigator.deviceMemory <= 4);
+
+function showFailure(title, detail) {
+  if (document.getElementById('falha')) return;
+  const box = document.createElement('div');
+  box.id = 'falha';
+  const h = document.createElement('div'); h.textContent = title;
+  const small = document.createElement('small');
+  small.textContent = detail || 'Tentar de novo carrega a versão leve do mural, feita para celular.';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'tentar de novo';
+  btn.addEventListener('click', () => {
+    store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now()))); // retry in light mode
+    location.reload();
+  });
+  box.append(h, small, btn);
+  document.body.appendChild(box);
+}
+
+// the GPU dropping the wall's textures is a memory signal too — say so, and let
+// the reader decide; preventDefault keeps the browser from giving up silently
+canvas.addEventListener('webglcontextlost', e => {
+  e.preventDefault();
+  store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+  showFailure('O navegador liberou a memória do mural.');
+}, false);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b0b0c);
@@ -1563,6 +1620,7 @@ const asMB = bytes => `${(bytes / 1048576).toFixed(1)} MB`;
 // read a body in chunks so the wait is legible instead of a frozen line
 async function fetchWithProgress(url, onProgress) {
   const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   const total = parseInt(res.headers.get('content-length') || '0', 10);
   const reader = res.body.getReader();
   const chunks = [];
@@ -1577,10 +1635,38 @@ async function fetchWithProgress(url, onProgress) {
   return { blob: new Blob(chunks), total };
 }
 
+let lastActivity = performance.now();
+let loadFinished = false;
+const touchActivity = () => { lastActivity = performance.now(); };
+
+// a bar that stops moving for half a minute is not "almost there": offer a way
+// out without tearing down the load that may still be alive
+const stallWatch = setInterval(() => {
+  if (loadFinished) { clearInterval(stallWatch); return; }
+  if (performance.now() - lastActivity < 30000 || document.getElementById('lento')) return;
+  const box = document.createElement('div');
+  box.id = 'lento';
+  box.textContent = 'o carregamento parou de avançar';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'tentar de novo';
+  btn.addEventListener('click', () => {
+    store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+    location.reload();
+  });
+  box.append(document.createElement('br'), btn);
+  (document.getElementById('title-screen')?.classList.contains('show')
+    ? document.getElementById('title-screen') : document.getElementById('loading')).appendChild(box);
+}, 3000);
+
 async function main() {
+  // set before anything heavy: if this tab is killed mid-load, the automatic
+  // reload finds the mark and takes the light path
+  store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+  if (previousLoadDied) document.getElementById('aviso-leve').hidden = false;
+
   // the catalogue is megabytes of its own, and until now nothing said so
   const loadingMsg = document.getElementById('loading-msg');
   const catalogue = await fetchWithProgress('atlas/atlas-map.json', (loaded, total) => {
+    touchActivity();
     // a gzipped response often carries no content-length: count bytes instead
     loadingMsg.textContent = total
       ? `carregando catálogo… ${pctOf(loaded, total)}%`
@@ -1629,7 +1715,10 @@ async function main() {
   //    and the plain <img> (for the card crop) from the same downloaded blob ──
   // Decoding four 8192² pages takes about as long as fetching them does, so the
   // bar covers both: parked at 100% for the whole decode, it read as stuck.
-  const nAtlases = mapData.atlases.length;
+  // phones get the light pages: same layout at 3072², so tiles keep their
+  // atlas/col/row and the uv math is unchanged
+  const pageSet = (lightMode && mapData.mobile) ? mapData.mobile : { size: mapData.size, atlases: mapData.atlases };
+  const nAtlases = pageSet.atlases.length;
   const fileBytes = new Array(nAtlases).fill(0);
   const fileTotals = new Array(nAtlases).fill(0);
   let pagesReady = 0;
@@ -1652,11 +1741,16 @@ async function main() {
       ? `${down < 1 ? 'carregando' : 'preparando'} imagens… ${pct}%`
       : `carregando imagens… ${asMB(loaded)}`;
     progressBar.style.width = `${pct}%`;
+    touchActivity();
   }
 
   // every response's headers first, bodies second: reading as they arrived meant
   // the last file's size landed mid-download and the percentage fell backwards
-  const responses = await Promise.all(mapData.atlases.map(name => fetch(`atlas/${name}`)));
+  const responses = await Promise.all(pageSet.atlases.map(async name => {
+    const res = await fetch(`atlas/${name}`);
+    if (!res.ok) throw new Error(`atlas/${name}: HTTP ${res.status}`);
+    return res;
+  }));
   responses.forEach((res, idx) => {
     fileTotals[idx] = parseInt(res.headers.get('content-length') || '0', 10);
   });
@@ -1685,13 +1779,18 @@ async function main() {
 
   const atlasMats = [];
   atlasSources = [];
-  for (const blob of blobs) {
+  for (let b = 0; b < blobs.length; b++) {
+    const blob = blobs[b];
+    blobs[b] = null; // the compressed page is not needed once it is a bitmap
     const url = URL.createObjectURL(blob);
     const img = new Image();
     img.src = url;
     await img.decode().catch(() => {});
+    // a refused decode used to fall through as a blank page and a bar that
+    // never finished; say which page failed instead
+    if (!img.naturalWidth) throw new Error(`não foi possível decodificar ${pageSet.atlases[b]}`);
 
-    let source = img, size = img.naturalWidth || mapData.size;
+    let source = img, size = img.naturalWidth;
     if (size > maxTex) {
       const c = document.createElement('canvas');
       c.width = c.height = maxTex;
@@ -1733,11 +1832,17 @@ async function main() {
   // let the browser actually paint that frame before the freeze begins.
   enterLabel.textContent = 'montando o mural… 90%';
   progressBar.style.width = '90%';
+  touchActivity();
   await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
 
   // ── ready — start rendering the wall right away, behind a translucent
   //    title card, so the wall is already alive when the cover lifts ──
   tick();
+  // two painted frames with every texture on the GPU: the heavy part is over,
+  // so the next visit — or a reload — takes the normal path again
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+  loadFinished = true;
+  store('sessionStorage', s => s.removeItem(LOAD_MARK));
   progressBar.style.width = '100%';
   enterLabel.textContent = 'entrando…';
   enterLabel.classList.add('ready');
@@ -1774,8 +1879,9 @@ async function main() {
 }
 
 main().catch(err => {
-  document.getElementById('loading').innerHTML = `<p style="color:#e88">erro: ${err.message}</p>`;
   console.error(err);
+  loadFinished = true;
+  showFailure('O mural não terminou de carregar.', `${err.message} — tentar de novo carrega a versão leve.`);
 });
 </script>
 </body>
