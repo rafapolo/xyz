@@ -29,6 +29,7 @@ PAGE_TEMPLATE = """<!doctype html>
   <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
 
   <link rel="stylesheet" href="../map.css">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
 </head>
 <body>
   <div id="map"></div>
