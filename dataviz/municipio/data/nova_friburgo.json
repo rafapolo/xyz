@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "gerado_em": "2026-08-28",
+ "gerado_em": "2026-09-25",
  "gerador": "rodado",
  "municipio": {
   "fonte": "br_bd_diretorios_brasil.municipio · br_ibge_censo_2022.municipio",
@@ -849,40 +849,40 @@
      {
       "produto": "DIESEL S10",
       "preco_municipio": 7.4536734693877555,
-      "preco_uf": 7.180895196506544,
-      "preco_brasil": 7.08455358112276,
+      "preco_uf": 7.180895196506549,
+      "preco_brasil": 7.084553581122775,
       "postos": 7,
       "ultima_coleta": "2026-07-22"
      },
      {
       "produto": "DIESEL S500",
-      "preco_municipio": 7.232352941176472,
-      "preco_uf": 7.0462537462537504,
-      "preco_brasil": 6.8250024425989375,
+      "preco_municipio": 7.23235294117647,
+      "preco_uf": 7.046253746253749,
+      "preco_brasil": 6.825002442598945,
       "postos": 6,
       "ultima_coleta": "2026-07-22"
      },
      {
       "produto": "ETANOL",
-      "preco_municipio": 4.976741573033709,
-      "preco_uf": 4.893025662251656,
-      "preco_brasil": 4.421222610827179,
+      "preco_municipio": 4.976741573033707,
+      "preco_uf": 4.8930256622516595,
+      "preco_brasil": 4.421222610827194,
       "postos": 11,
       "ultima_coleta": "2026-07-22"
      },
      {
       "produto": "GASOLINA ADITIVADA",
       "preco_municipio": 7.159000000000001,
-      "preco_uf": 6.880504532912884,
-      "preco_brasil": 6.840901029085803,
+      "preco_uf": 6.880504532912888,
+      "preco_brasil": 6.840901029085804,
       "postos": 10,
       "ultima_coleta": "2026-07-22"
      },
      {
       "produto": "GASOLINA COMUM",
       "preco_municipio": 7.007499999999999,
-      "preco_uf": 6.709298682805256,
-      "preco_brasil": 6.64382842314158,
+      "preco_uf": 6.709298682805261,
+      "preco_brasil": 6.643828423141522,
       "postos": 12,
       "ultima_coleta": "2026-07-22"
      },
@@ -890,7 +890,7 @@
       "produto": "GLP",
       "preco_municipio": 108.06161290322581,
       "preco_uf": 106.24099762470318,
-      "preco_brasil": 115.52725191644926,
+      "preco_brasil": 115.52725191644927,
       "postos": 7,
       "ultima_coleta": "2026-07-22"
      }
@@ -1256,9 +1256,9 @@
     "presentes": 3132,
     "redacao": 698.4133738601823,
     "linguagens": 538.1975683890578,
-    "matematica": 577.1218710089399,
+    "matematica": 577.1218710089398,
     "humanas": 548.4902431610942,
-    "natureza": 520.0523627075352,
+    "natureza": 520.0523627075353,
     "media_geral": 579.3218030157201
    },
    "censo_escolar": {
@@ -1369,7 +1369,7 @@
       "candidatos": 2414,
       "aprovados": 1418,
       "matriculados": 35,
-      "nota_media": 599.5028359890553
+      "nota_media": 599.502835989055
      },
      {
       "ano": 2018,
@@ -1390,7 +1390,7 @@
       "candidatos": 2101,
       "aprovados": 1074,
       "matriculados": 213,
-      "nota_media": 618.8937660327288
+      "nota_media": 618.8937660327289
      },
      {
       "ano": 2021,
@@ -1415,7 +1415,7 @@
      },
      {
       "curso": "ENGENHARIA ELÉTRICA",
-      "ies": "UFMG",
+      "ies": "CEFET/RJ",
       "matriculados": 18
      },
      {
@@ -1425,7 +1425,7 @@
      },
      {
       "curso": "FONOAUDIOLOGIA",
-      "ies": "UFF",
+      "ies": "UFRJ",
       "matriculados": 13
      },
      {
@@ -1467,11 +1467,11 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
+     "9": 10,
      "2": 66,
      "1": 24,
      "3": 316,
-     "4": 1419,
-     "9": 10
+     "4": 1419
     }
    },
    "dengue": {
@@ -1483,12 +1483,12 @@
     "obitos": 0,
     "notificados_ano_anterior": 5350,
     "classificacao_bruta": {
-     "12|1": 2,
-     "8 |None": 18,
      "10|9": 5,
      "10|1": 363,
      "10|None": 2,
-     "11|1": 9
+     "12|1": 2,
+     "11|1": 9,
+     "8 |None": 18
     }
    },
    "sisvan": {
@@ -1660,13 +1660,13 @@
     "fonte": "br_ms_sih.aihs_reduzidas (residência do paciente, id_municipio_6)",
     "ano": 2024,
     "internacoes": 11267,
-    "valor_total": 26760932.480000094,
+    "valor_total": 26760932.48000009,
     "obitos_hospitalares": 1075,
     "permanencia_media": 8.284281530132244,
     "diarias_uti": 10772,
     "no_municipio": 9792,
     "urgencia": 9274,
-    "valor_medio_aih": 2375.160422472716,
+    "valor_medio_aih": 2375.1604224727157,
     "taxa_mortalidade_hospitalar": 9.541137836158693,
     "pct_no_municipio": 86.90867134108458,
     "ano_anterior": {
@@ -1677,7 +1677,7 @@
      {
       "capitulo": "IX.  Doenças do aparelho circulatório",
       "internacoes": 1861,
-      "valor": 7971759.269999994
+      "valor": 7971759.269999996
      },
      {
       "capitulo": "XIX. Lesões enven e alg out conseq causas externas",
@@ -1697,7 +1697,7 @@
      {
       "capitulo": "XI.  Doenças do aparelho digestivo",
       "internacoes": 1164,
-      "valor": 2825916.4999999986
+      "valor": 2825916.4999999995
      },
      {
       "capitulo": "XIV. Doenças do aparelho geniturinário",
@@ -1707,19 +1707,19 @@
      {
       "capitulo": "XV.  Gravidez parto e puerpério",
       "internacoes": 835,
-      "valor": 413703.8900000006
+      "valor": 413703.89000000054
      },
      {
       "capitulo": "II.  Neoplasias (tumores)",
       "internacoes": 522,
-      "valor": 2069973.4699999997
+      "valor": 2069973.47
      }
     ],
     "serie": [
      {
       "ano": 2015,
       "internacoes": 9140,
-      "valor": 14858672.52000003
+      "valor": 14858672.520000022
      },
      {
       "ano": 2016,
@@ -1729,22 +1729,22 @@
      {
       "ano": 2017,
       "internacoes": 9345,
-      "valor": 14780826.090000011
+      "valor": 14780826.09
      },
      {
       "ano": 2018,
       "internacoes": 9659,
-      "valor": 16021076.859999985
+      "valor": 16021076.859999992
      },
      {
       "ano": 2019,
       "internacoes": 9945,
-      "valor": 16572105.579999993
+      "valor": 16572105.579999996
      },
      {
       "ano": 2020,
       "internacoes": 7749,
-      "valor": 14998325.309999984
+      "valor": 14998325.309999991
      },
      {
       "ano": 2021,
@@ -1754,7 +1754,7 @@
      {
       "ano": 2022,
       "internacoes": 9254,
-      "valor": 19807955.800000023
+      "valor": 19807955.800000012
      },
      {
       "ano": 2023,
@@ -2092,11 +2092,11 @@
       "n": 17
      },
      {
-      "local": "Comércio/serviços",
+      "local": "Escola",
       "n": 7
      },
      {
-      "local": "Escola",
+      "local": "Comércio/serviços",
       "n": 7
      }
     ],
@@ -2394,6 +2394,261 @@
       "domicilios": 12
      }
     ]
+   },
+   "frota": {
+    "fonte": "br_senatran_frota.municipio_tipo · br_ibge_populacao.municipio",
+    "competencia": "2026-07",
+    "total": 144521,
+    "por_tipo": [
+     {
+      "tipo": "automovel",
+      "quantidade": 86881
+     },
+     {
+      "tipo": "motocicleta",
+      "quantidade": 26737
+     },
+     {
+      "tipo": "caminhonete",
+      "quantidade": 8860
+     },
+     {
+      "tipo": "camioneta",
+      "quantidade": 7506
+     },
+     {
+      "tipo": "motoneta",
+      "quantidade": 3845
+     },
+     {
+      "tipo": "caminhao",
+      "quantidade": 3703
+     },
+     {
+      "tipo": "reboque",
+      "quantidade": 2417
+     },
+     {
+      "tipo": "utilitario",
+      "quantidade": 2338
+     },
+     {
+      "tipo": "semi_reboque",
+      "quantidade": 506
+     },
+     {
+      "tipo": "micro_onibus",
+      "quantidade": 472
+     },
+     {
+      "tipo": "caminhao_trator",
+      "quantidade": 450
+     },
+     {
+      "tipo": "onibus",
+      "quantidade": 399
+     },
+     {
+      "tipo": "outros",
+      "quantidade": 170
+     },
+     {
+      "tipo": "ciclomotor",
+      "quantidade": 168
+     },
+     {
+      "tipo": "triciclo",
+      "quantidade": 62
+     },
+     {
+      "tipo": "trator_rodas",
+      "quantidade": 4
+     },
+     {
+      "tipo": "side_car",
+      "quantidade": 2
+     },
+     {
+      "tipo": "quadriciclo",
+      "quantidade": 1
+     }
+    ],
+    "veiculos_1000hab": {
+     "municipio": 710.4666768264206,
+     "uf": 490.56097446129996,
+     "brasil": 620.0274104238893,
+     "ano_populacao": 2025
+    },
+    "serie": [
+     {
+      "ano": 2013,
+      "total": 101668
+     },
+     {
+      "ano": 2014,
+      "total": 106846
+     },
+     {
+      "ano": 2015,
+      "total": 111007
+     },
+     {
+      "ano": 2016,
+      "total": 114528
+     },
+     {
+      "ano": 2017,
+      "total": 117691
+     },
+     {
+      "ano": 2018,
+      "total": 121631
+     },
+     {
+      "ano": 2019,
+      "total": 125443
+     },
+     {
+      "ano": 2020,
+      "total": 127931
+     },
+     {
+      "ano": 2021,
+      "total": 131247
+     },
+     {
+      "ano": 2022,
+      "total": 133702
+     },
+     {
+      "ano": 2023,
+      "total": 135825
+     },
+     {
+      "ano": 2024,
+      "total": 138771
+     },
+     {
+      "ano": 2025,
+      "total": 142107
+     },
+     {
+      "ano": 2026,
+      "total": 144521
+     }
+    ]
+   },
+   "energia_gd": {
+    "fonte": "br_aneel_dadosabertos.empreendimento_geracao_distribuida",
+    "data_base": "2026-09-04",
+    "instalacoes": 4293,
+    "potencia_mw": 51.03320999999996,
+    "ucs_recebem_credito": 6857,
+    "w_por_habitante": 250.87976914417163,
+    "por_classe": [
+     {
+      "classe": "Residencial",
+      "instalacoes": 3571,
+      "kw": 32632.77000000002
+     },
+     {
+      "classe": "Comercial",
+      "instalacoes": 313,
+      "kw": 8222.3
+     },
+     {
+      "classe": "Industrial",
+      "instalacoes": 130,
+      "kw": 6562.28
+     },
+     {
+      "classe": "Rural",
+      "instalacoes": 272,
+      "kw": 3447.2400000000007
+     },
+     {
+      "classe": "Poder Público",
+      "instalacoes": 5,
+      "kw": 127.0
+     },
+     {
+      "classe": "Iluminação pública",
+      "instalacoes": 2,
+      "kw": 41.620000000000005
+     }
+    ],
+    "por_fonte": [
+     {
+      "fonte": "Radiação solar",
+      "instalacoes": 4293,
+      "kw": 51033.20999999996
+     }
+    ],
+    "por_ano_cadastro": [
+     {
+      "ano": 2015,
+      "instalacoes": 4,
+      "kw": 8.8
+     },
+     {
+      "ano": 2016,
+      "instalacoes": 8,
+      "kw": 25.78
+     },
+     {
+      "ano": 2017,
+      "instalacoes": 11,
+      "kw": 34.04
+     },
+     {
+      "ano": 2018,
+      "instalacoes": 31,
+      "kw": 228.22000000000003
+     },
+     {
+      "ano": 2019,
+      "instalacoes": 98,
+      "kw": 682.76
+     },
+     {
+      "ano": 2020,
+      "instalacoes": 220,
+      "kw": 2182.0399999999995
+     },
+     {
+      "ano": 2021,
+      "instalacoes": 584,
+      "kw": 4859.940000000002
+     },
+     {
+      "ano": 2022,
+      "instalacoes": 1271,
+      "kw": 18625.980000000003
+     },
+     {
+      "ano": 2023,
+      "instalacoes": 761,
+      "kw": 7302.970000000015
+     },
+     {
+      "ano": 2024,
+      "instalacoes": 528,
+      "kw": 5359.800000000002
+     },
+     {
+      "ano": 2025,
+      "instalacoes": 601,
+      "kw": 9757.75
+     },
+     {
+      "ano": 2026,
+      "instalacoes": 176,
+      "kw": 1965.1299999999997
+     }
+    ]
+   },
+   "energia_continuidade": {
+    "erro": "nenhum conjunto elétrico com o nome do município"
    }
   },
   "meio_ambiente": {
@@ -2741,7 +2996,7 @@
      {
       "ano": 2023,
       "focos": 50,
-      "frp_medio": 5.6579999999999995,
+      "frp_medio": 5.658,
       "frp_max": 22.6
      },
      {
@@ -2933,9 +3188,9 @@
     "zonas": 2
    },
    "genero": {
+    "2": 72939,
     "0": 118,
-    "4": 82419,
-    "2": 72939
+    "4": 82419
    },
    "instrucao": {
     "3": 45125,
@@ -3042,7 +3297,7 @@
      {
       "cargo": "vereador",
       "candidatos": 365,
-      "receita": 3312260.03
+      "receita": 3312260.0300000003
      }
     ]
    },
@@ -3357,12 +3612,12 @@
       {
        "ano": 2020,
        "licitacoes": 365,
-       "valor": 36079796.46
+       "valor": 36079796.45999999
       },
       {
        "ano": 2021,
        "licitacoes": 347,
-       "valor": 39793609.879999995
+       "valor": 39793609.88
       },
       {
        "ano": 2022,
@@ -3372,7 +3627,7 @@
       {
        "ano": 2023,
        "licitacoes": 96,
-       "valor": 38980514.419999994
+       "valor": 38980514.42
       }
      ],
      "por_orgao": [
@@ -3414,7 +3669,7 @@
       {
        "ano": 2023,
        "contratos": 57,
-       "valor": 24836561.44
+       "valor": 24836561.440000005
       },
       {
        "ano": 2024,
@@ -3619,9 +3874,9 @@
      },
      {
       "ano": 2022,
-      "reclamacoes": 876,
-      "nota_media": 3.0950118764845604,
-      "pct_respondida": 87.44292237442923
+      "reclamacoes": 964,
+      "nota_media": 3.03056768558952,
+      "pct_respondida": 87.55186721991701
      },
      {
       "ano": 2023,
@@ -3852,7 +4107,7 @@
     "ano": 2024,
     "vinculos_ativos_3112": 56975,
     "vinculos_ativos_ano_anterior": 54441,
-    "remuneracao_media": 2443.0679684637107,
+    "remuneracao_media": 2443.0679684637116,
     "estabelecimentos": 11763
    },
    "caged": {
@@ -3861,7 +4116,7 @@
     "admissoes": 23203,
     "desligamentos": 22091,
     "saldo": 1112,
-    "salario_medio_admissao": 1699.6566916180752
+    "salario_medio_admissao": 1699.6566916180707
    },
    "top_empregadores": {
     "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
@@ -3947,6 +4202,31 @@
       "empresa": "FUNDACAO D. JOAO VI DE NOVA FRIBURGO",
       "natureza": "Fundação Pública de Direito Público Municipal",
       "vinculos_ativos": 8
+     }
+    ]
+   },
+   "lista_suja": {
+    "fonte": "br_mte_listasuja.empregadores (Cadastro de Empregadores — trabalho análogo ao de escravo)",
+    "data_coleta": "2026-09-25",
+    "total": 1,
+    "trabalhadores": 8,
+    "uf": {
+     "empregadores": 21,
+     "trabalhadores": 55
+    },
+    "brasil": {
+     "empregadores": 578,
+     "trabalhadores": 4703
+    },
+    "empregadores": [
+     {
+      "empregador": "MANUANE DE LIMA VOGAS",
+      "documento": "CNPJ",
+      "ano_acao_fiscal": 2024,
+      "trabalhadores": 8,
+      "atividade": "Fabricação de produtos de carne",
+      "local": "FRIGORÍFICO FRIVOGAS, ESTRADA HENRIQUE EMERICH, S/N, AMPARO, NOVA FRIBURGO/RJ",
+      "inclusao": "2025-04-09"
      }
     ]
    }
@@ -4068,6 +4348,14 @@
       "valor": 68
      }
     ]
+   },
+   "assentamentos": {
+    "fonte": "br_incra_acervo.assentamentos (SIPRA)",
+    "total": 0,
+    "familias": 0,
+    "capacidade": 0,
+    "area_ha": 0,
+    "projetos": []
    }
   },
   "beneficios": {
@@ -4081,7 +4369,7 @@
    "bpc": {
     "competencia": "2025-07",
     "beneficiarios": 3953,
-    "repasse_mensal": 6000850.939999998
+    "repasse_mensal": 6000850.9399999995
    },
    "garantia_safra": null,
    "cadastro_unico": {
@@ -4091,6 +4379,220 @@
     "familias_cadastradas": 15944,
     "familias_pbf": 5917,
     "pct_populacao": 20.111635401081827
+   },
+   "cadunico_mds": {
+    "fonte": "br_mds_cadunico.indicadores_municipio (MDS · VIS DATA)",
+    "competencia": "2026-09",
+    "familias": {
+     "pobreza": 10234,
+     "baixa_renda": 5539,
+     "acima_meio_sm": 9939,
+     "total": 25712
+    },
+    "pessoas": {
+     "pobreza": 23513,
+     "baixa_renda": 15020,
+     "acima_meio_sm": 17173,
+     "total": 55706
+    },
+    "atualizacao": {
+     "competencia": "2026-09",
+     "taxa": 82.32,
+     "atualizadas": 21168
+    },
+    "responsavel_sexo": {
+     "feminino": 20054,
+     "masculino": 5345
+    },
+    "raca_cor": [
+     {
+      "raca": "Branca",
+      "pessoas": 35874
+     },
+     {
+      "raca": "Parda",
+      "pessoas": 11827
+     },
+     {
+      "raca": "Preta",
+      "pessoas": 7892
+     },
+     {
+      "raca": "Amarela",
+      "pessoas": 98
+     },
+     {
+      "raca": "Indígena",
+      "pessoas": 12
+     },
+     {
+      "raca": "Sem informação",
+      "pessoas": 3
+     }
+    ],
+    "grupos_especificos": {
+     "total": 1540,
+     "lista": [
+      {
+       "grupo": "Agricultores familiares",
+       "familias": 1217
+      },
+      {
+       "grupo": "Situação de rua",
+       "familias": 158
+      },
+      {
+       "grupo": "Catadores de recicláveis",
+       "familias": 150
+      },
+      {
+       "grupo": "Desalojados",
+       "familias": 16
+      },
+      {
+       "grupo": "Família de preso",
+       "familias": 14
+      },
+      {
+       "grupo": "Quilombolas",
+       "familias": 1
+      },
+      {
+       "grupo": "Acampados",
+       "familias": 1
+      },
+      {
+       "grupo": "Extrativistas",
+       "familias": 1
+      }
+     ]
+    },
+    "situacao_rua": {
+     "competencia": "2026-09",
+     "familias": 158,
+     "pessoas": 160,
+     "pct_atendimento": 82.5
+    },
+    "local": {
+     "urbano": 22849,
+     "rural": 2701
+    },
+    "esgoto": [
+     {
+      "forma": "Rede coletora",
+      "familias": 19758
+     },
+     {
+      "forma": "Fossa séptica",
+      "familias": 1026
+     },
+     {
+      "forma": "Fossa rudimentar",
+      "familias": 4025
+     },
+     {
+      "forma": "Vala a céu aberto",
+      "familias": 22
+     },
+     {
+      "forma": "Direto em rio, lago ou mar",
+      "familias": 207
+     },
+     {
+      "forma": "Outras formas",
+      "familias": 44
+     },
+     {
+      "forma": "Sem informação",
+      "familias": 630
+     }
+    ],
+    "saida_pobreza_pbf": {
+     "competencia": "2026-08",
+     "saem": 6323,
+     "permanecem": 554
+    },
+    "trabalho_infantil": {
+     "competencia": "2025-05",
+     "pessoas": 1
+    },
+    "serie_familias": [
+     {
+      "ano": 2012,
+      "familias": 12470,
+      "ref": "2012-12"
+     },
+     {
+      "ano": 2013,
+      "familias": 14360,
+      "ref": "2013-12"
+     },
+     {
+      "ano": 2014,
+      "familias": 16010,
+      "ref": "2014-12"
+     },
+     {
+      "ano": 2015,
+      "familias": 14694,
+      "ref": "2015-12"
+     },
+     {
+      "ano": 2016,
+      "familias": 13727,
+      "ref": "2016-12"
+     },
+     {
+      "ano": 2017,
+      "familias": 13109,
+      "ref": "2017-12"
+     },
+     {
+      "ano": 2018,
+      "familias": 13081,
+      "ref": "2018-12"
+     },
+     {
+      "ano": 2019,
+      "familias": 14618,
+      "ref": "2019-12"
+     },
+     {
+      "ano": 2020,
+      "familias": 17455,
+      "ref": "2020-12"
+     },
+     {
+      "ano": 2021,
+      "familias": 20282,
+      "ref": "2021-12"
+     },
+     {
+      "ano": 2022,
+      "familias": 27532,
+      "ref": "2022-12"
+     },
+     {
+      "ano": 2023,
+      "familias": 30332,
+      "ref": "2023-12"
+     },
+     {
+      "ano": 2024,
+      "familias": 26947,
+      "ref": "2024-12"
+     },
+     {
+      "ano": 2025,
+      "familias": 25446,
+      "ref": "2025-12"
+     },
+     {
+      "ano": 2026,
+      "familias": 25712,
+      "ref": "2026-09"
+     }
+    ]
    }
   },
   "vizinhanca": {

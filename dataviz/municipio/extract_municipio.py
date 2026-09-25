@@ -1530,6 +1530,294 @@ def beneficios_cadunico(mid):
             "pct_populacao": (pessoas / pop["populacao"] * 100) if pessoas and pop and pop["populacao"] else None}
 
 
+# ------------------------------------------------- CadÚnico (MDS, VIS DATA)
+# O painel VIS DATA do MDS publica cada indicador como um id opaco + N variáveis
+# em texto longo. Os ids são estáveis entre competências; as variáveis são
+# reconhecidas por trecho de texto, porque a ordem delas muda de um mês para outro.
+# As faixas de renda mudaram de definição em mar/2023 (nova linha do Bolsa
+# Família): só entram aqui os indicadores "a partir de mar/2023".
+CAD_IDS = {
+    "total": "00cf548d54db",           # famílias cadastradas — série desde 2012
+    "renda_familias": "c0a5b9a9c92d",  # pobreza PBF / até ½ SM / acima de ½ SM
+    "renda_pessoas": "f29f08a0bfde",
+    "atualizacao": "30058dbd78cc",
+    "responsavel_sexo": "2b7d6a9b7e74",
+    "raca_cor": "1c5935dba7b6",
+    "gpte": "59e11edab5b5",            # grupos populacionais tradicionais e específicos
+    "rua": "d9dd20f4ea2b",
+    "local": "4e9c79c1b29b",
+    "esgoto": "1d28255f7a03",
+    "saida_pobreza": "b03fff9ba9cd",   # famílias PBF que cruzam a linha após o benefício
+    "trabalho_infantil": "38867ce26ad1",
+}
+
+
+@section
+def beneficios_cadunico_mds(mid):
+    t = p("br_mds_cadunico", "indicadores_municipio")
+    ids_sql = "', '".join(CAD_IDS.values())
+    rows = q(f"""WITH x AS (SELECT id_indicador, referencia, variavel, valor FROM {t}
+            WHERE id_municipio='{mid}' AND id_indicador IN ('{ids_sql}'))
+        SELECT x.* FROM x JOIN (SELECT id_indicador, max(referencia) r FROM x GROUP BY 1) u
+          ON u.id_indicador=x.id_indicador AND u.r=x.referencia""")
+    if not rows:
+        raise RuntimeError("município sem indicadores do CadÚnico")
+    por = {}
+    for r in rows:
+        por.setdefault(r["id_indicador"], []).append(r)
+
+    def ref(chave):
+        rs = por.get(CAD_IDS[chave])
+        return rs and str(rs[0]["referencia"])[:7]
+
+    def val(chave, *trechos, exclui=()):
+        for r in por.get(CAD_IDS[chave], []):
+            txt = r["variavel"].lower()
+            if all(s in txt for s in trechos) and not any(s in txt for s in exclui):
+                return num(r["valor"])
+        return None
+
+    def faixas(chave):
+        pobreza = val(chave, "situação de pobreza")
+        ate_meio = val(chave, "até meio salário")
+        acima = val(chave, "acima de meio salário")
+        if ate_meio is None:
+            return None
+        return {"pobreza": pobreza, "baixa_renda": ate_meio - (pobreza or 0), "acima_meio_sm": acima,
+                "total": ate_meio + (acima or 0)}
+
+    grupos = []
+    for rot, trecho in [("Agricultores familiares", "agricultores familiares"), ("Situação de rua", "situação de rua"),
+                        ("Catadores de recicláveis", "catadores"), ("Quilombolas", "quilombolas"),
+                        ("Indígenas", "indígenas"), ("Pescadores artesanais", "pescadores"),
+                        ("Assentados da reforma agrária", "assentadas"), ("Acampados", "acampadas"),
+                        ("Ribeirinhos", "ribeirinhas"), ("Extrativistas", "extrativistas"),
+                        ("Comunidades de terreiro", "terreiro"), ("Ciganos", "ciganas"),
+                        ("Família de preso", "carcerário"), ("Desalojados", "desalojados"),
+                        ("Atingidos por obras de infraestrutura", "atingidas")]:
+        n = val("gpte", trecho)
+        if n:
+            grupos.append({"grupo": rot, "familias": n})
+    grupos.sort(key=lambda g: -g["familias"])
+
+    esgoto = [{"forma": rot, "familias": val("esgoto", trecho)} for rot, trecho in [
+        ("Rede coletora", "rede coletora"), ("Fossa séptica", "fossa séptica"),
+        ("Fossa rudimentar", "fossa rudimentar"), ("Vala a céu aberto", "vala"),
+        ("Direto em rio, lago ou mar", "direto para rio"), ("Outras formas", "outras formas"),
+        ("Sem informação", "sem informação")]]
+
+    # série anual: última competência de cada ano do total de famílias
+    serie = q(f"""SELECT year(referencia) ano, arg_max(valor, referencia) familias, max(referencia) ult
+        FROM {t} WHERE id_municipio='{mid}' AND id_indicador='{CAD_IDS['total']}' GROUP BY 1 ORDER BY 1""")
+
+    return {
+        "fonte": "br_mds_cadunico.indicadores_municipio (MDS · VIS DATA)",
+        "competencia": ref("renda_familias") or ref("total"),
+        "familias": faixas("renda_familias"),
+        "pessoas": faixas("renda_pessoas"),
+        "atualizacao": {"competencia": ref("atualizacao"),
+                        "taxa": val("atualizacao", "taxa"),
+                        "atualizadas": val("atualizacao", "com cadastro atualizado")},
+        "responsavel_sexo": {"feminino": val("responsavel_sexo", "feminino"),
+                             "masculino": val("responsavel_sexo", "masculino")},
+        "raca_cor": [{"raca": rot, "pessoas": val("raca_cor", "pessoas " + trecho)} for rot, trecho in [
+            ("Branca", "brancas"), ("Parda", "pardas"), ("Preta", "pretas"),
+            ("Amarela", "amarelas"), ("Indígena", "indígenas"), ("Sem informação", "sem informação")]],
+        "grupos_especificos": {"total": val("gpte", "total de famílias gpte"), "lista": grupos},
+        "situacao_rua": {"competencia": ref("rua"),
+                         "familias": val("rua", "famílias em situação de rua"),
+                         "pessoas": val("rua", "pessoas em famílias"),
+                         "pct_atendimento": val("rua", "proporção")},
+        "local": {"urbano": val("local", "urbanos"), "rural": val("local", "rurais")},
+        "esgoto": [e for e in esgoto if e["familias"] is not None],
+        "saida_pobreza_pbf": {"competencia": ref("saida_pobreza"),
+                              "saem": val("saida_pobreza", "passam a ter renda per capita acima da linha de pobreza após"),
+                              "permanecem": val("saida_pobreza", "permanecem")},
+        "trabalho_infantil": {"competencia": ref("trabalho_infantil"),
+                              "pessoas": val("trabalho_infantil", "pessoas")},
+        "serie_familias": [{"ano": r["ano"], "familias": num(r["familias"]), "ref": str(r["ult"])[:7]} for r in serie],
+    }
+
+
+# ---------------------------------------------------------------- frota
+@section
+def infra_frota(mid, uf):
+    """SENATRAN: pasta particionada ano=/, e cada mês traz uma linha
+    tipo_veiculo='total' ao lado das categorias — nunca somar tudo."""
+    t = f"read_parquet('{ROOT}/br_senatran_frota/municipio_tipo/*/*.parquet', hive_partitioning=true)"
+    am = one(f"SELECT max(ano*100+mes) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem frota SENATRAN")
+    ano, mes = am // 100, am % 100
+    tipos = q(f"""SELECT tipo_veiculo, quantidade FROM {t}
+        WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} AND tipo_veiculo<>'total' AND quantidade>0
+        ORDER BY quantidade DESC""")
+    total = one(f"SELECT quantidade FROM {t} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} AND tipo_veiculo='total'")
+    # dezembro de cada ano (ou o último mês do ano corrente)
+    serie = q(f"""SELECT ano, arg_max(quantidade, mes) total FROM {t}
+        WHERE id_municipio='{mid}' AND tipo_veiculo='total' GROUP BY 1 ORDER BY 1""")
+    tp = p("br_ibge_populacao", "municipio")
+    ano_pop = one(f"SELECT max(ano) a FROM {tp}")["a"]
+    # veículos/1.000 hab no município, na UF e no Brasil — mesma competência, mesma população
+    taxas = one(f"""WITH f AS (SELECT id_municipio, sigla_uf, quantidade FROM {t}
+            WHERE ano={ano} AND mes={mes} AND tipo_veiculo='total'),
+          pop AS (SELECT id_municipio, populacao FROM {tp} WHERE ano={ano_pop})
+        SELECT sum(f.quantidade) FILTER (WHERE f.id_municipio='{mid}') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE f.id_municipio='{mid}') mun,
+               sum(f.quantidade) FILTER (WHERE f.sigla_uf='{uf}') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE f.sigla_uf='{uf}') uf,
+               sum(f.quantidade) * 1000.0 / sum(pop.populacao) br
+        FROM f JOIN pop USING (id_municipio)""")
+    return {"fonte": "br_senatran_frota.municipio_tipo · br_ibge_populacao.municipio",
+            "competencia": f"{ano}-{mes:02d}",
+            "total": num(total and total["quantidade"]),
+            "por_tipo": [{"tipo": r["tipo_veiculo"], "quantidade": num(r["quantidade"])} for r in tipos],
+            "veiculos_1000hab": {"municipio": taxas["mun"], "uf": taxas["uf"], "brasil": taxas["br"],
+                                 "ano_populacao": ano_pop},
+            "serie": [{"ano": r["ano"], "total": num(r["total"])} for r in serie]}
+
+
+# ---------------------------------------------- ANEEL — geração distribuída
+@section
+def energia_gd(mid):
+    t = p("br_aneel_dadosabertos", "empreendimento_geracao_distribuida")
+    base = f"{t} WHERE CodMunicipioIbge={int(mid)}"
+    r = one(f"""SELECT count(*) n, sum(MdaPotenciaInstaladaKW::double) kw,
+            sum(QtdUCRecebeCredito) ucs_credito, max(DatGeracaoConjuntoDados) gerado
+        FROM {base}""")
+    if not r or not r["n"]:
+        raise RuntimeError("município sem geração distribuída")
+    classes = q(f"""SELECT DscClasseConsumo classe, count(*) n, sum(MdaPotenciaInstaladaKW::double) kw
+        FROM {base} GROUP BY 1 ORDER BY 3 DESC""")
+    fontes = q(f"""SELECT DscFonteGeracao fonte, count(*) n, sum(MdaPotenciaInstaladaKW::double) kw
+        FROM {base} GROUP BY 1 ORDER BY 3 DESC""")
+    # a ANEEL não publica data de conexão; a data de atualização cadastral é o que há
+    anos = q(f"""SELECT year(DthAtualizaCadastralEmpreend::date) ano, count(*) n,
+            sum(MdaPotenciaInstaladaKW::double) kw
+        FROM {base} AND DthAtualizaCadastralEmpreend IS NOT NULL GROUP BY 1 ORDER BY 1""")
+    tp = p("br_ibge_populacao", "municipio")
+    pop = one(f"SELECT populacao FROM {tp} WHERE id_municipio='{mid}' ORDER BY ano DESC LIMIT 1")
+    return {"fonte": "br_aneel_dadosabertos.empreendimento_geracao_distribuida",
+            "data_base": str(r["gerado"]),
+            "instalacoes": num(r["n"]),
+            "potencia_mw": r["kw"] / 1000,
+            "ucs_recebem_credito": num(r["ucs_credito"]),
+            "w_por_habitante": (r["kw"] * 1000 / pop["populacao"]) if pop and pop["populacao"] else None,
+            "por_classe": [{"classe": c["classe"], "instalacoes": num(c["n"]), "kw": c["kw"]} for c in classes],
+            "por_fonte": [{"fonte": f["fonte"], "instalacoes": num(f["n"]), "kw": f["kw"]} for f in fontes],
+            "por_ano_cadastro": [{"ano": a["ano"], "instalacoes": num(a["n"]), "kw": a["kw"]} for a in anos]}
+
+
+# --------------------------------------------- ANEEL — continuidade (DEC/FEC)
+def _norm_sql(col):
+    return f"upper(trim(strip_accents({col})))"
+
+
+@section
+def energia_continuidade(nome):
+    """Conjuntos elétricos têm nome de subestação, não de município, e não há
+    tabela de correspondência. Casa só o conjunto cujo nome é o do município
+    (ou 'NOME 1', 'NOME 2'…) — cobertura parcial, e o conjunto pode atender
+    também vizinhos. Sem casamento, a seção fica vazia em vez de chutar."""
+    t = p("br_aneel_dadosabertos", "indicadores_continuidade")
+    lim = p("br_aneel_dadosabertos", "indicadores_continuidade_limite")
+    nome_sql = nome.upper().replace("'", "''")
+    conj = q(f"""SELECT DISTINCT IdeConjUndConsumidoras id, DscConjUndConsumidoras nome, trim(SigAgente) agente
+        FROM {t}
+        WHERE AnoIndice >= year(current_date) - 3
+          AND regexp_matches({_norm_sql('DscConjUndConsumidoras')},
+                             '^' || strip_accents('{nome_sql}') || '( [0-9]+)?$')""")
+    if not conj:
+        raise RuntimeError("nenhum conjunto elétrico com o nome do município")
+    ids = ", ".join(str(c["id"]) for c in conj)
+    # ano completo mais recente (12 meses de DEC em todos os conjuntos casados)
+    anual = q(f"""WITH m AS (
+            SELECT AnoIndice ano, IdeConjUndConsumidoras id, NumPeriodoIndice mes,
+                   max(VlrIndiceEnviado) FILTER (WHERE SigIndicador='DEC') d,
+                   max(VlrIndiceEnviado) FILTER (WHERE SigIndicador='FEC') f,
+                   max(VlrIndiceEnviado) FILTER (WHERE SigIndicador='NumCon') ucs
+            FROM {t} WHERE IdeConjUndConsumidoras IN ({ids}) AND SigIndicador IN ('DEC','FEC','NumCon')
+            GROUP BY ALL),
+          c AS (SELECT ano, id, sum(d) d, sum(f) f, avg(ucs) ucs, count(d) meses FROM m GROUP BY ALL)
+        SELECT ano, sum(d*ucs)/sum(ucs) d, sum(f*ucs)/sum(ucs) f, sum(ucs) ucs, min(meses) meses
+        FROM c WHERE ucs > 0 GROUP BY 1 ORDER BY 1""")
+    anual = [a for a in anual if a["meses"] == 12]
+    limites = q(f"""SELECT AnoLimiteQualidade::int ano, SigIndicador ind,
+            sum(replace(VlrLimite, ',', '.')::double * u.ucs) / sum(u.ucs) v
+        FROM {lim} l JOIN (
+            SELECT IdeConjUndConsumidoras id, AnoIndice ano, avg(VlrIndiceEnviado) ucs FROM {t}
+            WHERE IdeConjUndConsumidoras IN ({ids}) AND SigIndicador='NumCon' GROUP BY ALL) u
+          ON u.id = l.IdeConjUndConsumidoras::bigint AND u.ano = l.AnoLimiteQualidade::int
+        WHERE SigIndicador IN ('DEC','FEC') GROUP BY ALL""")
+    lm = {(r["ano"], r["ind"]): r["v"] for r in limites}
+    return {"fonte": "br_aneel_dadosabertos.indicadores_continuidade · indicadores_continuidade_limite",
+            "conjuntos": [{"nome": c["nome"], "agente": c["agente"]} for c in conj],
+            "serie": [{"ano": a["ano"], "dec_horas": a["d"], "fec_vezes": a["f"], "unidades": num(round(a["ucs"])),
+                       "limite_dec": lm.get((a["ano"], "DEC")), "limite_fec": lm.get((a["ano"], "FEC"))}
+                      for a in anual[-10:]]}
+
+
+# ------------------------------------------------ lista suja (MTE)
+@section
+def trabalho_lista_suja(nome, uf):
+    """O cadastro não traz código de município; o endereço do estabelecimento
+    termina em 'MUNICÍPIO/UF' (às vezes 'MUNICÍPIO-UF'). Casa pelo nome
+    normalizado. Registros sem município no endereço ficam de fora."""
+    t = p("br_mte_listasuja", "empregadores")
+    nome_sql = nome.upper().replace("'", "''")
+    rows = q(f"""SELECT empregador, tipo_documento, ano_acao_fiscal, trabalhadores_envolvidos,
+            cnae, cnae_subclasse, estabelecimento, data_inclusao
+        FROM {t}
+        WHERE sigla_uf='{uf}' AND regexp_matches({_norm_sql('estabelecimento')},
+            '(^|[ ,.-])' || strip_accents('{nome_sql}') || ' ?[/-] ?{uf}\\b')
+        ORDER BY ano_acao_fiscal DESC""")
+    uf_tot = one(f"SELECT count(*) n, sum(trabalhadores_envolvidos) trab, max(data_coleta) coleta FROM {t} WHERE sigla_uf='{uf}'")
+    br_tot = one(f"SELECT count(*) n, sum(trabalhadores_envolvidos) trab FROM {t}")
+    cnae = p("br_bd_diretorios_brasil", "cnae_2")
+    desc = {r["subclasse"]: r["descricao_subclasse"] for r in q(
+        f"SELECT DISTINCT subclasse, descricao_subclasse FROM {cnae}")} if rows else {}
+    return {"fonte": "br_mte_listasuja.empregadores (Cadastro de Empregadores — trabalho análogo ao de escravo)",
+            "data_coleta": str(uf_tot["coleta"]),
+            "total": len(rows),
+            "trabalhadores": sum(num(r["trabalhadores_envolvidos"]) or 0 for r in rows),
+            "uf": {"empregadores": num(uf_tot["n"]), "trabalhadores": num(uf_tot["trab"])},
+            "brasil": {"empregadores": num(br_tot["n"]), "trabalhadores": num(br_tot["trab"])},
+            "empregadores": [{"empregador": r["empregador"], "documento": r["tipo_documento"],
+                              "ano_acao_fiscal": r["ano_acao_fiscal"],
+                              "trabalhadores": num(r["trabalhadores_envolvidos"]),
+                              "atividade": desc.get(r["cnae_subclasse"], r["cnae"]),
+                              "local": r["estabelecimento"], "inclusao": str(r["data_inclusao"])} for r in rows]}
+
+
+# ------------------------------------------------ INCRA — assentamentos
+FASES_INCRA = {3: "Criado", 4: "Em instalação", 5: "Em estruturação", 6: "Em consolidação", 7: "Consolidado"}
+
+
+@section
+def agro_assentamentos(mid, nome, uf):
+    """INCRA grava o município só pelo nome, às vezes na grafia antiga (PARATI).
+    Casa pelo nome normalizado OU pelo ponto (lat/lon) do projeto dentro do
+    polígono municipal."""
+    t = p("br_incra_acervo", "assentamentos")
+    nome_sql = nome.upper().replace("'", "''")
+    rows = q(f"""WITH muni AS (SELECT geometria FROM {p('br_geobr_mapas','municipio')} WHERE id_municipio='{mid}')
+        SELECT a.cd_sipra, a.nome_proje, a.municipio, a.num_famili, a.capacidade, a.fase,
+               try_cast(a.area_hecta AS double) area_ha, a.data_de_cr criacao, a.forma_obte
+        FROM {t} a, muni
+        WHERE a.uf='{uf}' AND ({_norm_sql('a.municipio')} = strip_accents('{nome_sql}')
+           OR (a.lat IS NOT NULL AND ST_Contains(muni.geometria, ST_Point(a.lon, a.lat))))
+        ORDER BY a.num_famili DESC NULLS LAST""")
+    return {"fonte": "br_incra_acervo.assentamentos (SIPRA)",
+            "total": len(rows),
+            "familias": sum(num(r["num_famili"]) or 0 for r in rows),
+            "capacidade": sum(num(r["capacidade"]) or 0 for r in rows),
+            "area_ha": sum(r["area_ha"] or 0 for r in rows),
+            "projetos": [{"codigo": r["cd_sipra"], "nome": r["nome_proje"], "familias": num(r["num_famili"]),
+                          "capacidade": num(r["capacidade"]), "area_ha": r["area_ha"],
+                          "fase": FASES_INCRA.get(r["fase"], f"Fase {r['fase']}"),
+                          "criacao": r["criacao"], "obtencao": r["forma_obte"]} for r in rows]}
+
+
 # -------------------------------------------------------------- vizinhança
 @section
 def vizinhanca(mid):
@@ -1613,7 +1901,10 @@ def main():
             "seguranca": {"isp_rj": seguranca_isp(mid, uf), "fbsp": seguranca_fbsp(mid),
                           "violencia_sinan": seguranca_violencia(mid)},
             "infraestrutura": {"snis": infra_snis(mid), "atlas_esgotos": infra_ana(mid),
-                               "censo_domicilios": infra_censo_domicilios(mid)},
+                               "censo_domicilios": infra_censo_domicilios(mid),
+                               "frota": infra_frota(mid, uf),
+                               "energia_gd": energia_gd(mid),
+                               "energia_continuidade": energia_continuidade(nome)},
             "meio_ambiente": {
                 "prodes": ambiente_prodes(mid), "seeg": ambiente_seeg(mid),
                 "queimadas": ambiente_queimadas(mid), "sisam": ambiente_sisam(mid),
@@ -1634,9 +1925,11 @@ def main():
             "comercio_exterior": comex(mid),
             "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
                          "top_empregadores": trabalho_top_empregadores(mid),
-                         "top_empregadores_publicos": trabalho_top_empregadores_publicos(mid)},
-            "agropecuaria": agropecuaria(mid),
-            "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid)},
+                         "top_empregadores_publicos": trabalho_top_empregadores_publicos(mid),
+                         "lista_suja": trabalho_lista_suja(nome, uf)},
+            "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf)},
+            "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid),
+                           "cadunico_mds": beneficios_cadunico_mds(mid)},
             "vizinhanca": vizinhanca(mid),
         },
     }

@@ -488,6 +488,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#geo"><span class="s-icon">🗺️</span> Geografia</a>
     <a class="sidebar-item" href="#amb"><span class="s-icon">🌳</span> Meio Ambiente</a>
     <a class="sidebar-item" href="#infra"><span class="s-icon">🚰</span> Infraestrutura</a>
+    <a class="sidebar-item" href="#energia"><span class="s-icon">⚡</span> Energia & Frota</a>
 
     <div class="sidebar-group-label">Economia</div>
     <a class="sidebar-item" href="#econ"><span class="s-icon">💰</span> Finanças</a>
@@ -511,7 +512,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer">21 temas · Rodado</div>
+  <div class="sidebar-footer">22 temas · Rodado</div>
 </div>
 
 <!-- MAIN -->
@@ -809,6 +810,56 @@ details.more > .more-body { margin-top: .4rem; }
   </div>
 </div>
 
+<!-- ENERGIA & FROTA -->
+<div class="section" id="energia">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">⚡</div>
+    <h2>Energia & Frota</h2>
+    <span class="table-name">br_senatran_frota · br_aneel_dadosabertos</span>
+  </div>
+  <div class="grid-3">
+    <div class="card card-metric"><h3>Frota de veículos <span class="vintage" id="frotaAno"></span></h3><div class="value" id="frotaTotal"></div><div class="delta up" id="frotaDelta"></div></div>
+    <div class="card card-metric">
+      <h3>Veículos por 1.000 hab <span class="vintage" id="frotaAno2"></span></h3>
+      <div class="value" id="frotaTaxa"></div>
+      <div class="bench-bars" id="frotaTaxaBars"></div>
+    </div>
+    <div class="card">
+      <h3>Frota por tipo <span class="vintage" id="frotaAno3"></span></h3>
+      <div class="bench-bars wide" id="frotaTipoBars"></div>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Evolução da frota <span class="vintage" id="frotaSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="frotaChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Frota registrada em dezembro de cada ano (último mês disponível no ano corrente)</div>
+    </div>
+    <div class="card card-chart">
+      <h3>Interrupções de energia — DEC e FEC <span class="vintage" id="contAno"></span></h3>
+      <div class="chart-container"><canvas id="contChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="contNota"></div>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Geração distribuída <span class="vintage" id="gdAno"></span></h3><div class="value" id="gdInst"></div><div class="sub">Instalações conectadas à rede (painéis em casas e empresas)</div></div>
+    <div class="card card-metric"><h3>Potência instalada <span class="vintage" id="gdAno2"></span></h3><div class="value" id="gdMw"></div><div class="sub" id="gdFonteSub"></div></div>
+    <div class="card card-metric"><h3>Potência por habitante <span class="vintage" id="gdAno3"></span></h3><div class="value" id="gdWhab"></div><div class="sub">Watts de geração própria por morador</div></div>
+    <div class="card card-metric"><h3>Unidades com crédito <span class="vintage" id="gdAno4"></span></h3><div class="value" id="gdUcs"></div><div class="sub">Contas de luz que recebem créditos dessa geração</div></div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card card-chart">
+      <h3>Novas instalações por ano <span class="vintage" id="gdSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="gdChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">A ANEEL não publica a data de conexão; o ano é o da atualização cadastral do empreendimento</div>
+    </div>
+    <div class="card">
+      <h3>Potência por classe de consumo <span class="vintage" id="gdAno5"></span></h3>
+      <div class="bench-bars wide" id="gdClasseBars"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ECONOMIA -->
 <div class="section" id="econ">
   <div class="section-header">
@@ -907,7 +958,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(0,131,0,.15);color:var(--s5)">💼</div>
     <h2>Trabalho & Emprego</h2>
-    <span class="table-name">br_me_caged · br_me_rais</span>
+    <span class="table-name">br_me_caged · br_me_rais · br_mte_listasuja</span>
   </div>
   <div class="grid-4">
     <div class="card card-metric"><h3>Vínculos formais <span class="vintage" id="raisAno"></span></h3><div class="value" id="raisVinculos"></div><div class="delta up" id="raisDelta"></div><div class="bench" id="raisBench"></div></div>
@@ -936,6 +987,21 @@ details.more > .more-body { margin-top: .4rem; }
       </table>
     </div>
   </div>
+  <div class="grid-2 mt-1">
+    <div class="card" id="listaSujaCard">
+      <h3>Cadastro de empregadores — trabalho escravo <span class="vintage" id="lsAno"></span> <span class="status" id="stLs"></span></h3>
+      <div class="sub" style="margin-bottom:.4rem">Empregadores flagrados pela fiscalização submetendo trabalhadores a condições análogas à escravidão, com endereço no município</div>
+      <table class="rank-table">
+        <thead><tr><th>Empregador</th><th>Atividade</th><th>Trabalhadores</th></tr></thead>
+        <tbody id="lsList"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Lista suja em contexto <span class="vintage" id="lsAno2"></span></h3>
+      <ul class="data-list" id="lsCtxList"></ul>
+      <div class="sub" style="margin-top:.6rem">O cadastro do MTE não traz código de município: o casamento é pelo nome do município no endereço do estabelecimento. Empregadores listados só com residência, sem cidade, ficam de fora.</div>
+    </div>
+  </div>
 </div>
 
 <!-- AGROPECUÁRIA -->
@@ -943,7 +1009,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(0,131,0,.15);color:var(--s5)">🌱</div>
     <h2>Agropecuária</h2>
-    <span class="table-name">br_ibge_pam · br_ibge_ppm</span>
+    <span class="table-name">br_ibge_pam · br_ibge_ppm · br_incra_acervo</span>
   </div>
   <div class="grid-2">
     <div class="card">
@@ -958,6 +1024,19 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="ppmList"></ul>
       <details class="more"><summary>ver detalhes</summary>
         <ul class="data-list more-body" id="ppmDetList"></ul>
+      </details>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-metric"><h3>Assentamentos da reforma agrária</h3><div class="value" id="assentN"></div><div class="sub" id="assentSub"></div></div>
+    <div class="card" style="grid-column: span 2">
+      <h3>Projetos de assentamento — INCRA</h3>
+      <table class="rank-table">
+        <thead><tr><th>Projeto</th><th>Fase · criação</th><th>Famílias</th></tr></thead>
+        <tbody id="assentList"></tbody>
+      </table>
+      <details class="more" id="assentMore"><summary>ver detalhes</summary>
+        <table class="rank-table more-body"><tbody id="assentDetList"></tbody></table>
       </details>
     </div>
   </div>
@@ -1424,7 +1503,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🫂</div>
     <h2>Benefícios Sociais</h2>
-    <span class="table-name">br_cgu_beneficios_cidadao</span>
+    <span class="table-name">br_cgu_beneficios_cidadao · br_mds_cadunico</span>
   </div>
   <div class="grid-4">
     <div class="card card-metric"><h3>Bolsa Família <span class="vintage" id="bfAno"></span></h3><div class="value" id="bfFamilias"></div><div class="bench"><span id="bfBench"></span></div></div>
@@ -1437,7 +1516,42 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric"><h3>Cadastro Único — famílias <span class="vintage old" id="cadAno2"></span></h3><div class="value" id="cadFamilias"></div><div class="sub" id="cadFamSub"></div></div>
     <div class="card">
       <h3>O que o CadÚnico mede</h3>
-      <div class="sub">Registro de baixa renda que dá acesso a Bolsa Família, tarifa social de energia, BPC e outros programas — cobre mais gente do que recebe benefício. Última competência disponível no espelho é de 2020.</div>
+      <div class="sub">Registro de baixa renda que dá acesso a Bolsa Família, tarifa social de energia, BPC e outros programas — cobre mais gente do que recebe benefício.</div>
+      <ul class="data-list" id="cadAtualList" style="margin-top:.5rem"></ul>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card">
+      <h3>Famílias por faixa de renda <span class="vintage" id="cadRendaAno"></span></h3>
+      <div class="sub" style="margin-bottom:.55rem">Renda per capita declarada — faixas vigentes desde mar/2023</div>
+      <div class="bench-bars wide" id="cadRendaBars"></div>
+      <div class="sub" style="margin-top:.6rem" id="cadSaidaSub"></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Famílias cadastradas <span class="vintage" id="cadSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="cadSerieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Quem é o responsável familiar <span class="vintage" id="cadRespAno"></span></h3>
+      <div class="bench-bars wide" id="cadSexoBars"></div>
+      <div class="sub" style="margin:.85rem 0 .55rem">Pessoas cadastradas por raça/cor</div>
+      <div class="bench-bars wide" id="cadRacaBars"></div>
+    </div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card">
+      <h3>Grupos tradicionais e específicos <span class="vintage" id="cadGpteAno"></span></h3>
+      <div class="sub" style="margin-bottom:.55rem" id="cadGpteSub"></div>
+      <div class="bench-bars wide" id="cadGpteBars"></div>
+    </div>
+    <div class="card">
+      <h3>População em situação de rua <span class="vintage" id="cadRuaAno"></span></h3>
+      <ul class="data-list" id="cadRuaList"></ul>
+    </div>
+    <div class="card">
+      <h3>Esgoto nas casas do CadÚnico <span class="vintage" id="cadEsgAno"></span></h3>
+      <div class="sub" style="margin-bottom:.55rem">% das famílias cadastradas</div>
+      <div class="bench-bars wide" id="cadEsgBars"></div>
     </div>
   </div>
 </div>
@@ -1495,6 +1609,7 @@ details.more > .more-body { margin-top: .4rem; }
   <a href="#geo"><span class="m-icon">🗺️</span>Geografia</a>
   <a href="#amb"><span class="m-icon">🌳</span>Ambiente</a>
   <a href="#infra"><span class="m-icon">🚰</span>Infra</a>
+  <a href="#energia"><span class="m-icon">⚡</span>Energia</a>
   <a href="#econ"><span class="m-icon">💰</span>Economia</a>
   <a href="#emp"><span class="m-icon">🏭</span>Empresas</a>
   <a href="#trab"><span class="m-icon">💼</span>Trabalho</a>
@@ -4043,17 +4158,230 @@ async function init() {
   // =========================================================================
   // BENEFÍCIOS — Cadastro Único
   // =========================================================================
+  // O painel do MDS (cadunico_mds) vai até o mês corrente; o br_mc_indicadores
+  // parou em 2020 e só entra quando o MDS não cobre o município.
+  const cadMds = ok(g(D, 'secoes.beneficios.cadunico_mds'));
   const cad = ok(g(D, 'secoes.beneficios.cadastro_unico'));
-  if (cad) {
-    const compCad = (cad.competencia || '').split('-').reverse().join('/');
-    setTxt('cadAno', compCad); setTxt('cadAno2', compCad);
-    setTxt('cadPessoas', fNum(cad.pessoas_cadastradas || 0));
-    setTxt('cadPctSub', fNum1(cad.pct_populacao || 0) + '% da população na competência');
-    setTxt('cadFamilias', fNum(cad.familias_cadastradas || 0));
-    setTxt('cadFamSub', fNum(cad.familias_pbf || 0) + ' delas recebiam Bolsa Família (' +
-      fNum1(pctDe(cad.familias_pbf, cad.familias_cadastradas)) + '%)');
+  const mmaa = s => (s || '').split('-').reverse().join('/');
+  const popAtual = (() => { const s = g(D, 'secoes.demografia.populacao_serie') || []; return s.length ? s[s.length - 1].populacao : null; })();
+  const cadIds = ['cadAno', 'cadAno2'];
+  if (cadMds && cadMds.familias) {
+    const comp = mmaa(cadMds.competencia);
+    cadIds.forEach(id => { setTxt(id, comp); const e = el_(id); if (e) e.classList.remove('old'); });
+    const pes = cadMds.pessoas || {}, fam = cadMds.familias;
+    setTxt('cadPessoas', fNum(pes.total));
+    setTxt('cadPctSub', popAtual ? fNum1(pctDe(pes.total, popAtual)) + '% da população estimada' : '');
+    setTxt('cadFamilias', fNum(fam.total));
+    setTxt('cadFamSub', fNum(fam.pobreza) + ' em situação de pobreza (' + fNum1(pctDe(fam.pobreza, fam.total)) + '%)');
+    const at = cadMds.atualizacao || {};
+    setHtml('cadAtualList',
+      (at.taxa != null ? liRow('Cadastros atualizados', fNum1(at.taxa) + '%') : '') +
+      (cadMds.local ? liRow('Famílias em área rural', fNum(cadMds.local.rural) + ' (' + fNum1(pctDe(cadMds.local.rural, fam.total)) + '%)') : '') +
+      (cadMds.trabalho_infantil && cadMds.trabalho_infantil.pessoas != null
+        ? liRow('Trabalho infantil identificado (' + mmaa(cadMds.trabalho_infantil.competencia) + ')', fNum(cadMds.trabalho_infantil.pessoas) + ' pessoa(s)') : ''));
+
+    setTxt('cadRendaAno', comp);
+    barrasCategoria('cadRendaBars', [
+      { k: 'Pobreza', v: fam.pobreza || 0, titulo: 'Renda per capita até a linha do Bolsa Família (R$ 218)' },
+      { k: 'Baixa renda', v: fam.baixa_renda || 0, titulo: 'Acima da linha de pobreza, até ½ salário-mínimo per capita' },
+      { k: 'Acima de ½ SM', v: fam.acima_meio_sm || 0 },
+    ], fam.total, C.s4);
+    const sp = cadMds.saida_pobreza_pbf || {};
+    setTxt('cadSaidaSub', sp.saem != null
+      ? 'Com o Bolsa Família, ' + fNum(sp.saem) + ' famílias beneficiárias passam da linha de pobreza; ' +
+        fNum(sp.permanecem) + ' continuam abaixo (' + mmaa(sp.competencia) + ')' : '');
+
+    const serie = cadMds.serie_familias || [];
+    if (serie.length) {
+      setTxt('cadSerieAno', serie[0].ano + '–' + serie[serie.length - 1].ano);
+      new Chart(el_('cadSerieChart'), {
+        type: 'line', data: { labels: serie.map(r => String(r.ano)),
+          datasets: [{ label: 'Famílias', data: serie.map(r => r.familias), borderColor: C.s4, backgroundColor: C.s4fill, fill: true, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3 }] },
+        options: { ...chartOpts, plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
+          callbacks: { label: ctx => fNum(ctx.parsed.y) + ' famílias (' + mmaa(serie[ctx.dataIndex].ref) + ')' } } },
+          scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { color: C.muted, callback: v => fNum(v) } } } }
+      });
+    } else vazioGrafico('cadSerieChart');
+
+    const rs = cadMds.responsavel_sexo || {};
+    setTxt('cadRespAno', comp);
+    barrasCategoria('cadSexoBars', [{ k: 'Mulher', v: rs.feminino || 0 }, { k: 'Homem', v: rs.masculino || 0 }],
+      (rs.feminino || 0) + (rs.masculino || 0), C.s3);
+    const raca = (cadMds.raca_cor || []).filter(r => r.pessoas);
+    barrasCategoria('cadRacaBars', raca.map(r => ({ k: r.raca, v: r.pessoas })),
+      raca.reduce((t, r) => t + r.pessoas, 0), C.s7);
+
+    const gp = cadMds.grupos_especificos || {};
+    setTxt('cadGpteAno', comp);
+    setTxt('cadGpteSub', gp.total ? fNum(gp.total) + ' famílias (' + fNum1(pctDe(gp.total, fam.total)) + '% do cadastro) — uma família pode estar em mais de um grupo' : '');
+    barrasCategoria('cadGpteBars', (gp.lista || []).slice(0, 8).map(r => ({ k: r.grupo, v: r.familias, titulo: r.grupo })),
+      0, C.s5, { fmtValor: v => fNum(v), msgVazio: 'Nenhuma família de grupo específico cadastrada' });
+
+    const rua = cadMds.situacao_rua || {};
+    setTxt('cadRuaAno', mmaa(rua.competencia));
+    if (rua.pessoas != null) {
+      setHtml('cadRuaList',
+        liRow('Pessoas em situação de rua', fNum(rua.pessoas)) +
+        liRow('Famílias', fNum(rua.familias)) +
+        (rua.pct_atendimento != null ? liRow('Com atendimento institucional', fNum1(rua.pct_atendimento) + '%') : '') +
+        (popAtual ? liRow('Por 10 mil habitantes', fNum1(rua.pessoas / popAtual * 1e4)) : ''));
+    } else vazioLista('cadRuaList');
+
+    const esg = cadMds.esgoto || [];
+    const esgTot = esg.reduce((t, r) => t + (r.familias || 0), 0);
+    setTxt('cadEsgAno', comp);
+    barrasCategoria('cadEsgBars', esg.filter(r => r.familias).map(r => ({ k: r.forma, v: r.familias, titulo: r.forma })),
+      esgTot, C.s1, { soPct: true });
   } else {
-    vazioValores('cadPessoas', 'cadFamilias');
+    if (cad) {
+      const compCad = mmaa(cad.competencia);
+      cadIds.forEach(id => setTxt(id, compCad));
+      setTxt('cadPessoas', fNum(cad.pessoas_cadastradas || 0));
+      setTxt('cadPctSub', fNum1(cad.pct_populacao || 0) + '% da população na competência');
+      setTxt('cadFamilias', fNum(cad.familias_cadastradas || 0));
+      setTxt('cadFamSub', fNum(cad.familias_pbf || 0) + ' delas recebiam Bolsa Família (' +
+        fNum1(pctDe(cad.familias_pbf, cad.familias_cadastradas)) + '%)');
+    } else {
+      vazioValores('cadPessoas', 'cadFamilias');
+    }
+    vazioLista('cadAtualList'); vazioLista('cadRuaList'); vazioGrafico('cadSerieChart');
+    ['cadRendaBars', 'cadSexoBars', 'cadRacaBars', 'cadGpteBars', 'cadEsgBars'].forEach(id => barrasCategoria(id, [], 0));
+  }
+
+  // =========================================================================
+  // AGROPECUÁRIA — assentamentos do INCRA
+  // =========================================================================
+  const assent = ok(g(D, 'secoes.agropecuaria.assentamentos'));
+  if (assent) {
+    setTxt('assentN', fNum(assent.total));
+    setTxt('assentSub', assent.total
+      ? fNum(assent.familias) + ' famílias assentadas · ' + fNum(Math.round(assent.area_ha)) + ' ha'
+      : 'Nenhum projeto de assentamento no município');
+    const rowAssent = (a, i) => '<tr>' +
+      '<td class="rank-name" title="' + a.nome + ' · ' + (a.obtencao || '') + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + titulo(a.nome).replace(/^(P[A-Z]?[a-z]?) /, m => m.toUpperCase()) + '</b></td>' +
+      '<td class="area">' + a.fase + ' · ' + String(a.criacao || '').slice(-4) + '</td>' +
+      '<td class="valor"><span class="val">' + fNum(a.familias) + '</span></td></tr>';
+    const proj = assent.projetos || [];
+    if (proj.length) setHtml('assentList', proj.slice(0, 5).map(rowAssent).join(''));
+    else vazioTabela('assentList', 3, 'Nenhum projeto de assentamento do INCRA no município');
+    setHtml('assentDetList', proj.slice(5).map((a, i) => rowAssent(a, i + 5)).join(''));
+    const mais = el_('assentMore'); if (mais) mais.hidden = proj.length <= 5;
+  } else {
+    vazioValor('assentN'); vazioTabela('assentList', 3);
+    const mais = el_('assentMore'); if (mais) mais.hidden = true;
+  }
+
+  // =========================================================================
+  // ENERGIA & FROTA
+  // =========================================================================
+  const TIPO_VEICULO = { automovel: 'Automóvel', motocicleta: 'Motocicleta', caminhonete: 'Caminhonete',
+    camioneta: 'Camioneta', motoneta: 'Motoneta', caminhao: 'Caminhão', reboque: 'Reboque',
+    utilitario: 'Utilitário', semi_reboque: 'Semirreboque', micro_onibus: 'Micro-ônibus',
+    caminhao_trator: 'Caminhão-trator', onibus: 'Ônibus', ciclomotor: 'Ciclomotor', outros: 'Outros' };
+  const mesAno = s => (s || '').split('-').reverse().join('/');
+  const frota = ok(g(D, 'secoes.infraestrutura.frota'));
+  if (frota) {
+    const comp = mesAno(frota.competencia);
+    ['frotaAno', 'frotaAno2', 'frotaAno3'].forEach(id => setTxt(id, comp));
+    setTxt('frotaTotal', fNum(frota.total));
+    const serie = frota.serie || [];
+    const ant = serie.length > 5 ? serie[serie.length - 6] : null;
+    if (ant && ant.total) {
+      const d = (frota.total / ant.total - 1) * 100;
+      setCls('frotaDelta', 'delta ' + (d >= 0 ? 'up' : 'down'));
+      setHtml('frotaDelta', (d >= 0 ? '▲ +' : '▼ −') + fNum1(Math.abs(d)) + '% <span class="vs">vs ' + ant.ano + '</span>');
+    }
+    const tx = frota.veiculos_1000hab || {};
+    setTxt('frotaTaxa', tx.municipio != null ? fNum(Math.round(tx.municipio)) : '—');
+    barrasCategoria('frotaTaxaBars', [
+      { k: truncaPalavra(g(D, 'municipio.nome'), 10), v: tx.municipio || 0, titulo: g(D, 'municipio.nome') },
+      { k: g(D, 'municipio.sigla_uf') || 'UF', v: tx.uf || 0 }, { k: 'Brasil', v: tx.brasil || 0 },
+    ], 0, null, { fmtValor: v => fNum(Math.round(v)) });
+    const barraMe = el_('frotaTaxaBars') && el_('frotaTaxaBars').querySelector('.row');
+    if (barraMe) barraMe.classList.add('me');
+    barrasCategoria('frotaTipoBars', (frota.por_tipo || []).slice(0, 8)
+      .map(r => ({ k: TIPO_VEICULO[r.tipo] || r.tipo, v: r.quantidade })), frota.total, C.s4);
+    if (serie.length) {
+      setTxt('frotaSerieAno', serie[0].ano + '–' + serie[serie.length - 1].ano);
+      new Chart(el_('frotaChart'), {
+        type: 'line', data: { labels: serie.map(r => String(r.ano)),
+          datasets: [{ label: 'Veículos', data: serie.map(r => r.total), borderColor: C.s4, backgroundColor: C.s4fill, fill: true, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3 }] },
+        options: { ...chartOpts, plugins: noLegend, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { color: C.muted, callback: v => fNum(v) } } } }
+      });
+    } else vazioGrafico('frotaChart');
+  } else {
+    vazioValores('frotaTotal', 'frotaTaxa'); barrasCategoria('frotaTaxaBars', [], 0);
+    barrasCategoria('frotaTipoBars', [], 0); vazioGrafico('frotaChart');
+  }
+
+  const cont = ok(g(D, 'secoes.infraestrutura.energia_continuidade'));
+  const serieCont = (cont && cont.serie) || [];
+  if (serieCont.length) {
+    setTxt('contAno', serieCont[0].ano + '–' + serieCont[serieCont.length - 1].ano);
+    new Chart(el_('contChart'), {
+      type: 'line', data: { labels: serieCont.map(r => String(r.ano)), datasets: [
+        { label: 'DEC (horas sem luz)', data: serieCont.map(r => r.dec_horas), borderColor: C.s1, pointBackgroundColor: C.s1, ...lineStyle, pointRadius: 3 },
+        { label: 'Limite DEC', data: serieCont.map(r => r.limite_dec), borderColor: C.s1, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0 },
+        { label: 'FEC (interrupções)', data: serieCont.map(r => r.fec_vezes), borderColor: C.s6, pointBackgroundColor: C.s6, ...lineStyle, pointRadius: 3 },
+        { label: 'Limite FEC', data: serieCont.map(r => r.limite_fec), borderColor: C.s6, borderDash: [4, 4], borderWidth: 1.5, pointRadius: 0 },
+      ] },
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
+        callbacks: { label: ctx => ctx.dataset.label + ': ' + (ctx.parsed.y == null ? '—' : fNum1(ctx.parsed.y)) } } } }
+    });
+    setTxt('contNota', 'Média anual por consumidor nos conjuntos elétricos ' +
+      cont.conjuntos.map(c => c.nome + ' (' + c.agente + ')').join(', ') +
+      ' — a ANEEL mede por conjunto, que pode atender também municípios vizinhos. Tracejado: limite regulatório.');
+  } else {
+    vazioGrafico('contChart', 'Nenhum conjunto elétrico da ANEEL leva o nome do município');
+    setTxt('contNota', 'A ANEEL mede interrupções por conjunto elétrico (nome de subestação), sem correspondência oficial com municípios.');
+  }
+
+  const gd = ok(g(D, 'secoes.infraestrutura.energia_gd'));
+  if (gd) {
+    const dataGd = mesAno((gd.data_base || '').slice(0, 7));
+    ['gdAno', 'gdAno2', 'gdAno3', 'gdAno4', 'gdAno5'].forEach(id => setTxt(id, dataGd));
+    setTxt('gdInst', fNum(gd.instalacoes));
+    setHtml('gdMw', fNum1(gd.potencia_mw) + ' <span class="unit">MW</span>');
+    const fontes = gd.por_fonte || [];
+    setTxt('gdFonteSub', fontes.length === 1 ? 'Toda de ' + fontes[0].fonte.toLowerCase()
+      : fontes.map(f => f.fonte + ' ' + fNum1(pctDe(f.kw, gd.potencia_mw * 1000)) + '%').join(' · '));
+    setHtml('gdWhab', gd.w_por_habitante != null ? fNum(Math.round(gd.w_por_habitante)) + ' <span class="unit">W/hab</span>' : '—');
+    setTxt('gdUcs', fNum(gd.ucs_recebem_credito));
+    barrasCategoria('gdClasseBars', (gd.por_classe || []).map(c => ({ k: c.classe, v: c.kw })),
+      gd.potencia_mw * 1000, C.s4, { fmtValor: v => fNum(Math.round(v)) + ' kW' });
+    const anos = gd.por_ano_cadastro || [];
+    if (anos.length) {
+      setTxt('gdSerieAno', anos[0].ano + '–' + anos[anos.length - 1].ano);
+      new Chart(el_('gdChart'), {
+        type: 'bar', data: { labels: anos.map(a => String(a.ano)),
+          datasets: [{ data: anos.map(a => a.instalacoes), backgroundColor: C.s4, maxBarThickness: 22, borderRadius: 4 }] },
+        options: { ...chartOpts, plugins: noLegend }
+      });
+    } else vazioGrafico('gdChart');
+  } else {
+    vazioValores('gdInst', 'gdMw', 'gdWhab', 'gdUcs'); barrasCategoria('gdClasseBars', [], 0); vazioGrafico('gdChart');
+  }
+
+  // =========================================================================
+  // TRABALHO — lista suja do trabalho escravo
+  // =========================================================================
+  const ls = ok(g(D, 'secoes.trabalho.lista_suja'));
+  if (ls) {
+    const coleta = mesAno(ls.data_coleta);
+    setTxt('lsAno', coleta); setTxt('lsAno2', coleta);
+    pill('stLs', ls.total ? 'st-crit' : 'st-good', ls.total ? '! ' + ls.total + ' na lista' : '✓ nenhum');
+    if (ls.total) {
+      setHtml('lsList', ls.empregadores.map((e, i) => '<tr>' +
+        '<td class="rank-name" title="' + e.local + '"><span class="rk-num">' + (i + 1) + '.</span><b>' + titulo(e.empregador) + '</b></td>' +
+        '<td class="area" title="' + (e.atividade || '') + '">' + (e.atividade || '—') + ' · ação ' + e.ano_acao_fiscal + '</td>' +
+        '<td class="valor"><span class="val">' + fNum(e.trabalhadores) + '</span></td></tr>').join(''));
+    } else vazioTabela('lsList', 3, 'Nenhum empregador com endereço no município na lista atual');
+    setHtml('lsCtxList',
+      liRow('No município', fNum(ls.total) + ' empregador(es) · ' + fNum(ls.trabalhadores) + ' trabalhadores') +
+      liRow('Na UF', fNum(ls.uf.empregadores) + ' · ' + fNum(ls.uf.trabalhadores) + ' trabalhadores') +
+      liRow('No Brasil', fNum(ls.brasil.empregadores) + ' · ' + fNum(ls.brasil.trabalhadores) + ' trabalhadores'));
+  } else {
+    pill('stLs', null); vazioTabela('lsList', 3); vazioLista('lsCtxList');
   }
 
   // Insights
