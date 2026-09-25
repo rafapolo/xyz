@@ -2,3 +2,6 @@ dataviz/.DS_Store
 .DS_Store
 __pycache__/
 *.pyc
+
+# dados pessoais (socios/CPF) usados por dataviz/scripts — nunca publicar
+dataviz/scripts/data/
