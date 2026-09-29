@@ -44,6 +44,8 @@
   #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
   #controls input[type=range] { width:100%; accent-color:#fca636; }
   #controls .row { margin-bottom:10px; }
+  #controls label.check { justify-content:flex-start; align-items:center; gap:6px; cursor:pointer; margin:0; }
+  #controls input[type=checkbox] { accent-color:#fca636; margin:0; }
   #controls select {
     width:100%; background:#222; color:#eee; border:1px solid #555; border-radius:4px;
     padding:3px 4px; font-size:11px;
@@ -156,6 +158,9 @@
     <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
     <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
   </div>
+  <div class="row">
+    <label class="check"><input type="checkbox" id="labelsToggle"> Mostrar labels</label>
+  </div>
 </div>
 </div>
 <button id="toggle-info" aria-label="Sobre o mapa">☰</button>
@@ -183,9 +188,18 @@ const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionCon
 
 // MapLibre GL basemap (OpenFreeMap "dark" vector style, OSM data, no API key, no rate limit)
 // replaces the CartoDB dark_all raster tiles carto deprecated for anonymous use
-L.maplibreGL({
+const basemap = L.maplibreGL({
   style: 'https://tiles.openfreemap.org/styles/dark'
 }).addTo(map);
+
+function applyLabels(show){
+  const gl = basemap.getMaplibreMap();
+  const style = gl && gl.style && gl.style._loaded ? gl.getStyle() : null;
+  if (!style) return;
+  style.layers.forEach(function(l){
+    if (l.type === 'symbol') gl.setLayoutProperty(l.id, 'visibility', show ? 'visible' : 'none');
+  });
+}
 
 const renderer = L.canvas({ padding: 0.5 });
 const fmt = new Intl.NumberFormat('pt-BR');
@@ -271,6 +285,11 @@ radiusSlider.addEventListener('input', function(){
   currentRadius = parseFloat(this.value);
   radiusValue.textContent = currentRadius.toFixed(2);
   markers.forEach(function(m){ m.setRadius(currentRadius); });
+});
+const labelsToggle = document.getElementById('labelsToggle');
+labelsToggle.addEventListener('change', function(){ applyLabels(this.checked); });
+['load', 'styledata'].forEach(function(ev){
+  basemap.getMaplibreMap().on(ev, function(){ applyLabels(labelsToggle.checked); });
 });
 L.DomEvent.disableClickPropagation(document.getElementById('controls'));
 L.DomEvent.disableClickPropagation(document.getElementById('info'));
