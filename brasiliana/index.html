@@ -195,6 +195,7 @@
     margin-top: 8px; font-size: .6rem; line-height: 1.45; color: var(--f-faint);
   }
   .f-row { margin-top: 11px; }
+  .f-sec { margin: 18px 0 -2px; font: 600 .6rem system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--f-faint); border-top: 1px solid var(--f-line); padding-top: 12px; }
   .f-row label {
     display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
     font-size: .6rem; letter-spacing: .08em; text-transform: uppercase;
@@ -322,121 +323,134 @@
     #hint .touch { display: inline; }
   }
 
-  /* ── metadata card ────────────────────────────────────────────────── */
-  /* The wall goes soft behind an open piece: the sharp copy is the one in the
-     card, and everything else steps back out of focus. */
+  /* ── the piece viewer ─────────────────────────────────────────────── */
+  /* Opening a piece hands it the screen: the text in a panel on the left (the
+     filters live on the right, the wordmark steps aside), the image on a stage
+     that takes the rest and zooms for real — wheel, pinch, drag, double click.
+     The wall stays behind, dimmed, and comes back as it was on close. */
   #card-wrap {
-    position: fixed; inset: 0; z-index: 20;
-    display: flex; align-items: center; justify-content: center;
+    position: fixed; inset: 0; z-index: 30;
+    display: grid; grid-template-columns: minmax(300px, 380px) 1fr;
     opacity: 0; pointer-events: none;
-    background: rgba(6,6,8,0);
-    backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
-    transition: opacity .35s ease, background-color .4s ease,
-                backdrop-filter .4s ease, -webkit-backdrop-filter .4s ease;
+    background: rgba(6,6,8,.97);
+    transition: opacity .3s ease;
   }
-  #card-wrap.open {
-    opacity: 1; pointer-events: auto;
-    background: rgba(6,6,8,.3);
-    backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
-  }
+  #card-wrap.open { opacity: 1; pointer-events: auto; }
+  #card-wrap.full { grid-template-columns: 0 1fr; }
+  #card-wrap.full #card { visibility: hidden; }
 
   #card {
-    position: relative;
-    width: min(420px, 90vw);
-    max-height: 86vh;
-    overflow-y: auto;
-    background: rgba(6,6,8,.86);
-    backdrop-filter: blur(6px);
-    border-radius: 6px;
-    padding: 34px 30px 26px;
-    text-align: center;
-    box-shadow: 0 30px 80px rgba(0,0,0,.6);
-    transform: translateY(10px) scale(.97);
-    transition: transform .35s ease;
+    position: relative; min-width: 0; height: 100dvh; overflow-y: auto; overscroll-behavior: contain;
+    background: #0e0e11; border-right: 1px solid rgba(255,255,255,.08);
+    padding: 22px 26px 30px; text-align: left;
+    transform: translateX(-14px); transition: transform .3s ease;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.14) transparent;
   }
-  #card-wrap.open #card { transform: translateY(0) scale(1); }
+  #card-wrap.open #card { transform: none; }
+  /* the way back to the 3D wall, and to the filters, is always the first thing in the panel */
+  #card-bar { display: flex; gap: 8px; margin-bottom: 18px; }
+  #card-bar button {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: 18px; font: .74rem system-ui, sans-serif; letter-spacing: .04em;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); color: #e6e6e0;
+  }
+  #card-bar button:hover { background: rgba(255,255,255,.15); }
+  #card-back { font-weight: 600; }
+  #card-filters-n:not(:empty) { background: #d8b04a; color: #111; border-radius: 9px; padding: 0 6px; font-size: .66rem; font-weight: 700; }
+  /* filters opened from the viewer sit above it; choosing one returns to the wall, filtered */
+  body.filters-over #filters { z-index: 40; }
+  body.filters-over #filters-scrim { z-index: 39; }
+  #card-back:focus-visible, #card button:focus-visible, #card a:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #card-kicker {
+    font: .64rem/1.5 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #8e8e87;
+  }
+  #card-title { font-size: 1.6rem; line-height: 1.2; font-weight: 400; color: #f5f5f0; margin: 6px 0 8px; overflow-wrap: anywhere; }
+  #card-byline { font-size: .95rem; color: #b9b9b0; }
+  #card-byline .sep { color: #55554f; padding: 0 6px; }
+  #card-date .arq { font: .62rem system-ui, sans-serif; letter-spacing: .06em; color: #8e8e87; border: 1px solid rgba(255,255,255,.14); border-radius: 4px; padding: 0 4px; margin-left: 6px; vertical-align: 2px; cursor: help; }
+  #card-contrib { all: unset; cursor: pointer; color: #cdd8e0; text-decoration: underline; text-decoration-color: rgba(127,168,201,.4); text-underline-offset: 3px; }
+  #card-contrib:hover { color: #fff; text-decoration-color: #7fa8c9; }
+  #card-contrib:empty { display: none; }
 
-  #card-back {
-    position: absolute; left: 14px; top: 14px;
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
-    color: #ddd; font-size: 1rem; line-height: 28px; text-align: center;
-    cursor: pointer; font-family: system-ui, sans-serif;
-  }
-  #card-back:hover { background: rgba(255,255,255,.18); }
-
-  #card-type { font-size: 1.55rem; font-weight: 400; color: #f2f2f2; margin-bottom: 6px; }
-  #card-seealso { font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: #7fa8c9; margin-bottom: 18px; }
-  #card-seealso span { color: #cdd8e0; }
-
-  #card-img-wrap { margin: 0 auto 18px; max-width: 260px; }
-  #card-img {
-    display: block; width: 100%; height: auto; border-radius: 2px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.55);
-    image-rendering: auto;
-  }
-
-  #card-title { font-size: 1.02rem; color: #f5f5f0; }
-  #card-date { font-size: .85rem; color: #b9b9b0; margin-top: 2px; }
-  #card-contrib { font-size: .82rem; color: #cdd8e0; margin-top: 10px; }
-  /* the card is centred text; the tree needs a common left edge, so it is a
-     left-aligned block that is itself centred */
-  /* the card is centred text; the tree needs a common left edge, so it is a
-     left-aligned block that is itself centred */
-  #card-tags {
-    width: fit-content; max-width: 100%; margin: 14px auto 0; text-align: left;
-    font-family: system-ui, sans-serif; font-size: .8rem; line-height: 1.5; color: #b8c6d1;
-  }
-  #card-tags:empty { display: none; }
-  #card-tags .tn { position: relative; margin-left: 6px; padding-left: 15px; border-left: 1px solid rgba(127,168,201,.3); }
-  #card-tags > .tn { margin-left: 0; padding-left: 0; border-left: 0; margin-top: 4px; }
-  #card-tags .tl { padding: 4px 0; overflow-wrap: anywhere; }
-  #card-tags .tl[role="button"] { cursor: pointer; border-radius: 4px; }
-  #card-tags .tl[role="button"]:hover { color: #fff; text-decoration: underline; text-decoration-color: rgba(127,168,201,.6); }
-  #card-tags .tl[role="button"]:focus-visible { outline: 1px solid var(--f-accent, #7fa8c9); outline-offset: 2px; }
-  /* elbow from the parent's line to this label */
-  #card-tags .tn .tn > .tl::before {
-    content: ''; position: absolute; left: 0; top: 1.05em; width: 10px; border-top: 1px solid rgba(127,168,201,.3);
-  }
-  #card-tags .tn .tn:last-child { border-left-color: transparent; }
-  #card-tags .tn .tn:last-child::after {
-    content: ''; position: absolute; left: -1px; top: 0; height: 1.05em; border-left: 1px solid rgba(127,168,201,.3);
-  }
-  #card-tags .tn.place > .tl { color: #e6eef5; font-weight: 600; }
-  #card-tags .tn.topic > .tl { color: #b8c6d1; }
-  #card-tags .tn.group > .tl { color: #8fa6b8; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
-  #card-tags .tm { margin-top: 10px; font-size: .7rem; color: #7d8a94; letter-spacing: .02em; }
-  #card-tags .more {
-    all: unset; cursor: pointer; margin: 2px 0 2px 15px; padding: 4px 0; font-size: .72rem; color: #7fa8c9;
-  }
-  #card-tags .more:hover { text-decoration: underline; }
-  #card-related { margin: 16px 0 0; text-align: left; }
-  #card-related h4 { margin: 0 0 6px; font: 600 .66rem system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #8fa6b8; }
-  #card-related .rel { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
-  #card-related .rel button { all: unset; flex: 0 0 auto; cursor: pointer; border-radius: 3px; overflow: hidden; line-height: 0; }
-  #card-related .rel img { width: 64px; height: 64px; object-fit: cover; display: block; opacity: .85; }
-  #card-related .rel button:hover img, #card-related .rel button:focus-visible img { opacity: 1; }
-  #card-img-wrap.zoom { overflow: auto; max-height: 72dvh; cursor: zoom-out; -webkit-overflow-scrolling: touch; }
-  #card-img-wrap.zoom #card-img { width: 220%; max-width: none; }
-  #card-img { cursor: zoom-in; }
-  #card-footer {
-    margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.12);
-    font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .04em; color: #888;
-  }
-  #card-footer a { color: #d8b04a; text-decoration: none; }
-  #card-footer a:hover { text-decoration: underline; }
-  #card-rights { margin-top: 6px; font-size: .68rem; color: #777; }
-
-  /* stepping between pieces without a keyboard */
-  #card-nav { display: flex; gap: 9px; margin-top: 16px; }
-  #card-nav button {
-    all: unset; flex: 1 1 0; box-sizing: border-box; cursor: pointer; text-align: center;
-    font-family: system-ui, sans-serif; font-size: .7rem; letter-spacing: .05em; color: #cdd8e0;
+  #card-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
+  #card-nav button, #card-nav a {
+    all: unset; box-sizing: border-box; cursor: pointer; text-align: center;
+    font: .72rem system-ui, sans-serif; letter-spacing: .04em; color: #cdd8e0;
     background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
-    border-radius: 6px; padding: 9px 6px;
+    border-radius: 6px; padding: 8px 11px;
   }
-  #card-nav button:hover { background: rgba(255,255,255,.13); }
-  #card-nav button:active { background: rgba(255,255,255,.2); }
+  #card-nav a { color: #d8b04a; border-color: rgba(216,176,74,.35); flex: 1 1 100%; }
+  #card-nav button:hover, #card-nav a:hover { background: rgba(255,255,255,.12); }
+
+  /* tags: places as one-line trails, everything else as chips — every piece a filter */
+  #card-tags { font: .8rem/1.5 system-ui, sans-serif; color: #b8c6d1; }
+  #card-tags:empty { display: none; }
+  #card .sec { margin: 18px 0 6px; font: 600 .62rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; }
+  #card-tags .trail { margin: 2px 0; color: #e6eef5; font-weight: 600; overflow-wrap: anywhere; }
+  #card-tags .trail .sep { color: #55554f; font-weight: 400; padding: 0 5px; }
+  #card-tags .trail .topic { font-weight: 400; color: #b8c6d1; }
+  #card-tags .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  #card-tags .chip2 { background: rgba(127,168,201,.12); color: #cfdbe4; border-radius: 12px; padding: 3px 10px; max-width: 100%; overflow-wrap: anywhere; }
+  #card-tags [role="button"] { cursor: pointer; }
+  #card-tags .trail [role="button"]:hover { color: #fff; text-decoration: underline; text-decoration-color: rgba(127,168,201,.6); }
+  #card-tags .chip2[role="button"]:hover { background: rgba(127,168,201,.26); color: #fff; }
+  #card-tags [role="button"]:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #card-tags .tm { margin-top: 12px; font-size: .7rem; color: #7d8a94; }
+  #card-tags .more { all: unset; cursor: pointer; font-size: .72rem; color: #7fa8c9; padding: 3px 4px; }
+  #card-tags .more:hover { text-decoration: underline; }
+
+  #card-related h4 { margin: 18px 0 6px; font: 600 .62rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; }
+  #card-related .rel { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
+  #card-related .rel button { all: unset; flex: 0 0 auto; cursor: pointer; border-radius: 3px; overflow: hidden; line-height: 0; }
+  #card-related .rel img { width: 60px; height: 60px; object-fit: cover; display: block; opacity: .85; }
+  #card-related .rel button:hover img, #card-related .rel button:focus-visible img { opacity: 1; }
+
+  /* the archival record (NOBRADE): what the piece is, where it sits, where the original is */
+  #card-ficha { margin-top: 20px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 12px; font: .78rem/1.45 system-ui, sans-serif; }
+  #card-ficha summary { cursor: pointer; font-weight: 600; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; list-style: none; }
+  #card-ficha summary::-webkit-details-marker { display: none; }
+  #card-ficha summary::before { content: '▸'; display: inline-block; width: 1.1em; transition: transform .2s; }
+  #card-ficha[open] summary::before { transform: rotate(90deg); }
+  #card-ficha dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 12px 0 0; }
+  #card-ficha dt { color: #6e6e68; }
+  #card-ficha dd { margin: 0; color: #cfcfc8; min-width: 0; overflow-wrap: anywhere; }
+  #card-ficha .act.code, #card-ficha .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem; }
+  #card-ficha .act { all: unset; cursor: pointer; color: #cdd8e0; text-decoration: underline; text-decoration-color: rgba(127,168,201,.4); text-underline-offset: 3px; }
+  #card-ficha .act:hover { color: #fff; }
+  #card-ficha .crumb .sep { color: #55554f; padding: 0 4px; }
+  #card-ficha a { color: #d8b04a; text-decoration: none; }
+  #card-ficha a:hover { text-decoration: underline; }
+  #card-ficha .copied { color: #9fd49a; }
+
+  /* ── stage ── */
+  #stage { position: relative; overflow: hidden; min-width: 0; touch-action: none; cursor: default; user-select: none; -webkit-user-select: none; }
+  #stage.can-pan { cursor: grab; }
+  #stage.panning { cursor: grabbing; }
+  #card-img {
+    position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6); image-rendering: auto; -webkit-user-drag: none;
+    opacity: 0; transition: opacity .2s ease;
+  }
+  #card-img.ready { opacity: 1; }
+  #stage.anim #card-img { transition: transform .22s ease, opacity .2s ease; }
+  #stage .sbtn {
+    all: unset; box-sizing: border-box; position: absolute; display: grid; place-items: center; cursor: pointer;
+    background: rgba(12,12,14,.62); border: 1px solid rgba(255,255,255,.16); color: #e6e6e0;
+    font: 1rem/1 system-ui, sans-serif; border-radius: 8px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    transition: background .15s, opacity .2s;
+  }
+  #stage .sbtn:hover { background: rgba(40,40,44,.85); }
+  #stage .sbtn:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #stage #stage-close { top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; }
+  #stage #stage-prev, #stage #stage-next { top: 50%; width: 40px; height: 56px; margin-top: -28px; font-size: 1.5rem; }
+  #stage #stage-prev { left: 14px; } #stage #stage-next { right: 14px; }
+  #stage-tools { position: absolute; right: 14px; bottom: 14px; display: flex; gap: 6px; }
+  #stage #stage-tools .sbtn { position: static; width: 36px; height: 36px; font-size: .95rem; }
+  #stage #stage-tools #z-fit { width: auto; padding: 0 10px; font-size: .7rem; letter-spacing: .04em; }
+  #stage-hint { position: absolute; left: 16px; bottom: 20px; font: .68rem system-ui, sans-serif; color: #77776f; pointer-events: none; transition: opacity .4s; }
+  #stage.touched #stage-hint { opacity: 0; }
+  #stage-pct { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); font: .7rem system-ui, sans-serif; color: #ddd; background: rgba(0,0,0,.5); padding: 3px 8px; border-radius: 10px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #stage-pct.on { opacity: 1; }
 
   /* ── small screens / fingers ─────────────────────────────────────────────
        Two things change shape here: the filter panel spans the width instead
@@ -510,48 +524,41 @@
 
     #wordmark { font-size: .96rem; left: 6px; }
 
-    /* both are sheets on the same edge, and the filter sheet now sits above the
-       card: park the card on top of its peek instead of under it, or the peek
-       would cover the card's own ‹ anterior / próxima › */
-    #card-wrap {
-      align-items: flex-end;
-      padding-bottom: calc(var(--sheet-peek, 56px) + env(safe-area-inset-bottom));
-    }
+    /* phone: the image on top, the text as a sheet under it; tapping the image
+       gives it the whole screen, and scrolling the text shrinks the image to a
+       strip so the piece never leaves view */
+    #card-wrap { display: flex; flex-direction: column; }
+    #stage { order: -1; flex: 0 0 auto; height: 44dvh; transition: height .28s ease; }
+    #card-wrap.compact #stage { height: 22dvh; }
+    #card-wrap.full #stage { height: 100dvh; }
+    #card-wrap.full #card { display: none; }
     #card {
-      /* the sheet is capped short of the screen on purpose: the band of wall it
-         leaves above is where the opened piece goes, and at 86dvh there was no
-         band — the piece rose straight behind the sheet */
-      width: 100%; max-width: none; max-height: min(66dvh, 560px);
-      overscroll-behavior: contain;
-      border-radius: 16px 16px 0 0; background: rgba(6,6,8,.94);
-      padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
-      transform: translateY(26px) scale(1);
+      flex: 1 1 auto; height: auto; min-height: 0; border-right: 0; transform: translateY(20px);
+      border-radius: 16px 16px 0 0; margin-top: -14px; z-index: 1;
+      padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
     }
-    #card::before { /* grab handle — says "sheet", and it can be swiped */
-      content: ''; display: block; width: 40px; height: 4px; margin: 0 auto 12px;
+    #card::before { /* grab handle — says "sheet" */
+      content: ''; display: block; width: 40px; height: 4px; margin: 0 auto 10px;
       border-radius: 2px; background: rgba(255,255,255,.24);
     }
-    #card-back { top: 8px; left: 8px; width: 34px; height: 34px; line-height: 32px; }
-    #card-type { font-size: 1.3rem; }
-    #card-seealso { margin-bottom: 14px; }
-    #card-img-wrap { max-width: min(210px, 48vw); margin-bottom: 14px; }
-    #card-nav button { padding: 12px 6px; font-size: .74rem; }
+    #card-bar { margin-bottom: 12px; }
+    #card-bar button { padding: 9px 14px; font-size: .78rem; }
+    #card-title { font-size: 1.35rem; }
+    #card-nav button, #card-nav a { padding: 11px 12px; font-size: .76rem; }
+    #card-nav button { flex: 1 1 0; }
+    #stage #stage-prev, #stage #stage-next, #stage-tools, #stage-hint { display: none; }
+    #card-wrap.full #stage-tools { display: flex; }
+    #stage #stage-close { display: none; }
+    #card-wrap.full #stage #stage-close { display: grid; }
   }
 
   @media (max-width: 380px) {
     #card { padding-left: 14px; padding-right: 14px; }
-    #card-img-wrap { max-width: 165px; }
   }
 
   /* a phone held sideways: a full-height sheet would swallow the screen */
   @media (max-height: 460px) and (max-width: 900px) {
-    #card-wrap { align-items: center; }
-    #card {
-      width: min(460px, 92vw); max-height: 92dvh; border-radius: 8px;
-      padding: 12px 18px 14px;
-    }
-    #card::before { display: none; }
-    #card-img-wrap { max-width: 150px; margin-bottom: 10px; }
+    #card-wrap { grid-template-columns: minmax(240px, 42vw) 1fr; }
     #filters-body { max-height: 58dvh; }
   }
 </style>
@@ -598,12 +605,18 @@
         <button type="button" class="f-x" id="f-search-x" aria-label="limpar busca" hidden>×</button>
       </div>
     </div>
+    <p class="f-sec">Arranjo</p>
     <div class="f-row">
-      <label for="f-institution">Instituição</label>
+      <label for="f-institution">Instituição de origem</label>
       <select id="f-institution"><option value="">todas</option></select>
     </div>
     <div class="f-row">
-      <label for="f-year-lo"><span>Década</span><span class="val" id="f-year-readout">—</span></label>
+      <label for="f-serie">Série (coleção ou fundo)</label>
+      <select id="f-serie"><option value="">todas</option></select>
+    </div>
+    <p class="f-sec">Data</p>
+    <div class="f-row">
+      <label for="f-year-lo"><span>Década de produção</span><span class="val" id="f-year-readout">—</span></label>
       <div class="f-hist" id="f-hist"></div>
       <div class="f-range">
         <div class="f-range-track"><div class="f-range-fill" id="f-year-fill"></div></div>
@@ -611,6 +624,7 @@
         <input type="range" id="f-year-hi" aria-label="década final">
       </div>
     </div>
+    <p class="f-sec">Pontos de acesso</p>
     <div class="f-row">
       <label for="f-author">Autor / fotógrafo</label>
       <select id="f-author"><option value="">todos</option></select>
@@ -628,20 +642,25 @@
       <select id="f-bairro" disabled><option value="">escolha uma cidade</option></select>
     </div>
     <div class="f-row">
-      <label for="f-topico">Tópico</label>
+      <label for="f-topico">Assunto</label>
       <select id="f-topico"><option value="">todos</option></select>
     </div>
     <div class="f-row">
-      <label for="f-colecao">Coleção</label>
-      <select id="f-colecao"><option value="">todas</option></select>
-    </div>
-    <div class="f-row">
-      <label for="f-pessoa">Pessoa</label>
+      <label for="f-pessoa">Pessoa retratada</label>
       <select id="f-pessoa"><option value="">todas</option></select>
     </div>
     <div class="f-row">
-      <label for="f-type">Tipo de suporte</label>
+      <label for="f-colecao">Coleção citada nos assuntos</label>
+      <select id="f-colecao"><option value="">todas</option></select>
+    </div>
+    <p class="f-sec">Suporte e uso</p>
+    <div class="f-row">
+      <label for="f-type">Espécie e suporte</label>
       <select id="f-type"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-rep">Condição de reprodução</label>
+      <select id="f-rep"><option value="">todas</option></select>
     </div>
     <div id="f-result">—</div>
     <button id="f-clear" class="disabled">limpar filtros</button>
@@ -652,25 +671,40 @@
   <span class="touch">arraste para deslocar · pinça para aproximar · toque numa peça</span>
 </p>
 
-<div id="card-wrap">
-  <div id="card">
-    <div id="card-back">←</div>
-    <div id="card-type">—</div>
-    <div id="card-seealso"><span id="card-community">—</span> · <span id="card-date-tag">—</span></div>
-    <div id="card-img-wrap"><img id="card-img" alt=""></div>
-    <div id="card-title">—</div>
-    <div id="card-date">—</div>
-    <div id="card-contrib"></div>
-    <div id="card-tags"></div>
-    <div id="card-related" hidden></div>
-    <div id="card-footer">
-      <div><a id="card-link" href="#" target="_blank" rel="noopener">ver item original ↗</a> · <span id="card-handle"></span></div>
-      <div id="card-rights"></div>
+<div id="card-wrap" role="dialog" aria-modal="true" aria-labelledby="card-title">
+  <aside id="card">
+    <div id="card-bar">
+      <button type="button" id="card-back" title="voltar ao mural 3D (Esc)">← mural</button>
+      <button type="button" id="card-filters" title="filtrar o mural">filtros<span id="card-filters-n"></span></button>
     </div>
+    <div id="card-kicker"></div>
+    <h2 id="card-title">—</h2>
+    <div id="card-byline"><span id="card-date"></span><span class="sep" id="card-by-sep">·</span><button type="button" id="card-contrib" title="filtrar o mural por este autor"></button></div>
     <div id="card-nav">
       <button type="button" id="card-prev" aria-label="peça anterior">‹ anterior</button>
       <button type="button" id="card-next" aria-label="próxima peça">próxima ›</button>
+      <a id="card-link" href="#" target="_blank" rel="noopener">original ↗</a>
     </div>
+    <div id="card-tags"></div>
+    <div id="card-related" hidden></div>
+    <details id="card-ficha">
+      <summary>Ficha arquivística <span style="font-weight:400;letter-spacing:.04em;text-transform:none;color:#6e6e68">· NOBRADE</span></summary>
+      <dl id="card-ficha-dl"></dl>
+    </details>
+  </aside>
+  <div id="stage">
+    <img id="card-img" alt="" draggable="false">
+    <div id="stage-pct"></div>
+    <button type="button" class="sbtn" id="stage-prev" aria-label="peça anterior">‹</button>
+    <button type="button" class="sbtn" id="stage-next" aria-label="próxima peça">›</button>
+    <button type="button" class="sbtn" id="stage-close" aria-label="voltar ao mural" title="voltar ao mural 3D (Esc)">×</button>
+    <div id="stage-tools">
+      <button type="button" class="sbtn" id="z-out" aria-label="afastar (−)">−</button>
+      <button type="button" class="sbtn" id="z-in" aria-label="aproximar (+)">+</button>
+      <button type="button" class="sbtn" id="z-fit" aria-label="encaixar a imagem (0)">encaixar</button>
+      <button type="button" class="sbtn" id="z-full" aria-label="só a imagem (F)">⤢</button>
+    </div>
+    <div id="stage-hint">roda aproxima · arraste move · duplo clique amplia · F só a imagem</div>
   </div>
 </div>
 
@@ -1063,6 +1097,11 @@ renderer.domElement.addEventListener('pointermove', e => {
 // (the "hole" always opens in the middle, wherever you clicked).
 let atlasSources = []; // { source, size } per atlas page — used to crop the tile into the card canvas
 let atlasEntries = null, TPR = 1;
+let seriesTitles = [];   // títulos das séries NOBRADE (nível 3); meta.si indexa aqui
+let authorities = [];    // formas autorizadas ISAAR(CPF) dos autores; meta.ai indexa aqui
+let instituicoes = {};   // community do DSpace → nome autorizado da instituição
+let colecaoInfo = {};    // código e título do nível 1
+const tileByRef = new Map(); // código de referência → peça, para links #BR RJXYZ…
 let selected = null;
 let selectedAt = 0;
 
@@ -1134,11 +1173,10 @@ function rest(m) { aim(m, m.userData.basePos, 1); }
 function deselect() {
   closing = false;
   tileMeshes.forEach(rest);
-  document.getElementById('card-wrap').classList.remove('open');
+  document.getElementById('card-wrap').classList.remove('open', 'full', 'compact');
   selected = null;
 }
 document.getElementById('card-back').addEventListener('click', () => closeCard());
-document.getElementById('card-img').addEventListener('click', () => document.getElementById('card-img-wrap').classList.toggle('zoom'));
 // A tap is pointerup *then* a compatibility click. The card opens on the
 // pointerup, so that click lands on whatever the card just put under the
 // finger — the backdrop (closing it again) or a button on the sheet. Swallow
@@ -1153,11 +1191,6 @@ document.getElementById('card-wrap').addEventListener('click', e => {
 document.getElementById('card-wrap').addEventListener('click', e => {
   if (e.target.id === 'card-wrap') closeCard();
 });
-// the wall is frozen while a piece is up, so a scroll out there means "give it
-// back" — the card folds away and the wheel that followed does the zooming
-document.getElementById('card-wrap').addEventListener('wheel', e => {
-  if (selected && !e.target.closest('#card')) closeCard(); // the card's own body still scrolls
-}, { passive: true });
 
 /* ─── browser history ────────────────────────────────────────────────────────
    Opening a piece is an event worth going back from: each one becomes a history
@@ -1197,7 +1230,7 @@ const handleFromHash = () => {
 window.addEventListener('popstate', e => {
   if (!historyReady) return;
   const h = (e.state && e.state.h) || handleFromHash();
-  const tile = h ? tileByHandle.get(h) : null;
+  const tile = h ? (tileByHandle.get(h) || tileByRef.get(h)) : null;
   if (tile) { if (tile !== selected) selectTile(tile); }
   else if (selected) deselect();
   // back out of a card lands on an entry whose query predates the filter that closed it
@@ -1212,6 +1245,7 @@ const filtersBodyEl = document.getElementById('filters-body');
 function toggleFilters(force) {
   const open = force !== undefined ? force : !filtersEl.classList.contains('open');
   filtersEl.classList.toggle('open', open);
+  if (!open) document.body.classList.remove('filters-over');
   filtersHead.setAttribute('aria-expanded', String(open));
   filtersScrim.classList.toggle('on', open && isMobile);
 }
@@ -1268,10 +1302,18 @@ window.addEventListener('touchcancel', endSheetDrag);
 window.addEventListener('keydown', e => {
   const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
   if (e.key === 'Escape') {
-    if (selected) closeCard();
+    if (document.body.classList.contains('filters-over') && filtersEl.classList.contains('open')) toggleFilters(false);
+    else if (selected && wrapEl.classList.contains('full')) setFull(false);
+    else if (selected) closeCard();
     else if (typing) e.target.blur();
     else toggleFilters(false);
     return;
+  }
+  if (selected && !typing && !e.metaKey && !e.ctrlKey) {
+    if (e.key === 'f' || e.key === 'F') { setFull(!wrapEl.classList.contains('full')); return; }
+    if (e.key === '+' || e.key === '=') { zoomCenter(1.5); return; }
+    if (e.key === '-' || e.key === '_') { zoomCenter(1 / 1.5); return; }
+    if (e.key === '0') { fitZ(true); return; }
   }
   if (e.key === 'f' && !typing) { toggleFilters(); return; }
   if (e.key === '/' && !typing) { // straight into the search box
@@ -1393,47 +1435,289 @@ function tileThumbUrl(handle, px) {
 
 function showCard(data) {
   const meta = data.meta || {};
-  document.getElementById('card-type').textContent = meta.type || 'Fotografia';
-  document.getElementById('card-community').textContent = meta.community || '—';
-  document.getElementById('card-date-tag').textContent = prettyDate(meta.date) || 's.d.';
-  document.getElementById('card-title').textContent = meta.title || '(sem título)';
-  document.getElementById('card-date').textContent = prettyDate(meta.date);
-  document.getElementById('card-contrib').textContent = meta.contributor ? meta.contributor : '';
-  // this piece's dc.subject, one chip each (accent/case duplicates folded)
-  const tagsEl = document.getElementById('card-tags');
-  renderSubjectTree(tagsEl, meta);
-  document.getElementById('card-img-wrap').classList.remove('zoom');
+  const inst = instName(meta.community);
+  const aut = meta.ai != null ? authorities[meta.ai] : '';
+  const u = tileByHandle.get(data.handle)?.userData || {};
+  document.getElementById('card-kicker').textContent =
+    [meta.sup || cleanType(meta.type).replace('/', ',').toLowerCase() || 'fotografia', inst].filter(Boolean).join(' · ');
+  document.getElementById('card-title').textContent = meta.title || '[sem título]';
+  // 1.3: the date as NOBRADE writes it — brackets and "?" say "attributed", so they stay
+  const dateEl = document.getElementById('card-date');
+  dateEl.textContent = meta.dt || meta.date || '[s.d.]';
+  if (meta.dq) {
+    const q = document.createElement('span');
+    q.className = 'arq'; q.textContent = 'atribuída';
+    q.title = 'Data atribuída pelo arquivista (NOBRADE 1.3.3.2): a origem não informa; estimada pelo período de atividade do autor ou pelas datas-limite da série.';
+    dateEl.appendChild(q);
+  }
+  // 2.1 / 8.1: the author is an access point — a name that filters the wall
+  const who = shortName(aut || cleanAuthor(meta.contributor));
+  const contrib = document.getElementById('card-contrib');
+  contrib.textContent = who;
+  contrib.onclick = u._author ? () => cardFilter && cardFilter({ author: u._author }) : null;
+  document.getElementById('card-by-sep').hidden = !who;
+  // 5.1: this is a collection of copies — the original's whereabouts is the headline link
+  const link = document.getElementById('card-link');
+  link.href = data.handle ? sourceUrl(data.handle) : '#';
+  link.textContent = `original: ${inst || 'Brasiliana Fotográfica'} ↗`;
+  renderSubjectTree(document.getElementById('card-tags'), meta);
   renderRelated(data);
-  document.getElementById('card-handle').textContent = data.handle || '';
-  document.getElementById('card-link').href = data.handle ? sourceUrl(data.handle) : '#';
-  document.getElementById('card-rights').textContent = meta.rights ? `Direitos: ${meta.rights}` : '';
-
-  // crop this tile out of the atlas image for a (still small, but framed) preview
-  const entry = atlasEntries[data.handle];
-  const img = document.getElementById('card-img');
-  const page = atlasSources[entry?.atlas || 0];
-  if (page && entry) {
-    const S = page.size / TPR;
-    const out = Math.min(512, Math.round(S * 4)); // no point upscaling past 4x
-    const c = document.createElement('canvas');
-    c.width = c.height = out;
-    const ctx = c.getContext('2d');
-    ctx.imageSmoothingEnabled = true;
-    ctx.drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, out, out);
-    img.src = c.toDataURL('image/jpeg', 0.92);
-  }
-  // the atlas tile is only 128 px: show it at once, then swap in the medium image
-  // (~1000 px) once it has loaded — unless the card has moved on to another piece
-  const want = data.handle;
-  img.dataset.handle = want;
-  if (want) {
-    const big = new Image();
-    big.onload = () => { if (img.dataset.handle === want) img.src = big.src; };
-    big.src = mediumUrl(want);
-    neighbours(want).forEach(h => { new Image().src = mediumUrl(h); });   // ‹ › should not flash the blurry tile
-  }
+  renderFicha(data, meta, inst, aut, u);
+  const nAct = document.querySelectorAll('#filters-chips .chip').length;
+  document.getElementById('card-filters-n').textContent = nAct ? String(nAct) : '';
+  document.getElementById('card').scrollTop = 0;
+  wrapEl.classList.remove('compact');
+  stageLoad(data);
   document.getElementById('card-wrap').classList.add('open');
 }
+
+// "Ferrez, Marc, 1843-1923" → "Marc Ferrez": the byline reads as a name; the ficha keeps the authorized form
+function shortName(form) {
+  if (!form) return '';
+  const base = form.replace(/,\s*(?:ca\.\s*|fl\.\s*|m\.\s*|n\.\s*)?\d{4}.*$/, '').trim();
+  const m = base.match(/^([^,]+),\s*([^,]+)$/);
+  return m && !/\b(escola|oficina|officina|photographia|casa|companhia|museu|instituto)\b/i.test(base) ? `${m[2]} ${m[1]}` : base;
+}
+const instName = c => (c && instituicoes[c]) || c || '';
+
+// ── the archival record: the seven NOBRADE mandatory elements a piece carries,
+// plus where the original is and how it may be reproduced ──
+function renderFicha(data, meta, inst, aut, u) {
+  const dl = document.getElementById('card-ficha-dl');
+  dl.replaceChildren();
+  const row = (dt, ...kids) => {
+    const a = document.createElement('dt'); a.textContent = dt;
+    const b = document.createElement('dd');
+    kids.flat().forEach(k => b.append(k));
+    dl.append(a, b);
+    return b;
+  };
+  const act = (label, fn, cls = '') => {
+    const x = document.createElement('button');
+    x.type = 'button'; x.className = 'act ' + cls; x.textContent = label; x.addEventListener('click', fn);
+    return x;
+  };
+  const copy = (btn, text) => {
+    const done = () => { const t = btn.textContent; btn.textContent = 'copiado ✓'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = t; btn.classList.remove('copied'); }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, () => {}); } catch {}
+  };
+  const sep = () => Object.assign(document.createElement('span'), { className: 'sep', textContent: '›' });
+  if (meta.ref) { const b = act(meta.ref, () => copy(b, meta.ref), 'code'); b.title = 'copiar o código de referência'; row('Código', b); }
+  row('Nível', 'dossiê');
+  const serie = u._serie;
+  const crumb = row('Arranjo');
+  crumb.className = 'crumb';
+  crumb.append(colecaoInfo.titulo ? colecaoInfo.titulo.replace(/\s*\(.*\)$/, '').replace(/^Coleção\s+/, '') : 'Brasiliana', sep(),
+    act(inst || '—', () => cardFilter && cardFilter({ institution: meta.community })));
+  if (serie) crumb.append(sep(), act(serie, () => cardFilter && cardFilter({ institution: meta.community, serie })));
+  const d = row('Data', meta.dt || meta.date || '[s.d.]');
+  if (meta.dq) d.append(' — atribuída pelo arquivista');
+  if (meta.date && meta.dt && meta.date.trim() !== meta.dt) d.append(Object.assign(document.createElement('div'), { textContent: `na origem: ${meta.date}`, style: 'color:#6e6e68' }));
+  row('Produtor', aut || cleanAuthor(meta.contributor) || 'autoria não identificada');
+  row('Dimensão e suporte', `1 ${meta.sup || cleanType(meta.type).replace('/', ',').toLowerCase() || 'fotografia'}`);
+  const orig = row('Original', `${inst || '—'} · `);
+  orig.append(Object.assign(document.createElement('a'), { href: sourceUrl(data.handle), target: '_blank', rel: 'noopener', textContent: 'Brasiliana Fotográfica ↗' }));
+  if (meta.rep || meta.rights) row('Reprodução', (meta.rep ? meta.rep[0].toUpperCase() + meta.rep.slice(1) : 'Consultar o detentor') + (meta.rights ? ` (${meta.rights})` : ''));
+  row('Handle', data.handle || '—');
+  const cite = act('copiar referência', () => copy(cite, citation(data, meta, inst, aut)));
+  cite.title = citation(data, meta, inst, aut);
+  row('Citar', cite);
+}
+
+function citation(data, meta, inst, aut) {
+  const base = (aut || '').replace(/,\s*(?:ca\.\s*|fl\.\s*|m\.\s*|n\.\s*)?\d{4}.*$/, '');
+  const m = base.match(/^([^,]+),\s*(.+)$/);
+  const who = m ? `${m[1].toUpperCase()}, ${m[2]}. ` : base ? `${base.toUpperCase()}. ` : '';
+  const hoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).replace(/ de /g, ' ');
+  return `${who}${meta.title || '[sem título]'}. ${meta.dt || '[s.d.]'}. 1 ${meta.sup || 'fotografia'}. ` +
+    `Original: ${inst}. Código de referência: ${meta.ref || data.handle}. ` +
+    `Disponível em: ${sourceUrl(data.handle)}. Acesso em: ${hoje}.`;
+}
+
+
+// ─── the stage: fit, zoom and pan over the piece's image ────────────────────
+// The image sits at its natural size and one transform places it:
+// translate(x, y) scale(s). "fit" is the scale that shows it whole; zoom is
+// anchored under the cursor / between the fingers, and panning is clamped so
+// the image never leaves the stage. A sharper copy (derivados/grande) is
+// swapped in once the zoom passes what the medium copy can show, keeping the
+// on-screen size exactly where it was.
+const wrapEl = document.getElementById('card-wrap');
+const stage = document.getElementById('stage');
+const stImg = document.getElementById('card-img');
+const stPct = document.getElementById('stage-pct');
+const Z = { s: 1, x: 0, y: 0, fit: 1, nw: 0, nh: 0, touched: false, handle: null, grande: false };
+const MAXZ = 6;              // × the fitted size
+let hasGrande = false;       // set from the map once the grande derivative exists
+const grandeUrl = h => `https://hel1.your-objectstorage.com/brasiliana/derivados/grande/${h.replace(/\//g, '_')}.webp`;
+const narrow = () => window.matchMedia('(max-width: 640px)').matches;
+
+function fitScale() {
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const pad = narrow() && !wrapEl.classList.contains('full') ? 1 : 0.92;
+  return Z.nw && W && H ? Math.min(W * pad / Z.nw, H * pad / Z.nh) : 1;
+}
+function clampZ() {
+  const W = stage.clientWidth, H = stage.clientHeight, w = Z.nw * Z.s, h = Z.nh * Z.s;
+  Z.x = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, Z.x));
+  Z.y = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, Z.y));
+}
+function applyZ(anim) {
+  stage.classList.toggle('anim', !!anim);
+  clampZ();
+  stImg.style.transform = `translate(${Z.x}px, ${Z.y}px) scale(${Z.s})`;
+  stage.classList.toggle('can-pan', Z.s > Z.fit * 1.01);
+  if (hasGrande && !Z.grande && Z.s > 1.1 && Z.handle) loadGrande(Z.handle);
+}
+function fitZ(anim) {
+  if (!Z.nw) return;
+  Z.fit = fitScale(); Z.s = Z.fit; Z.touched = false;
+  applyZ(anim);
+}
+let pctTimer = null;
+function zoomAt(k, cx, cy, anim) {
+  if (!Z.nw) return;
+  const ns = Math.min(Z.fit * MAXZ, Math.max(Z.fit, Z.s * k));
+  Z.x = cx - (cx - Z.x) * (ns / Z.s);
+  Z.y = cy - (cy - Z.y) * (ns / Z.s);
+  Z.s = ns; Z.touched = ns > Z.fit * 1.001;
+  applyZ(anim);
+  stage.classList.add('touched');
+  stPct.textContent = `${Math.round(Z.s / Z.fit * 100)}%`;
+  stPct.classList.add('on');
+  clearTimeout(pctTimer); pctTimer = setTimeout(() => stPct.classList.remove('on'), 700);
+}
+const zoomCenter = k => zoomAt(k, stage.clientWidth / 2, stage.clientHeight / 2, true);
+
+// swap the picture under the same view: a sharper copy of the same image keeps its on-screen size
+function showSrc(src, w, h) {
+  const prev = Z.nw;
+  stImg.src = src;
+  stImg.style.width = `${w}px`; stImg.style.height = `${h}px`;
+  Z.nw = w; Z.nh = h;
+  if (Z.touched && prev) { Z.s *= prev / w; Z.x = Z.x; Z.fit = fitScale(); applyZ(false); }
+  else fitZ(false);
+  stImg.classList.add('ready');
+}
+function stageLoad(data) {
+  const h = data.handle;
+  Z.handle = h; Z.touched = false; Z.grande = false; Z.nw = 0;
+  stImg.classList.remove('ready');
+  stImg.alt = (data.meta || {}).title || '';
+  // the atlas tile first (instant, blurry), then the medium copy (~1000 px)
+  const entry = atlasEntries[h], page = atlasSources[entry?.atlas || 0];
+  let got = false;
+  const big = new Image();
+  big.onload = () => { if (Z.handle === h) { got = true; showSrc(big.src, big.naturalWidth, big.naturalHeight); } };
+  big.src = mediumUrl(h);
+  setTimeout(() => {
+    if (got || Z.handle !== h || !page || !entry) return;
+    const S = page.size / TPR, out = Math.min(512, Math.round(S * 4)), c = document.createElement('canvas');
+    c.width = c.height = out;
+    const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, out, out);
+    showSrc(c.toDataURL('image/jpeg', 0.9), out, out);
+  }, 120);
+  neighbours(h).forEach(n => { new Image().src = mediumUrl(n); });   // ‹ › should not flash the blurry tile
+}
+function loadGrande(h) {
+  Z.grande = true;
+  const g = new Image();
+  g.onload = () => { if (Z.handle === h) { Z.touched = true; showSrc(g.src, g.naturalWidth, g.naturalHeight); } };
+  g.src = grandeUrl(h);
+}
+new ResizeObserver(() => { if (!Z.nw) return; if (Z.touched) { Z.fit = fitScale(); applyZ(false); } else fitZ(false); }).observe(stage);
+
+function setFull(on) {
+  wrapEl.classList.toggle('full', on);
+  document.getElementById('z-full').textContent = on ? '⤡' : '⤢';
+}
+
+// wheel: zoom under the cursor (a trackpad pinch arrives as ctrl+wheel with small deltas)
+stage.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = stage.getBoundingClientRect();
+  zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+
+// pointers: one drags (pan when zoomed, swipe when not), two pinch
+const stPts = new Map();
+let gest = null, lastTap = 0, lastPointerType = 'mouse';
+stage.addEventListener('pointerdown', e => {
+  if (e.target.closest('.sbtn')) return;
+  lastPointerType = e.pointerType;
+  stage.setPointerCapture(e.pointerId);
+  stPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (stPts.size === 1) gest = { type: 'one', x0: e.clientX, y0: e.clientY, ox: Z.x, oy: Z.y, moved: 0, onImg: e.target === stImg };
+  else if (stPts.size === 2) {
+    const [a, b] = [...stPts.values()];
+    gest = { type: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: Z.s };
+  }
+});
+stage.addEventListener('pointermove', e => {
+  if (!stPts.has(e.pointerId) || !gest) return;
+  stPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gest.type === 'one') {
+    const dx = e.clientX - gest.x0, dy = e.clientY - gest.y0;
+    gest.moved = Math.max(gest.moved, Math.hypot(dx, dy));
+    if (Z.s > Z.fit * 1.01) { Z.x = gest.ox + dx; Z.y = gest.oy + dy; applyZ(false); stage.classList.add('panning'); }
+  } else if (gest.type === 'pinch' && stPts.size >= 2) {
+    const [a, b] = [...stPts.values()], r = stage.getBoundingClientRect();
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    zoomAt((gest.s0 * d / gest.d0) / Z.s, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+  }
+});
+function stEnd(e) {
+  if (!stPts.has(e.pointerId)) return;
+  stPts.delete(e.pointerId);
+  stage.classList.remove('panning');
+  const g = gest;
+  if (g && g.type === 'pinch') { gest = null; return; }   // the finger left behind does not start a drag
+  gest = null;
+  if (!g || e.type === 'pointercancel') return;
+  const dx = e.clientX - g.x0, dy = e.clientY - g.y0, atFit = Z.s <= Z.fit * 1.01;
+  const full = wrapEl.classList.contains('full');
+  if (g.moved < 8) {
+    const r = stage.getBoundingClientRect(), now = performance.now();
+    if (e.pointerType !== 'mouse' && now - lastTap < 300) {       // double tap
+      lastTap = 0;
+      if (atFit) zoomAt(2.5, e.clientX - r.left, e.clientY - r.top, true); else fitZ(true);
+      return;
+    }
+    lastTap = now;
+    if (narrow() && !full && g.onImg) { setFull(true); return; }  // phone: the image asks for the screen
+    if (!narrow() && !g.onImg && e.pointerType === 'mouse') closeCard(); // desktop: a click beside the picture
+    return;
+  }
+  if (e.pointerType !== 'mouse' && atFit) {
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) stepSelection(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6) { if (full) setFull(false); else closeCard(); }
+  }
+}
+stage.addEventListener('pointerup', stEnd);
+stage.addEventListener('pointercancel', stEnd);
+stage.addEventListener('dblclick', e => {
+  if (lastPointerType !== 'mouse' || e.target.closest('.sbtn')) return;
+  const r = stage.getBoundingClientRect();
+  if (Z.s > Z.fit * 1.05) fitZ(true); else zoomAt(2.5, e.clientX - r.left, e.clientY - r.top, true);
+});
+document.getElementById('z-in').addEventListener('click', () => zoomCenter(1.5));
+document.getElementById('z-out').addEventListener('click', () => zoomCenter(1 / 1.5));
+document.getElementById('z-fit').addEventListener('click', () => fitZ(true));
+document.getElementById('z-full').addEventListener('click', () => setFull(!wrapEl.classList.contains('full')));
+document.getElementById('card-filters').addEventListener('click', () => {
+  document.body.classList.add('filters-over');
+  toggleFilters(true);
+});
+document.getElementById('stage-prev').addEventListener('click', () => stepSelection(-1));
+document.getElementById('stage-next').addEventListener('click', () => stepSelection(1));
+document.getElementById('stage-close').addEventListener('click', () => {
+  if (narrow() && wrapEl.classList.contains('full')) setFull(false); else closeCard();
+});
+// phone: reading the text shrinks the picture to a strip, and it grows back at the top
+document.getElementById('card').addEventListener('scroll', e => {
+  if (narrow()) wrapEl.classList.toggle('compact', e.target.scrollTop > 40);
+}, { passive: true });
 
 // ─── render loop ────────────────────────────────────────────────────────────
 // Easing is a time constant here, never a per-frame fraction: a fixed fraction
@@ -1493,6 +1777,7 @@ function flattenMeta(value) {
 }
 
 function yearOf(meta) {
+  if (meta && Number.isInteger(meta.ano)) return meta.ano;
   const m = String((meta || {}).date || '').match(/(1[5-9]\d{2}|20\d{2})/);
   return m ? parseInt(m[1], 10) : null;
 }
@@ -1527,6 +1812,18 @@ function cleanAuthor(raw) {
   s = s.replace(/[.,\s]+$/, '').replace(/^\[(.*)\]$/, '$1').trim();
   if (!s || NO_AUTHOR.test(s) || /[<>]|\d{3}/.test(s)) return '';
   return s;
+}
+// 1.5: the NOBRADE species and support ("negativo fotográfico, vidro"); colour is left to the card
+function typeOf(meta) {
+  if (meta.sup) return meta.sup.replace(/\s(?:p&b|cor)(?=,|$)/, '');
+  const t = cleanType(meta.type);
+  return t ? t.replace('/', ',').toLowerCase() : '';
+}
+// 2.1: the authority record when the piece has one, the cleaned spelling otherwise
+function authorOf(meta) {
+  if (meta.ai != null) return `a${meta.ai}`;
+  const a = cleanAuthor(meta.contributor);
+  return a ? authorKey(a) : '';
 }
 // same person, different word order or accents → same key
 const authorKey = name => deburr(name).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
@@ -1803,23 +2100,27 @@ let cardFilter = null;   // set by setupFilters: ({estado, cidade, bairro, topic
 function renderSubjectTree(el, meta) {
   el.replaceChildren();
   const t = subjectTree(meta);
-  const node = (cls, label, filter, into) => {
-    const d = document.createElement('div');
-    d.className = 'tn ' + cls;
-    const l = document.createElement('div');
-    l.className = 'tl'; l.textContent = label;
-    if (filter) {
-      l.tabIndex = 0; l.setAttribute('role', 'button'); l.title = 'filtrar o mural por isto';
-      const go = () => cardFilter && cardFilter(filter);
-      l.addEventListener('click', go);
-      l.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-    }
-    d.appendChild(l);
-    into.appendChild(d);
-    return d;
+  const clickable = (node, filter, label) => {
+    if (!filter) return node;
+    node.tabIndex = 0; node.setAttribute('role', 'button'); node.title = `filtrar o mural: ${label}`;
+    const go = () => cardFilter && cardFilter(filter);
+    node.addEventListener('click', go);
+    node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    return node;
   };
-  // places: Brasil › estado › cidade › (bairro | tópico…); a country is its own "estado"
-  const drawPlace = (n, label, into, ctx) => {
+  const sec = title => { const h = document.createElement('div'); h.className = 'sec'; h.textContent = title; el.appendChild(h); };
+  const capped = (items, n, into) => {
+    items.forEach((x, i) => { if (i >= n) x.hidden = true; into.appendChild(x); });
+    if (items.length > n) {
+      const more = document.createElement('button');
+      more.type = 'button'; more.className = 'more'; more.textContent = `+${items.length - n}`;
+      more.addEventListener('click', () => { items.forEach(x => { x.hidden = false; }); more.remove(); });
+      into.appendChild(more);
+    }
+  };
+  // Onde: every branch of the place tree becomes one trail, Brasil › estado › cidade › local
+  const trails = [];
+  const walk = (n, label, ctx, trail) => {
     const c = Object.assign({}, ctx);
     if (n.place) {
       if (ctx.level === 0) { if (label !== 'Brasil') c.estado = label; }
@@ -1829,76 +2130,71 @@ function renderSubjectTree(el, meta) {
     } else c.topico = (ctx.topico ? ctx.topico + ' - ' : '') + label;
     c.level = ctx.level + 1;
     const f = Object.assign({}, c); delete f.level;
-    const hasFilter = f.estado || f.cidade || f.bairro || f.topico;
-    const d = node(n.place ? 'place' : 'topic', label, hasFilter ? f : null, into);
-    n.kids.forEach((kid, name) => drawPlace(kid, name, d, c));
+    const seg = { label, place: !!n.place, filter: (f.estado || f.cidade || f.bairro || f.topico) ? f : null };
+    const tr = trail.concat(seg);
+    if (!n.kids.size) trails.push(tr); else n.kids.forEach((kid, name) => walk(kid, name, c, tr));
   };
-  t.root.kids.forEach((kid, name) => drawPlace(kid, name, el, { level: 0, estado: name === 'Brasil' ? null : name }));
-  // Brasil's kids are states: level 1 with no estado yet → estado
-  const group = (title, leaves, mk) => {
-    if (!leaves.length) return;
-    const g = node('place group', title, null, el);
-    leaves.forEach(x => mk(x, g));
-    const nodes = g.querySelectorAll('.tn');
-    if (nodes.length > 8) {
-      nodes.forEach((n, i) => { if (i >= 8) n.hidden = true; });
-      const more = document.createElement('button');
-      more.type = 'button'; more.className = 'more'; more.textContent = `+${nodes.length - 8} mais`;
-      more.addEventListener('click', () => { nodes.forEach(n => { n.hidden = false; }); more.remove(); });
-      g.appendChild(more);
-    }
-  };
-  // themes: "A - B - C" is a path, so pieces sharing a prefix share a branch
-  const themeRoot = { kids: new Map() };
-  t.themes.forEach(tag => tag.split(/\s+-\s+/).reduce((n, label) => {
-    if (!n.kids.has(label)) n.kids.set(label, { kids: new Map() });
-    return n.kids.get(label);
-  }, themeRoot));
-  if (themeRoot.kids.size) {
-    const g = node('place group', 'Assuntos', null, el);
-    const drawTheme = (n, label, into, path) => {
-      const p = path.concat(label);
-      const d = node('topic', label, { topico: p.join(' - ') }, into);
-      n.kids.forEach((kid, name) => drawTheme(kid, name, d, p));
-    };
-    themeRoot.kids.forEach((kid, name) => drawTheme(kid, name, g, []));
-    const nodes = g.querySelectorAll('.tn');
-    if (nodes.length > 8) {
-      nodes.forEach((n, i) => { if (i >= 8) n.hidden = true; });
-      const more = document.createElement('button');
-      more.type = 'button'; more.className = 'more'; more.textContent = `+${nodes.length - 8} mais`;
-      more.addEventListener('click', () => { nodes.forEach(n => { n.hidden = false; }); more.remove(); });
-      g.appendChild(more);
-    }
+  t.root.kids.forEach((kid, name) => walk(kid, name, { level: 0, estado: name === 'Brasil' ? null : name }, []));
+  if (trails.length) {
+    sec('Onde');
+    capped(trails.map(tr => {
+      const line = document.createElement('div'); line.className = 'trail';
+      tr.forEach((sg, i) => {
+        if (i) line.appendChild(Object.assign(document.createElement('span'), { className: 'sep', textContent: '›' }));
+        const x = document.createElement('span');
+        if (!sg.place) x.className = 'topic';
+        x.textContent = sg.label;
+        line.appendChild(clickable(x, sg.filter, sg.label));
+      });
+      return line;
+    }), 4, el);
   }
-  group('Coleção', t.colecao, (x, g) => node('topic', x, { colecao: x }, g));
-  group('Pessoas', t.pessoa, (x, g) => node('topic', x, { pessoa: x }, g));
+  const chips = (title, list) => {
+    if (!list.length) return;
+    sec(title);
+    const box = document.createElement('div'); box.className = 'chips';
+    capped(list.map(([label, filter, full]) => {
+      const c = document.createElement('span'); c.className = 'chip2'; c.textContent = label;
+      clickable(c, filter, full || label);
+      if (full && full !== label) c.title = full;
+      return c;
+    }), 10, box);
+    el.appendChild(box);
+  };
+  chips('Assuntos', t.themes.map(tag => {
+    const parts = tag.split(/\s+-\s+/);
+    return [parts.slice(-2).join(' › '), { topico: parts.join(' - ') }, parts.join(' › ')];
+  }));
+  chips('Pessoas', t.pessoa.map(x => [x, { pessoa: x }]));
+  chips('Coleção citada', t.colecao.map(x => [x, { colecao: x }]));
   if (t.tomada.length) {
     const m = document.createElement('div');
     m.className = 'tm'; m.textContent = [...new Set(t.tomada.map(x => x.replace(/^fotografia$/i, 'Fotografia')))].join(' · ');
     el.appendChild(m);
   }
-  if (!el.firstChild) { const e = document.createElement('div'); e.className = 'tm'; e.textContent = 'Sem assunto catalogado'; el.appendChild(e); }
 }
 
 
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
   learnCities(entries);
-  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map();
+  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map(), repCounts = new Map();
   let minYear = Infinity, maxYear = -Infinity;
 
   entries.forEach(e => {
     const meta = e.meta || {};
     if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
-    const t = cleanType(meta.type);
+    const t = typeOf(meta);
     if (t) typeCounts.set(t, (typeCounts.get(t) || 0) + 1);
-    const a = cleanAuthor(meta.contributor);
-    if (a) {
-      const k = authorKey(a), g = authorGroups.get(k) || { n: 0, forms: new Map() };
+    // 2.1: one entry per authority record — its authorized form names the group
+    const k = authorOf(meta);
+    if (k) {
+      const a = meta.ai != null ? authorities[meta.ai] : cleanAuthor(meta.contributor);
+      const g = authorGroups.get(k) || { n: 0, forms: new Map() };
       g.n++; g.forms.set(a, (g.forms.get(a) || 0) + 1);
       authorGroups.set(k, g);
     }
+    if (meta.rep) repCounts.set(meta.rep, (repCounts.get(meta.rep) || 0) + 1);
     const y = yearOf(meta);
     if (y != null) { if (y < minYear) minYear = y; if (y > maxYear) maxYear = y; }
   });
@@ -1907,15 +2203,21 @@ function setupFilters(mapData) {
   const selInst = document.getElementById('f-institution');
   [...instCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
     const opt = document.createElement('option');
-    opt.value = name; opt.textContent = `${name} (${n.toLocaleString('pt-BR')})`;
+    opt.value = name; opt.textContent = `${instName(name)} (${n.toLocaleString('pt-BR')})`;
     selInst.appendChild(opt);
   });
 
   const selType = document.getElementById('f-type');
   [...typeCounts.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt')).forEach(([name, n]) => {
     const opt = document.createElement('option');
-    opt.value = name; opt.textContent = `${name.replace('/', ' / ')} (${n.toLocaleString('pt-BR')})`;
+    opt.value = name; opt.textContent = `${name} (${n.toLocaleString('pt-BR')})`;
     selType.appendChild(opt);
+  });
+  const selRep = document.getElementById('f-rep');
+  [...repCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${name[0].toUpperCase() + name.slice(1)} (${n.toLocaleString('pt-BR')})`;
+    selRep.appendChild(opt);
   });
 
   // one entry per person: the most common spelling names the group, and
@@ -1958,9 +2260,11 @@ function setupFilters(mapData) {
   tileMeshes.forEach(m => {
     const meta = m.userData.meta || {};
     m.userData._year = yearOf(meta);
-    const a = cleanAuthor(meta.contributor);
-    m.userData._author = a ? authorKey(a) : '';
-    m.userData._type = cleanType(meta.type);
+    m.userData._author = authorOf(meta);
+    m.userData._type = typeOf(meta);
+    m.userData._rep = meta.rep || '';
+    if (meta.ref) tileByRef.set(meta.ref, m);
+    m.userData._serie = meta.si != null ? seriesTitles[meta.si] || '' : '';
     Object.assign(m.userData, (({ st, ct, bh, tp, col, pes }) => ({ _st: st, _ct: ct, _bh: bh, _tp: tp, _col: col, _pes: pes }))(subjectFacets(meta)));
     // one haystack per piece: every metadata field, not a chosen few
     // the handle is the map's key, not a field of meta — it still has to be
@@ -1992,6 +2296,7 @@ function setupFilters(mapData) {
   const selTopico = document.getElementById('f-topico');
   const selColecao = document.getElementById('f-colecao');
   const selPessoa = document.getElementById('f-pessoa');
+  const selSerie = document.getElementById('f-serie');
   const fillSelect = (sel, rows, first) => {
     sel.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: first }));
     rows.forEach(([value, n]) => {
@@ -2036,7 +2341,7 @@ function setupFilters(mapData) {
     sel.value = value;
   }
 
-  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' };
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '', serie: '', rep: '' };
 
   function resetYear() {
     state.yearTouched = false;
@@ -2064,6 +2369,8 @@ function setupFilters(mapData) {
         (!state.topico || d._tp.has(topicPrefix() + state.topico)) &&
         (!state.colecao || d._col.has(state.colecao)) &&
         (!state.pessoa || d._pes.has(state.pessoa)) &&
+        (!state.serie || d._serie === state.serie) &&
+        (!state.rep || d._rep === state.rep) &&
         terms.every(t => d._hay.includes(t));
       if (okRest && d._year != null) {
         const i = Math.floor((d._year - decadeMin) / 10);
@@ -2122,7 +2429,7 @@ function setupFilters(mapData) {
   function activeFilters() {
     const out = [];
     if (state.search.trim()) out.push({ key: 'search', text: `“${state.search.trim()}”` });
-    if (state.institution) out.push({ key: 'institution', text: state.institution });
+    if (state.institution) out.push({ key: 'institution', text: instName(state.institution) });
     if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
     if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
     if (state.estado) out.push({ key: 'estado', text: state.estado });
@@ -2131,13 +2438,15 @@ function setupFilters(mapData) {
     if (state.topico) out.push({ key: 'topico', text: state.topico });
     if (state.colecao) out.push({ key: 'colecao', text: state.colecao });
     if (state.pessoa) out.push({ key: 'pessoa', text: state.pessoa });
+    if (state.serie) out.push({ key: 'serie', text: state.serie });
+    if (state.rep) out.push({ key: 'rep', text: state.rep });
     if (state.type) out.push({ key: 'type', text: state.type });
     return out;
   }
 
   function clearOne(key) {
     if (key === 'search') { state.search = ''; searchInput.value = ''; }
-    if (key === 'institution') { state.institution = ''; selInst.value = ''; }
+    if (key === 'institution') { state.institution = ''; selInst.value = ''; fillSeries(); }
     if (key === 'type') { state.type = ''; selType.value = ''; }
     if (key === 'estado') resetPlace('estado');
     if (key === 'cidade') resetPlace('cidade');
@@ -2145,6 +2454,8 @@ function setupFilters(mapData) {
     if (key === 'topico') { state.topico = ''; selTopico.value = ''; }
     if (key === 'colecao') { state.colecao = ''; selColecao.value = ''; }
     if (key === 'pessoa') { state.pessoa = ''; selPessoa.value = ''; }
+    if (key === 'serie') { state.serie = ''; selSerie.value = ''; }
+    if (key === 'rep') { state.rep = ''; selRep.value = ''; }
     if (key === 'author') { state.author = ''; selAuthor.value = ''; }
     if (key === 'year') resetYear();
     apply();
@@ -2170,7 +2481,13 @@ function setupFilters(mapData) {
     });
   }
 
-  selInst.addEventListener('change', () => { state.institution = selInst.value; apply(); });
+  selInst.addEventListener('change', () => {
+    state.institution = selInst.value;
+    fillSeries();
+    if (state.serie && ![...selSerie.options].some(o => o.value === state.serie)) state.serie = '';
+    apply();
+  });
+  selRep.addEventListener('change', () => { state.rep = selRep.value; apply(); });
   selType.addEventListener('change', () => { state.type = selType.value; apply(); });
 
   // typing re-tests every tile, so hold off until the burst settles
@@ -2192,6 +2509,7 @@ function setupFilters(mapData) {
   selTopico.addEventListener('change', () => { state.topico = selTopico.value; apply(); });
   selColecao.addEventListener('change', () => { state.colecao = selColecao.value; apply(); });
   selPessoa.addEventListener('change', () => { state.pessoa = selPessoa.value; apply(); });
+  selSerie.addEventListener('change', () => { state.serie = selSerie.value; apply(); });
   selAuthor.addEventListener('change', () => { state.author = selAuthor.value; apply(); });
 
   function onYear(e) {
@@ -2211,8 +2529,8 @@ function setupFilters(mapData) {
 
   clearBtn.addEventListener('click', () => {
     clearTimeout(searchTimer);
-    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.bairro = state.topico = state.colecao = state.pessoa = '';
-    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; selColecao.value = ''; selPessoa.value = ''; rebuildPlace();
+    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.bairro = state.topico = state.colecao = state.pessoa = state.serie = state.rep = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; selColecao.value = ''; selPessoa.value = ''; selSerie.value = ''; selRep.value = ''; fillSeries(); rebuildPlace();
     resetYear();
     apply();
   });
@@ -2220,13 +2538,20 @@ function setupFilters(mapData) {
   fillSelect(selEstado, tally('', d => d._st, 1), 'todos');
   fillSelect(selColecao, tally('', d => d._col, 1), 'todas');
   fillSelect(selPessoa, tally('', d => d._pes, 5), 'todas');
+  // the arrangement reads top-down: with an institution chosen, only its series
+  function fillSeries() {
+    const keep = state.serie;
+    fillSelect(selSerie, tally('', d => d._serie && (!state.institution || d.meta?.community === state.institution) ? [d._serie] : [], 1), 'todas');
+    if (keep) setSelect(selSerie, keep);
+  }
+  fillSeries();
 
   // a tag on the card applies itself as a filter; the URL carries the filters
   // (?estado=…&topico=…) so a filtered wall can be shared and survives a reload
   const URL_KEYS = { q: 'search', inst: 'institution', autor: 'author', tipo: 'type', estado: 'estado', cidade: 'cidade',
-    bairro: 'bairro', topico: 'topico', colecao: 'colecao', pessoa: 'pessoa' };
+    bairro: 'bairro', topico: 'topico', colecao: 'colecao', pessoa: 'pessoa', serie: 'serie', rep: 'rep' };
   const SELECTS = { institution: selInst, author: selAuthor, type: selType, estado: selEstado, cidade: selCidade,
-    bairro: selBairro, topico: selTopico, colecao: selColecao, pessoa: selPessoa };
+    bairro: selBairro, topico: selTopico, colecao: selColecao, pessoa: selPessoa, serie: selSerie, rep: selRep };
   function syncUrl() {
     const p = new URLSearchParams();
     Object.entries(URL_KEYS).forEach(([k, f]) => { if (state[f]) p.set(k, state[f]); });
@@ -2237,6 +2562,9 @@ function setupFilters(mapData) {
   syncUrlHook = syncUrl;
   cardFilter = f => {
     Object.assign(state, { estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' }, f);
+    if (f.institution !== undefined) { setSelect(selInst, state.institution); fillSeries(); }
+    if (f.serie !== undefined) setSelect(selSerie, state.serie);
+    if (f.author !== undefined) setSelect(selAuthor, state.author);
     if (state.cidade && !state.estado) state.cidade = '';
     setSelect(selEstado, state.estado); rebuildPlace();
     setSelect(selCidade, state.cidade); rebuildPlace();
@@ -2326,6 +2654,11 @@ async function main() {
   const mapData = JSON.parse(await catalogue.blob.text());
   TPR = mapData.size / mapData.tile;
   atlasEntries = mapData.map;
+  seriesTitles = mapData.series || [];
+  authorities = mapData.autoridades || [];
+  instituicoes = mapData.instituicoes || {};
+  colecaoInfo = mapData.colecao || {};
+  hasGrande = !!mapData.grande;
   const handles = Object.keys(mapData.map);
 
   // the note only earns its space in placeholder mode — the piece count already
@@ -2342,9 +2675,8 @@ async function main() {
   for (const entry of Object.values(mapData.map)) {
     const meta = entry.meta || {};
     if (meta.community) institutions.add(meta.community);
-    const m = String(meta.date || '').match(/(1[5-9]\d{2}|20\d{2})/);
-    if (m) {
-      const y = parseInt(m[1], 10);
+    const y = yearOf(meta);
+    if (y != null) {
       if (y < minYear) minYear = y;
       if (y > maxYear) maxYear = y;
     }
@@ -2522,7 +2854,7 @@ async function main() {
   history.replaceState({ h: null }, '', location.pathname + location.search);
   historyReady = true;
   // a link straight to a piece: open it *as* a step, so back returns to the wall
-  const linked = deepLink && tileByHandle.get(deepLink);
+  const linked = deepLink && (tileByHandle.get(deepLink) || tileByRef.get(deepLink.trim()));
   if (linked) openTile(linked);
 
   // on a phone the hint sits over the wall itself — it retires once read
