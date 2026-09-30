@@ -379,16 +379,27 @@
   #card-title { font-size: 1.02rem; color: #f5f5f0; }
   #card-date { font-size: .85rem; color: #b9b9b0; margin-top: 2px; }
   #card-contrib { font-size: .82rem; color: #cdd8e0; margin-top: 10px; }
-  #card-tags { margin-top: 12px; font-family: system-ui, sans-serif; font-size: .7rem; line-height: 1.55; color: #b8c6d1; }
+  /* the card is centred text; the tree needs a common left edge, so it is a
+     left-aligned block that is itself centred */
+  #card-tags {
+    width: fit-content; max-width: 100%; margin: 14px auto 0; text-align: left;
+    font-family: system-ui, sans-serif; font-size: .72rem; line-height: 1.5; color: #b8c6d1;
+  }
   #card-tags:empty { display: none; }
-  #card-tags .tn { margin: 0; padding: 0 0 0 13px; border-left: 1px solid rgba(127,168,201,.28); }
-  #card-tags > .tn { padding-left: 0; border-left: 0; }
-  #card-tags .tl { padding: 1px 0; overflow-wrap: anywhere; }
-  #card-tags .tn.place > .tl { color: #dcebf6; font-weight: 600; }
+  #card-tags .tn { position: relative; margin-left: 6px; padding-left: 15px; border-left: 1px solid rgba(127,168,201,.3); }
+  #card-tags > .tn { margin-left: 0; padding-left: 0; border-left: 0; }
+  #card-tags .tl { padding: 2px 0; overflow-wrap: anywhere; }
+  /* elbow from the parent's line to this label */
+  #card-tags .tn .tn > .tl::before {
+    content: ''; position: absolute; left: 0; top: .82em; width: 10px; border-top: 1px solid rgba(127,168,201,.3);
+  }
+  #card-tags .tn .tn:last-child { border-left-color: transparent; }
+  #card-tags .tn .tn:last-child::after {
+    content: ''; position: absolute; left: -1px; top: 0; height: .82em; border-left: 1px solid rgba(127,168,201,.3);
+  }
+  #card-tags .tn.place > .tl { color: #e6eef5; font-weight: 600; }
   #card-tags .tn.topic > .tl { color: #b8c6d1; }
-  #card-tags .tn > .tl::before { content: '└ '; color: rgba(127,168,201,.5); }
-  #card-tags > .tn > .tl::before { content: ''; }
-  #card-tags .to { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  #card-tags .to { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
   #card-tags .to span {
     font-size: .64rem; line-height: 1.7; padding: 0 8px; border-radius: 999px;
     background: rgba(127,168,201,.12); border: 1px solid rgba(127,168,201,.22);
@@ -1280,6 +1291,7 @@ cardEl.addEventListener('touchend', e => {
 // Every item's page is the same address with its handle in it, so the map used
 // to spend 1,2 MB repeating that prefix 12.552 times — and meta.handle another
 // 0,4 MB repeating the key it was already filed under. Both are derived here.
+const mediumUrl = h => `https://hel1.your-objectstorage.com/brasiliana/derivados/medio/${h.replace(/\//g, '_')}.webp`;
 const sourceUrl = h => `https://brasilianafotografica.bn.gov.br/brasiliana/handle/${h}?show=full`;
 
 function showCard(data) {
@@ -1310,6 +1322,15 @@ function showCard(data) {
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, out, out);
     img.src = c.toDataURL('image/jpeg', 0.92);
+  }
+  // the atlas tile is only 128 px: show it at once, then swap in the medium image
+  // (~1000 px) once it has loaded — unless the card has moved on to another piece
+  const want = data.handle;
+  img.dataset.handle = want;
+  if (want) {
+    const big = new Image();
+    big.onload = () => { if (img.dataset.handle === want) img.src = big.src; };
+    big.src = mediumUrl(want);
   }
   document.getElementById('card-wrap').classList.add('open');
 }
@@ -1437,36 +1458,106 @@ const UF = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia
   RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins' };
 const STATE_BY_KEY = new Map(Object.values(UF).map(n => [deburr(n), n]));
 
+// ── places, from subject AND coverage, in the many ways the catalogue writes them:
+//   "Porto Velho (RO)" · "Recife, PE" · "Rio de Janeiro - RJ" · "Recife, Pernambuco, Brasil"
+//   "Bahia (Estado)" · "RJ" · "Centro (Rio de Janeiro, RJ)" · bare "Recife" (learned below)
+const UF_CODE = /^[A-Z]{2}$/;
+const CITY_UF = new Map();
+const CANON = new Map();     // deburred city → its most common spelling ("Rio de janeiro" → "Rio de Janeiro")
+const HOOD = new Map();      // deburred bairro → {state, city}, learned from "Bairro (Cidade, UF)"
+const FEATURE = /^(?:ba[ií]a|morro|ilha|serra|lago|lagoa|floresta|estrada|avenida|rua|pra[cç]a|largo|parque|jardim|campo|cais|porto|rio|igreja|esta[cç][aã]o|forte|palacio|palácio|centro)\b/i;   // deburred city → its UF, learned from the explicit forms
+const stateOf = x => UF_CODE.test(x) ? UF[x] : STATE_BY_KEY.get(deburr(x));
+function parsePlaceExplicit(raw) {
+  const t = raw.trim().replace(/\.$/, '').replace(/,\s*(?:brasil|brazil)$/i, '').replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '');
+  let m;
+  if ((m = t.match(/^(.+?)\s*\((?:estado|brazil\s*:\s*state)\)$/i)) && stateOf(m[1].trim())) return { state: stateOf(m[1].trim()) };
+  if (UF_CODE.test(t) && UF[t]) return { state: UF[t] };
+  if (STATE_BY_KEY.has(deburr(t))) return { state: STATE_BY_KEY.get(deburr(t)), city: /^(rio de janeiro|sao paulo)$/.test(deburr(t)) ? t : null };
+  // "Bairro (Cidade, UF)"
+  if ((m = t.match(/^(.+?)\s*\(([^(),]+),\s*([A-Za-z]{2})\)$/)) && UF[m[3].toUpperCase()] && !/\s-\s/.test(m[1]))
+    return { state: UF[m[3].toUpperCase()], city: m[2].replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '').trim(), sub: m[1].trim() };
+  if (/\s-\s/.test(t.replace(/\s+-\s+(?=[A-Z]{2}$)/, ''))) return null;   // a topic path, handled by the caller
+  // "Cidade (UF)" · "Cidade, UF" · "Cidade - UF" · "Cidade(UF)"
+  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*|\s-\s*)([A-Z]{2})\)?$/)) && UF[m[2]]) return { state: UF[m[2]], city: m[1].trim() };
+  // "Cidade (Estado por extenso)" · "Cidade, Estado por extenso"
+  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/)) && STATE_BY_KEY.has(deburr(m[2]))) return { state: STATE_BY_KEY.get(deburr(m[2])), city: m[1].trim() };
+  return null;
+}
+function parsePlace(raw) {
+  const p = parsePlaceExplicit(raw);
+  if (p) {
+    if (p.city) p.city = CANON.get(deburr(p.city)) || p.city;
+    // "Ceará, CE": the state written twice is no city (Rio de Janeiro and São Paulo are both)
+    if (p.city && deburr(p.city) === deburr(p.state) && !/^(rio de janeiro|sao paulo)$/.test(deburr(p.state))) p.city = null;
+    return p;
+  }
+  const k = deburr(raw.trim().replace(/\.$/, ''));
+  const uf = CITY_UF.get(k);
+  return uf ? { state: UF[uf], city: raw.trim().replace(/\.$/, '') } : null;
+}
+const NO_PLACE = /^\[?s\.?\s?l\.?\]?$|^\[?s\.?\s?n\.?\]?$/i;
+
+// every place-bearing tag of a piece, PT side only
+function geoTags(meta) {
+  const seen = new Set(), out = [];
+  const add = t => {
+    const k = subjectKey(t);
+    if (!k || seen.has(k) || NO_PLACE.test(String(t).trim())) return;
+    seen.add(k); out.push(String(t).trim());
+  };
+  subjectsOf(meta).forEach(add);
+  const cov = [].concat((meta || {}).coverage || []).map(t => String(t).trim()).filter(t => !EN_WORD.test(t));
+  cov.forEach(add);
+  return out;
+}
+
 function subjectTree(meta) {
   const root = { kids: new Map() };
   const put = path => path.reduce((n, label) => {
     if (!n.kids.has(label)) n.kids.set(label, { kids: new Map(), place: false });
     return n.kids.get(label);
   }, root);
+  const place = path => path.forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
   const others = [];
   let hasPlace = false;
-  subjectsOf(meta).forEach(tag => {
-    const key = deburr(tag).replace(/\s*\(estado\)$/, '');
-    if (key === 'brasil') { put(['Brasil']).place = true; hasPlace = true; return; }
-    if (STATE_BY_KEY.has(key)) {
-      const st = STATE_BY_KEY.get(key);
-      put(['Brasil']).place = true; put(['Brasil', st]).place = true; hasPlace = true; return;
+  const tags = geoTags(meta);
+  // a bairro / feature ("Centro", "Baía de Guanabara") is not a city: it hangs under the
+  // piece's real city, or under the city it was learned to belong to
+  const cities = new Set();
+  tags.forEach(tag => { const p = parsePlace(tag); if (p && p.city && !FEATURE.test(p.city) && !HOOD.has(deburr(p.city))) cities.add(p.state + '|' + p.city); });
+  tags.forEach(tag => {
+    const key = deburr(tag).replace(/\.$/, '');
+    if (key === 'brasil' || key === 'brazil') { place(['Brasil']); hasPlace = true; return; }
+    let p = parsePlace(tag);
+    if (p && p.city && !p.sub && (FEATURE.test(p.city) || HOOD.has(deburr(p.city)))) {
+      const h = HOOD.get(deburr(p.city));
+      const real = h ? { state: h.state, city: h.city } : [...cities].map(c => c.split('|')).filter(c => c[0] === p.state).map(c => ({ state: c[0], city: c[1] }))[0];
+      p = real ? { state: real.state, city: real.city, sub: p.city } : { state: p.state, city: null, sub: p.city };
     }
-    const parts = tag.split(/\s+-\s+/);
-    // "Espírito Santo (Estado) - Colônias": a state carrying a topic
-    const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
-    if (sm && STATE_BY_KEY.has(deburr(sm[1]))) {
-      const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
-      path.forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
-      parts.slice(1).forEach((_, i) => put(path.concat(parts.slice(1, i + 2))));
+    if (p) {
+      const path = ['Brasil', p.state].concat(p.city ? [p.city] : []);
+      place(path);
+      if (p.sub) put(path.concat(p.sub)).place = true;
       hasPlace = true; return;
     }
-    const m = parts[parts.length - 1].match(/^(.+?)\s*\(([A-Z]{2})\)$/);
-    if (!m || !UF[m[2]]) { others.push(tag); return; }
-    const path = ['Brasil', UF[m[2]], m[1]];
-    path.slice(0, 3).forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
-    parts.slice(0, -1).forEach((_, i) => { put(path.concat(parts.slice(0, i + 1))); });
-    hasPlace = true;
+    // "Espírito Santo (Estado) - Colônias": a state carrying a topic
+    const parts = tag.split(/\s+-\s+/);
+    const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
+    if (parts.length > 1 && sm && STATE_BY_KEY.has(deburr(sm[1]))) {
+      const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
+      place(path); hasPlace = true;
+      parts.slice(1).forEach((_, i) => put(path.concat(parts.slice(1, i + 2))));
+      return;
+    }
+    // "Tópico - Cidade (UF)": the last segment carries the place
+    const lp = parts.length > 1 ? parsePlace(parts[parts.length - 1]) : null;
+    if (lp && lp.city) {
+      const path = ['Brasil', lp.state, lp.city];
+      place(path); hasPlace = true;
+      parts.slice(0, -1).forEach((_, i) => put(path.concat(parts.slice(0, i + 1))));
+      return;
+    }
+    others.push(tag);
   });
   // a lone "Brasil" is no tree — it reads better as a chip with the rest
   if (hasPlace && root.kids.get('Brasil').kids.size === 0) { root.kids.clear(); others.push('Brasil'); }
@@ -1521,8 +1612,23 @@ function subjectFacets(meta) {
   return { st, ct, tp };
 }
 
+function learnCities(entries) {
+  const votes = new Map(), spell = new Map();
+  entries.forEach(e => geoTags(e.meta).forEach(t => {
+    const p = parsePlaceExplicit(t);
+    if (!p || !p.city) return;
+    { const k = deburr(p.city), v = spell.get(k) || new Map(); v.set(p.city, (v.get(p.city) || 0) + 1); spell.set(k, v); }
+    if (p.sub) HOOD.set(deburr(p.sub), { state: p.state, city: p.city });
+    const uf = Object.keys(UF).find(k => UF[k] === p.state), k = deburr(p.city);
+    const v = votes.get(k) || new Map(); v.set(uf, (v.get(uf) || 0) + 1); votes.set(k, v);
+  }));
+  spell.forEach((v, k) => CANON.set(k, [...v].sort((a, b) => b[1] - a[1])[0][0]));
+  votes.forEach((v, k) => { const [uf, n] = [...v].sort((a, b) => b[1] - a[1])[0]; if (n >= 2 && !STATE_BY_KEY.has(k)) CITY_UF.set(k, uf); });
+}
+
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
+  learnCities(entries);
   const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map();
   let minYear = Infinity, maxYear = -Infinity;
 
