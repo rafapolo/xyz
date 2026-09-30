@@ -1495,6 +1495,19 @@ function parsePlace(raw) {
   const uf = CITY_UF.get(k);
   return uf ? { state: UF[uf], city: raw.trim().replace(/\.$/, '') } : null;
 }
+// places outside Brazil hang from their country instead of "Brasil"
+const COUNTRIES = new Map(['Alemanha', 'França', 'Paraguai', 'Argentina', 'Uruguai', 'Bolívia', 'Peru', 'Chile', 'Colômbia', 'Venezuela',
+  'Portugal', 'Espanha', 'Itália', 'Inglaterra', 'Reino Unido', 'Estados Unidos', 'Suíça', 'Bélgica', 'Holanda', 'Países Baixos',
+  'Áustria', 'Rússia', 'Japão', 'China', 'Índia', 'Egito', 'África do Sul', 'Angola', 'Moçambique', 'Cabo Verde', 'Canadá', 'México',
+  'Cuba', 'Equador', 'Suriname', 'Guiana', 'Guiana Francesa', 'Dinamarca', 'Suécia', 'Noruega', 'Polônia', 'Grécia', 'Turquia',
+  'Escócia', 'Irlanda'].map(n => [deburr(n), n]));
+function parseForeign(raw) {
+  const t = raw.trim().replace(/\.$/, '');
+  if (COUNTRIES.has(deburr(t))) return { country: COUNTRIES.get(deburr(t)) };
+  const m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/);
+  if (m && COUNTRIES.has(deburr(m[2]))) return { country: COUNTRIES.get(deburr(m[2])), city: m[1].trim() };
+  return null;
+}
 const NO_PLACE = /^\[?s\.?\s?l\.?\]?$|^\[?s\.?\s?n\.?\]?$/i;
 
 // every place-bearing tag of a piece, PT side only
@@ -1540,6 +1553,8 @@ function subjectTree(meta) {
       if (p.sub) put(path.concat(p.sub)).place = true;
       hasPlace = true; return;
     }
+    const fp = parseForeign(tag);
+    if (fp) { place([fp.country].concat(fp.city ? [fp.city] : [])); return; }
     // "Espírito Santo (Estado) - Colônias": a state carrying a topic
     const parts = tag.split(/\s+-\s+/);
     const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
@@ -1559,14 +1574,27 @@ function subjectTree(meta) {
     }
     others.push(tag);
   });
-  // a lone "Brasil" is no tree — it reads better as a chip with the rest
-  if (hasPlace && root.kids.get('Brasil').kids.size === 0) { root.kids.clear(); others.push('Brasil'); }
   return { root, others };
+}
+
+// "Assuntos": everything that is not a place, "A - B - C" becoming a path so pieces
+// sharing a prefix share a branch. Shooting conditions (Externa, Diurna…) are noise here.
+const TOMADA = /^(?:externa|interna|diurna|noturna|horizontal|vertical)$/i;
+function themeTree(others) {
+  const root = { kids: new Map() };
+  others.filter(t => !TOMADA.test(t.trim())).forEach(tag => {
+    tag.split(/\s+-\s+/).reduce((n, label) => {
+      if (!n.kids.has(label)) n.kids.set(label, { kids: new Map(), place: false });
+      return n.kids.get(label);
+    }, root);
+  });
+  return root;
 }
 
 function renderSubjectTree(el, meta) {
   el.replaceChildren();
   const { root, others } = subjectTree(meta);
+  const themes = themeTree(others);
   const draw = (node, label, into) => {
     const d = document.createElement('div');
     d.className = 'tn ' + (node.place ? 'place' : 'topic');
@@ -1576,11 +1604,7 @@ function renderSubjectTree(el, meta) {
     into.appendChild(d);
   };
   root.kids.forEach((kid, name) => draw(kid, name, el));
-  if (others.length) {
-    const o = document.createElement('div'); o.className = 'to';
-    others.forEach(t => { const c = document.createElement('span'); c.textContent = t; o.appendChild(c); });
-    el.appendChild(o);
-  }
+  if (themes.kids.size) draw(Object.assign(themes, { place: true }), 'Assuntos', el);
 }
 
 // estado / cidade / tópico facets of one piece, as sets of plain keys:
