@@ -211,6 +211,7 @@
   }
   /* the popup list is painted by the OS — give it a real ground, not the
      panel's translucent one, or it inherits the wall behind the field */
+  .f-row select:disabled { opacity: .45; }
   .f-row select { text-overflow: ellipsis; } /* long author names on a narrow phone */
   .f-row option { background: #15151a; color: var(--f-text); }
   .f-row input::placeholder { color: var(--f-faint); }
@@ -589,8 +590,16 @@
       <select id="f-author"><option value="">todos</option></select>
     </div>
     <div class="f-row">
-      <label for="f-subject">Assunto</label>
-      <select id="f-subject"><option value="">todos</option></select>
+      <label for="f-estado">Estado</label>
+      <select id="f-estado"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-cidade">Cidade</label>
+      <select id="f-cidade" disabled><option value="">escolha um estado</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-topico">Tópico</label>
+      <select id="f-topico"><option value="">todos</option></select>
     </div>
     <div class="f-row">
       <label for="f-type">Tipo de suporte</label>
@@ -1483,9 +1492,38 @@ function renderSubjectTree(el, meta) {
   }
 }
 
+// estado / cidade / tópico facets of one piece, as sets of plain keys:
+//   _st "S"   _ct "S|C"   _tp "S|C|T" · "S||T" · "||T"  (a topic is findable at
+//   any level of the cascade; a theme with no place only at the top one)
+const CATALOGUE_TAG = /^cole[cç][aã]o\b|^(?:externa|interna|diurna|noturna|horizontal|vertical)$/i;
+function subjectFacets(meta) {
+  const st = new Set(), ct = new Set(), tp = new Set();
+  const { root, others } = subjectTree(meta);
+  const brasil = root.kids.get('Brasil');
+  const topics = (node, path, add) => node.kids.forEach((kid, name) => {
+    const p = path.concat(name);
+    add(p.join(' - '));
+    topics(kid, p, add);
+  });
+  if (brasil) brasil.kids.forEach((stNode, sName) => {
+    st.add(sName);
+    stNode.kids.forEach((kid, name) => {
+      const addTopic = t => { tp.add(`${sName}||${t}`); tp.add(`||${t}`); };
+      if (kid.place) {
+        ct.add(`${sName}|${name}`);
+        topics(kid, [], t => { tp.add(`${sName}|${name}|${t}`); addTopic(t); });
+      } else {
+        addTopic(name); topics(kid, [name], addTopic);
+      }
+    });
+  });
+  others.filter(t => deburr(t) !== 'brasil' && !CATALOGUE_TAG.test(t.trim())).forEach(t => tp.add(`||${t}`));
+  return { st, ct, tp };
+}
+
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
-  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map(), subjectGroups = new Map();
+  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map();
   let minYear = Infinity, maxYear = -Infinity;
 
   entries.forEach(e => {
@@ -1493,9 +1531,6 @@ function setupFilters(mapData) {
     if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
     const t = cleanType(meta.type);
     if (t) typeCounts.set(t, (typeCounts.get(t) || 0) + 1);
-    subjectsOf(meta).map(subjectKey).forEach(k => {
-      subjectGroups.set(k, (subjectGroups.get(k) || 0) + 1);
-    });
     const a = cleanAuthor(meta.contributor);
     if (a) {
       const k = authorKey(a), g = authorGroups.get(k) || { n: 0, forms: new Map() };
@@ -1533,18 +1568,6 @@ function setupFilters(mapData) {
     selAuthor.appendChild(opt);
   });
 
-  const subjectNames = new Map(); // key → a readable spelling
-  entries.forEach(e => subjectsOf(e.meta).forEach(t => {
-    const k = subjectKey(t);
-    if (k && subjectGroups.get(k) >= SUBJECT_MIN && !subjectNames.has(k)) subjectNames.set(k, String(t).trim());
-  }));
-  const selSubject = document.getElementById('f-subject');
-  [...subjectGroups.entries()].filter(([, n]) => n >= SUBJECT_MIN).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = `${subjectNames.get(k)} (${n.toLocaleString('pt-BR')})`;
-    selSubject.appendChild(opt);
-  });
-
   const decadeMin = Math.floor(minYear / 10) * 10;
   const decadeMax = Math.floor(maxYear / 10) * 10;
   const nDecades = (decadeMax - decadeMin) / 10 + 1;
@@ -1576,7 +1599,7 @@ function setupFilters(mapData) {
     const a = cleanAuthor(meta.contributor);
     m.userData._author = a ? authorKey(a) : '';
     m.userData._type = cleanType(meta.type);
-    m.userData._subjects = new Set(subjectsOf(meta).map(subjectKey));
+    Object.assign(m.userData, (({ st, ct, tp }) => ({ _st: st, _ct: ct, _tp: tp }))(subjectFacets(meta)));
     // one haystack per piece: every metadata field, not a chosen few
     // the handle is the map's key, not a field of meta — it still has to be
     // searchable (people paste a handle or its number straight into the box)
@@ -1601,7 +1624,43 @@ function setupFilters(mapData) {
     bars.push(bar);
   }
 
-  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', subject: '' };
+  const selEstado = document.getElementById('f-estado');
+  const selCidade = document.getElementById('f-cidade');
+  const selTopico = document.getElementById('f-topico');
+  const fillSelect = (sel, rows, first) => {
+    sel.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: first }));
+    rows.forEach(([value, n]) => {
+      const opt = document.createElement('option');
+      opt.value = value; opt.textContent = `${value} (${n.toLocaleString('pt-BR')})`;
+      sel.appendChild(opt);
+    });
+  };
+  const tally = (prefix, keyOf, min) => {
+    const c = new Map();
+    tileMeshes.forEach(m => keyOf(m.userData).forEach(k => {
+      if (k.startsWith(prefix)) { const v = k.slice(prefix.length); c.set(v, (c.get(v) || 0) + 1); }
+    }));
+    return [...c].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt'));
+  };
+  // topics under the current place: the whole catalogue is thousands, so the top
+  // level lists only recurring ones; inside a state or city every topic is shown
+  function topicPrefix() { return state.estado ? (state.cidade ? `${state.estado}|${state.cidade}|` : `${state.estado}||`) : '||'; }
+  function rebuildPlace() {
+    fillSelect(selCidade, state.estado ? tally(`${state.estado}|`, d => d._ct, 1) : [], state.estado ? 'todas' : 'escolha um estado');
+    selCidade.disabled = !state.estado;
+    selCidade.value = state.cidade;
+    fillSelect(selTopico, tally(topicPrefix(), d => d._tp, state.estado ? 1 : SUBJECT_MIN), 'todos');
+    selTopico.value = state.topico;
+  }
+  // changing a level empties the ones below it, whose lists just changed
+  function resetPlace(level, rebuild) {
+    if (level === 'estado') { if (!rebuild) { state.estado = ''; selEstado.value = ''; } state.cidade = ''; }
+    if (level === 'cidade' && !rebuild) { state.cidade = ''; selCidade.value = ''; }
+    state.topico = '';
+    rebuildPlace();
+  }
+
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', topico: '' };
 
   function resetYear() {
     state.yearTouched = false;
@@ -1623,7 +1682,9 @@ function setupFilters(mapData) {
         (!state.institution || meta.community === state.institution) &&
         (!state.type || d._type === state.type) &&
         (!state.author || d._author === state.author) &&
-        (!state.subject || d._subjects.has(state.subject)) &&
+        (!state.estado || d._st.has(state.estado)) &&
+        (!state.cidade || d._ct.has(`${state.estado}|${state.cidade}`)) &&
+        (!state.topico || d._tp.has(topicPrefix() + state.topico)) &&
         terms.every(t => d._hay.includes(t));
       if (okRest && d._year != null) {
         const i = Math.floor((d._year - decadeMin) / 10);
@@ -1684,7 +1745,9 @@ function setupFilters(mapData) {
     if (state.institution) out.push({ key: 'institution', text: state.institution });
     if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
     if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
-    if (state.subject) out.push({ key: 'subject', text: subjectNames.get(state.subject) });
+    if (state.estado) out.push({ key: 'estado', text: state.estado });
+    if (state.cidade) out.push({ key: 'cidade', text: state.cidade });
+    if (state.topico) out.push({ key: 'topico', text: state.topico });
     if (state.type) out.push({ key: 'type', text: state.type });
     return out;
   }
@@ -1693,7 +1756,9 @@ function setupFilters(mapData) {
     if (key === 'search') { state.search = ''; searchInput.value = ''; }
     if (key === 'institution') { state.institution = ''; selInst.value = ''; }
     if (key === 'type') { state.type = ''; selType.value = ''; }
-    if (key === 'subject') { state.subject = ''; selSubject.value = ''; }
+    if (key === 'estado') resetPlace('estado');
+    if (key === 'cidade') resetPlace('cidade');
+    if (key === 'topico') { state.topico = ''; selTopico.value = ''; }
     if (key === 'author') { state.author = ''; selAuthor.value = ''; }
     if (key === 'year') resetYear();
     apply();
@@ -1735,7 +1800,9 @@ function setupFilters(mapData) {
   });
   searchX.addEventListener('click', () => { clearTimeout(searchTimer); clearOne('search'); searchInput.focus(); });
 
-  selSubject.addEventListener('change', () => { state.subject = selSubject.value; apply(); });
+  selEstado.addEventListener('change', () => { state.estado = selEstado.value; resetPlace('estado', true); apply(); });
+  selCidade.addEventListener('change', () => { state.cidade = selCidade.value; resetPlace('cidade', true); apply(); });
+  selTopico.addEventListener('change', () => { state.topico = selTopico.value; apply(); });
   selAuthor.addEventListener('change', () => { state.author = selAuthor.value; apply(); });
 
   function onYear(e) {
@@ -1755,12 +1822,14 @@ function setupFilters(mapData) {
 
   clearBtn.addEventListener('click', () => {
     clearTimeout(searchTimer);
-    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.subject = '';
-    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selSubject.value = '';
+    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.topico = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; rebuildPlace();
     resetYear();
     apply();
   });
 
+  fillSelect(selEstado, tally('', d => d._st, 1), 'todos');
+  rebuildPlace();
   apply();
   toggleFilters(!isMobile); // on a phone the wall matters more than the panel
 }
