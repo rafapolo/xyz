@@ -1550,7 +1550,7 @@ function setupFilters(mapData) {
   });
 
   const selType = document.getElementById('f-type');
-  [...typeCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+  [...typeCounts.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt')).forEach(([name, n]) => {
     const opt = document.createElement('option');
     opt.value = name; opt.textContent = `${name.replace('/', ' / ')} (${n.toLocaleString('pt-BR')})`;
     selType.appendChild(opt);
