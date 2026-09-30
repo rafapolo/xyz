@@ -381,29 +381,44 @@
   #card-contrib { font-size: .82rem; color: #cdd8e0; margin-top: 10px; }
   /* the card is centred text; the tree needs a common left edge, so it is a
      left-aligned block that is itself centred */
+  /* the card is centred text; the tree needs a common left edge, so it is a
+     left-aligned block that is itself centred */
   #card-tags {
     width: fit-content; max-width: 100%; margin: 14px auto 0; text-align: left;
-    font-family: system-ui, sans-serif; font-size: .72rem; line-height: 1.5; color: #b8c6d1;
+    font-family: system-ui, sans-serif; font-size: .8rem; line-height: 1.5; color: #b8c6d1;
   }
   #card-tags:empty { display: none; }
   #card-tags .tn { position: relative; margin-left: 6px; padding-left: 15px; border-left: 1px solid rgba(127,168,201,.3); }
-  #card-tags > .tn { margin-left: 0; padding-left: 0; border-left: 0; }
-  #card-tags .tl { padding: 2px 0; overflow-wrap: anywhere; }
+  #card-tags > .tn { margin-left: 0; padding-left: 0; border-left: 0; margin-top: 4px; }
+  #card-tags .tl { padding: 4px 0; overflow-wrap: anywhere; }
+  #card-tags .tl[role="button"] { cursor: pointer; border-radius: 4px; }
+  #card-tags .tl[role="button"]:hover { color: #fff; text-decoration: underline; text-decoration-color: rgba(127,168,201,.6); }
+  #card-tags .tl[role="button"]:focus-visible { outline: 1px solid var(--f-accent, #7fa8c9); outline-offset: 2px; }
   /* elbow from the parent's line to this label */
   #card-tags .tn .tn > .tl::before {
-    content: ''; position: absolute; left: 0; top: .82em; width: 10px; border-top: 1px solid rgba(127,168,201,.3);
+    content: ''; position: absolute; left: 0; top: 1.05em; width: 10px; border-top: 1px solid rgba(127,168,201,.3);
   }
   #card-tags .tn .tn:last-child { border-left-color: transparent; }
   #card-tags .tn .tn:last-child::after {
-    content: ''; position: absolute; left: -1px; top: 0; height: .82em; border-left: 1px solid rgba(127,168,201,.3);
+    content: ''; position: absolute; left: -1px; top: 0; height: 1.05em; border-left: 1px solid rgba(127,168,201,.3);
   }
   #card-tags .tn.place > .tl { color: #e6eef5; font-weight: 600; }
   #card-tags .tn.topic > .tl { color: #b8c6d1; }
-  #card-tags .to { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-  #card-tags .to span {
-    font-size: .64rem; line-height: 1.7; padding: 0 8px; border-radius: 999px;
-    background: rgba(127,168,201,.12); border: 1px solid rgba(127,168,201,.22);
+  #card-tags .tn.group > .tl { color: #8fa6b8; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
+  #card-tags .tm { margin-top: 10px; font-size: .7rem; color: #7d8a94; letter-spacing: .02em; }
+  #card-tags .more {
+    all: unset; cursor: pointer; margin: 2px 0 2px 15px; padding: 4px 0; font-size: .72rem; color: #7fa8c9;
   }
+  #card-tags .more:hover { text-decoration: underline; }
+  #card-related { margin: 16px 0 0; text-align: left; }
+  #card-related h4 { margin: 0 0 6px; font: 600 .66rem system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #8fa6b8; }
+  #card-related .rel { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  #card-related .rel button { all: unset; flex: 0 0 auto; cursor: pointer; border-radius: 3px; overflow: hidden; line-height: 0; }
+  #card-related .rel img { width: 64px; height: 64px; object-fit: cover; display: block; opacity: .85; }
+  #card-related .rel button:hover img, #card-related .rel button:focus-visible img { opacity: 1; }
+  #card-img-wrap.zoom { overflow: auto; max-height: 72dvh; cursor: zoom-out; -webkit-overflow-scrolling: touch; }
+  #card-img-wrap.zoom #card-img { width: 220%; max-width: none; }
+  #card-img { cursor: zoom-in; }
   #card-footer {
     margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.12);
     font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .04em; color: #888;
@@ -601,7 +616,7 @@
       <select id="f-author"><option value="">todos</option></select>
     </div>
     <div class="f-row">
-      <label for="f-estado">Estado</label>
+      <label for="f-estado">Estado / país</label>
       <select id="f-estado"><option value="">todos</option></select>
     </div>
     <div class="f-row">
@@ -609,8 +624,20 @@
       <select id="f-cidade" disabled><option value="">escolha um estado</option></select>
     </div>
     <div class="f-row">
+      <label for="f-bairro">Bairro / local</label>
+      <select id="f-bairro" disabled><option value="">escolha uma cidade</option></select>
+    </div>
+    <div class="f-row">
       <label for="f-topico">Tópico</label>
       <select id="f-topico"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-colecao">Coleção</label>
+      <select id="f-colecao"><option value="">todas</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-pessoa">Pessoa</label>
+      <select id="f-pessoa"><option value="">todas</option></select>
     </div>
     <div class="f-row">
       <label for="f-type">Tipo de suporte</label>
@@ -635,6 +662,7 @@
     <div id="card-date">—</div>
     <div id="card-contrib"></div>
     <div id="card-tags"></div>
+    <div id="card-related" hidden></div>
     <div id="card-footer">
       <div><a id="card-link" href="#" target="_blank" rel="noopener">ver item original ↗</a> · <span id="card-handle"></span></div>
       <div id="card-rights"></div>
@@ -1110,6 +1138,7 @@ function deselect() {
   selected = null;
 }
 document.getElementById('card-back').addEventListener('click', () => closeCard());
+document.getElementById('card-img').addEventListener('click', () => document.getElementById('card-img-wrap').classList.toggle('zoom'));
 // A tap is pointerup *then* a compatibility click. The card opens on the
 // pointerup, so that click lands on whatever the card just put under the
 // finger — the backdrop (closing it again) or a button on the sheet. Swallow
@@ -1171,7 +1200,10 @@ window.addEventListener('popstate', e => {
   const tile = h ? tileByHandle.get(h) : null;
   if (tile) { if (tile !== selected) selectTile(tile); }
   else if (selected) deselect();
+  // back out of a card lands on an entry whose query predates the filter that closed it
+  if (syncUrlHook) syncUrlHook();
 });
+let syncUrlHook = null;   // set by setupFilters
 const filtersEl = document.getElementById('filters');
 const filtersHead = document.getElementById('filters-head');
 const filtersScrim = document.getElementById('filters-scrim');
@@ -1294,17 +1326,84 @@ cardEl.addEventListener('touchend', e => {
 const mediumUrl = h => `https://hel1.your-objectstorage.com/brasiliana/derivados/medio/${h.replace(/\//g, '_')}.webp`;
 const sourceUrl = h => `https://brasilianafotografica.bn.gov.br/brasiliana/handle/${h}?show=full`;
 
+// "[entre 1907 e 1912]" → "1907–1912"; a bracketed single year is a catalogued estimate → "c. 1860"
+function prettyDate(d) {
+  if (!d) return '';
+  const s = String(d).trim();
+  const range = s.match(/^\[?\s*entre\s+(\d{4})\s+e\s+(\d{4})\s*\]?$/i);
+  if (range) return `${range[1]}–${range[2]}`;
+  const est = s.match(/^\[\s*(?:ca?\.?\s*)?(\d{4})\s*\??\]$/i);
+  if (est) return `c. ${est[1]}`;
+  return s.replace(/^\[|\]$/g, '').replace(/^ca?\.\s*/i, 'c. ');
+}
+
+// the handles the card can step to next (respecting the filter), to warm their images
+function neighbours(handle) {
+  const cur = tileByHandle.get(handle);
+  if (!cur) return [];
+  const n = tileMeshes.length, i0 = tileMeshes.indexOf(cur), out = [];
+  [1, -1].forEach(dir => {
+    let i = i0;
+    for (let k = 0, found = 0; k < n && found < 2; k++) {
+      i = (i + dir + n) % n;
+      if (!tileMeshes[i].userData.filteredOut) { out.push(tileMeshes[i].userData.handle); found++; }
+    }
+  });
+  return out;
+}
+
+// "da mesma série": same author first, then the same year, then shared tags
+function renderRelated(data) {
+  const box = document.getElementById('card-related');
+  box.replaceChildren();
+  const me = tileByHandle.get(data.handle);
+  if (!me || !me.userData._author) { box.hidden = true; return; }
+  const mu = me.userData, scored = [];
+  tileMeshes.forEach(t => {
+    const u = t.userData;
+    if (t === me || u._author !== mu._author) return;
+    let sc = 1 + (u._year != null && u._year === mu._year ? 2 : 0);
+    for (const k of u._tp) { if (mu._tp.has(k)) { sc += 1; break; } }
+    scored.push([sc, t]);
+  });
+  scored.sort((a, b) => b[0] - a[0]);
+  const top = scored.slice(0, 12);
+  if (!top.length) { box.hidden = true; return; }
+  const h = document.createElement('h4'); h.textContent = 'Do mesmo autor';
+  const row = document.createElement('div'); row.className = 'rel';
+  top.forEach(([, t]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.title = (t.userData.meta || {}).title || '';
+    const im = document.createElement('img'); im.alt = b.title; im.src = tileThumbUrl(t.userData.handle, 64);
+    b.appendChild(im);
+    b.addEventListener('click', () => openTile(t));
+    row.appendChild(b);
+  });
+  box.append(h, row);
+  box.hidden = false;
+}
+function tileThumbUrl(handle, px) {
+  const entry = atlasEntries[handle], page = atlasSources[entry?.atlas || 0];
+  if (!page || !entry) return '';
+  const S = page.size / TPR, c = document.createElement('canvas');
+  c.width = c.height = px;
+  c.getContext('2d').drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, px, px);
+  return c.toDataURL('image/jpeg', 0.8);
+}
+
 function showCard(data) {
   const meta = data.meta || {};
   document.getElementById('card-type').textContent = meta.type || 'Fotografia';
   document.getElementById('card-community').textContent = meta.community || '—';
-  document.getElementById('card-date-tag').textContent = meta.date || 's.d.';
+  document.getElementById('card-date-tag').textContent = prettyDate(meta.date) || 's.d.';
   document.getElementById('card-title').textContent = meta.title || '(sem título)';
-  document.getElementById('card-date').textContent = meta.date || '';
+  document.getElementById('card-date').textContent = prettyDate(meta.date);
   document.getElementById('card-contrib').textContent = meta.contributor ? meta.contributor : '';
   // this piece's dc.subject, one chip each (accent/case duplicates folded)
   const tagsEl = document.getElementById('card-tags');
   renderSubjectTree(tagsEl, meta);
+  document.getElementById('card-img-wrap').classList.remove('zoom');
+  renderRelated(data);
   document.getElementById('card-handle').textContent = data.handle || '';
   document.getElementById('card-link').href = data.handle ? sourceUrl(data.handle) : '#';
   document.getElementById('card-rights').textContent = meta.rights ? `Direitos: ${meta.rights}` : '';
@@ -1331,6 +1430,7 @@ function showCard(data) {
     const big = new Image();
     big.onload = () => { if (img.dataset.handle === want) img.src = big.src; };
     big.src = mediumUrl(want);
+    neighbours(want).forEach(h => { new Image().src = mediumUrl(h); });   // ‹ › should not flash the blurry tile
   }
   document.getElementById('card-wrap').classList.add('open');
 }
@@ -1438,17 +1538,9 @@ const SUBJECT_MIN = 20;
 
 // the catalogue repeats most subjects in English ("Railroads - Buildings and
 // structures - Porto Velho (Rondônia, Brazil)" beside "Ferrovias - …"); keep the
-// Portuguese side. An English-only record keeps what it has rather than none.
-const EN_WORD = new RegExp('\\b(?:brazil|state|buildings?|structures|and|of|the|railroads?|rivers?|bridges|streets|church(?:es)?|photographs?|public|dwellings|portraits?|stations?|construction|region|waterfalls|plazas|mountains|women|history|life|hospitals?|views?|colon(?:y|ies)|slaves|panoramic|aerial|harbors?|ports?|forts?|islands?|beaches|houses|schools?|palaces?|squares?|paraguay|amazon|falls|lakes?|people|children|boats|ships|trains?|roads?|cities|city|towns?|landscapes?|factories|industry)\\b', 'i');
-function subjectsOf(meta) {
-  const seen = new Set(), all = [];
-  [].concat((meta || {}).subject || []).forEach(t => {
-    const k = subjectKey(t);
-    if (k && !seen.has(k)) { seen.add(k); all.push(String(t).trim()); }
-  });
-  const pt = all.filter(t => !EN_WORD.test(t));
-  return pt.length ? pt : all;
-}
+// Portuguese side. The English side is still read for a place when the Portuguese
+// one names none. Proper names that merely contain "and"/"hospital" stay.
+const EN_WORD = new RegExp('\\b(?:brazil|state|buildings?|structures|railroads?|rivers?|bridges|streets|church(?:es)?|photographs?|public|dwellings|portraits?|stations?|construction|region|waterfalls|plazas|mountains|women|history|life|views?|colon(?:y|ies)|slaves|panoramic|aerial|harbors?|ports?|forts?|islands?|beaches|houses|schools?|squares?|paraguay|amazon|falls|lakes?|people|children|boats|ships|trains?|roads?|cities|city|towns?|landscapes?|factories|industry|exhibitions?|gardens?|indians?|politicians|carnival|military|interiors?|men|hospitals)\\b', 'i');
 
 // Brasil › estado › cidade › tópico, derived from the tag text: "Tópico - Cidade (UF)"
 // carries the whole path. Tags without a recognisable place stay out of the tree.
@@ -1457,28 +1549,63 @@ const UF = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia
   PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte',
   RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins' };
 const STATE_BY_KEY = new Map(Object.values(UF).map(n => [deburr(n), n]));
-
-// ── places, from subject AND coverage, in the many ways the catalogue writes them:
-//   "Porto Velho (RO)" · "Recife, PE" · "Rio de Janeiro - RJ" · "Recife, Pernambuco, Brasil"
-//   "Bahia (Estado)" · "RJ" · "Centro (Rio de Janeiro, RJ)" · bare "Recife" (learned below)
 const UF_CODE = /^[A-Z]{2}$/;
-const CITY_UF = new Map();
-const CANON = new Map();     // deburred city → its most common spelling ("Rio de janeiro" → "Rio de Janeiro")
-const HOOD = new Map();      // deburred bairro → {state, city}, learned from "Bairro (Cidade, UF)"
-const FEATURE = /^(?:ba[ií]a|morro|ilha|serra|lago|lagoa|floresta|estrada|avenida|rua|pra[cç]a|largo|parque|jardim|campo|cais|porto|rio|igreja|esta[cç][aã]o|forte|palacio|palácio|centro)\b/i;   // deburred city → its UF, learned from the explicit forms
 const stateOf = x => UF_CODE.test(x) ? UF[x] : STATE_BY_KEY.get(deburr(x));
-function parsePlaceExplicit(raw) {
-  const t = raw.trim().replace(/\.$/, '').replace(/,\s*(?:brasil|brazil)$/i, '').replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '');
+
+// learned from the whole catalogue (learnCities)
+const CITY_UF = new Map();   // deburred city → UF, from explicit "Cidade (UF)" forms
+const CANON = new Map();     // deburred city → its commonest spelling ("Rio de janeiro" → "Rio de Janeiro")
+const HOOD = new Map();      // deburred bairro → {state, city}, from "Bairro (Cidade, UF)"
+const THEME_CANON = new Map(); // deburred theme → its commonest spelling
+
+// a place-shaped word that is not a town: it hangs under the piece's real city
+const FEATURE = /^(?:ba[ií]a|morro|ilha|serra\s+d|lago|lagoa|floresta|estrada|avenida|rua|pra[cç]a|largo|parque|jardim|campo\s+d|cais|rio\s+(?!de janeiro|branco|grande|claro)|igreja|esta[cç][aã]o|forte|pal[aá]cio|bairro|edif[ií]cios?)\b/i;
+// never learned as a city from a bare mention ("Cachoeira" here is a waterfall)
+const COMMON_NOUN = /^(?:cachoeiras?|praias?|igrejas?|rios?|ilhas?|serras?|morros?|lagos?|lagoas?|fortes?|pontes?|ruas?|avenidas?|centro|porto|campo|vila|fazenda)$/;
+
+const COUNTRIES = new Map(['Alemanha', 'França', 'Paraguai', 'Argentina', 'Uruguai', 'Bolívia', 'Peru', 'Chile', 'Colômbia', 'Venezuela',
+  'Portugal', 'Espanha', 'Itália', 'Inglaterra', 'Reino Unido', 'Estados Unidos', 'Suíça', 'Bélgica', 'Holanda', 'Países Baixos',
+  'Áustria', 'Rússia', 'Japão', 'China', 'Índia', 'Egito', 'África do Sul', 'Angola', 'Moçambique', 'Cabo Verde', 'Canadá', 'México',
+  'Cuba', 'Equador', 'Suriname', 'Guiana', 'Guiana Francesa', 'Dinamarca', 'Suécia', 'Noruega', 'Polônia', 'Grécia', 'Turquia',
+  'Escócia', 'Irlanda'].map(n => [deburr(n), n]));
+
+// ── one place tag, in the many ways the catalogue writes it ──────────────────
+//   "Porto Velho (RO)" · "Recife, PE" · "Rio de Janeiro - RJ" · "Recife, Pernambuco, Brasil"
+//   "Bahia (Estado)" · "RJ" · "Centro (Rio de Janeiro, RJ)" · "Petrópolis [RJ]" · bare "Recife"
+function normTag(raw) {
+  let t = String(raw).replace(/\s+/g, ' ').trim().replace(/;+$/, '').trim().replace(/[–—]/g, '-').replace(/^-\s*/, '');
+  t = t.replace(/\(\s*(?:brazil|brasil)\s*:\s*(?:state|estado)\s*\)/i, '(Estado)')
+       .replace(/,\s*(?:brazil|brasil)\s*\)/i, ')').replace(/\s*\((?:brazil|brasil)\)/i, '')
+       .replace(/\[\s*([A-Za-z]{2})\s*\]/, '($1)')
+       .replace(/\(\s*([A-Za-z]{2})\s*\)/, (m, a) => UF[a.toUpperCase()] ? `(${a.toUpperCase()})` : m)
+       .replace(/,\s*([A-Za-z]{2})$/, (m, a) => UF[a.toUpperCase()] ? `, ${a.toUpperCase()}` : m);
+  if ((t.match(/\(/g) || []).length > (t.match(/\)/g) || []).length) t += ')';
+  // "Guanabara, Baía de" → "Baía de Guanabara"
+  t = t.replace(/^(.+?),\s*((?:Ba[ií]a|Ilha|Lagoa|Lago|Rio|Serra|Morro|Ponta|Praia|Cabo|Enseada|Floresta|Campo)\s+d[aeo]s?)(\s*\([^)]*\))?$/i, '$2 $1$3');
   let m;
-  if ((m = t.match(/^(.+?)\s*\((?:estado|brazil\s*:\s*state)\)$/i)) && stateOf(m[1].trim())) return { state: stateOf(m[1].trim()) };
+  if ((m = t.match(/^estado\s+d[eao]s?\s+(.+)$/i)) && stateOf(m[1].trim())) t = stateOf(m[1].trim());
+  else if ((m = t.match(/^(.+?),\s*(?:estado|territ[oó]rio)$/i)) && stateOf(m[1].trim())) t = stateOf(m[1].trim());
+  return t;
+}
+
+function parsePlaceExplicit(raw) {
+  const t = normTag(raw).replace(/\.$/, '').replace(/,\s*(?:brasil|brazil)$/i, '').replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '');
+  let m;
+  if ((m = t.match(/^(.+?)\s*\((?:estado)\)$/i)) && stateOf(m[1].trim())) return { state: stateOf(m[1].trim()) };
   if (UF_CODE.test(t) && UF[t]) return { state: UF[t] };
   if (STATE_BY_KEY.has(deburr(t))) return { state: STATE_BY_KEY.get(deburr(t)), city: /^(rio de janeiro|sao paulo)$/.test(deburr(t)) ? t : null };
-  // "Bairro (Cidade, UF)"
-  if ((m = t.match(/^(.+?)\s*\(([^(),]+),\s*([A-Za-z]{2})\)$/)) && UF[m[3].toUpperCase()] && !/\s-\s/.test(m[1]))
-    return { state: UF[m[3].toUpperCase()], city: m[2].replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '').trim(), sub: m[1].trim() };
+  // "Bairro (Cidade, UF)" · "Cidade (Estado, UF)"
+  if ((m = t.match(/^(.+?)\s*\(([^(),]+),\s*([A-Za-z]{2})\)$/)) && UF[m[3].toUpperCase()] && !/\s-\s/.test(m[1])) {
+    const st = UF[m[3].toUpperCase()], inner = m[2].replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '').trim();
+    if (deburr(inner) === deburr(st) && !/^(rio de janeiro|sao paulo)$/.test(deburr(st))) return { state: st, city: m[1].trim() };   // "Fortaleza (Ceará, CE)"
+    if (deburr(inner) === 'brasil') return { state: st };
+    return { state: st, city: inner, sub: m[1].trim() };
+  }
   if (/\s-\s/.test(t.replace(/\s+-\s+(?=[A-Z]{2}$)/, ''))) return null;   // a topic path, handled by the caller
   // "Cidade (UF)" · "Cidade, UF" · "Cidade - UF" · "Cidade(UF)"
-  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*|\s-\s*)([A-Z]{2})\)?$/)) && UF[m[2]]) return { state: UF[m[2]], city: m[1].trim() };
+  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*|\s-\s*)([A-Z]{2})\)?$/)) && UF[m[2]]) {
+    return deburr(m[1]) === 'brasil' ? { state: UF[m[2]] } : { state: UF[m[2]], city: m[1].trim() };
+  }
   // "Cidade (Estado por extenso)" · "Cidade, Estado por extenso"
   if ((m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/)) && STATE_BY_KEY.has(deburr(m[2]))) return { state: STATE_BY_KEY.get(deburr(m[2])), city: m[1].trim() };
   return null;
@@ -1491,18 +1618,13 @@ function parsePlace(raw) {
     if (p.city && deburr(p.city) === deburr(p.state) && !/^(rio de janeiro|sao paulo)$/.test(deburr(p.state))) p.city = null;
     return p;
   }
-  const k = deburr(raw.trim().replace(/\.$/, ''));
+  const k = deburr(normTag(raw).replace(/\.$/, ''));
   const uf = CITY_UF.get(k);
-  return uf ? { state: UF[uf], city: raw.trim().replace(/\.$/, '') } : null;
+  return uf ? { state: UF[uf], city: CANON.get(k) || normTag(raw).replace(/\.$/, '') } : null;
 }
 // places outside Brazil hang from their country instead of "Brasil"
-const COUNTRIES = new Map(['Alemanha', 'França', 'Paraguai', 'Argentina', 'Uruguai', 'Bolívia', 'Peru', 'Chile', 'Colômbia', 'Venezuela',
-  'Portugal', 'Espanha', 'Itália', 'Inglaterra', 'Reino Unido', 'Estados Unidos', 'Suíça', 'Bélgica', 'Holanda', 'Países Baixos',
-  'Áustria', 'Rússia', 'Japão', 'China', 'Índia', 'Egito', 'África do Sul', 'Angola', 'Moçambique', 'Cabo Verde', 'Canadá', 'México',
-  'Cuba', 'Equador', 'Suriname', 'Guiana', 'Guiana Francesa', 'Dinamarca', 'Suécia', 'Noruega', 'Polônia', 'Grécia', 'Turquia',
-  'Escócia', 'Irlanda'].map(n => [deburr(n), n]));
 function parseForeign(raw) {
-  const t = raw.trim().replace(/\.$/, '');
+  const t = String(raw).trim().replace(/\.$/, '');
   if (COUNTRIES.has(deburr(t))) return { country: COUNTRIES.get(deburr(t)) };
   const m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/);
   if (m && COUNTRIES.has(deburr(m[2]))) return { country: COUNTRIES.get(deburr(m[2])), city: m[1].trim() };
@@ -1510,18 +1632,41 @@ function parseForeign(raw) {
 }
 const NO_PLACE = /^\[?s\.?\s?l\.?\]?$|^\[?s\.?\s?n\.?\]?$/i;
 
-// every place-bearing tag of a piece, PT side only
+// every tag of a piece: Portuguese side (subject + coverage) and, apart, the English side
 function geoTags(meta) {
-  const seen = new Set(), out = [];
+  const seen = new Set(), pt = [], en = [];
   const add = t => {
-    const k = subjectKey(t);
-    if (!k || seen.has(k) || NO_PLACE.test(String(t).trim())) return;
-    seen.add(k); out.push(String(t).trim());
+    const s = String(t).trim(), k = subjectKey(s);
+    if (!k || seen.has(k) || NO_PLACE.test(s)) return;
+    seen.add(k);
+    (EN_WORD.test(s) ? en : pt).push(s);
   };
-  subjectsOf(meta).forEach(add);
-  const cov = [].concat((meta || {}).coverage || []).map(t => String(t).trim()).filter(t => !EN_WORD.test(t));
-  cov.forEach(add);
-  return out;
+  [].concat((meta || {}).subject || []).forEach(add);
+  [].concat((meta || {}).coverage || []).forEach(add);
+  // an English-only record keeps what it has rather than none
+  return { pt: pt.length ? pt : en, en: pt.length ? en : [] };
+}
+
+// ── what a non-place tag is ──────────────────────────────────────────────────
+const TOMADA = /^(?:externa|interna|diurna|noturna|horizontal|vertical|fotografia)$/i;
+const CAPS_THEME = /^(?:revolta da armada|cangaco|musica|personalidades|aspectos)$/;
+const isCaps = t => t === t.toUpperCase() && /[A-ZÀ-Ý]{3}/.test(t);
+function classifyTag(tag) {
+  const t = tag.trim();
+  if (TOMADA.test(t)) return 'tomada';
+  if (/^cole[cç][aã]o\b|^cole[cç][oõ]es\b/i.test(t)) return 'colecao';
+  if (isCaps(t) && !CAPS_THEME.test(deburr(t))) return 'colecao';
+  // "Sobrenome, Nome[, 1867-1924]": a person, not a subject
+  if (/^[A-ZÀ-Ý][^,()-]+,\s*[A-ZÀ-Ý][^,()]*(?:,\s*[\d\[c].*)?$/.test(t) && !/\s-\s/.test(t) && !/,\s*(?:guerra|rio|ba[ií]a|ilha|lagoa|estado|cidade|vila|serra|morro)\b/i.test(t)) return 'pessoa';
+  return 'tema';
+}
+// "Brasil - História - Revolta da Armada, 1893-1895" and "REVOLTA DA ARMADA" are one theme
+const THEME_SYN = { igrejas: 'Igrejas e capelas', 'baia da guanabara': 'Baía de Guanabara' };
+function themeNorm(tag) {
+  const t = String(tag).replace(/^Brasil\s+-\s+Hist[óo]ria\s+-\s+/i, '').replace(/,?\s*\d{4}\s*-\s*\d{4}$/, '')
+    .replace(/\s*\(Edif[ií]cios\)/i, '').replace(/\s+/g, ' ').trim();
+  const k = deburr(t);
+  return THEME_SYN[k] || THEME_CANON.get(k) || t;
 }
 
 function subjectTree(meta) {
@@ -1531,32 +1676,38 @@ function subjectTree(meta) {
     return n.kids.get(label);
   }, root);
   const place = path => path.forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
-  const others = [];
+  const out = { root, themes: [], colecao: [], pessoa: [], tomada: [] };
   let hasPlace = false;
-  const tags = geoTags(meta);
+  const { pt, en } = geoTags(meta);
+  const authorK = meta && meta.contributor ? authorKey(cleanAuthor(meta.contributor)) : '';
+
   // a bairro / feature ("Centro", "Baía de Guanabara") is not a city: it hangs under the
   // piece's real city, or under the city it was learned to belong to
   const cities = new Set();
-  tags.forEach(tag => { const p = parsePlace(tag); if (p && p.city && !FEATURE.test(p.city) && !HOOD.has(deburr(p.city))) cities.add(p.state + '|' + p.city); });
-  tags.forEach(tag => {
-    const key = deburr(tag).replace(/\.$/, '');
+  pt.forEach(tag => { const p = parsePlace(tag); if (p && p.city && !FEATURE.test(p.city) && !HOOD.has(deburr(p.city))) cities.add(p.state + '|' + p.city); });
+  const attach = p => {
+    if (!p || !p.city || p.sub || !(FEATURE.test(p.city) || HOOD.has(deburr(p.city)))) return p;
+    const h = HOOD.get(deburr(p.city));
+    const real = h ? { state: h.state, city: h.city } : [...cities].map(c => c.split('|')).filter(c => c[0] === p.state).map(c => ({ state: c[0], city: c[1] }))[0];
+    return real ? { state: real.state, city: real.city, sub: p.city } : { state: p.state, city: null, sub: p.city };
+  };
+  const addPlace = p => {
+    const path = ['Brasil', p.state].concat(p.city ? [p.city] : []);
+    place(path);
+    if (p.sub) put(path.concat(p.sub)).place = true;
+    hasPlace = true;
+    return path;
+  };
+
+  pt.forEach(tag => {
+    const nt = normTag(tag), key = deburr(nt).replace(/\.$/, '');
     if (key === 'brasil' || key === 'brazil') { place(['Brasil']); hasPlace = true; return; }
-    let p = parsePlace(tag);
-    if (p && p.city && !p.sub && (FEATURE.test(p.city) || HOOD.has(deburr(p.city)))) {
-      const h = HOOD.get(deburr(p.city));
-      const real = h ? { state: h.state, city: h.city } : [...cities].map(c => c.split('|')).filter(c => c[0] === p.state).map(c => ({ state: c[0], city: c[1] }))[0];
-      p = real ? { state: real.state, city: real.city, sub: p.city } : { state: p.state, city: null, sub: p.city };
-    }
-    if (p) {
-      const path = ['Brasil', p.state].concat(p.city ? [p.city] : []);
-      place(path);
-      if (p.sub) put(path.concat(p.sub)).place = true;
-      hasPlace = true; return;
-    }
-    const fp = parseForeign(tag);
-    if (fp) { place([fp.country].concat(fp.city ? [fp.city] : [])); return; }
+    const p = attach(parsePlace(tag));
+    if (p) { addPlace(p); return; }
+    const fp = parseForeign(nt);
+    if (fp) { place([fp.country].concat(fp.city ? [fp.city] : [])); hasPlace = true; return; }
     // "Espírito Santo (Estado) - Colônias": a state carrying a topic
-    const parts = tag.split(/\s+-\s+/);
+    const parts = nt.split(/\s+-\s+/);
     const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
     if (parts.length > 1 && sm && STATE_BY_KEY.has(deburr(sm[1]))) {
       const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
@@ -1565,90 +1716,171 @@ function subjectTree(meta) {
       return;
     }
     // "Tópico - Cidade (UF)": the last segment carries the place
-    const lp = parts.length > 1 ? parsePlace(parts[parts.length - 1]) : null;
-    if (lp && lp.city) {
-      const path = ['Brasil', lp.state, lp.city];
-      place(path); hasPlace = true;
-      parts.slice(0, -1).forEach((_, i) => put(path.concat(parts.slice(0, i + 1))));
+    const lp = parts.length > 1 ? attach(parsePlace(parts[parts.length - 1])) : null;
+    if (lp && lp.state) {
+      const path = addPlace(lp);
+      const base = lp.sub ? path.concat(lp.sub) : path;
+      parts.slice(0, -1).forEach((_, i) => put(base.concat(parts.slice(0, i + 1))));
       return;
     }
-    others.push(tag);
+    // a bare bairro ("Centro") the catalogue elsewhere places in a city
+    const hood = HOOD.get(deburr(nt));
+    if (hood) { addPlace({ state: hood.state, city: hood.city, sub: nt }); return; }
+    if (authorK && authorKey(cleanAuthor(tag)) === authorK) return;   // the piece's own author, already on the card
+    const cls = classifyTag(tag);
+    (out[cls === 'tema' ? 'themes' : cls] || out.themes).push(cls === 'tema' ? themeNorm(tag) : tag.trim());
   });
-  return { root, others };
+  // English-only place ("Salvador (Brazil)") when the Portuguese side named none
+  if (!hasPlace) en.forEach(tag => { const p = attach(parsePlace(tag)); if (p && !hasPlace) addPlace(p); });
+  out.themes = [...new Set(out.themes)];
+  return out;
 }
 
-// "Assuntos": everything that is not a place, "A - B - C" becoming a path so pieces
-// sharing a prefix share a branch. Shooting conditions (Externa, Diurna…) are noise here.
-const TOMADA = /^(?:externa|interna|diurna|noturna|horizontal|vertical)$/i;
-function themeTree(others) {
-  const root = { kids: new Map() };
-  others.filter(t => !TOMADA.test(t.trim())).forEach(tag => {
-    tag.split(/\s+-\s+/).reduce((n, label) => {
-      if (!n.kids.has(label)) n.kids.set(label, { kids: new Map(), place: false });
-      return n.kids.get(label);
-    }, root);
-  });
-  return root;
-}
-
-function renderSubjectTree(el, meta) {
-  el.replaceChildren();
-  const { root, others } = subjectTree(meta);
-  const themes = themeTree(others);
-  const draw = (node, label, into) => {
-    const d = document.createElement('div');
-    d.className = 'tn ' + (node.place ? 'place' : 'topic');
-    const l = document.createElement('div'); l.className = 'tl'; l.textContent = label;
-    d.appendChild(l);
-    node.kids.forEach((kid, name) => draw(kid, name, d));
-    into.appendChild(d);
-  };
-  root.kids.forEach((kid, name) => draw(kid, name, el));
-  if (themes.kids.size) draw(Object.assign(themes, { place: true }), 'Assuntos', el);
-}
-
-// estado / cidade / tópico facets of one piece, as sets of plain keys:
-//   _st "S"   _ct "S|C"   _tp "S|C|T" · "S||T" · "||T"  (a topic is findable at
+// estado / cidade / bairro / tópico / coleção / pessoa facets of one piece, as sets of plain keys:
+//   st "S"   ct "S|C"   bh "S|C|B"   tp "S|C|T" · "S||T" · "||T"  (a topic is findable at
 //   any level of the cascade; a theme with no place only at the top one)
-const CATALOGUE_TAG = /^cole[cç][aã]o\b|^(?:externa|interna|diurna|noturna|horizontal|vertical)$/i;
+// countries count as a "state" of their own
 function subjectFacets(meta) {
-  const st = new Set(), ct = new Set(), tp = new Set();
-  const { root, others } = subjectTree(meta);
-  const brasil = root.kids.get('Brasil');
+  const st = new Set(), ct = new Set(), bh = new Set(), tp = new Set(), col = new Set(), pes = new Set();
+  const t = subjectTree(meta);
   const topics = (node, path, add) => node.kids.forEach((kid, name) => {
     const p = path.concat(name);
     add(p.join(' - '));
     topics(kid, p, add);
   });
-  if (brasil) brasil.kids.forEach((stNode, sName) => {
+  const walkState = (sName, stNode) => {
     st.add(sName);
+    const addTopic = x => { tp.add(`${sName}||${x}`); tp.add(`||${x}`); };
     stNode.kids.forEach((kid, name) => {
-      const addTopic = t => { tp.add(`${sName}||${t}`); tp.add(`||${t}`); };
-      if (kid.place) {
-        ct.add(`${sName}|${name}`);
-        topics(kid, [], t => { tp.add(`${sName}|${name}|${t}`); addTopic(t); });
-      } else {
-        addTopic(name); topics(kid, [name], addTopic);
-      }
+      if (!kid.place) { addTopic(name); topics(kid, [name], addTopic); return; }
+      ct.add(`${sName}|${name}`);
+      kid.kids.forEach((k2, n2) => {
+        if (k2.place) { bh.add(`${sName}|${name}|${n2}`); return; }
+        const add = x => { tp.add(`${sName}|${name}|${x}`); addTopic(x); };
+        add(n2); topics(k2, [n2], add);
+      });
     });
+  };
+  t.root.kids.forEach((node, name) => {
+    if (name === 'Brasil') node.kids.forEach((stNode, sName) => walkState(sName, stNode));
+    else walkState(name, node);
   });
-  others.filter(t => deburr(t) !== 'brasil' && !CATALOGUE_TAG.test(t.trim())).forEach(t => tp.add(`||${t}`));
-  return { st, ct, tp };
+  t.themes.forEach(x => x.split(/\s+-\s+/).reduce((acc, seg) => { const p = acc ? `${acc} - ${seg}` : seg; tp.add(`||${p}`); return p; }, ''));
+  t.colecao.forEach(x => col.add(x));
+  t.pessoa.forEach(x => pes.add(x));
+  return { st, ct, bh, tp, col, pes };
 }
 
 function learnCities(entries) {
-  const votes = new Map(), spell = new Map();
-  entries.forEach(e => geoTags(e.meta).forEach(t => {
-    const p = parsePlaceExplicit(t);
-    if (!p || !p.city) return;
-    { const k = deburr(p.city), v = spell.get(k) || new Map(); v.set(p.city, (v.get(p.city) || 0) + 1); spell.set(k, v); }
-    if (p.sub) HOOD.set(deburr(p.sub), { state: p.state, city: p.city });
-    const uf = Object.keys(UF).find(k => UF[k] === p.state), k = deburr(p.city);
-    const v = votes.get(k) || new Map(); v.set(uf, (v.get(uf) || 0) + 1); votes.set(k, v);
-  }));
-  spell.forEach((v, k) => CANON.set(k, [...v].sort((a, b) => b[1] - a[1])[0][0]));
-  votes.forEach((v, k) => { const [uf, n] = [...v].sort((a, b) => b[1] - a[1])[0]; if (n >= 2 && !STATE_BY_KEY.has(k)) CITY_UF.set(k, uf); });
+  const votes = new Map(), spell = new Map(), tspell = new Map();
+  const count = (map, k, v) => { const m = map.get(k) || new Map(); m.set(v, (m.get(v) || 0) + 1); map.set(k, m); };
+  const best = m => [...m].sort((a, b) => b[1] - a[1] || (a[0] === a[0].toUpperCase()) - (b[0] === b[0].toUpperCase()))[0];
+  entries.forEach(e => {
+    const g = geoTags(e.meta);
+    g.pt.concat(g.en).forEach(t => {
+      count(tspell, deburr(themeNorm(t)), themeNormRaw(t));
+      const p = parsePlaceExplicit(t);
+      if (!p || !p.city) return;
+      count(spell, deburr(p.city), p.city);
+      if (p.sub) HOOD.set(deburr(p.sub), { state: p.state, city: p.city });
+      count(votes, deburr(p.city), Object.keys(UF).find(k => UF[k] === p.state));
+    });
+  });
+  spell.forEach((v, k) => CANON.set(k, best(v)[0]));
+  tspell.forEach((v, k) => THEME_CANON.set(k, best(v)[0]));
+  votes.forEach((v, k) => {
+    const [uf, n] = best(v), total = [...v.values()].reduce((a, b) => a + b, 0);
+    if (n >= 2 && n / total >= 0.8 && !STATE_BY_KEY.has(k) && !COMMON_NOUN.test(k)) CITY_UF.set(k, uf);
+  });
 }
+// the cleaned string before the canonical-spelling lookup
+const themeNormRaw = tag => String(tag).replace(/^Brasil\s+-\s+Hist[óo]ria\s+-\s+/i, '').replace(/,?\s*\d{4}\s*-\s*\d{4}$/, '')
+  .replace(/\s*\(Edif[ií]cios\)/i, '').replace(/\s+/g, ' ').trim();
+
+// ── the card's tag block: places as a tree, then Assuntos / Coleção / Pessoas, then the
+// shooting conditions as one quiet line. Every node is a button that applies that filter.
+let cardFilter = null;   // set by setupFilters: ({estado, cidade, bairro, topico, colecao, pessoa}) → filter + close card
+function renderSubjectTree(el, meta) {
+  el.replaceChildren();
+  const t = subjectTree(meta);
+  const node = (cls, label, filter, into) => {
+    const d = document.createElement('div');
+    d.className = 'tn ' + cls;
+    const l = document.createElement('div');
+    l.className = 'tl'; l.textContent = label;
+    if (filter) {
+      l.tabIndex = 0; l.setAttribute('role', 'button'); l.title = 'filtrar o mural por isto';
+      const go = () => cardFilter && cardFilter(filter);
+      l.addEventListener('click', go);
+      l.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    }
+    d.appendChild(l);
+    into.appendChild(d);
+    return d;
+  };
+  // places: Brasil › estado › cidade › (bairro | tópico…); a country is its own "estado"
+  const drawPlace = (n, label, into, ctx) => {
+    const c = Object.assign({}, ctx);
+    if (n.place) {
+      if (ctx.level === 0) { if (label !== 'Brasil') c.estado = label; }
+      else if (ctx.level === 1 && ctx.estado == null) c.estado = label;
+      else if (!c.cidade) c.cidade = label;
+      else c.bairro = label;
+    } else c.topico = (ctx.topico ? ctx.topico + ' - ' : '') + label;
+    c.level = ctx.level + 1;
+    const f = Object.assign({}, c); delete f.level;
+    const hasFilter = f.estado || f.cidade || f.bairro || f.topico;
+    const d = node(n.place ? 'place' : 'topic', label, hasFilter ? f : null, into);
+    n.kids.forEach((kid, name) => drawPlace(kid, name, d, c));
+  };
+  t.root.kids.forEach((kid, name) => drawPlace(kid, name, el, { level: 0, estado: name === 'Brasil' ? null : name }));
+  // Brasil's kids are states: level 1 with no estado yet → estado
+  const group = (title, leaves, mk) => {
+    if (!leaves.length) return;
+    const g = node('place group', title, null, el);
+    leaves.forEach(x => mk(x, g));
+    const nodes = g.querySelectorAll('.tn');
+    if (nodes.length > 8) {
+      nodes.forEach((n, i) => { if (i >= 8) n.hidden = true; });
+      const more = document.createElement('button');
+      more.type = 'button'; more.className = 'more'; more.textContent = `+${nodes.length - 8} mais`;
+      more.addEventListener('click', () => { nodes.forEach(n => { n.hidden = false; }); more.remove(); });
+      g.appendChild(more);
+    }
+  };
+  // themes: "A - B - C" is a path, so pieces sharing a prefix share a branch
+  const themeRoot = { kids: new Map() };
+  t.themes.forEach(tag => tag.split(/\s+-\s+/).reduce((n, label) => {
+    if (!n.kids.has(label)) n.kids.set(label, { kids: new Map() });
+    return n.kids.get(label);
+  }, themeRoot));
+  if (themeRoot.kids.size) {
+    const g = node('place group', 'Assuntos', null, el);
+    const drawTheme = (n, label, into, path) => {
+      const p = path.concat(label);
+      const d = node('topic', label, { topico: p.join(' - ') }, into);
+      n.kids.forEach((kid, name) => drawTheme(kid, name, d, p));
+    };
+    themeRoot.kids.forEach((kid, name) => drawTheme(kid, name, g, []));
+    const nodes = g.querySelectorAll('.tn');
+    if (nodes.length > 8) {
+      nodes.forEach((n, i) => { if (i >= 8) n.hidden = true; });
+      const more = document.createElement('button');
+      more.type = 'button'; more.className = 'more'; more.textContent = `+${nodes.length - 8} mais`;
+      more.addEventListener('click', () => { nodes.forEach(n => { n.hidden = false; }); more.remove(); });
+      g.appendChild(more);
+    }
+  }
+  group('Coleção', t.colecao, (x, g) => node('topic', x, { colecao: x }, g));
+  group('Pessoas', t.pessoa, (x, g) => node('topic', x, { pessoa: x }, g));
+  if (t.tomada.length) {
+    const m = document.createElement('div');
+    m.className = 'tm'; m.textContent = [...new Set(t.tomada.map(x => x.replace(/^fotografia$/i, 'Fotografia')))].join(' · ');
+    el.appendChild(m);
+  }
+  if (!el.firstChild) { const e = document.createElement('div'); e.className = 'tm'; e.textContent = 'Sem assunto catalogado'; el.appendChild(e); }
+}
+
 
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
@@ -1729,7 +1961,7 @@ function setupFilters(mapData) {
     const a = cleanAuthor(meta.contributor);
     m.userData._author = a ? authorKey(a) : '';
     m.userData._type = cleanType(meta.type);
-    Object.assign(m.userData, (({ st, ct, tp }) => ({ _st: st, _ct: ct, _tp: tp }))(subjectFacets(meta)));
+    Object.assign(m.userData, (({ st, ct, bh, tp, col, pes }) => ({ _st: st, _ct: ct, _bh: bh, _tp: tp, _col: col, _pes: pes }))(subjectFacets(meta)));
     // one haystack per piece: every metadata field, not a chosen few
     // the handle is the map's key, not a field of meta — it still has to be
     // searchable (people paste a handle or its number straight into the box)
@@ -1756,7 +1988,10 @@ function setupFilters(mapData) {
 
   const selEstado = document.getElementById('f-estado');
   const selCidade = document.getElementById('f-cidade');
+  const selBairro = document.getElementById('f-bairro');
   const selTopico = document.getElementById('f-topico');
+  const selColecao = document.getElementById('f-colecao');
+  const selPessoa = document.getElementById('f-pessoa');
   const fillSelect = (sel, rows, first) => {
     sel.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: first }));
     rows.forEach(([value, n]) => {
@@ -1779,18 +2014,29 @@ function setupFilters(mapData) {
     fillSelect(selCidade, state.estado ? tally(`${state.estado}|`, d => d._ct, 1) : [], state.estado ? 'todas' : 'escolha um estado');
     selCidade.disabled = !state.estado;
     selCidade.value = state.cidade;
+    const hoods = state.cidade ? tally(`${state.estado}|${state.cidade}|`, d => d._bh, 1) : [];
+    fillSelect(selBairro, hoods, state.cidade ? (hoods.length ? 'todos' : 'nenhum registrado') : 'escolha uma cidade');
+    selBairro.disabled = !hoods.length;
+    selBairro.value = state.bairro;
     fillSelect(selTopico, tally(topicPrefix(), d => d._tp, state.estado ? 1 : SUBJECT_MIN), 'todos');
-    selTopico.value = state.topico;
+    setSelect(selTopico, state.topico);
   }
   // changing a level empties the ones below it, whose lists just changed
   function resetPlace(level, rebuild) {
-    if (level === 'estado') { if (!rebuild) { state.estado = ''; selEstado.value = ''; } state.cidade = ''; }
-    if (level === 'cidade' && !rebuild) { state.cidade = ''; selCidade.value = ''; }
+    if (level === 'estado') { if (!rebuild) { state.estado = ''; selEstado.value = ''; } state.cidade = ''; state.bairro = ''; }
+    if (level === 'cidade') { if (!rebuild) { state.cidade = ''; selCidade.value = ''; } state.bairro = ''; }
     state.topico = '';
     rebuildPlace();
   }
+  // a select that may not list a value (a topic below the top-level threshold): add it
+  function setSelect(sel, value) {
+    if (value && ![...sel.options].some(o => o.value === value)) {
+      const opt = document.createElement('option'); opt.value = value; opt.textContent = value; sel.appendChild(opt);
+    }
+    sel.value = value;
+  }
 
-  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', topico: '' };
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' };
 
   function resetYear() {
     state.yearTouched = false;
@@ -1814,7 +2060,10 @@ function setupFilters(mapData) {
         (!state.author || d._author === state.author) &&
         (!state.estado || d._st.has(state.estado)) &&
         (!state.cidade || d._ct.has(`${state.estado}|${state.cidade}`)) &&
+        (!state.bairro || d._bh.has(`${state.estado}|${state.cidade}|${state.bairro}`)) &&
         (!state.topico || d._tp.has(topicPrefix() + state.topico)) &&
+        (!state.colecao || d._col.has(state.colecao)) &&
+        (!state.pessoa || d._pes.has(state.pessoa)) &&
         terms.every(t => d._hay.includes(t));
       if (okRest && d._year != null) {
         const i = Math.floor((d._year - decadeMin) / 10);
@@ -1846,6 +2095,7 @@ function setupFilters(mapData) {
 
     const active = activeFilters();
     renderChips(active);
+    syncUrl();
     searchX.hidden = !state.search;
     clearBtn.classList.toggle('disabled', active.length === 0);
 
@@ -1877,7 +2127,10 @@ function setupFilters(mapData) {
     if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
     if (state.estado) out.push({ key: 'estado', text: state.estado });
     if (state.cidade) out.push({ key: 'cidade', text: state.cidade });
+    if (state.bairro) out.push({ key: 'bairro', text: state.bairro });
     if (state.topico) out.push({ key: 'topico', text: state.topico });
+    if (state.colecao) out.push({ key: 'colecao', text: state.colecao });
+    if (state.pessoa) out.push({ key: 'pessoa', text: state.pessoa });
     if (state.type) out.push({ key: 'type', text: state.type });
     return out;
   }
@@ -1888,7 +2141,10 @@ function setupFilters(mapData) {
     if (key === 'type') { state.type = ''; selType.value = ''; }
     if (key === 'estado') resetPlace('estado');
     if (key === 'cidade') resetPlace('cidade');
+    if (key === 'bairro') { state.bairro = ''; selBairro.value = ''; }
     if (key === 'topico') { state.topico = ''; selTopico.value = ''; }
+    if (key === 'colecao') { state.colecao = ''; selColecao.value = ''; }
+    if (key === 'pessoa') { state.pessoa = ''; selPessoa.value = ''; }
     if (key === 'author') { state.author = ''; selAuthor.value = ''; }
     if (key === 'year') resetYear();
     apply();
@@ -1932,7 +2188,10 @@ function setupFilters(mapData) {
 
   selEstado.addEventListener('change', () => { state.estado = selEstado.value; resetPlace('estado', true); apply(); });
   selCidade.addEventListener('change', () => { state.cidade = selCidade.value; resetPlace('cidade', true); apply(); });
+  selBairro.addEventListener('change', () => { state.bairro = selBairro.value; apply(); });
   selTopico.addEventListener('change', () => { state.topico = selTopico.value; apply(); });
+  selColecao.addEventListener('change', () => { state.colecao = selColecao.value; apply(); });
+  selPessoa.addEventListener('change', () => { state.pessoa = selPessoa.value; apply(); });
   selAuthor.addEventListener('change', () => { state.author = selAuthor.value; apply(); });
 
   function onYear(e) {
@@ -1952,13 +2211,52 @@ function setupFilters(mapData) {
 
   clearBtn.addEventListener('click', () => {
     clearTimeout(searchTimer);
-    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.topico = '';
-    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; rebuildPlace();
+    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.bairro = state.topico = state.colecao = state.pessoa = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; selColecao.value = ''; selPessoa.value = ''; rebuildPlace();
     resetYear();
     apply();
   });
 
   fillSelect(selEstado, tally('', d => d._st, 1), 'todos');
+  fillSelect(selColecao, tally('', d => d._col, 1), 'todas');
+  fillSelect(selPessoa, tally('', d => d._pes, 5), 'todas');
+
+  // a tag on the card applies itself as a filter; the URL carries the filters
+  // (?estado=…&topico=…) so a filtered wall can be shared and survives a reload
+  const URL_KEYS = { q: 'search', inst: 'institution', autor: 'author', tipo: 'type', estado: 'estado', cidade: 'cidade',
+    bairro: 'bairro', topico: 'topico', colecao: 'colecao', pessoa: 'pessoa' };
+  const SELECTS = { institution: selInst, author: selAuthor, type: selType, estado: selEstado, cidade: selCidade,
+    bairro: selBairro, topico: selTopico, colecao: selColecao, pessoa: selPessoa };
+  function syncUrl() {
+    const p = new URLSearchParams();
+    Object.entries(URL_KEYS).forEach(([k, f]) => { if (state[f]) p.set(k, state[f]); });
+    if (state.yearTouched) p.set('ano', `${state.yearLo}-${state.yearHi}`);
+    const q = p.toString();
+    try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch {}
+  }
+  syncUrlHook = syncUrl;
+  cardFilter = f => {
+    Object.assign(state, { estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' }, f);
+    if (state.cidade && !state.estado) state.cidade = '';
+    setSelect(selEstado, state.estado); rebuildPlace();
+    setSelect(selCidade, state.cidade); rebuildPlace();
+    setSelect(selBairro, state.bairro); setSelect(selTopico, state.topico);
+    setSelect(selColecao, state.colecao); setSelect(selPessoa, state.pessoa);
+    apply();
+  };
+  (() => {
+    const p = new URLSearchParams(location.search);
+    Object.entries(URL_KEYS).forEach(([k, f]) => {
+      const v = p.get(k);
+      if (!v) return;
+      if (f === 'search') { state.search = v; searchInput.value = v; return; }
+      state[f] = v; setSelect(SELECTS[f], v);
+      if (f === 'estado' || f === 'cidade') rebuildPlace();
+    });
+    const y = (p.get('ano') || '').match(/^(\d{4})-(\d{4})$/);
+    if (y) { state.yearLo = +y[1]; state.yearHi = +y[2]; state.yearTouched = true; loSlider.value = y[1]; hiSlider.value = y[2]; }
+    setSelect(selCidade, state.cidade); setSelect(selBairro, state.bairro); setSelect(selTopico, state.topico);
+  })();
   rebuildPlace();
   apply();
   toggleFilters(!isMobile); // on a phone the wall matters more than the panel
