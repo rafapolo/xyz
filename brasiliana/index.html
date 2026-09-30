@@ -378,11 +378,18 @@
   #card-title { font-size: 1.02rem; color: #f5f5f0; }
   #card-date { font-size: .85rem; color: #b9b9b0; margin-top: 2px; }
   #card-contrib { font-size: .82rem; color: #cdd8e0; margin-top: 10px; }
-  #card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+  #card-tags { margin-top: 12px; font-family: system-ui, sans-serif; font-size: .7rem; line-height: 1.55; color: #b8c6d1; }
   #card-tags:empty { display: none; }
-  #card-tags span {
-    font-family: system-ui, sans-serif; font-size: .64rem; letter-spacing: .02em; line-height: 1.7;
-    padding: 0 8px; border-radius: 999px; color: #b8c6d1;
+  #card-tags .tn { margin: 0; padding: 0 0 0 13px; border-left: 1px solid rgba(127,168,201,.28); }
+  #card-tags > .tn { padding-left: 0; border-left: 0; }
+  #card-tags .tl { padding: 1px 0; overflow-wrap: anywhere; }
+  #card-tags .tn.place > .tl { color: #dcebf6; font-weight: 600; }
+  #card-tags .tn.topic > .tl { color: #b8c6d1; }
+  #card-tags .tn > .tl::before { content: '└ '; color: rgba(127,168,201,.5); }
+  #card-tags > .tn > .tl::before { content: ''; }
+  #card-tags .to { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  #card-tags .to span {
+    font-size: .64rem; line-height: 1.7; padding: 0 8px; border-radius: 999px;
     background: rgba(127,168,201,.12); border: 1px solid rgba(127,168,201,.22);
   }
   #card-footer {
@@ -1276,16 +1283,7 @@ function showCard(data) {
   document.getElementById('card-contrib').textContent = meta.contributor ? meta.contributor : '';
   // this piece's dc.subject, one chip each (accent/case duplicates folded)
   const tagsEl = document.getElementById('card-tags');
-  tagsEl.replaceChildren();
-  const seen = new Set();
-  [].concat(meta.subject || []).forEach(t => {
-    const k = deburr(String(t)).trim();
-    if (!k || seen.has(k)) return;
-    seen.add(k);
-    const chip = document.createElement('span');
-    chip.textContent = t;
-    tagsEl.appendChild(chip);
-  });
+  renderSubjectTree(tagsEl, meta);
   document.getElementById('card-handle').textContent = data.handle || '';
   document.getElementById('card-link').href = data.handle ? sourceUrl(data.handle) : '#';
   document.getElementById('card-rights').textContent = meta.rights ? `Direitos: ${meta.rights}` : '';
@@ -1408,6 +1406,83 @@ const authorKey = name => deburr(name).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).
 const subjectKey = t => deburr(String(t)).replace(/\s+/g, ' ').trim();
 const SUBJECT_MIN = 20;
 
+// the catalogue repeats most subjects in English ("Railroads - Buildings and
+// structures - Porto Velho (Rondônia, Brazil)" beside "Ferrovias - …"); keep the
+// Portuguese side. An English-only record keeps what it has rather than none.
+const EN_WORD = new RegExp('\\b(?:brazil|state|buildings?|structures|and|of|the|railroads?|rivers?|bridges|streets|church(?:es)?|photographs?|public|dwellings|portraits?|stations?|construction|region|waterfalls|plazas|mountains|women|history|life|hospitals?|views?|colon(?:y|ies)|slaves|panoramic|aerial|harbors?|ports?|forts?|islands?|beaches|houses|schools?|palaces?|squares?|paraguay|amazon|falls|lakes?|people|children|boats|ships|trains?|roads?|cities|city|towns?|landscapes?|factories|industry)\\b', 'i');
+function subjectsOf(meta) {
+  const seen = new Set(), all = [];
+  [].concat((meta || {}).subject || []).forEach(t => {
+    const k = subjectKey(t);
+    if (k && !seen.has(k)) { seen.add(k); all.push(String(t).trim()); }
+  });
+  const pt = all.filter(t => !EN_WORD.test(t));
+  return pt.length ? pt : all;
+}
+
+// Brasil › estado › cidade › tópico, derived from the tag text: "Tópico - Cidade (UF)"
+// carries the whole path. Tags without a recognisable place stay out of the tree.
+const UF = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal',
+  ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais',
+  PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte',
+  RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins' };
+const STATE_BY_KEY = new Map(Object.values(UF).map(n => [deburr(n), n]));
+
+function subjectTree(meta) {
+  const root = { kids: new Map() };
+  const put = path => path.reduce((n, label) => {
+    if (!n.kids.has(label)) n.kids.set(label, { kids: new Map(), place: false });
+    return n.kids.get(label);
+  }, root);
+  const others = [];
+  let hasPlace = false;
+  subjectsOf(meta).forEach(tag => {
+    const key = deburr(tag).replace(/\s*\(estado\)$/, '');
+    if (key === 'brasil') { put(['Brasil']).place = true; hasPlace = true; return; }
+    if (STATE_BY_KEY.has(key)) {
+      const st = STATE_BY_KEY.get(key);
+      put(['Brasil']).place = true; put(['Brasil', st]).place = true; hasPlace = true; return;
+    }
+    const parts = tag.split(/\s+-\s+/);
+    // "Espírito Santo (Estado) - Colônias": a state carrying a topic
+    const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
+    if (sm && STATE_BY_KEY.has(deburr(sm[1]))) {
+      const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
+      path.forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
+      parts.slice(1).forEach((_, i) => put(path.concat(parts.slice(1, i + 2))));
+      hasPlace = true; return;
+    }
+    const m = parts[parts.length - 1].match(/^(.+?)\s*\(([A-Z]{2})\)$/);
+    if (!m || !UF[m[2]]) { others.push(tag); return; }
+    const path = ['Brasil', UF[m[2]], m[1]];
+    path.slice(0, 3).forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
+    parts.slice(0, -1).forEach((_, i) => { put(path.concat(parts.slice(0, i + 1))); });
+    hasPlace = true;
+  });
+  // a lone "Brasil" is no tree — it reads better as a chip with the rest
+  if (hasPlace && root.kids.get('Brasil').kids.size === 0) { root.kids.clear(); others.push('Brasil'); }
+  return { root, others };
+}
+
+function renderSubjectTree(el, meta) {
+  el.replaceChildren();
+  const { root, others } = subjectTree(meta);
+  const draw = (node, label, into) => {
+    const d = document.createElement('div');
+    d.className = 'tn ' + (node.place ? 'place' : 'topic');
+    const l = document.createElement('div'); l.className = 'tl'; l.textContent = label;
+    d.appendChild(l);
+    node.kids.forEach((kid, name) => draw(kid, name, d));
+    into.appendChild(d);
+  };
+  root.kids.forEach((kid, name) => draw(kid, name, el));
+  if (others.length) {
+    const o = document.createElement('div'); o.className = 'to';
+    others.forEach(t => { const c = document.createElement('span'); c.textContent = t; o.appendChild(c); });
+    el.appendChild(o);
+  }
+}
+
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
   const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map(), subjectGroups = new Map();
@@ -1418,8 +1493,7 @@ function setupFilters(mapData) {
     if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
     const t = cleanType(meta.type);
     if (t) typeCounts.set(t, (typeCounts.get(t) || 0) + 1);
-    new Set([].concat(meta.subject || []).map(subjectKey)).forEach(k => {
-      if (!k) return;
+    subjectsOf(meta).map(subjectKey).forEach(k => {
       subjectGroups.set(k, (subjectGroups.get(k) || 0) + 1);
     });
     const a = cleanAuthor(meta.contributor);
@@ -1460,7 +1534,7 @@ function setupFilters(mapData) {
   });
 
   const subjectNames = new Map(); // key → a readable spelling
-  entries.forEach(e => [].concat((e.meta || {}).subject || []).forEach(t => {
+  entries.forEach(e => subjectsOf(e.meta).forEach(t => {
     const k = subjectKey(t);
     if (k && subjectGroups.get(k) >= SUBJECT_MIN && !subjectNames.has(k)) subjectNames.set(k, String(t).trim());
   }));
@@ -1502,7 +1576,7 @@ function setupFilters(mapData) {
     const a = cleanAuthor(meta.contributor);
     m.userData._author = a ? authorKey(a) : '';
     m.userData._type = cleanType(meta.type);
-    m.userData._subjects = new Set([].concat(meta.subject || []).map(subjectKey));
+    m.userData._subjects = new Set(subjectsOf(meta).map(subjectKey));
     // one haystack per piece: every metadata field, not a chosen few
     // the handle is the map's key, not a field of meta — it still has to be
     // searchable (people paste a handle or its number straight into the box)
