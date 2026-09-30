@@ -211,6 +211,7 @@
   }
   /* the popup list is painted by the OS — give it a real ground, not the
      panel's translucent one, or it inherits the wall behind the field */
+  .f-row select { text-overflow: ellipsis; } /* long author names on a narrow phone */
   .f-row option { background: #15151a; color: var(--f-text); }
   .f-row input::placeholder { color: var(--f-faint); }
   .f-row input[type="search"]::-webkit-search-decoration,
@@ -377,6 +378,13 @@
   #card-title { font-size: 1.02rem; color: #f5f5f0; }
   #card-date { font-size: .85rem; color: #b9b9b0; margin-top: 2px; }
   #card-contrib { font-size: .82rem; color: #cdd8e0; margin-top: 10px; }
+  #card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+  #card-tags:empty { display: none; }
+  #card-tags span {
+    font-family: system-ui, sans-serif; font-size: .64rem; letter-spacing: .02em; line-height: 1.7;
+    padding: 0 8px; border-radius: 999px; color: #b8c6d1;
+    background: rgba(127,168,201,.12); border: 1px solid rgba(127,168,201,.22);
+  }
   #card-footer {
     margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.12);
     font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .04em; color: #888;
@@ -513,7 +521,6 @@
     #filters-body { max-height: 58dvh; }
   }
 </style>
-<script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
 </head>
 <body>
 
@@ -572,11 +579,7 @@
     </div>
     <div class="f-row">
       <label for="f-author">Autor / fotógrafo</label>
-      <div class="f-field">
-        <input type="text" id="f-author" list="f-author-list" autocomplete="off" placeholder="buscar ou escolher…">
-        <button type="button" class="f-x" id="f-author-x" aria-label="limpar autor" hidden>×</button>
-      </div>
-      <datalist id="f-author-list"></datalist>
+      <select id="f-author"><option value="">todos</option></select>
     </div>
     <div class="f-row">
       <label for="f-type">Tipo de suporte</label>
@@ -600,6 +603,7 @@
     <div id="card-title">—</div>
     <div id="card-date">—</div>
     <div id="card-contrib"></div>
+    <div id="card-tags"></div>
     <div id="card-footer">
       <div><a id="card-link" href="#" target="_blank" rel="noopener">ver item original ↗</a> · <span id="card-handle"></span></div>
       <div id="card-rights"></div>
@@ -1266,6 +1270,18 @@ function showCard(data) {
   document.getElementById('card-title').textContent = meta.title || '(sem título)';
   document.getElementById('card-date').textContent = meta.date || '';
   document.getElementById('card-contrib').textContent = meta.contributor ? meta.contributor : '';
+  // this piece's dc.subject, one chip each (accent/case duplicates folded)
+  const tagsEl = document.getElementById('card-tags');
+  tagsEl.replaceChildren();
+  const seen = new Set();
+  [].concat(meta.subject || []).forEach(t => {
+    const k = deburr(String(t)).trim();
+    if (!k || seen.has(k)) return;
+    seen.add(k);
+    const chip = document.createElement('span');
+    chip.textContent = t;
+    tagsEl.appendChild(chip);
+  });
   document.getElementById('card-handle').textContent = data.handle || '';
   document.getElementById('card-link').href = data.handle ? sourceUrl(data.handle) : '#';
   document.getElementById('card-rights').textContent = meta.rights ? `Direitos: ${meta.rights}` : '';
@@ -1349,16 +1365,56 @@ function yearOf(meta) {
   return m ? parseInt(m[1], 10) : null;
 }
 
+// ─── filter-value cleanup: the catalogue's type / author strings are messy ───
+// (OCR debris, case variants, life dates glued on, "Nome Sobrenome" vs "Sobrenome, Nome").
+// Only the filter lists and matching use these; the card still shows the raw record.
+const KNOWN_TYPES = ['Fotografia/ Papel', 'Negativo/ Vidro', 'Diapositivo/ Vidro', 'Reprodução Fotomecânica/ Papel', 'Negativo flexível'];
+function cleanType(raw) {
+  const s = String(raw || '').replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  const fold = deburr(s);
+  const known = KNOWN_TYPES.find(k => deburr(k) === fold);
+  if (known) return known;
+  // OCR debris: rebuild from the tail that survived ("…afia/ Papel", "…gativo/ Vidro")
+  if (/(?:rafia|FOa)\/ Papel$/.test(s)) return 'Fotografia/ Papel';
+  if (/gativo\/ Vidro$/.test(s)) return 'Negativo/ Vidro';
+  if (/Fotomec/.test(s)) return 'Reprodução Fotomecânica/ Papel';
+  if (/[<>{}\d]/.test(s)) return '';          // unrecoverable garbage — leave it out of the list
+  return /[A-ZÀ-Ý]{3,}/.test(s) ? s.charAt(0) + s.slice(1).toLowerCase() : s;  // "NEGATIVO flexível" → "Negativo flexível"
+}
+
+const NO_AUTHOR = /^(s\/autor|s\/nome|s\/a|\[?s\.?n\.?\]?|sem autor|\[sem autor\]|autoria n[aã]o identificada|autor n[aã]o identificado|n[aã]o identificado|an[oô]nimo)$/i;
+function cleanAuthor(raw) {
+  let s = String(raw || '').replace(/\s+/g, ' ').trim();
+  s = s.replace(/^Fot[óo]grafo:\s*/i, '')
+       .replace(/\s*[-–]?\s*\((?:autoria|fot[óo]grafo|firma)\)/gi, '')
+       .replace(/\s+-\s+(?:Fot[óo]grafo|Est[úu]dio\/Ag[eê]ncia)$/i, '');
+  // life dates / floruit glued to the end: ", 1864-1957", "(1893 - 1961)", "[? -1908]", "18- -19-"
+  const tail = /[,\s]*[\[(]?\s*(?:(?:ca\.|fl\.|m\.|n\.)\s*)?(?:\?|\d{2,4}-?)\s*(?:[-–]\s*(?:ca\.\s*)?\d{0,4})?\s*[\])]?[.,\s]*$/i;
+  for (let i = 0; i < 3 && tail.test(s) && s.replace(tail, '').length > 2; i++) s = s.replace(tail, '');
+  s = s.replace(/[.,\s]+$/, '').replace(/^\[(.*)\]$/, '$1').trim();
+  if (!s || NO_AUTHOR.test(s) || /[<>]|\d{3}/.test(s)) return '';
+  return s;
+}
+// same person, different word order or accents → same key
+const authorKey = name => deburr(name).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+
 function setupFilters(mapData) {
   const entries = Object.values(mapData.map);
-  const instCounts = new Map(), typeCounts = new Map(), authorCounts = new Map();
+  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map();
   let minYear = Infinity, maxYear = -Infinity;
 
   entries.forEach(e => {
     const meta = e.meta || {};
     if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
-    if (meta.type) typeCounts.set(meta.type, (typeCounts.get(meta.type) || 0) + 1);
-    if (meta.contributor) authorCounts.set(meta.contributor, (authorCounts.get(meta.contributor) || 0) + 1);
+    const t = cleanType(meta.type);
+    if (t) typeCounts.set(t, (typeCounts.get(t) || 0) + 1);
+    const a = cleanAuthor(meta.contributor);
+    if (a) {
+      const k = authorKey(a), g = authorGroups.get(k) || { n: 0, forms: new Map() };
+      g.n++; g.forms.set(a, (g.forms.get(a) || 0) + 1);
+      authorGroups.set(k, g);
+    }
     const y = yearOf(meta);
     if (y != null) { if (y < minYear) minYear = y; if (y > maxYear) maxYear = y; }
   });
@@ -1378,11 +1434,16 @@ function setupFilters(mapData) {
     selType.appendChild(opt);
   });
 
-  const authorListEl = document.getElementById('f-author-list');
-  [...authorCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 300).forEach(([name]) => {
+  // one entry per person: the most common spelling names the group, and
+  // "Sobrenome, Nome" wins a tie over "Nome Sobrenome"
+  const authorNames = new Map();
+  const selAuthor = document.getElementById('f-author');
+  [...authorGroups.entries()].sort((a, b) => b[1].n - a[1].n).forEach(([key, g]) => {
+    const name = [...g.forms.entries()].sort((a, b) => b[1] - a[1] || b[0].includes(',') - a[0].includes(','))[0][0];
+    authorNames.set(key, name);
     const opt = document.createElement('option');
-    opt.value = name;
-    authorListEl.appendChild(opt);
+    opt.value = key; opt.textContent = `${name} (${g.n.toLocaleString('pt-BR')})`;
+    selAuthor.appendChild(opt);
   });
 
   const decadeMin = Math.floor(minYear / 10) * 10;
@@ -1401,8 +1462,6 @@ function setupFilters(mapData) {
   const yearReadout = document.getElementById('f-year-readout');
   const yearFill = document.getElementById('f-year-fill');
   const histEl = document.getElementById('f-hist');
-  const authorInput = document.getElementById('f-author');
-  const authorX = document.getElementById('f-author-x');
   const searchInput = document.getElementById('f-search');
   const searchX = document.getElementById('f-search-x');
   const clearBtn = document.getElementById('f-clear');
@@ -1415,7 +1474,9 @@ function setupFilters(mapData) {
   tileMeshes.forEach(m => {
     const meta = m.userData.meta || {};
     m.userData._year = yearOf(meta);
-    m.userData._author = deburr(meta.contributor || '');
+    const a = cleanAuthor(meta.contributor);
+    m.userData._author = a ? authorKey(a) : '';
+    m.userData._type = cleanType(meta.type);
     // one haystack per piece: every metadata field, not a chosen few
     // the handle is the map's key, not a field of meta — it still has to be
     // searchable (people paste a handle or its number straight into the box)
@@ -1449,7 +1510,6 @@ function setupFilters(mapData) {
   }
 
   function apply() {
-    const q = deburr(state.author.trim());
     // free text is AND across terms, so "rio 1900" narrows instead of widening
     const terms = deburr(state.search.trim()).split(/\s+/).filter(Boolean);
     const decCounts = new Array(nDecades).fill(0);
@@ -1461,8 +1521,8 @@ function setupFilters(mapData) {
       // bars show what each decade *would* give under the other filters
       const okRest =
         (!state.institution || meta.community === state.institution) &&
-        (!state.type || meta.type === state.type) &&
-        (!q || d._author.includes(q)) &&
+        (!state.type || d._type === state.type) &&
+        (!state.author || d._author === state.author) &&
         terms.every(t => d._hay.includes(t));
       if (okRest && d._year != null) {
         const i = Math.floor((d._year - decadeMin) / 10);
@@ -1495,7 +1555,6 @@ function setupFilters(mapData) {
     const active = activeFilters();
     renderChips(active);
     searchX.hidden = !state.search;
-    authorX.hidden = !state.author;
     clearBtn.classList.toggle('disabled', active.length === 0);
 
     countBadge.classList.toggle('empty', active.length === 0);
@@ -1523,7 +1582,7 @@ function setupFilters(mapData) {
     if (state.search.trim()) out.push({ key: 'search', text: `“${state.search.trim()}”` });
     if (state.institution) out.push({ key: 'institution', text: state.institution });
     if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
-    if (state.author.trim()) out.push({ key: 'author', text: state.author.trim() });
+    if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
     if (state.type) out.push({ key: 'type', text: state.type });
     return out;
   }
@@ -1532,7 +1591,7 @@ function setupFilters(mapData) {
     if (key === 'search') { state.search = ''; searchInput.value = ''; }
     if (key === 'institution') { state.institution = ''; selInst.value = ''; }
     if (key === 'type') { state.type = ''; selType.value = ''; }
-    if (key === 'author') { state.author = ''; authorInput.value = ''; }
+    if (key === 'author') { state.author = ''; selAuthor.value = ''; }
     if (key === 'year') resetYear();
     apply();
   }
@@ -1573,17 +1632,7 @@ function setupFilters(mapData) {
   });
   searchX.addEventListener('click', () => { clearTimeout(searchTimer); clearOne('search'); searchInput.focus(); });
 
-  let authorTimer = null;
-  authorInput.addEventListener('input', () => {
-    authorX.hidden = !authorInput.value;
-    clearTimeout(authorTimer);
-    authorTimer = setTimeout(() => { state.author = authorInput.value; apply(); }, 160);
-  });
-  authorInput.addEventListener('change', () => { // picking from the datalist
-    clearTimeout(authorTimer);
-    state.author = authorInput.value; apply();
-  });
-  authorX.addEventListener('click', () => { clearTimeout(authorTimer); clearOne('author'); authorInput.focus(); });
+  selAuthor.addEventListener('change', () => { state.author = selAuthor.value; apply(); });
 
   function onYear(e) {
     let lo = parseInt(loSlider.value, 10), hi = parseInt(hiSlider.value, 10);
@@ -1601,9 +1650,9 @@ function setupFilters(mapData) {
   hiSlider.addEventListener('input', onYear);
 
   clearBtn.addEventListener('click', () => {
-    clearTimeout(authorTimer); clearTimeout(searchTimer);
+    clearTimeout(searchTimer);
     state.search = ''; state.institution = ''; state.type = ''; state.author = '';
-    searchInput.value = ''; selInst.value = ''; selType.value = ''; authorInput.value = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = '';
     resetYear();
     apply();
   });
