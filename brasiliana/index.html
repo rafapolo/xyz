@@ -1985,7 +1985,8 @@ function subjectTree(meta) {
     const fp = parseForeign(nt);
     if (fp) { place([fp.country].concat(fp.city ? [fp.city] : [])); hasPlace = true; return; }
     // "Espírito Santo (Estado) - Colônias": a state carrying a topic
-    const parts = nt.split(/\s+-\s+/);
+    // "Vales - Nova Friburgo (RJ) - Brasil", "Ferrovias - Brasil - Minas Gerais": the country adds nothing
+    const parts = nt.split(/\s+-\s+/).filter(x => !/^(brasil|brazil)$/.test(deburr(x)));
     const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
     if (parts.length > 1 && sm && STATE_BY_KEY.has(deburr(sm[1]))) {
       const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
@@ -1993,12 +1994,15 @@ function subjectTree(meta) {
       parts.slice(1).forEach((_, i) => put(path.concat(parts.slice(1, i + 2))));
       return;
     }
-    // "Tópico - Cidade (UF)": the last segment carries the place
-    const lp = parts.length > 1 ? attach(parsePlace(parts[parts.length - 1])) : null;
+    // "Tópico - Cidade (UF)": the last segment carries the place; or one in the middle, when it
+    // says its UF ("Estruturas hidráulicas - Rio de Janeiro (RJ) - Projetos e construção")
+    const at = parts.length < 2 ? -1 : parsePlace(parts[parts.length - 1]) ? parts.length - 1
+      : parts.findIndex((x, i) => i && /\((?:[A-Z]{2}|Estado)\)$/.test(x) && parsePlace(x));
+    const lp = at > 0 ? attach(parsePlace(parts[at])) : null;
     if (lp && lp.state) {
-      const path = addPlace(lp);
+      const path = addPlace(lp), topic = parts.filter((_, i) => i !== at);
       const base = lp.sub ? path.concat(lp.sub) : path;
-      parts.slice(0, -1).forEach((_, i) => put(base.concat(parts.slice(0, i + 1))));
+      topic.forEach((_, i) => put(base.concat(topic.slice(0, i + 1))));
       return;
     }
     // a bare bairro ("Centro") the catalogue elsewhere places in a city
@@ -2116,16 +2120,44 @@ function renderSubjectTree(el, meta) {
     if (!n.kids.size) trails.push(tr); else n.kids.forEach((kid, name) => walk(kid, name, c, tr));
   };
   t.root.kids.forEach((kid, name) => walk(kid, name, { level: 0, estado: name === 'Brasil' ? null : name }, []));
-  if (trails.length) {
+  // a topic already shown under a deeper place drops its shallower copy (… › RJ › Ferrovias beside … › RJ › Nova Friburgo › Ferrovias)
+  const key = tr => ({ at: tr.filter(s => s.place).map(s => s.label), what: tr.filter(s => !s.place).map(s => s.label).join('\u0000') });
+  const keys = trails.map(key);
+  const kept = trails.map((tr, i) => [tr, keys[i]]).filter(([, k], i) => !keys.some((b, j) => j !== i && k.what && b.what === k.what
+    && b.at.length > k.at.length && k.at.every((l, n) => b.at[n] === l)));
+  // the same topic under several places is one trail: the shared places, then the others side
+  // by side, then the topic once (Brasil › Minas Gerais · Rio de Janeiro › Estradas)
+  const lines = [];
+  kept.forEach(([tr, k]) => {
+    const twin = k.what && lines.find(l => l.what === k.what);
+    if (twin) twin.trs.push(tr); else lines.push({ what: k.what, trs: [tr] });
+  });
+  const items = lines.map(({ trs }) => {
+    if (trs.length === 1) return trs[0];
+    const ats = trs.map(tr => tr.filter(s => s.place));
+    let common = 0;
+    while (ats.every(at => at.length > common + 1 && at[common].label === ats[0][common].label)) common++;
+    const topic = trs[0].filter(s => !s.place).map(s => Object.assign({}, s, { filter: { topico: s.filter.topico } }));
+    const alts = ats.map(at => Object.assign({}, at[at.length - 1], { full: at.map(s => s.label).join(' › ') }));
+    return ats[0].slice(0, common).concat([alts], topic);
+  });
+  if (items.length) {
     sec('Onde');
-    capped(trails.map(tr => {
+    const seg = sg => {
+      const x = document.createElement('span');
+      if (!sg.place) x.className = 'topic';
+      x.textContent = sg.label;
+      clickable(x, sg.filter, sg.full || sg.label);
+      if (sg.full && sg.full !== sg.label) x.title = `filtrar o mural: ${sg.full}`;
+      return x;
+    };
+    const sep = text => Object.assign(document.createElement('span'), { className: 'sep', textContent: text });
+    capped(items.map(tr => {
       const line = document.createElement('div'); line.className = 'trail';
       tr.forEach((sg, i) => {
-        if (i) line.appendChild(Object.assign(document.createElement('span'), { className: 'sep', textContent: '›' }));
-        const x = document.createElement('span');
-        if (!sg.place) x.className = 'topic';
-        x.textContent = sg.label;
-        line.appendChild(clickable(x, sg.filter, sg.label));
+        if (i) line.appendChild(sep('›'));
+        if (Array.isArray(sg)) sg.forEach((alt, n) => { if (n) line.appendChild(sep('·')); line.appendChild(seg(alt)); });
+        else line.appendChild(seg(sg));
       });
       return line;
     }), 4, el);
@@ -2142,9 +2174,15 @@ function renderSubjectTree(el, meta) {
     }), 10, box);
     el.appendChild(box);
   };
-  chips('Assuntos', t.themes.map(tag => {
-    const parts = tag.split(/\s+-\s+/);
-    return [parts.slice(-2).join(' › '), { topico: parts.join(' - ') }, parts.join(' › ')];
+  // a chip shows a theme's last two segments, or more when that would read the same as another's
+  const tail = (parts, n) => parts.filter((x, i) => !i || !/^(brasil|brazil)$/.test(deburr(x))).slice(-n).join(' › ');
+  // "Escravidão" and "Escravidão - Brasil" are one theme
+  const themes = [], seen = new Set();
+  t.themes.map(tag => tag.split(/\s+-\s+/)).forEach(parts => { const k = deburr(tail(parts, Infinity)); if (!seen.has(k)) { seen.add(k); themes.push(parts); } });
+  chips('Assuntos', themes.map(parts => {
+    let n = 2;
+    while (n < parts.length && themes.some(o => o !== parts && tail(o, n) === tail(parts, n))) n++;
+    return [tail(parts, n), { topico: parts.join(' - ') }, parts.join(' › ')];
   }));
   chips('Pessoas', t.pessoa.map(x => [x, { pessoa: x }]));
   chips('Coleção citada', t.colecao.map(x => [x, { colecao: x }]));
