@@ -1541,7 +1541,8 @@ function citation(data, meta, inst, aut) {
 // anchored under the cursor / between the fingers, and panning is clamped so
 // the image never leaves the stage. A sharper copy (derivados/grande) is
 // swapped in once the zoom passes what the medium copy can show, keeping the
-// on-screen size exactly where it was.
+// on-screen size exactly where it was. Sizes: medio 1.200 px, grande 2.000 px
+// (CONARQ derivadas de acesso; NARA 2004 "Access – Recommended" / "Larger Alternative").
 const wrapEl = document.getElementById('card-wrap');
 const stage = document.getElementById('stage');
 const stImg = document.getElementById('card-img');
@@ -1604,7 +1605,7 @@ function stageLoad(data) {
   Z.handle = h; Z.touched = false; Z.grande = false; Z.nw = 0;
   stImg.classList.remove('ready');
   stImg.alt = (data.meta || {}).title || '';
-  // the atlas tile first (instant, blurry), then the medium copy (~1000 px)
+  // the atlas tile first (instant, blurry), then the medium copy (1.200 px, NARA "access")
   const entry = atlasEntries[h], page = atlasSources[entry?.atlas || 0];
   let got = false;
   const big = new Image();
