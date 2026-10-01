@@ -1165,16 +1165,22 @@ function openTile(tile) {
   const h = tile.userData.handle;
   // holding an arrow key walks the wall faster than Safari allows entries to be
   // pushed (100 per 30s); the wall keeps working, it just stops recording
-  try { history.pushState({ h }, '', `#${encodeURIComponent(h)}`); } catch {}
+  // d counts the pieces stacked since the wall, so closing can unwind them all
+  const d = (history.state && history.state.h && history.state.d || 0) + 1;
+  try { history.pushState({ h, d }, '', `#${encodeURIComponent(h)}`); } catch {}
 }
 
 let closing = false; // a history.back() already asked for; popstate clears it
 
 function closeCard() {
   if (closing) return; // dragging a filter fires apply() per frame — one back, not twelve
-  // stepping back is what put the card on screen — unwind it the same way, so
-  // forward can bring the piece back instead of a dead entry
-  if (historyReady && history.state && history.state.h) { closing = true; history.back(); return; }
+  // closing goes back to the wall, not to the previous piece: unwind every entry
+  // the pieces stacked (‹ anterior / próxima › each pushed one) in a single step
+  if (historyReady && history.state && history.state.h) {
+    closing = true;
+    history.go(-(history.state.d || 1));
+    return;
+  }
   deselect();
 }
 
@@ -1669,9 +1675,7 @@ document.getElementById('card-filters').addEventListener('click', () => {
 });
 document.getElementById('stage-prev').addEventListener('click', () => stepSelection(-1));
 document.getElementById('stage-next').addEventListener('click', () => stepSelection(1));
-document.getElementById('stage-close').addEventListener('click', () => {
-  if (narrow() && wrapEl.classList.contains('full')) setFull(false); else closeCard();
-});
+document.getElementById('stage-close').addEventListener('click', () => closeCard());
 // phone: reading the text shrinks the picture to a strip, and it grows back at the top
 document.getElementById('card').addEventListener('scroll', e => {
   if (narrow()) wrapEl.classList.toggle('compact', e.target.scrollTop > 40);
