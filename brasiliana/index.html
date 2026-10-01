@@ -402,8 +402,8 @@
   #card-related h4 { margin: 18px 0 6px; font: 600 .62rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; }
   #card-related .rel { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
   #card-related .rel button { all: unset; flex: 0 0 auto; cursor: pointer; border-radius: 3px; overflow: hidden; line-height: 0; }
-  #card-related .rel img { width: 60px; height: 60px; object-fit: cover; display: block; opacity: .85; }
-  #card-related .rel button:hover img, #card-related .rel button:focus-visible img { opacity: 1; }
+  #card-related .rel canvas { width: 60px; height: 60px; display: block; opacity: .85; }
+  #card-related .rel button:hover canvas, #card-related .rel button:focus-visible canvas { opacity: 1; }
 
   /* the archival record (NOBRADE): what the piece is, where it sits, where the original is */
   #card-ficha { margin-top: 20px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 12px; font: .78rem/1.45 system-ui, sans-serif; }
@@ -767,6 +767,7 @@ const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerH
 camera.position.set(0, 0, START_Z);
 
 function resize() {
+  wake(4);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1092,9 +1093,9 @@ renderer.domElement.addEventListener('pointermove', e => {
 });
 
 // ─── selection / card ─────────────────────────────────────────────────────
-// the camera never moves here — the *tiles* do: the clicked one grows and
-// moves to screen-center, the rest part radially away from that same point
-// (the "hole" always opens in the middle, wherever you clicked).
+// Opening a piece hands the screen to the viewer, which covers the wall: the
+// wall itself does not move (it used to part around the piece, but that is now
+// out of sight and only cost a frame of work over thousands of tiles).
 let atlasSources = []; // { source, size } per atlas page — used to crop the tile into the card canvas
 let atlasEntries = null, TPR = 1;
 let seriesTitles = [];   // títulos das séries NOBRADE (nível 3); meta.si indexa aqui
@@ -1105,61 +1106,13 @@ const tileByRef = new Map(); // código de referência → peça, para links #BR
 let selected = null;
 let selectedAt = 0;
 
-// Where the opened piece goes and how big it gets. On a desktop that is simply
-// the middle of the screen; on a phone the card is a bottom sheet, so the piece
-// is centred in whatever band of wall is left above it — measured off the sheet
-// that was just filled in, because its height depends on how much metadata the
-// item carries. Guessed at a fixed fraction, the piece ended up behind the sheet.
-function framing(visH) {
-  if (!isMobile) return { lift: 0, scale: 3.4 };
-  const vh = window.innerHeight;
-  // Where the wall begins depends on where the filter panel is anchored: as a
-  // bar at the top it is the line under its header (open or closed — a tap on
-  // the wall closes the rest of it); as a sheet on the bottom edge it takes
-  // nothing off the top at all, and it sits behind the card either way.
-  const fr = filtersEl.getBoundingClientRect();
-  const top = (fr.bottom < vh - 1 ? fr.top + filtersHead.offsetHeight : 0) + 10;
-  // the card is parked above the filter sheet's peek, so the wall ends where
-  // the card's own laid-out top is — not at the bottom of the screen
-  const pad = parseFloat(getComputedStyle(cardEl.parentElement).paddingBottom) || 0;
-  const bottom = vh - cardEl.offsetHeight - pad - 10;
-  const band = bottom - top;
-  if (band < 70) return { lift: 0, scale: Math.min(3.4, visH * 0.18) }; // no room to speak of
-  return {
-    lift: (vh / 2 - (top + bottom) / 2) / vh * visH,
-    scale: THREE.MathUtils.clamp((band / vh) * visH * 0.82, 1.2, 3.4),
-  };
-}
-
 function selectTile(mesh) {
   closing = false;
   selected = mesh;
   selectedAt = performance.now();
+  if (hovered) { hovered.userData.targetScale = 1; markAnimating(hovered); }
   hovered = null;
-
-  showCard(mesh.userData); // fill the card first: its height decides the framing
-
-  const centerZ = mesh.userData.basePos.z;
-  const cx = camTarget.x, cy = camTarget.y;
-  const visH = visibleHeight();
-  const { lift, scale } = framing(visH);
-
-  // Beyond the edge of the screen the parting is invisible, and moving every
-  // one of twelve thousand instances for it costs a phone the whole animation.
-  const reach = Math.hypot(visH * camera.aspect, visH) * 0.5 + 8;
-
-  tileMeshes.forEach(m => {
-    if (m === mesh) return;
-    const dx = m.userData.basePos.x - cx;
-    const dy = m.userData.basePos.y - cy;
-    const dist = Math.hypot(dx, dy) || 0.001;
-    if (dist > reach) { rest(m); return; }
-    const ux = dx / dist, uy = dy / dist;
-    const push = THREE.MathUtils.clamp(6.5 - dist * 0.5, 1.5, 6.5); // closer tiles get shoved further
-    aim(m, m.userData.basePos.clone().add(new THREE.Vector3(ux * push, uy * push, -1.5)), 1);
-  });
-
-  aim(mesh, new THREE.Vector3(cx, cy + lift, centerZ + 4), scale);
+  showCard(mesh.userData);
 }
 
 // a tile only joins the animation set when it has somewhere to go
@@ -1174,6 +1127,8 @@ function deselect() {
   closing = false;
   tileMeshes.forEach(rest);
   document.getElementById('card-wrap').classList.remove('open', 'full', 'compact');
+  document.body.classList.remove('filters-over');
+  wake(30);
   selected = null;
 }
 document.getElementById('card-back').addEventListener('click', () => closeCard());
@@ -1386,7 +1341,7 @@ function neighbours(handle) {
   const n = tileMeshes.length, i0 = tileMeshes.indexOf(cur), out = [];
   [1, -1].forEach(dir => {
     let i = i0;
-    for (let k = 0, found = 0; k < n && found < 2; k++) {
+    for (let k = 0, found = 0; k < n && found < 1; k++) {
       i = (i + dir + n) % n;
       if (!tileMeshes[i].userData.filteredOut) { out.push(tileMeshes[i].userData.handle); found++; }
     }
@@ -1416,21 +1371,23 @@ function renderRelated(data) {
   top.forEach(([, t]) => {
     const b = document.createElement('button');
     b.type = 'button'; b.title = (t.userData.meta || {}).title || '';
-    const im = document.createElement('img'); im.alt = b.title; im.src = tileThumbUrl(t.userData.handle, 64);
-    b.appendChild(im);
+    b.setAttribute('aria-label', b.title);
+    b.appendChild(tileThumbCanvas(t.userData.handle, 60));
     b.addEventListener('click', () => openTile(t));
     row.appendChild(b);
   });
   box.append(h, row);
   box.hidden = false;
 }
-function tileThumbUrl(handle, px) {
+function tileThumbCanvas(handle, px) {
+  const c = document.createElement('canvas'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = c.height = Math.round(px * dpr);
   const entry = atlasEntries[handle], page = atlasSources[entry?.atlas || 0];
-  if (!page || !entry) return '';
-  const S = page.size / TPR, c = document.createElement('canvas');
-  c.width = c.height = px;
-  c.getContext('2d').drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, px, px);
-  return c.toDataURL('image/jpeg', 0.8);
+  if (page && entry) {
+    const S = page.size / TPR;
+    c.getContext('2d').drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, c.width, c.height);
+  }
+  return c;
 }
 
 function showCard(data) {
@@ -1730,6 +1687,17 @@ const TAU_FREE = 0.10;  // let go — it settles
 const TAU_ZOOM = 0.12;
 let lastFrame = performance.now();
 
+// The wall is drawn only when something on it changes: the camera is moving,
+// tiles are easing, or an input/resize/load just happened (wake). Idle — and
+// behind the opaque piece viewer — it costs nothing, instead of redrawing
+// thirteen thousand tiles sixty times a second.
+var kick = 120;                                  // frames to draw regardless (the opening load)
+function wake(n = 2) { kick = Math.max(kick || 0, n); }   // hoisted: resize() may call it first
+const _lastCam = new THREE.Vector3(Infinity, 0, 0);
+['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart', 'touchmove'].forEach(ev =>
+  window.addEventListener(ev, () => wake(2), { passive: true, capture: true }));
+document.addEventListener('visibilitychange', () => wake(4));
+
 function tick(now = lastFrame) {
   requestAnimationFrame(tick);
   // a backgrounded tab comes back with a gap of seconds: clamp it, or the wall
@@ -1753,8 +1721,16 @@ function tick(now = lastFrame) {
   // while it trailed behind tilted the whole view a little on every drag —
   // which is what made a fast pan swim instead of slide.
 
+  const busy = animating.size > 0;
   updateTileAnimation(dt);
-  renderer.render(scene, camera);
+  // the viewer is up and opaque: nothing of the wall is on screen
+  if (selected && historyReady && performance.now() - selectedAt > 400) { _lastCam.set(Infinity, 0, 0); return; }
+  const moved = _lastCam.distanceToSquared(camera.position) > 1e-8;
+  if (!historyReady || moved || busy || kick > 0) {
+    renderer.render(scene, camera);
+    _lastCam.copy(camera.position);
+    if (kick > 0) kick--;
+  }
 }
 
 // ─── filter panel: instituição / década / autor / tipo ─────────────────────
