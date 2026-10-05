@@ -4,8 +4,11 @@
   var stored = null;
   try { stored = localStorage.getItem('rodado-theme'); } catch (e) { /* no-op */ }
 
+  // sem escolha salva, segue o tema do sistema (e acompanha se ele mudar)
+  var sistema = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
   function effectiveTheme() {
-    return stored || 'light';
+    return stored || (sistema && sistema.matches ? 'dark' : 'light');
   }
 
   // a barra do navegador no celular acompanha o fundo do tema escolhido
@@ -27,8 +30,19 @@
       : '<i class="fa-solid fa-moon"></i>';
   }
 
-  if (stored) root.setAttribute('data-theme', stored);
+  root.setAttribute('data-theme', effectiveTheme());
   applyIcon(effectiveTheme());
+
+  if (sistema) {
+    var aoMudar = function () {
+      if (stored) return;
+      root.setAttribute('data-theme', effectiveTheme());
+      applyIcon(effectiveTheme());
+    };
+    // Safari < 14 só tem addListener
+    if (sistema.addEventListener) sistema.addEventListener('change', aoMudar);
+    else if (sistema.addListener) sistema.addListener(aoMudar);
+  }
 
   if (btn) {
     btn.addEventListener('click', function () {
