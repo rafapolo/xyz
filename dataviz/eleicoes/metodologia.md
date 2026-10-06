@@ -88,3 +88,34 @@ Para cada município, sobre os votos de prefeito no 1º turno de 2024:
 - Centroides: `br_bd_diretorios_brasil.municipio` (coluna `centroide`, GEOMETRY).
 - A query completa (CTE de scores + agregação ponderada + join de centroide) está
   versionada; regenerar `data.json` a partir dela reproduz o mapa.
+
+---
+
+# Presidente 2026 — 1º turno (04/10/2026)
+
+O seletor **Eleição** abre o mesmo mapa com o voto para presidente
+(`?eleicao=presidente-2026`, o padrão; `?eleicao=prefeitos-2024` para o mapa acima).
+
+- **Lula × Flávio** (modo padrão): diferença, em pontos percentuais dos votos válidos,
+  entre Lula (PT) e Flávio Bolsonaro (PL), os dois que vão ao 2º turno de 25/10.
+  Vermelho = Lula à frente, azul = Flávio à frente, satura em ±40 pontos.
+- **Inclinação** e **Polarização**: o mesmo cálculo de 2024, sobre os 12 candidatos, com a
+  nota do partido de cada um. Duas siglas que não existiam no survey nem em 2024:
+  **MISSÃO\*** (Renan Santos, 2,2%) → 7,8, direita liberal de origem no MBL, entre
+  REPUBLICANOS e NOVO; **DEMOCRATA\*** (Wilson Grassi, 0,01%) → 5,0, neutro por falta de
+  posição conhecida — o voto é desprezível.
+- **A polarização aqui não é um sinal independente.** PT (2,5) e PL (8,5) somam 92% do voto,
+  então todo município fica entre 2,2 e 3,0 e a dispersão é quase só função da margem entre
+  os dois. A escala de cor usa esse intervalo (em 2024, 0 a 2,0).
+
+## Fonte
+
+- Votos: site de divulgação do TSE, `https://resultados.tse.jus.br/oficial/ele2026/6257/`
+  (eleição 6257, cargo 1), um arquivo por município
+  (`dados/<uf>/<uf><cod_tse>-c0001-e006257-u.json`), baixado em 06/10/2026 com 100% das
+  seções totalizadas. O código TSE vira IBGE pelo `config/mun-e006257-cm.json`.
+- 5.571 municípios; o exterior (`zz`, ~331 mil votos válidos) fica fora do mapa. A soma
+  municipal (118.969.906 válidos) + exterior fecha com o total nacional (119.300.788).
+- Centroides: `br_bd_diretorios_brasil.municipio`, como em 2024.
+- `dados/presidente_2026/build.py` refaz `data_presidente_2026.json` (baixa o que falta,
+  junta com os centroides no beelink). Os JSON brutos ficam em `raw/`, fora do git.

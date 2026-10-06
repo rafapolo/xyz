@@ -8,7 +8,7 @@ mesmo fix já aplicado no [swissviz](https://github.com/rafapolo/swissviz) (`d78
 
 | Página | URL | O que é |
 |---|---|---|
-| [eleicoes](../dataviz/eleicoes/) | `/dataviz/eleicoes/` | Inclinação e polarização ideológica do voto por município (prefeitos 2024) — Leaflet + estilo `dark` do OpenFreeMap via `maplibre-gl-leaflet` |
+| [eleicoes](../dataviz/eleicoes/) | `/dataviz/eleicoes/` | Voto por município: Lula × Flávio no 1º turno presidencial de 2026, e inclinação/polarização ideológica (presidente 2026, prefeitos 2024) — Leaflet + estilo `dark` do OpenFreeMap via `maplibre-gl-leaflet` |
 | [religioes](../dataviz/religioes/) | `/dataviz/religioes/` | Perfil religioso dominante por município (Censo IBGE 2010/2022) — mesma ponte Leaflet/OpenFreeMap |
 | [religioes/igrejas](../dataviz/religioes/igrejas/) | `/dataviz/religioes/igrejas/` | 765 mil templos religiosos do CNEFE por vertente — MapLibre puro, estilo `dark` trocado direto (era raster CartoDB inline) |
 | [racas](../dataviz/racas/) | `/dataviz/racas/` | Cor/raça autodeclarada dominante por município — estilo `positron` (claro) do OpenFreeMap, mantém o filtro CSS duotone azul |

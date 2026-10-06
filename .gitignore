@@ -5,3 +5,6 @@ __pycache__/
 
 # dados pessoais (socios/CPF) usados por dataviz/scripts — nunca publicar
 dataviz/scripts/data/
+
+# brutos do TSE (66 MB), refeitos por build.py
+dataviz/eleicoes/dados/presidente_2026/raw/

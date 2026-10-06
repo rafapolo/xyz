@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Polarização nas Eleições Municipais 2024</title>
+<title>Eleições por Município</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -42,6 +42,7 @@
   #legend .bar { width:230px; height:10px; border-radius:2px; margin:6px 0 4px; }
   #legend .bar.lean { background: linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac); }
   #legend .bar.polar { background: linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921); }
+  #legend .bar.margin { background: linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac); }
   #legend .labels { display:flex; justify-content:space-between; color:#bbb; }
   #legend .hide { display:none; }
   #parties { bottom:20px; left:12px; padding:10px 12px; font-size:10px; max-width:320px; }
@@ -58,7 +59,7 @@
   #parties .sig .ast { color:#e0a03a; }
   #parties .sc { color:#999; font-family:'JetBrains Mono',monospace; }
   #parties .pfoot { color:#777; font-size:9px; margin-top:7px; }
-  #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:200px; }
+  #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:240px; }
   #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
   #controls input[type=range] { width:100%; accent-color:#7ab8ff; }
   #controls .row { margin-bottom:10px; }
@@ -69,6 +70,7 @@
   }
   #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
   #controls .seg button + button { border-left:1px solid #444; }
+  #info .hide, #controls .hide { display:none; }
   .leaflet-tooltip.tt-box {
     background: rgba(10,14,26,0.92); backdrop-filter: blur(8px);
     color:#eee; border:1px solid rgba(255,255,255,0.12); border-radius:8px;
@@ -153,6 +155,20 @@
 <body>
 <div id="map"></div>
 <div id="info" class="panel">
+<div data-eleicao="presidente-2026">
+  <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
+  <h1>Lula × Flávio por Município</h1>
+  <p>Cada ponto é um município. No modo <b>Lula × Flávio</b> a cor é a diferença entre
+  os dois mais votados do país: <b style="color:#e08a8a">vermelho</b> = Lula à frente,
+  <b class="blue" style="color:#7ab8ff">azul</b> = Flávio Bolsonaro à frente, pálido = empate.</p>
+  <p>Flávio teve <b>47,0%</b> dos votos válidos e Lula <b>45,2%</b>; os dois disputam o
+  2º turno em 25/10. Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.
+  Exterior fora do mapa.</p>
+  <p><b>Inclinação</b> e <b>Polarização</b> usam as mesmas notas ideológicas dos partidos
+  do mapa de prefeitos, sobre os 12 candidatos. Com dois nomes somando 92% do voto, a
+  polarização aqui é quase só a margem entre eles — não um sinal independente.</p>
+</div>
+<div data-eleicao="prefeitos-2024">
   <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
   <h1>Esquerda × Direita nas Prefeituras</h1>
   <p>Cada ponto é um município, colorido pela <b>distribuição</b> do voto para prefeito —
@@ -169,8 +185,14 @@
   e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
   e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
 </div>
+</div>
 <div id="right-sheets">
 <div id="legend" class="panel">
+  <div id="legend-margin" class="hide">
+    <div class="cap">Diferença Lula − Flávio (pontos percentuais)</div>
+    <div class="bar margin"></div>
+    <div class="labels"><span>Lula +40</span><span>empate</span><span>Flávio +40</span></div>
+  </div>
   <div id="legend-lean">
     <div class="cap">Inclinação ideológica do voto</div>
     <div class="bar lean"></div>
@@ -184,8 +206,16 @@
 </div>
 <div id="controls" class="panel">
   <div class="row">
+    <label>Eleição</label>
+    <div class="seg" id="seg-eleicao">
+      <button data-eleicao="presidente-2026">Presidente 2026</button>
+      <button data-eleicao="prefeitos-2024">Prefeitos 2024</button>
+    </div>
+  </div>
+  <div class="row">
     <label>Métrica</label>
-    <div class="seg">
+    <div class="seg" id="seg-mode">
+      <button id="mode-margin" data-mode="margin">Lula × Flávio</button>
       <button id="mode-lean" class="active" data-mode="lean">Inclinação</button>
       <button id="mode-polar" data-mode="polar">Polarização</button>
     </div>
@@ -203,7 +233,7 @@
   </div>
   <div class="psub">0 = esquerda · 10 = direita · pondera o voto de cada candidato</div>
   <div class="pbody"></div>
-  <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado por herança de sigla. Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
+  <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado à mão (ver metodologia). Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
 </div>
 <button id="toggle-info" aria-label="Sobre o mapa">☰</button>
 <button id="toggle-legend" aria-label="Legenda e controles">▤</button>
@@ -221,7 +251,14 @@ function leanColor(s){
 }
 const PLASMA=[[13,8,135],[126,3,168],[177,42,144],[204,71,120],[248,149,64],[240,249,33]];
 function plasma(t){ t=clamp(t,0,1); const n=PLASMA.length-1, x=t*n, i=Math.min(n-1,Math.floor(x)); return mix(PLASMA[i],PLASMA[i+1],x-i); }
-function polarColor(v){ return plasma(v/2.0); } // clamp reference P95≈2.0
+// polarização: escala por eleição — 2024 vai de 0 a ~2,0 (P95); em 2026 o voto se
+// concentra em PT (2,5) e PL (8,5), e todo município fica entre 2,2 e 3,0
+function polarColor(v){ const [lo, hi] = EL().polar; return plasma((v - lo) / (hi - lo)); }
+// diferença Lula − Flávio em pontos percentuais; satura em ±40
+function marginColor(d){
+  if (d >= 0) return mix(PALE, RED, clamp(d / 40, 0, 1));
+  return mix(PALE, BLUE, clamp(-d / 40, 0, 1));
+}
 function leanLabel(s){
   if (s < 4.0) return 'Esquerda';
   if (s < 4.7) return 'Centro-esquerda';
@@ -236,25 +273,46 @@ const PARTY_SCORES = {
   'REDE':3.3,'PDT':3.3,'PSB':3.7,'PV':4.1,'CIDADANIA':4.6,'SOLIDARIEDADE':5.4,
   'PMB':5.5,'MOBILIZA':5.5,'AVANTE':5.6,'MDB':5.7,'PODE':5.7,'PSD':5.9,'AGIR':6.0,
   'PSDB':6.0,'PRD':6.8,'UNIÃO':6.9,'PP':7.0,'REPUBLICANOS':7.2,'DC':7.5,
-  'PRTB':8.0,'NOVO':8.2,'PL':8.5
+  'PRTB':8.0,'NOVO':8.2,'PL':8.5,'MISSÃO':7.8,'DEMOCRATA':5.0
 };
-const PARTY_NOSURVEY = new Set(['UP','PMB','MOBILIZA','AGIR','PRD','DC']);
-(function renderParties(){
+const PARTY_NOSURVEY = new Set(['UP','PMB','MOBILIZA','AGIR','PRD','DC','MISSÃO','DEMOCRATA']);
+
+// eleições do mapa; ?eleicao=<chave> abre direto numa delas
+const ELEICOES = {
+  'presidente-2026': {
+    file: 'data_presidente_2026.json', modes: ['margin','lean','polar'], polar: [2.2, 3.0],
+    polarLabels: ['2,2', '3,0'],
+    parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA']
+  },
+  'prefeitos-2024': {
+    file: 'data.json', modes: ['lean','polar'], polar: [0, 2.0], polarLabels: ['consenso', 'dividido'],
+    parties: Object.keys(PARTY_SCORES).filter(k => k !== 'MISSÃO' && k !== 'DEMOCRATA')
+  }
+};
+let ELEICAO = new URLSearchParams(location.search).get('eleicao');
+if (!ELEICOES[ELEICAO]) ELEICAO = 'presidente-2026';
+function EL(){ return ELEICOES[ELEICAO]; }
+
+function renderParties(){
   const body = document.querySelector('#parties .pbody');
-  const rows = Object.entries(PARTY_SCORES).sort((a,b) => a[1]-b[1]).map(function(e){
+  const rows = EL().parties.map(k => [k, PARTY_SCORES[k]]).sort((a,b) => a[1]-b[1]).map(function(e){
     const ast = PARTY_NOSURVEY.has(e[0]) ? '<span class="ast">*</span>' : '';
     return '<div class="prow"><span class="chip" style="background:' + leanColor(e[1]) + '"></span>' +
            '<span class="sig">' + e[0] + ast + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
   }).join('');
   body.innerHTML = rows;
+}
+(function(){
   const panel = document.getElementById('parties');
   panel.querySelector('.phead').addEventListener('click', () => panel.classList.toggle('collapsed'));
 })();
 
 // record: [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir]
+// presidente-2026 acrescenta [plula, pflavio]
 let DATA = [];
-let MODE = 'lean';
-let sortedLean = [], sortedPolar = [];
+let MODE = 'margin';
+let sortedLean = [], sortedPolar = [], sortedMargin = [];
+const CACHE = {};
 
 const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: false })
   .setView([-14.2, -51.9], 4);
@@ -272,6 +330,8 @@ let currentRadius = 3;
 
 const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
 const POLAR_GRAD = 'linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921)';
+// a barra de margem vai de Lula (esquerda) a Flávio (direita): valor = Flávio − Lula
+const MARGIN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac)';
 
 function percentileOf(sortedArr, val){
   let lo = 0, hi = sortedArr.length;
@@ -279,22 +339,34 @@ function percentileOf(sortedArr, val){
   return sortedArr.length ? lo / sortedArr.length : 0;
 }
 
-function colorFor(r){ return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]); }
+function colorFor(r){
+  if (MODE === 'margin') return marginColor(r[15] - r[16]);
+  return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]);
+}
+function marginLabel(d){
+  const v = Math.abs(d).toFixed(1);
+  if (Math.abs(d) < 0.05) return 'Empate';
+  return (d > 0 ? 'Lula +' : 'Flávio +') + v;
+}
 
 function tooltipHtml(r){
   const [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir] = r;
-  const sorted = MODE === 'lean' ? sortedLean : sortedPolar;
-  const val = MODE === 'lean' ? lean : polar;
+  const margin = MODE === 'margin' ? r[16] - r[15] : 0; // Flávio − Lula
+  const sorted = MODE === 'margin' ? sortedMargin : MODE === 'lean' ? sortedLean : sortedPolar;
+  const val = MODE === 'margin' ? margin : MODE === 'lean' ? lean : polar;
   const pct = percentileOf(sorted, val);
   const pShown = Math.min(99, Math.round(pct * 100));
-  const grad = MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
+  const grad = MODE === 'margin' ? MARGIN_GRAD : MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
   const lo = sorted[0], hi = sorted[sorted.length - 1];
-  const metricBig = MODE === 'lean'
+  const metricBig = MODE === 'margin'
+    ? '<div class="tt-metric" style="color:' + marginColor(-margin) + '">' + marginLabel(-margin) + '</div>' +
+      '<div class="tt-metric-label">pontos · Lula ' + fmtPct(r[15]) + ' × Flávio ' + fmtPct(r[16]) + '</div>'
+    : MODE === 'lean'
     ? '<div class="tt-metric" style="color:' + leanColor(lean) + '">' + leanLabel(lean) + '</div>' +
       '<div class="tt-metric-label">nota ' + lean.toFixed(1) + ' / 10 · esq→dir</div>'
     : '<div class="tt-metric" style="color:' + polarColor(polar) + '">' + polar.toFixed(2) + '</div>' +
       '<div class="tt-metric-label">dispersão ideológica do voto</div>';
-  const fmtEdge = MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
+  const fmtEdge = MODE === 'margin' ? (x => marginLabel(-x)) : MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
   return (
     '<div class="tt-head"><span class="tt-name">' + nome + '</span><span class="tt-badge">' + uf + '</span></div>' +
     '<div class="tt-sub">' + fmt.format(tot) + ' votos válidos · ' + ncand + ' candidatos</div>' +
@@ -335,23 +407,46 @@ function render(){
   });
 }
 
-fetch('data.json').then(r => r.json()).then(function(json){
-  DATA = json;
-  sortedLean = json.map(r => r[5]).sort((a,b) => a-b);
-  sortedPolar = json.map(r => r[6]).sort((a,b) => a-b);
-  render();
-});
+function setEleicao(key){
+  ELEICAO = key;
+  const el = EL();
+  document.querySelectorAll('#seg-eleicao button').forEach(b => b.classList.toggle('active', b.dataset.eleicao === key));
+  document.querySelectorAll('#info [data-eleicao]').forEach(d => d.classList.toggle('hide', d.dataset.eleicao !== key));
+  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
+  const pl = document.querySelectorAll('#legend-polar .labels span');
+  pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
+  renderParties();
+  const url = new URL(location.href);
+  url.searchParams.set('eleicao', key);
+  history.replaceState(null, '', url);
+  const load = CACHE[key] ? Promise.resolve(CACHE[key]) : fetch(el.file).then(r => r.json());
+  load.then(function(json){
+    if (ELEICAO !== key) return; // trocou de novo antes de carregar
+    CACHE[key] = json;
+    DATA = json;
+    sortedLean = json.map(r => r[5]).sort((a,b) => a-b);
+    sortedPolar = json.map(r => r[6]).sort((a,b) => a-b);
+    sortedMargin = json.length && json[0].length > 15 ? json.map(r => r[16] - r[15]).sort((a,b) => a-b) : [];
+    MODE = el.modes.includes(MODE) ? MODE : el.modes[0];
+    render();
+    setMode(MODE);
+  });
+}
 
 function setMode(mode){
   MODE = mode;
-  document.querySelectorAll('#controls .seg button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
   document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
   document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
   // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
   DATA.forEach(function(r, i){ const c = colorFor(r); markers[i].setStyle({ color: c, fillColor: c }); });
 }
-document.querySelectorAll('#controls .seg button').forEach(b =>
+document.querySelectorAll('#seg-mode button').forEach(b =>
   b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.querySelectorAll('#seg-eleicao button').forEach(b =>
+  b.addEventListener('click', () => { if (b.dataset.eleicao !== ELEICAO) setEleicao(b.dataset.eleicao); }));
+setEleicao(ELEICAO);
 
 const radiusSlider = document.getElementById('radiusSlider');
 const radiusValue = document.getElementById('radiusValue');
