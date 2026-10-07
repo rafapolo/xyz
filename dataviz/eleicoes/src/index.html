@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lula × Flávio por município — eleições 2026</title>
+<meta name="description" content="Mapa do 1º turno presidencial de 2026, município a município: quem venceu, a inclinação ideológica do voto e os 703 municípios que trocaram de lado desde 2022.">
+<link rel="canonical" href="https://xn--2dk.xyz/dataviz/eleicoes/?eleicao=presidente-2026">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="xn--2dk.xyz">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Lula × Flávio, município a município">
+<meta property="og:description" content="1º turno de 2026 nos 5.571 municípios: Flávio venceu em 2.908, Lula em 2.663 — e 703 trocaram de lado desde 2022. Passe o mouse e filtre os vira-casacas.">
+<meta property="og:url" content="https://xn--2dk.xyz/dataviz/eleicoes/?eleicao=presidente-2026">
+<meta property="og:image" content="https://xn--2dk.xyz/dataviz/eleicoes/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Mapa do Brasil com um ponto por município, em vermelho onde Lula venceu e em azul onde Flávio Bolsonaro venceu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lula × Flávio, município a município">
+<meta name="twitter:description" content="1º turno de 2026 nos 5.571 municípios — e os 703 que trocaram de lado desde 2022.">
+<meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/eleicoes/og.png">
+<script>(function(){var e=new URLSearchParams(location.search).get('eleicao'),f={'prefeitos-2024':'data.json'}[e]||'data_presidente_2026.json';window.__k=f==='data.json'?'prefeitos-2024':'presidente-2026';window.__d=fetch(f).then(function(r){return r.json()});})()</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
+<script defer src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script defer src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; background:#0b0b0b; font-family: 'Inter', Helvetica, Arial, sans-serif; overflow-x:hidden; }
+  #map { position:absolute; top:0; bottom:0; left:0; right:0; background:rgb(29,33,40); }
+  .panel {
+    position:absolute; z-index:1000; background:rgba(20,20,20,0.88); color:#eee;
+    border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  }
+  #info { top:12px; left:12px; padding:14px 16px; max-width:350px; }
+  #info .eyebrow { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:#7ab8ff; margin:0 0 6px; }
+  #info h1 {
+    font-size:16px; font-weight:700; letter-spacing:-0.2px; color:#fff;
+    margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);
+  }
+  #info p { font-size:12px; line-height:1.6; margin:0; color:rgba(255,255,255,0.65); }
+  #info p + p { margin-top:8px; }
+  #info a { color:#7ab8ff; text-decoration:none; border-bottom:1px solid rgba(122,184,255,0.35); }
+  #info a:hover { border-bottom-color:#7ab8ff; }
+  #info .xref {
+    margin-top:10px; padding-top:9px; border-top:1px solid rgba(255,255,255,0.1);
+    font-size:11px; color:rgba(255,255,255,0.6);
+  }
+  #info .xref b { color:#e08a8a; }
+  #info .xref b.blue { color:#7ab8ff; }
+  #legend { bottom:20px; right:12px; padding:10px 14px; font-size:11px; }
+  #legend .cap { color:#ddd; margin-bottom:2px; font-weight:500; }
+  #legend .bar { width:230px; height:10px; border-radius:2px; margin:6px 0 4px; }
+  #legend .bar.lean { background: linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac); }
+  #legend .bar.polar { background: linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921); }
+  #legend .bar.margin { background: linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac); }
+  #legend .labels { display:flex; justify-content:space-between; color:#bbb; }
+  #legend .hide { display:none; }
+  #parties { bottom:20px; left:12px; padding:10px 12px; font-size:10px; max-width:320px; }
+  #parties .phead { display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; }
+  #parties .ptitle { color:#ddd; font-weight:500; font-size:11px; }
+  #parties .psub { color:#888; font-size:9px; margin:1px 0 7px; }
+  #parties .caret { color:#888; font-size:10px; transition:transform .15s; }
+  #parties.collapsed .caret { transform:rotate(-90deg); }
+  #parties.collapsed .pbody, #parties.collapsed .psub { display:none; }
+  #parties .pbody { columns:2; column-gap:16px; }
+  #parties .prow { display:flex; align-items:center; gap:6px; line-height:1.55; break-inside:avoid; }
+  #parties .chip { width:9px; height:9px; border-radius:2px; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,0.12) inset; }
+  #parties .sig { color:#ccc; flex:1; white-space:nowrap; }
+  #parties .sig .ast { color:#e0a03a; }
+  #parties .sc { color:#999; font-family:'JetBrains Mono',monospace; }
+  #parties .pfoot { color:#777; font-size:9px; margin-top:7px; }
+  #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:240px; }
+  #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
+  #controls input[type=range] { width:100%; accent-color:#7ab8ff; }
+  #controls .row { margin-bottom:10px; }
+  #controls .seg { display:flex; gap:0; border:1px solid #444; border-radius:5px; overflow:hidden; }
+  #controls .seg button {
+    flex:1; background:#222; color:#bbb; border:0; padding:6px 4px; font-size:11px;
+    font-family:'Inter',sans-serif; cursor:pointer; transition:background .15s,color .15s;
+  }
+  #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
+  #controls .seg button + button { border-left:1px solid #444; }
+  #flip-count { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
+  #info .hide, #controls .hide { display:none; }
+  .tt-box {
+    position:fixed; left:0; top:0; z-index:1000; pointer-events:none; display:none; box-sizing:border-box;
+    will-change:transform; contain:layout paint;
+    background: #0a0e1a;
+    color:#eee; border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    padding:12px 14px; min-width:230px; max-width:300px;
+    font-family:'Inter',Helvetica,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,0.5);
+  }
+  .tt-box.on { display:block; }
+  #hl { position:fixed; left:0; top:0; z-index:999; pointer-events:none; display:none; border:1.5px solid #fff; border-radius:50%; box-shadow:0 0 0 1px rgba(0,0,0,0.6); will-change:transform; }
+  #hl.on { display:block; }
+  .tt-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .tt-name { font-weight:600; font-size:14px; color:#fff; }
+  .tt-badge {
+    font-size:10px; font-weight:600; letter-spacing:0.5px; color:#ccc;
+    border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:1px 5px; flex-shrink:0;
+  }
+  .tt-sub { font-size:11px; color:#888; margin:2px 0 8px; }
+  .tt-metric { font-size:22px; font-weight:600; line-height:1.2; font-family:'JetBrains Mono',monospace; }
+  .tt-metric-label { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:8px; }
+  .tt-range { margin:2px 0 10px; }
+  .tt-range-head { display:flex; justify-content:space-between; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:3px; }
+  .tt-range-bar { position:relative; height:5px; border-radius:3px; }
+  .tt-range-marker {
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:9px; height:9px; border-radius:50%; background:#fff;
+    border:2px solid rgba(10,14,26,0.9); box-shadow:0 0 4px rgba(0,0,0,0.6);
+  }
+  .tt-range-labels { display:flex; justify-content:space-between; font-size:10px; color:#888; font-family:'JetBrains Mono',monospace; margin-top:3px; }
+  .tt-race { display:flex; flex-direction:column; gap:5px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1); }
+  .tt-cand { font-size:11px; }
+  .tt-cand-top { display:flex; justify-content:space-between; gap:8px; margin-bottom:2px; }
+  .tt-cand-party { color:#ddd; }
+  .tt-cand-pct { font-family:'JetBrains Mono',monospace; color:#fff; }
+  .tt-cand-bar { height:4px; border-radius:2px; background:rgba(255,255,255,0.1); overflow:hidden; }
+  .tt-cand-fill { height:100%; border-radius:2px; }
+  .tt-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px 14px; padding-top:8px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.1); }
+  .tt-cell { display:flex; justify-content:space-between; gap:8px; font-size:11px; }
+  .tt-cell .k { color:#888; }
+  .tt-cell .v { font-family:'JetBrains Mono',monospace; color:#ddd; white-space:nowrap; }
+  .leaflet-control-attribution { background:rgba(20,20,20,0.7) !important; color:#999 !important; }
+  .leaflet-control-attribution a { color:#7ab8ff !important; }
+
+  #toggle-info, #toggle-legend {
+    display:none; position:fixed; top:12px; width:42px; height:42px; z-index:1100;
+    background:rgba(20,20,20,0.88); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    color:#eee; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+  #toggle-info { left:12px; }
+  #toggle-legend { right:12px; }
+  #sheet-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
+  #sheet-backdrop.visible { display:block; }
+
+  @media (max-width: 760px) {
+    #parties { display:none; }
+    #toggle-info, #toggle-legend { display:flex; }
+    #info, #right-sheets {
+      position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
+      width:100% !important; max-width:none !important; max-height:70vh; overflow-y:auto;
+      box-sizing:border-box;
+      transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      z-index:1080;
+    }
+    #info { border-radius:16px 16px 0 0; }
+    #info::before, #right-sheets::before {
+      content:''; display:block; width:36px; height:4px; background:rgba(255,255,255,0.15);
+      border-radius:2px; margin:-4px auto 12px;
+    }
+    #info.open, #right-sheets.open { transform:translateY(0); }
+    #right-sheets {
+      display:flex; flex-direction:column; gap:8px;
+      background:transparent; box-shadow:none; backdrop-filter:none; padding:0 0 8px;
+    }
+    #right-sheets .panel { position:static; width:100%; max-width:none; box-sizing:border-box; }
+    #info, #right-sheets { overflow-x:hidden; max-height:70vh; max-height:70dvh; padding-bottom:max(8px, env(safe-area-inset-bottom)); }
+    .leaflet-control-zoom { display:none; }
+    #legend .bar { width:100%; }
+    #toggle-info, #toggle-legend { width:44px; height:44px; top:max(12px, env(safe-area-inset-top)); }
+    #controls .seg button { padding-top:10px; padding-bottom:10px; }
+    .tt-box { max-height:60vh; max-height:60dvh; overflow-y:auto; padding-bottom:max(12px, env(safe-area-inset-bottom)); }
+    #right-sheets .panel:first-child { border-radius:16px 16px 0 0; }
+    .tt-box {
+      left:0 !important; right:0 !important; top:auto !important; bottom:0 !important; transform:none !important;
+      max-width:none !important; width:100%; border-radius:16px 16px 0 0 !important;
+      z-index:1090;
+    }
+  }
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
+</head>
+<body>
+<div id="map"></div>
+<div id="info" class="panel">
+<div data-eleicao="presidente-2026">
+  <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
+  <h1>Lula × Flávio por Município</h1>
+  <p>Cada ponto é um município. No modo <b>Lula × Flávio</b> a cor é a diferença entre
+  os dois mais votados do país: <b style="color:#e08a8a">vermelho</b> = Lula à frente,
+  <b class="blue" style="color:#7ab8ff">azul</b> = Flávio Bolsonaro à frente, pálido = empate.</p>
+  <p>Flávio teve <b>47,0%</b> dos votos válidos e Lula <b>45,2%</b>; os dois disputam o
+  2º turno em 25/10. Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.
+  Exterior fora do mapa.</p>
+  <p><b>Inclinação</b> e <b>Polarização</b> usam as mesmas notas ideológicas dos partidos
+  do mapa de prefeitos, sobre os 12 candidatos. Com dois nomes somando 92% do voto, a
+  polarização aqui é quase só a margem entre eles — não um sinal independente.</p>
+</div>
+<div data-eleicao="prefeitos-2024">
+  <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
+  <h1>Esquerda × Direita nas Prefeituras</h1>
+  <p>Cada ponto é um município, colorido pela <b>distribuição</b> do voto para prefeito —
+  não pela sigla de quem venceu. Cada partido recebe uma nota ideológica de 0 (esquerda) a
+  10 (direita) segundo o survey de especialistas de Bolognesi, Ribeiro &amp; Codato; a cor
+  agrega o voto de <b>todos</b> os candidatos.</p>
+  <p><b>Inclinação:</b> vermelho = município mais à esquerda, azul = mais à direita.
+  <b>Polarização:</b> quão dividido entre extremos ideológicos foi o voto — não confundir
+  com disputa apertada entre dois nomes do mesmo campo.</p>
+  <p class="xref">Cruzando com o <a href="../religioes/">mapa religioso (Censo IBGE)</a>:
+  no <b style="color:#e08a8a">Nordeste</b> — e em parte no Sudeste — municípios mais
+  <b class="blue">evangélicos</b> pendem à direita e mais <b>católicos</b> à esquerda. Mas
+  <b style="color:#ccc">não é lei nacional</b>: no <b style="color:#e08a8a">Sul</b> católicos
+  e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
+  e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
+</div>
+</div>
+<div id="right-sheets">
+<div id="legend" class="panel">
+  <div id="legend-margin" class="hide">
+    <div class="cap">Diferença Lula − Flávio (pontos percentuais)</div>
+    <div class="bar margin"></div>
+    <div class="labels"><span>Lula +40</span><span>empate</span><span>Flávio +40</span></div>
+  </div>
+  <div id="legend-lean">
+    <div class="cap">Inclinação ideológica do voto</div>
+    <div class="bar lean"></div>
+    <div class="labels"><span>esquerda</span><span>centro</span><span>direita</span></div>
+  </div>
+  <div id="legend-polar" class="hide">
+    <div class="cap">Polarização (dispersão do voto)</div>
+    <div class="bar polar"></div>
+    <div class="labels"><span>consenso</span><span>dividido</span></div>
+  </div>
+</div>
+<div id="controls" class="panel">
+  <div class="row">
+    <label>Eleição</label>
+    <div class="seg" id="seg-eleicao">
+      <button data-eleicao="presidente-2026">Presidente 2026</button>
+      <button data-eleicao="prefeitos-2024">Prefeitos 2024</button>
+    </div>
+  </div>
+  <div class="row">
+    <label>Métrica</label>
+    <div class="seg" id="seg-mode">
+      <button id="mode-margin" data-mode="margin">Lula × Flávio</button>
+      <button id="mode-lean" class="active" data-mode="lean">Inclinação</button>
+      <button id="mode-polar" data-mode="polar">Polarização</button>
+    </div>
+  </div>
+  <div class="row" id="row-flip">
+    <label>Vs. presidencial 2022</label>
+    <div class="seg" id="seg-flip">
+      <button data-flip="all" class="active">Todos</button>
+      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 no município; Flávio venceu em 2026">Vira-casacas<br><span style="font-weight:400;font-size:11px">(Lula → Flávio)</span></button>
+    </div>
+    <div id="flip-count"></div>
+  </div>
+  <div class="row">
+    <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
+    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
+  </div>
+</div>
+</div>
+<div id="parties" class="panel">
+  <div class="phead">
+    <span class="ptitle">Nota ideológica dos partidos</span>
+    <span class="caret">▾</span>
+  </div>
+  <div class="psub">0 = esquerda · 10 = direita · pondera o voto de cada candidato</div>
+  <div class="pbody"></div>
+  <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado à mão (ver metodologia). Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
+</div>
+<button id="toggle-info" aria-label="Sobre o mapa">☰</button>
+<button id="toggle-legend" aria-label="Legenda e controles">▤</button>
+<div id="sheet-backdrop"></div>
+<script>
+// ---- color helpers ----
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function toHex(x){ return clamp(Math.round(x),0,255).toString(16).padStart(2,'0'); }
+function mix(c1,c2,t){ return '#' + toHex(c1[0]+(c2[0]-c1[0])*t) + toHex(c1[1]+(c2[1]-c1[1])*t) + toHex(c1[2]+(c2[2]-c1[2])*t); }
+const RED=[178,24,43], PALE=[247,247,247], BLUE=[33,102,172];
+// diverging, neutral center at score 5.0; saturates at 3.5 (left) / 7.5 (right)
+function leanColor(s){
+  if (s <= 5) return mix(PALE, RED, clamp((5 - s) / 1.5, 0, 1));
+  return mix(PALE, BLUE, clamp((s - 5) / 2.5, 0, 1));
+}
+const PLASMA=[[13,8,135],[126,3,168],[177,42,144],[204,71,120],[248,149,64],[240,249,33]];
+function plasma(t){ t=clamp(t,0,1); const n=PLASMA.length-1, x=t*n, i=Math.min(n-1,Math.floor(x)); return mix(PLASMA[i],PLASMA[i+1],x-i); }
+// polarização: escala por eleição — 2024 vai de 0 a ~2,0 (P95); em 2026 o voto se
+// concentra em PT (2,5) e PL (8,5), e todo município fica entre 2,2 e 3,0
+function polarColor(v){ const [lo, hi] = EL().polar; return plasma((v - lo) / (hi - lo)); }
+// diferença Lula − Flávio em pontos percentuais; satura em ±40
+function marginColor(d){
+  if (d >= 0) return mix(PALE, RED, clamp(d / 40, 0, 1));
+  return mix(PALE, BLUE, clamp(-d / 40, 0, 1));
+}
+function leanLabel(s){
+  if (s < 4.0) return 'Esquerda';
+  if (s < 4.7) return 'Centro-esquerda';
+  if (s <= 5.3) return 'Centro';
+  if (s <= 6.5) return 'Centro-direita';
+  return 'Direita';
+}
+
+// party ideology scores (single source; mirrors dados/query.sql + metodologia.md)
+const PARTY_SCORES = {
+  'PCO':0.3,'PCB':0.5,'UP':0.5,'PSTU':0.6,'PSOL':1.3,'PC do B':1.7,'PT':2.5,
+  'REDE':3.3,'PDT':3.3,'PSB':3.7,'PV':4.1,'CIDADANIA':4.6,'SOLIDARIEDADE':5.4,
+  'PMB':5.5,'MOBILIZA':5.5,'AVANTE':5.6,'MDB':5.7,'PODE':5.7,'PSD':5.9,'AGIR':6.0,
+  'PSDB':6.0,'PRD':6.8,'UNIÃO':6.9,'PP':7.0,'REPUBLICANOS':7.2,'DC':7.5,
+  'PRTB':8.0,'NOVO':8.2,'PL':8.5,'MISSÃO':7.8,'DEMOCRATA':5.0
+};
+const PARTY_NOSURVEY = new Set(['UP','PMB','MOBILIZA','AGIR','PRD','DC','MISSÃO','DEMOCRATA']);
+
+// eleições do mapa; ?eleicao=<chave> abre direto numa delas
+const ELEICOES = {
+  'presidente-2026': {
+    file: 'data_presidente_2026.json', modes: ['margin','lean','polar'], polar: [2.2, 3.0],
+    polarLabels: ['2,2', '3,0'],
+    parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA']
+  },
+  'prefeitos-2024': {
+    file: 'data.json', modes: ['lean','polar'], polar: [0, 2.0], polarLabels: ['consenso', 'dividido'],
+    parties: Object.keys(PARTY_SCORES).filter(k => k !== 'MISSÃO' && k !== 'DEMOCRATA')
+  }
+};
+let ELEICAO = new URLSearchParams(location.search).get('eleicao');
+if (!ELEICOES[ELEICAO]) ELEICAO = 'presidente-2026';
+function EL(){ return ELEICOES[ELEICAO]; }
+
+function renderParties(){
+  const body = document.querySelector('#parties .pbody');
+  const rows = EL().parties.map(k => [k, PARTY_SCORES[k]]).sort((a,b) => a[1]-b[1]).map(function(e){
+    const ast = PARTY_NOSURVEY.has(e[0]) ? '<span class="ast">*</span>' : '';
+    return '<div class="prow"><span class="chip" style="background:' + leanColor(e[1]) + '"></span>' +
+           '<span class="sig">' + e[0] + ast + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
+  }).join('');
+  body.innerHTML = rows;
+}
+(function(){
+  const panel = document.getElementById('parties');
+  panel.querySelector('.phead').addEventListener('click', () => panel.classList.toggle('collapsed'));
+})();
+
+// record: [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir]
+// presidente-2026 acrescenta [plula, pflavio]
+let DATA = [];
+let MODE = 'margin';
+let FLIP = 'all'; // all | lost (Lula 2022 → Flávio 2026) | won (Bolsonaro 2022 → Lula 2026)
+let sortedLean = [], sortedPolar = [], sortedMargin = [];
+const CACHE = {};
+
+// só o Brasil: a navegação fica presa a uma caixa em volta do país e o resto do mundo
+// é coberto por uma máscara (mundo menos o contorno do Brasil) na cor do fundo
+const BR_BOUNDS = L.latLngBounds([-34.2, -74.6], [5.6, -33.4]);
+const map = L.map('map', {
+  preferCanvas: true, zoomControl: true, attributionControl: false,
+  zoomSnap: 0.1, zoomDelta: 0.5, wheelPxPerZoomLevel: 120,
+  maxBounds: BR_BOUNDS.pad(0.08), maxBoundsViscosity: 1.0
+});
+function fitBrasil(){
+  map.invalidateSize();
+  const z = map.getBoundsZoom(BR_BOUNDS, false, L.point(16, 16));
+  map.setMinZoom(z - 0.2);
+  map.fitBounds(BR_BOUNDS, { padding: [8, 8], animate: false });
+}
+fitBrasil();
+let resizeT;
+window.addEventListener('resize', function(){
+  clearTimeout(resizeT);
+  resizeT = setTimeout(function(){
+    const wasMin = map.getZoom() <= map.getMinZoom() + 0.3;
+    const z = map.getBoundsZoom(BR_BOUNDS, false, L.point(16, 16));
+    map.setMinZoom(z - 0.2);
+    if (wasMin) map.fitBounds(BR_BOUNDS, { padding: [8, 8], animate: false });
+  }, 120);
+});
+map.createPane('mask'); map.getPane('mask').style.zIndex = 390; map.getPane('mask').style.pointerEvents = 'none';
+fetch('brasil.geojson').then(r => r.json()).then(function(g){
+  const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
+  const holes = polys.map(p => p[0].map(c => [c[1], c[0]]));
+  const world = [[-89, -179], [-89, 179], [89, 179], [89, -179]];
+  const r = L.svg({ pane: 'mask', padding: 1 });
+  L.polygon([world].concat(holes), { renderer: r, pane: 'mask', stroke: false, fillColor: 'rgb(29,33,40)', fillOpacity: 1, interactive: false }).addTo(map);
+  L.polygon(holes, { renderer: r, pane: 'mask', color: 'rgba(255,255,255,0.28)', weight: 1, fill: false, interactive: false }).addTo(map);
+});
+// MapLibre GL basemap (OpenFreeMap "dark" vector style, OSM data, no API key, no rate limit)
+// replaces the CartoDB dark_all raster tiles carto deprecated for anonymous use
+// rótulos em pt-BR: o estilo vem em inglês (name_en) — troca por name:pt, com o nome local de reserva
+fetch('https://tiles.openfreemap.org/styles/dark').then(r => r.json()).then(function(style){
+  style.layers.forEach(function(l){
+    const tf = l.layout && l.layout['text-field'];
+    if (Array.isArray(tf) && JSON.stringify(tf).indexOf('name') >= 0)
+      l.layout['text-field'] = ['coalesce', ['get', 'name:pt'], ['get', 'name']];
+  });
+  L.maplibreGL({ style: style }).addTo(map);
+});
+
+const renderer = L.canvas({ padding: 0.1 });
+const fmt = new Intl.NumberFormat('pt-BR');
+const fmtPct = v => v.toFixed(1) + '%';
+let markers = [];
+let currentRadius = 3;
+
+const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
+const POLAR_GRAD = 'linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921)';
+// a barra de margem vai de Lula (esquerda) a Flávio (direita): valor = Flávio − Lula
+const MARGIN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac)';
+
+function percentileOf(sortedArr, val){
+  let lo = 0, hi = sortedArr.length;
+  while (lo < hi){ const mid = (lo + hi) >> 1; if (sortedArr[mid] < val) lo = mid + 1; else hi = mid; }
+  return sortedArr.length ? lo / sortedArr.length : 0;
+}
+
+// vira-casaca: quem venceu o 1º turno de 2022 (Lula × Bolsonaro) não é quem venceu em 2026 (Lula × Flávio)
+function flipKind(r){
+  if (r.length < 19 || r[17] == null) return null;
+  if (r[17] > r[18] && r[16] > r[15]) return 'lost';
+  if (r[18] > r[17] && r[15] > r[16]) return 'won';
+  return null;
+}
+function flipMatch(r){ return FLIP === 'all' || flipKind(r) === FLIP; }
+function colorFor(r){
+  if (MODE === 'margin') return marginColor(r[15] - r[16]);
+  return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]);
+}
+function marginLabel(d){
+  const v = Math.abs(d).toFixed(1);
+  if (Math.abs(d) < 0.05) return 'Empate';
+  return (d > 0 ? 'Lula +' : 'Flávio +') + v;
+}
+
+function tooltipHtml(r){
+  const [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir] = r;
+  const margin = MODE === 'margin' ? r[16] - r[15] : 0; // Flávio − Lula
+  const sorted = MODE === 'margin' ? sortedMargin : MODE === 'lean' ? sortedLean : sortedPolar;
+  const val = MODE === 'margin' ? margin : MODE === 'lean' ? lean : polar;
+  const pct = percentileOf(sorted, val);
+  const pShown = Math.min(99, Math.round(pct * 100));
+  const grad = MODE === 'margin' ? MARGIN_GRAD : MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
+  const lo = sorted[0], hi = sorted[sorted.length - 1];
+  const metricBig = MODE === 'margin'
+    ? '<div class="tt-metric" style="color:' + marginColor(-margin) + '">' + marginLabel(-margin) + '</div>' +
+      '<div class="tt-metric-label">pontos · Lula ' + fmtPct(r[15]) + ' × Flávio ' + fmtPct(r[16]) + '</div>'
+    : MODE === 'lean'
+    ? '<div class="tt-metric" style="color:' + leanColor(lean) + '">' + leanLabel(lean) + '</div>' +
+      '<div class="tt-metric-label">nota ' + lean.toFixed(1) + ' / 10 · esq→dir</div>'
+    : '<div class="tt-metric" style="color:' + polarColor(polar) + '">' + polar.toFixed(2) + '</div>' +
+      '<div class="tt-metric-label">dispersão ideológica do voto</div>';
+  const fmtEdge = MODE === 'margin' ? (x => marginLabel(-x)) : MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
+  return (
+    '<div class="tt-head"><span class="tt-name">' + nome + '</span><span class="tt-badge">' + uf + '</span></div>' +
+    '<div class="tt-sub">' + fmt.format(tot) + ' votos válidos · ' + ncand + ' candidatos</div>' +
+    metricBig +
+    '<div class="tt-range">' +
+      '<div class="tt-range-head"><span>mín · máx nacional</span><span>P' + pShown + '</span></div>' +
+      '<div class="tt-range-bar" style="background:' + grad + ';">' +
+        '<div class="tt-range-marker" style="left:' + (pct * 100).toFixed(1) + '%;"></div>' +
+      '</div>' +
+      '<div class="tt-range-labels"><span>' + fmtEdge(lo) + '</span><span>' + fmtEdge(hi) + '</span></div>' +
+    '</div>' +
+    '<div class="tt-race">' +
+      '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥇 ' + w1 + '</span><span class="tt-cand-pct">' + fmtPct(w1pct) + '</span></div>' +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w1pct,0,100) + '%;background:#7ab8ff;"></div></div></div>' +
+      (w2 ? '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥈 ' + w2 + '</span><span class="tt-cand-pct">' + fmtPct(w2pct) + '</span></div>' +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:#888;"></div></div></div>' : '') +
+    '</div>' +
+    (r.length > 18 && r[17] != null ? '<div class="tt-sub" style="margin-top:8px">2022: Lula ' + fmtPct(r[17]) + ' × Bolsonaro ' + fmtPct(r[18]) +
+      (flipKind(r) ? ' · <b style="color:#e0a03a">trocou de lado</b>' : '') + '</div>' : '') +
+    '<div class="tt-grid">' +
+      '<div class="tt-cell"><span class="k">Voto esquerda</span><span class="v">' + fmtPct(pesq) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Voto centro</span><span class="v">' + fmtPct(pcen) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Voto direita</span><span class="v">' + fmtPct(pdir) + '</span></div>' +
+      '<div class="tt-cell"><span class="k">Margem 1º–2º</span><span class="v">' + fmtPct(Math.max(0, w1pct - w2pct)) + '</span></div>' +
+    '</div>'
+  );
+}
+
+function render(){
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  DATA.forEach(function(r){
+    const color = colorFor(r);
+    const marker = L.circleMarker([r[2], r[3]], {
+      renderer, radius: currentRadius, color, weight: 0, fillColor: color, fillOpacity: 0.85, interactive: false
+    });
+    marker.addTo(map);
+    markers.push(marker);
+  });
+  buildGrid();
+}
+
+// ---- hover: um único tooltip, índice em grade e nada de hit-test por marcador ----
+const CELL = 0.25; // graus
+let GRID = new Map();
+function buildGrid(){
+  GRID = new Map();
+  DATA.forEach(function(r, i){
+    const k = Math.floor(r[2] / CELL) * 10000 + Math.floor(r[3] / CELL);
+    const a = GRID.get(k); if (a) a.push(i); else GRID.set(k, [i]);
+  });
+}
+const tipEl = document.createElement('div'); tipEl.className = 'tt-box'; document.body.appendChild(tipEl);
+const hlEl = document.createElement('div'); hlEl.id = 'hl'; document.body.appendChild(hlEl);
+let HOVER = -1, lastPt = { x: 0, y: 0 }, raf = 0, pend = null;
+const isSheet = () => window.matchMedia('(max-width: 760px)').matches;
+
+function nearest(lat, lng, z){
+  const k = 256 * Math.pow(2, z) / 360;                    // px por grau de longitude
+  const R = Math.max(currentRadius * (FLIP === 'all' ? 1 : 1.6), 3) + (isSheet() ? 14 : 5); // raio de captura em px (dedo > mouse)
+  const reach = Math.max(1, Math.ceil(R / k / CELL) + 1);
+  const cy = Math.floor(lat / CELL), cx = Math.floor(lng / CELL);
+  const cosLat = Math.cos(lat * Math.PI / 180);
+  let best = -1, bd = R * R;
+  for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
+    const a = GRID.get((cy + dy) * 10000 + cx + dx); if (!a) continue;
+    for (let j = 0; j < a.length; j++) {
+      const r = DATA[a[j]];
+      const px = (r[3] - lng) * k, py = (r[2] - lat) * k / cosLat;
+      const d = px * px + py * py;
+      if (d < bd && flipMatch(r)) { bd = d; best = a[j]; }
+    }
+  }
+  return best;
+}
+function hideTip(){
+  HOVER = -1; tipEl.classList.remove('on'); hlEl.classList.remove('on');
+  map.getContainer().style.cursor = '';
+}
+function showTip(i, x, y){
+  const r = DATA[i];
+  if (i !== HOVER) {
+    HOVER = i;
+    tipEl.innerHTML = tooltipHtml(r);
+    tipEl.classList.add('on');
+    const p = map.latLngToContainerPoint([r[2], r[3]]);
+    const d = (currentRadius * (FLIP === 'all' ? 1 : 1.6) + 3) * 2;
+    hlEl.style.width = hlEl.style.height = d + 'px';
+    hlEl.style.transform = 'translate3d(' + (p.x - d / 2) + 'px,' + (p.y - d / 2) + 'px,0)';
+    hlEl.classList.add('on');
+    map.getContainer().style.cursor = 'pointer';
+  } else if (!tipEl.classList.contains('on')) {
+    tipEl.innerHTML = tooltipHtml(r); tipEl.classList.add('on');
+  } else if (MODE !== tipEl.dataset.mode || ELEICAO !== tipEl.dataset.el) {
+    tipEl.innerHTML = tooltipHtml(r);
+  }
+  tipEl.dataset.mode = MODE; tipEl.dataset.el = ELEICAO;
+  if (isSheet()) return;
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight, vw = innerWidth, vh = innerHeight;
+  let tx = x + 16, ty = y + 16;
+  if (tx + w > vw - 8) tx = x - w - 16;
+  if (ty + h > vh - 8) ty = Math.max(8, vh - h - 8);
+  tipEl.style.transform = 'translate3d(' + Math.round(tx) + 'px,' + Math.round(ty) + 'px,0)';
+}
+function onPoint(e){
+  const oe = e.originalEvent; pend = { x: oe.clientX, y: oe.clientY, ll: e.latlng };
+  if (raf) return;
+  raf = requestAnimationFrame(function(){
+    raf = 0; const q = pend; if (!q || !DATA.length) return;
+    lastPt = q;
+    const i = nearest(q.ll.lat, q.ll.lng, map.getZoom());
+    if (i < 0) { if (HOVER >= 0) hideTip(); return; }
+    showTip(i, q.x, q.y);
+  });
+}
+map.on('mousemove', function(e){ if (!isSheet()) onPoint(e); });
+map.on('click', function(e){ if (isSheet()) onPoint(e); });
+map.on('mouseout', hideTip);
+map.on('movestart zoomstart', hideTip);
+
+function setEleicao(key){
+  ELEICAO = key;
+  const el = EL();
+  document.querySelectorAll('#seg-eleicao button').forEach(b => b.classList.toggle('active', b.dataset.eleicao === key));
+  document.querySelectorAll('#info [data-eleicao]').forEach(d => d.classList.toggle('hide', d.dataset.eleicao !== key));
+  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
+  const pl = document.querySelectorAll('#legend-polar .labels span');
+  pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
+  renderParties();
+  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
+  if (key !== 'presidente-2026') FLIP = 'all';
+  const url = new URL(location.href);
+  url.searchParams.set('eleicao', key);
+  history.replaceState(null, '', url);
+  const load = CACHE[key] ? Promise.resolve(CACHE[key]) : (window.__d && window.__k === key ? window.__d : fetch(el.file).then(r => r.json()));
+  window.__d = null;
+  load.then(function(json){
+    if (ELEICAO !== key) return; // trocou de novo antes de carregar
+    CACHE[key] = json;
+    DATA = json;
+    sortedLean = json.map(r => r[5]).sort((a,b) => a-b);
+    sortedPolar = json.map(r => r[6]).sort((a,b) => a-b);
+    sortedMargin = json.length && json[0].length > 15 ? json.map(r => r[16] - r[15]).sort((a,b) => a-b) : [];
+    MODE = el.modes.includes(MODE) ? MODE : el.modes[0];
+    render();
+    setMode(MODE);
+  });
+}
+
+function applyFlip(){
+  const flipN = { lost: 0, won: 0 };
+  DATA.forEach(function(r, i){
+    const k = flipKind(r); if (k) flipN[k]++;
+    const on = flipMatch(r), m = markers[i], c = colorFor(r);
+    m.setStyle({ color: c, fillColor: c, fillOpacity: on ? (FLIP === 'all' ? 0.85 : 0.95) : 0.05, opacity: on ? 1 : 0.05 });
+    m.setRadius(on && FLIP !== 'all' ? currentRadius * 1.6 : currentRadius);
+  });
+  document.getElementById('flip-count').textContent = DATA[0] && DATA[0].length > 18
+    ? flipN.lost + ' municípios votaram em Lula em 2022 e em Flávio em 2026' + (flipN.won ? '; ' + flipN.won + ' fizeram o caminho inverso' : '; nenhum fez o caminho inverso') + '.'
+    : '';
+}
+function setFlip(f){
+  FLIP = f;
+  document.querySelectorAll('#seg-flip button').forEach(b => b.classList.toggle('active', b.dataset.flip === f));
+  applyFlip();
+}
+document.querySelectorAll('#seg-flip button').forEach(b => b.addEventListener('click', () => setFlip(b.dataset.flip)));
+
+function setMode(mode){
+  MODE = mode;
+  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
+  document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
+  document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
+  // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
+  applyFlip();
+  if (HOVER >= 0) showTip(HOVER, lastPt.x, lastPt.y);
+}
+document.querySelectorAll('#seg-mode button').forEach(b =>
+  b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.querySelectorAll('#seg-eleicao button').forEach(b =>
+  b.addEventListener('click', () => { if (b.dataset.eleicao !== ELEICAO) setEleicao(b.dataset.eleicao); }));
+setEleicao(ELEICAO);
+
+const radiusSlider = document.getElementById('radiusSlider');
+const radiusValue = document.getElementById('radiusValue');
+radiusSlider.addEventListener('input', function(){
+  currentRadius = parseFloat(this.value);
+  radiusValue.textContent = currentRadius.toFixed(2);
+  applyFlip();
+});
+L.DomEvent.disableClickPropagation(document.getElementById('controls'));
+L.DomEvent.disableClickPropagation(document.getElementById('info'));
+L.DomEvent.disableClickPropagation(document.getElementById('legend'));
+L.DomEvent.disableClickPropagation(document.getElementById('parties'));
+
+(function setupMobilePanels(){
+  const toggleInfo = document.getElementById('toggle-info');
+  const toggleLegend = document.getElementById('toggle-legend');
+  const infoPanel = document.getElementById('info');
+  const rightSheets = document.getElementById('right-sheets');
+  const backdrop = document.getElementById('sheet-backdrop');
+  const allPanels = [infoPanel, rightSheets];
+  function closeAll(){ allPanels.forEach(p => p.classList.remove('open')); backdrop.classList.remove('visible'); }
+  function togglePanel(panel){
+    const isOpen = panel.classList.contains('open');
+    closeAll();
+    hideTip();
+    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); }
+  }
+  toggleInfo.addEventListener('click', () => togglePanel(infoPanel));
+  toggleLegend.addEventListener('click', () => togglePanel(rightSheets));
+  backdrop.addEventListener('click', closeAll);
+  L.DomEvent.disableClickPropagation(toggleInfo);
+  L.DomEvent.disableClickPropagation(toggleLegend);
+})();
+</script>
+</body>
+</html>
