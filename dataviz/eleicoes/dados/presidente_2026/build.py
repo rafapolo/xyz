@@ -45,6 +45,11 @@ NOMES = {
 }
 
 
+# o centroide do IBGE de Vitória (ES) inclui Trindade e Martim Vaz, a ~1.200 km da costa, e cai
+# no mar (lon -39,18); usa-se a coordenada da cidade, na ilha de Vitória
+CENTROIDE_CORRIGIDO = {'3205309': (-20.3155, -40.3128)}
+
+
 def get(url):
     err = None
     for _ in range(4):
@@ -116,7 +121,9 @@ def main():
         cands.sort(key=lambda c: -c[2])
         pct = lambda v: round(100 * v / tot, 1)
         voto = {n: v for n, _, v in cands}
-        m = cent[cdi]
+        m = dict(cent[cdi])
+        if cdi in CENTROIDE_CORRIGIDO:
+            m['lat'], m['lon'] = CENTROIDE_CORRIGIDO[cdi]
         recs.append([
             uf.upper(), m['nome'], float(m['lat']), float(m['lon']), tot,
             round(lean, 3), round(polar, 3), sum(1 for c in cands if c[2]),
