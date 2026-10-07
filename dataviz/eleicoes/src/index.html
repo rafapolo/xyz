@@ -87,6 +87,10 @@
   }
   #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
   #controls .seg button + button { border-left:1px solid #444; }
+  #loading { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:900; padding:10px 16px; border-radius:8px;
+    background:rgba(20,20,20,0.9); color:#ccc; font-size:13px; pointer-events:none; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none !important; animation:none !important; } }
+  #controls .seg button:focus-visible, #toggle-info:focus-visible, #toggle-legend:focus-visible { outline:2px solid #7ab8ff; outline-offset:-2px; }
   #flip-count { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
   #info .hide, #controls .hide { display:none; }
   .tt-box {
@@ -181,7 +185,8 @@
 <script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
 </head>
 <body>
-<div id="map"></div>
+<div id="map" role="application" aria-label="Mapa do 1º turno presidencial de 2026 por município"></div>
+<div id="loading" role="status">Carregando municípios…</div>
 <div id="info" class="panel">
 <div data-eleicao="presidente-2026">
   <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
@@ -192,9 +197,6 @@
   <p>Flávio teve <b>47,0%</b> dos votos válidos e Lula <b>45,2%</b>; os dois disputam o
   2º turno em 25/10. Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.
   Exterior fora do mapa.</p>
-  <p><b>Inclinação</b> e <b>Polarização</b> usam as mesmas notas ideológicas dos partidos
-  do mapa de prefeitos, sobre os 12 candidatos. Com dois nomes somando 92% do voto, a
-  polarização aqui é quase só a margem entre eles — não um sinal independente.</p>
 </div>
 <div data-eleicao="prefeitos-2024">
   <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
@@ -257,8 +259,8 @@
     <div id="flip-count"></div>
   </div>
   <div class="row">
-    <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
-    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
+    <label>Tamanho dos pontos <span id="radiusValue">2.30</span></label>
+    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="2.3">
   </div>
 </div>
 </div>
@@ -271,7 +273,7 @@
   <div class="pbody"></div>
   <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado à mão (ver metodologia). Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
 </div>
-<button id="toggle-info" aria-label="Sobre o mapa">☰</button>
+<button id="toggle-info" aria-label="Sobre o mapa" aria-expanded="false">☰</button>
 <button id="toggle-legend" aria-label="Legenda e controles">▤</button>
 <div id="sheet-backdrop"></div>
 <script>
@@ -346,8 +348,9 @@ function renderParties(){
 // record: [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir]
 // presidente-2026 acrescenta [plula, pflavio]
 let DATA = [];
-let MODE = 'margin';
-let FLIP = 'all'; // all | lost (Lula 2022 → Flávio 2026) | won (Bolsonaro 2022 → Lula 2026)
+const Q = new URLSearchParams(location.search);
+let MODE = ['margin', 'lean', 'polar'].includes(Q.get('modo')) ? Q.get('modo') : 'margin';
+let FLIP = Q.get('filtro') === 'vira-casacas' ? 'lost' : 'all'; // all | lost (Lula 2022 → Flávio 2026) | won (Bolsonaro 2022 → Lula 2026)
 let sortedLean = [], sortedPolar = [], sortedMargin = [];
 const CACHE = {};
 
@@ -401,7 +404,7 @@ const renderer = L.canvas({ padding: 0.1 });
 const fmt = new Intl.NumberFormat('pt-BR');
 const fmtPct = v => v.toFixed(1) + '%';
 let markers = [];
-let currentRadius = 3;
+let currentRadius = 2.3;
 
 const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
 const POLAR_GRAD = 'linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921)';
@@ -568,6 +571,11 @@ function onPoint(e){
 map.on('mousemove', function(e){ if (!isSheet()) onPoint(e); });
 map.on('click', function(e){ if (isSheet()) onPoint(e); });
 map.on('mouseout', hideTip);
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Escape') return;
+  hideTip();
+  const bd = document.getElementById('sheet-backdrop'); if (bd.classList.contains('visible')) bd.click();
+});
 map.on('movestart zoomstart', hideTip);
 
 function setEleicao(key){
@@ -580,10 +588,9 @@ function setEleicao(key){
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
   document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
-  if (key !== 'presidente-2026') FLIP = 'all';
-  const url = new URL(location.href);
-  url.searchParams.set('eleicao', key);
-  history.replaceState(null, '', url);
+  if (key !== 'presidente-2026') { FLIP = 'all'; document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === 'all'); b.setAttribute('aria-pressed', b.dataset.flip === 'all'); }); }
+  else document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === FLIP); b.setAttribute('aria-pressed', b.dataset.flip === FLIP); });
+  syncUrl();
   const load = CACHE[key] ? Promise.resolve(CACHE[key]) : (window.__d && window.__k === key ? window.__d : fetch(el.file).then(r => r.json()));
   window.__d = null;
   load.then(function(json){
@@ -596,7 +603,19 @@ function setEleicao(key){
     MODE = el.modes.includes(MODE) ? MODE : el.modes[0];
     render();
     setMode(MODE);
+    const ld = document.getElementById('loading'); if (ld) ld.remove();
+  }).catch(function(){
+    const ld = document.getElementById('loading');
+    if (ld) ld.textContent = 'Não foi possível carregar os dados. Recarregue a página.';
   });
+}
+// o endereço sempre reflete o que está na tela, para dar pra compartilhar o filtro
+function syncUrl(){
+  const url = new URL(location.href);
+  url.searchParams.set('eleicao', ELEICAO);
+  MODE !== 'margin' ? url.searchParams.set('modo', MODE) : url.searchParams.delete('modo');
+  FLIP === 'lost' ? url.searchParams.set('filtro', 'vira-casacas') : url.searchParams.delete('filtro');
+  history.replaceState(null, '', url);
 }
 
 function applyFlip(){
@@ -613,19 +632,19 @@ function applyFlip(){
 }
 function setFlip(f){
   FLIP = f;
-  document.querySelectorAll('#seg-flip button').forEach(b => b.classList.toggle('active', b.dataset.flip === f));
-  applyFlip();
+  document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === f); b.setAttribute('aria-pressed', b.dataset.flip === f); });
+  applyFlip(); syncUrl();
 }
 document.querySelectorAll('#seg-flip button').forEach(b => b.addEventListener('click', () => setFlip(b.dataset.flip)));
 
 function setMode(mode){
   MODE = mode;
-  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.querySelectorAll('#seg-mode button').forEach(b => { b.classList.toggle('active', b.dataset.mode === mode); b.setAttribute('aria-pressed', b.dataset.mode === mode); });
   document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
   document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
   document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
   // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
-  applyFlip();
+  applyFlip(); syncUrl();
   if (HOVER >= 0) showTip(HOVER, lastPt.x, lastPt.y);
 }
 document.querySelectorAll('#seg-mode button').forEach(b =>
