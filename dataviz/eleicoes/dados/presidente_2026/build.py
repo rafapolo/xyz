@@ -6,7 +6,10 @@ br_bd_diretorios_brasil.municipio no beelink e grava um registro por município
 no mesmo layout de data.json (prefeitos 2024), com dois campos a mais:
 
   [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct,
-   pesq, pcen, pdir, plula, pflavio]
+   pesq, pcen, pdir, plula, pflavio, plula22, pbolso22]
+
+plula22/pbolso22 são os votos de Lula e Bolsonaro no 1º turno de 2022 (% dos votos
+válidos, br_tse_eleicoes.resultados_candidato_municipio), para achar quem trocou de lado.
 
 O exterior (zz) fica de fora. Os JSON brutos vão para raw/ (fora do git);
 rodar de novo pula o que já foi baixado.
@@ -80,9 +83,24 @@ FROM read_parquet('~/rodado/br_bd_diretorios_brasil/municipio/*.parquet');"""
     return {r['id_municipio']: r for r in csv.DictReader(io.StringIO(out))}
 
 
+def votos2022():
+    sql = """SET enable_progress_bar=false;
+WITH t AS (SELECT id_municipio, sum(votos) tot,
+  sum(votos) FILTER (WHERE numero_candidato='13') lula,
+  sum(votos) FILTER (WHERE numero_candidato='22') bolso
+  FROM read_parquet('~/rodado/br_tse_eleicoes/resultados_candidato_municipio/*.parquet')
+  WHERE ano=2022 AND cargo='presidente' AND turno=1 GROUP BY id_municipio)
+SELECT id_municipio, round(100.0*lula/tot,1) lula, round(100.0*bolso/tot,1) bolso FROM t WHERE tot>0;"""
+    out = subprocess.run(['ssh', os.environ.get('BEELINK_HOST', 'beelink'),
+                          '~/bin/duckdb -readonly -csv ~/rodado/basedosdados.duckdb'],
+                         input=sql, capture_output=True, text=True, check=True).stdout
+    return {r['id_municipio']: r for r in csv.DictReader(io.StringIO(out))}
+
+
 def main():
     jobs = baixa()
     cent = centroides()
+    v22 = votos2022()
     recs = []
     for uf, cd, cdi in jobs:
         d = json.load(open(os.path.join(RAW, f'{uf}{cd}.json')))
@@ -108,6 +126,7 @@ def main():
             pct(sum(v for s, v in sc if 4.0 <= s <= 6.0)),
             pct(sum(v for s, v in sc if s > 6.0)),
             pct(voto['Lula']), pct(voto['Flávio Bolsonaro']),
+            float(v22[cdi]['lula']) if cdi in v22 else None, float(v22[cdi]['bolso']) if cdi in v22 else None,
         ])
     recs.sort(key=lambda r: (r[0], r[1]))
     with open(OUT, 'w') as f:

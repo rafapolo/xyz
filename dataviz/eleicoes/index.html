@@ -3,7 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Eleições por Município</title>
+<title>Lula × Flávio por município — eleições 2026</title>
+<meta name="description" content="Mapa do 1º turno presidencial de 2026, município a município: quem venceu, a inclinação ideológica do voto e os 703 municípios que trocaram de lado desde 2022.">
+<link rel="canonical" href="https://xn--2dk.xyz/dataviz/eleicoes/?eleicao=presidente-2026">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="xn--2dk.xyz">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Lula × Flávio, município a município">
+<meta property="og:description" content="1º turno de 2026 nos 5.571 municípios: Flávio venceu em 2.908, Lula em 2.663 — e 703 trocaram de lado desde 2022. Passe o mouse e filtre os vira-casacas.">
+<meta property="og:url" content="https://xn--2dk.xyz/dataviz/eleicoes/?eleicao=presidente-2026">
+<meta property="og:image" content="https://xn--2dk.xyz/dataviz/eleicoes/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Mapa do Brasil com um ponto por município, em vermelho onde Lula venceu e em azul onde Flávio Bolsonaro venceu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lula × Flávio, município a município">
+<meta name="twitter:description" content="1º turno de 2026 nos 5.571 municípios — e os 703 que trocaram de lado desde 2022.">
+<meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/eleicoes/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -70,9 +86,10 @@
   }
   #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
   #controls .seg button + button { border-left:1px solid #444; }
+  #flip-count { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
   #info .hide, #controls .hide { display:none; }
   .leaflet-tooltip.tt-box {
-    background: rgba(10,14,26,0.92); backdrop-filter: blur(8px);
+    background: rgba(10,14,26,0.985);
     color:#eee; border:1px solid rgba(255,255,255,0.12); border-radius:8px;
     padding:12px 14px; min-width:230px; max-width:300px;
     font-family:'Inter',Helvetica,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,0.5);
@@ -220,6 +237,14 @@
       <button id="mode-polar" data-mode="polar">Polarização</button>
     </div>
   </div>
+  <div class="row" id="row-flip">
+    <label>Vs. presidencial 2022</label>
+    <div class="seg" id="seg-flip">
+      <button data-flip="all" class="active">Todos</button>
+      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 no município; Flávio venceu em 2026">Vira-casacas (Lula → Flávio)</button>
+    </div>
+    <div id="flip-count"></div>
+  </div>
   <div class="row">
     <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
     <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
@@ -311,6 +336,7 @@ function renderParties(){
 // presidente-2026 acrescenta [plula, pflavio]
 let DATA = [];
 let MODE = 'margin';
+let FLIP = 'all'; // all | lost (Lula 2022 → Flávio 2026) | won (Bolsonaro 2022 → Lula 2026)
 let sortedLean = [], sortedPolar = [], sortedMargin = [];
 const CACHE = {};
 
@@ -339,6 +365,14 @@ function percentileOf(sortedArr, val){
   return sortedArr.length ? lo / sortedArr.length : 0;
 }
 
+// vira-casaca: quem venceu o 1º turno de 2022 (Lula × Bolsonaro) não é quem venceu em 2026 (Lula × Flávio)
+function flipKind(r){
+  if (r.length < 19 || r[17] == null) return null;
+  if (r[17] > r[18] && r[16] > r[15]) return 'lost';
+  if (r[18] > r[17] && r[15] > r[16]) return 'won';
+  return null;
+}
+function flipMatch(r){ return FLIP === 'all' || flipKind(r) === FLIP; }
 function colorFor(r){
   if (MODE === 'margin') return marginColor(r[15] - r[16]);
   return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]);
@@ -384,6 +418,8 @@ function tooltipHtml(r){
       (w2 ? '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥈 ' + w2 + '</span><span class="tt-cand-pct">' + fmtPct(w2pct) + '</span></div>' +
         '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:#888;"></div></div></div>' : '') +
     '</div>' +
+    (r.length > 18 && r[17] != null ? '<div class="tt-sub" style="margin-top:8px">2022: Lula ' + fmtPct(r[17]) + ' × Bolsonaro ' + fmtPct(r[18]) +
+      (flipKind(r) ? ' · <b style="color:#e0a03a">trocou de lado</b>' : '') + '</div>' : '') +
     '<div class="tt-grid">' +
       '<div class="tt-cell"><span class="k">Voto esquerda</span><span class="v">' + fmtPct(pesq) + '</span></div>' +
       '<div class="tt-cell"><span class="k">Voto centro</span><span class="v">' + fmtPct(pcen) + '</span></div>' +
@@ -399,7 +435,7 @@ function render(){
   DATA.forEach(function(r){
     const color = colorFor(r);
     const marker = L.circleMarker([r[2], r[3]], {
-      renderer, radius: currentRadius, color, weight: 0, fillColor: color, fillOpacity: 0.85
+      renderer, radius: currentRadius, color, weight: 0, fillColor: color, fillOpacity: 0.85, interactive: true
     });
     marker.bindTooltip(function(){ return tooltipHtml(r); }, { sticky: true, className: 'tt-box' });
     marker.addTo(map);
@@ -416,6 +452,8 @@ function setEleicao(key){
   const pl = document.querySelectorAll('#legend-polar .labels span');
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
+  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
+  if (key !== 'presidente-2026') FLIP = 'all';
   const url = new URL(location.href);
   url.searchParams.set('eleicao', key);
   history.replaceState(null, '', url);
@@ -433,6 +471,26 @@ function setEleicao(key){
   });
 }
 
+function applyFlip(){
+  const flipN = { lost: 0, won: 0 };
+  DATA.forEach(function(r, i){
+    const k = flipKind(r); if (k) flipN[k]++;
+    const on = flipMatch(r), m = markers[i];
+    m.setStyle({ fillOpacity: on ? (FLIP === 'all' ? 0.85 : 0.95) : 0.05, opacity: on ? 1 : 0.05 });
+    m.setRadius(on && FLIP !== 'all' ? currentRadius * 1.6 : currentRadius);
+    if (on && FLIP !== 'all') m.bringToFront();
+  });
+  document.getElementById('flip-count').textContent = DATA[0] && DATA[0].length > 18
+    ? flipN.lost + ' municípios votaram em Lula em 2022 e em Flávio em 2026' + (flipN.won ? '; ' + flipN.won + ' fizeram o caminho inverso' : '; nenhum fez o caminho inverso') + '.'
+    : '';
+}
+function setFlip(f){
+  FLIP = f;
+  document.querySelectorAll('#seg-flip button').forEach(b => b.classList.toggle('active', b.dataset.flip === f));
+  applyFlip();
+}
+document.querySelectorAll('#seg-flip button').forEach(b => b.addEventListener('click', () => setFlip(b.dataset.flip)));
+
 function setMode(mode){
   MODE = mode;
   document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
@@ -441,6 +499,7 @@ function setMode(mode){
   document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
   // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
   DATA.forEach(function(r, i){ const c = colorFor(r); markers[i].setStyle({ color: c, fillColor: c }); });
+  applyFlip();
 }
 document.querySelectorAll('#seg-mode button').forEach(b =>
   b.addEventListener('click', () => setMode(b.dataset.mode)));
@@ -453,7 +512,7 @@ const radiusValue = document.getElementById('radiusValue');
 radiusSlider.addEventListener('input', function(){
   currentRadius = parseFloat(this.value);
   radiusValue.textContent = currentRadius.toFixed(2);
-  markers.forEach(m => m.setRadius(currentRadius));
+  applyFlip();
 });
 L.DomEvent.disableClickPropagation(document.getElementById('controls'));
 L.DomEvent.disableClickPropagation(document.getElementById('info'));
