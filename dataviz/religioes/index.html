@@ -36,10 +36,14 @@
   }
   #info .xref b { color:#fca636; }
   #info .xref b.evang { color:#b57edc; }
-  #legend { bottom:20px; right:12px; padding:10px 14px; font-size:11px; }
+  #legend { bottom:38px; right:12px; padding:10px 14px; font-size:11px; }
   #legend .bar { width:220px; height:10px; border-radius:2px; margin:6px 0 4px;
     background: linear-gradient(to right, #2c115f, #51127c, #6f187f, #932667, #b63656, #d84c3e, #f76b1c, #fca636, #f6e75e); }
   #legend .labels { display:flex; justify-content:space-between; color:#bbb; }
+  #plataformas { position:fixed; bottom:10px; right:12px; z-index:1000; font-size:11px; color:#fca636;
+    text-decoration:none; background:rgba(20,20,20,0.88); padding:4px 9px; border-radius:6px;
+    border:1px solid rgba(255,255,255,0.12); }
+  #plataformas:hover { border-color:#fca636; }
   #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:190px; }
   #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
   #controls input[type=range] { width:100%; accent-color:#fca636; }
@@ -97,6 +101,7 @@
 
   @media (max-width: 760px) {
     #toggle-info, #toggle-legend { display:flex; }
+    #plataformas { bottom:8px; right:8px; }
     #info, #right-sheets {
       position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important;
       width:100% !important; max-width:none !important; max-height:70vh; overflow-y:auto;
@@ -155,8 +160,8 @@
     </select>
   </div>
   <div class="row">
-    <label>Tamanho dos pontos <span id="radiusValue">3</span></label>
-    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="3">
+    <label>Tamanho dos pontos <span id="radiusValue">2.45</span></label>
+    <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="2.45">
   </div>
   <div class="row">
     <label class="check"><input type="checkbox" id="labelsToggle"> Mostrar labels</label>
@@ -165,6 +170,7 @@
 </div>
 <button id="toggle-info" aria-label="Sobre o mapa">☰</button>
 <button id="toggle-legend" aria-label="Legenda e controles">▤</button>
+<a id="plataformas" href="https://rodado.xyz/plataformas/" target="_blank" rel="noopener">rodado.xyz/plataformas ↗</a>
 <div id="sheet-backdrop"></div>
 <script>
 const MAGMA9 = ["#f6e75e","#fca636","#f76b1c","#d84c3e","#b63656","#932667","#6f187f","#51127c","#2c115f"];
@@ -183,8 +189,22 @@ function textColorFor(hex){
 let DATA_BY_YEAR = {};
 // record: [uf, municipio, lat, lon, population, catolica, evangelicas, espirita, umbanda, semreligiao, bin]
 
-const map = L.map('map', { preferCanvas: true, zoomControl: true, attributionControl: false })
-  .setView([-14.2, -51.9], 4);
+// Brasil com folga para os vizinhos; o zoom minimo e o enquadramento do pais na tela
+const BR_BOUNDS = L.latLngBounds([-35.5, -75], [6.5, -32]);
+const map = L.map('map', {
+  preferCanvas: true, zoomControl: true, attributionControl: false,
+  zoomSnap: 0.25, maxBounds: BR_BOUNDS, maxBoundsViscosity: 1.0
+});
+function fitBrasil(){
+  map.invalidateSize();
+  const z = map.getBoundsZoom(BR_BOUNDS, false);
+  map.setMinZoom(z);
+  if (map.getZoom() < z) map.setZoom(z);
+  return z;
+}
+map.fitBounds(BR_BOUNDS);
+fitBrasil();
+window.addEventListener('resize', fitBrasil);
 
 // MapLibre GL basemap (OpenFreeMap "dark" vector style, OSM data, no API key, no rate limit)
 // replaces the CartoDB dark_all raster tiles carto deprecated for anonymous use
@@ -205,7 +225,7 @@ const renderer = L.canvas({ padding: 0.5 });
 const fmt = new Intl.NumberFormat('pt-BR');
 const fmtPct = function(v){ return v.toFixed(1) + '%'; };
 let markers = [];
-let currentRadius = 3;
+let currentRadius = 2.45;
 
 const GRADIENT_CSS = 'linear-gradient(to right, ' + [...MAGMA9].reverse().join(', ') + ')';
 
