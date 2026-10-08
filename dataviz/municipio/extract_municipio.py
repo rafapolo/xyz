@@ -18,7 +18,9 @@ from datetime import date
 
 DUCKDB = os.path.expanduser("~/bin/duckdb")
 ROOT = os.path.expanduser("~/rodado")
-SETTINGS = ("SET threads=8; SET memory_limit='20GB'; SET temp_directory='/dev/shm/duckdb_tmp'; "
+# /dev/shm é tmpfs: despejar lá é despejar na RAM. O limite é por processo e o beelink
+# divide a memória com o llama-server, então fica no teto do modo "modelo no ar".
+SETTINGS = (f"SET threads=8; SET memory_limit='8GB'; SET temp_directory='{os.path.expanduser('~/duckdb_tmp')}'; "
             "INSTALL spatial; LOAD spatial; ")
 
 
@@ -1853,6 +1855,196 @@ def vizinhanca(mid):
                            "populacao": pop_map.get(mid), "pib_per_capita": pib_pc(mid)}}
 
 
+# ------------------------------------------------- SINESP — ocorrências criminais
+def _pop_ref():
+    tp = p("br_ibge_populacao", "municipio")
+    return tp, one(f"SELECT max(ano) a FROM {tp}")["a"]
+
+
+@section
+def seguranca_sinesp(mid):
+    """SINESP: os tipos contra a vida contam vítimas (quantidade_ocorrencias vem nula);
+    mandado de prisão conta ocorrências. Só a abrangência Estadual — a linha da PRF
+    (morte_no_transito) é outro recorte e não se soma. Mês 'nao_reportado' e
+    'zero_estrutural' ficam de fora: são ausência de dado, não zero."""
+    t = p("br_mj_sinesp", "municipio_mes")
+    filtro = "abrangencia='Estadual' AND situacao_registro='reportado'"
+    am = one(f"SELECT max(ano*100+mes) am FROM {t} WHERE id_municipio='{mid}' AND {filtro}")["am"]
+    if am is None:
+        return {"disponivel": False, "motivo": "município sem registro reportado ao SINESP"}
+    ano_parcial, mes_parcial = am // 100, am % 100
+    ano = ano_parcial if mes_parcial == 12 else ano_parcial - 1
+    anual = q(f"""SELECT ano, tipo_ocorrencia tipo, sum(quantidade_vitimas) vitimas,
+            sum(quantidade_vitimas_feminino) vitimas_feminino, sum(quantidade_ocorrencias) ocorrencias,
+            count(DISTINCT mes) meses
+        FROM {t} WHERE id_municipio='{mid}' AND {filtro} GROUP BY 1,2 ORDER BY 1,2""")
+
+    def do_ano(a):
+        return {r["tipo"]: {"vitimas": num(r["vitimas"]), "vitimas_feminino": num(r["vitimas_feminino"]),
+                            "ocorrencias": num(r["ocorrencias"]), "meses": r["meses"]}
+                for r in anual if r["ano"] == a}
+    tp, ano_pop = _pop_ref()
+    # mesma conta nos três níveis: só municípios que reportaram entram no numerador e no denominador
+    taxa = one(f"""WITH s AS (SELECT id_municipio, sum(quantidade_vitimas) v FROM {t}
+            WHERE ano={ano} AND tipo_ocorrencia='homicidio_doloso' AND {filtro} GROUP BY 1),
+          pop AS (SELECT id_municipio, populacao FROM {tp} WHERE ano={ano_pop})
+        SELECT sum(s.v) FILTER (WHERE s.id_municipio='{mid}') * 1e5
+                 / sum(pop.populacao) FILTER (WHERE s.id_municipio='{mid}') mun,
+               sum(s.v) FILTER (WHERE s.id_municipio LIKE '{mid[:2]}%') * 1e5
+                 / sum(pop.populacao) FILTER (WHERE s.id_municipio LIKE '{mid[:2]}%') uf,
+               sum(s.v) * 1e5 / sum(pop.populacao) br
+        FROM s JOIN pop USING (id_municipio)""")
+    serie = [{"ano": r["ano"], "homicidio_doloso": num(r["vitimas"]), "meses": r["meses"]}
+             for r in anual if r["tipo"] == "homicidio_doloso"]
+    return {"fonte": "br_mj_sinesp.municipio_mes · br_ibge_populacao.municipio", "ano": ano,
+            "por_tipo": do_ano(ano),
+            "ano_parcial": None if ano_parcial == ano else {"ano": ano_parcial, "ate_mes": mes_parcial,
+                                                            "por_tipo": do_ano(ano_parcial)},
+            "taxa_homicidio_doloso_100k": {"municipio": taxa["mun"], "uf": taxa["uf"], "brasil": taxa["br"],
+                                           "ano_populacao": ano_pop},
+            "serie": serie}
+
+
+# --------------------------------------------- PRF — acidentes em rodovia federal
+@section
+def seguranca_prf(mid):
+    t = p("br_prf_acidentes", "ocorrencia")
+    amax = one(f"SELECT max(ano) a FROM {t}")["a"]
+    a0 = amax - 5
+    onde = f"CAST(id_municipio AS VARCHAR)='{mid}' AND ano>={a0}"
+    por_ano = q(f"""SELECT ano, count(*) acidentes, sum(quantidade_mortos) mortos,
+            sum(quantidade_feridos_graves) feridos_graves, sum(quantidade_feridos) feridos
+        FROM {t} WHERE {onde} GROUP BY 1 ORDER BY 1""")
+    if not por_ano:
+        return {"disponivel": False, "desde": a0,
+                "motivo": f"nenhum acidente registrado pela PRF no município desde {a0}"}
+
+    def top(col):
+        return [{"k": r["k"], "n": r["n"]} for r in q(
+            f"SELECT {col} k, count(*) n FROM {t} WHERE {onde} AND {col} IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 6")]
+    return {"fonte": "br_prf_acidentes.ocorrencia", "desde": a0, "ate": amax,
+            "acidentes": sum(r["acidentes"] for r in por_ano),
+            "mortos": sum(num(r["mortos"]) or 0 for r in por_ano),
+            "feridos_graves": sum(num(r["feridos_graves"]) or 0 for r in por_ano),
+            "por_ano": [{k: num(v) for k, v in r.items()} for r in por_ano],
+            "por_rodovia": [{"k": f"BR-{r['k']}", "n": r["n"]} for r in top("CAST(br AS VARCHAR)")],
+            "por_causa": top("causa_acidente"), "por_tipo": top("tipo_acidente")}
+
+
+# ------------------------------------------------- SISDEPEN — sistema prisional
+@section
+def seguranca_sisdepen(mid):
+    """unidade_prisional traz mais de uma linha por unidade no mesmo ciclo; a capacidade
+    é a da unidade (max), não a soma das linhas."""
+    tu = p("br_mj_sisdepen", "unidade_prisional")
+    tp_ = p("br_mj_sisdepen", "populacao_prisional")
+    tc = p("br_mj_sisdepen", "populacao_caracteristica")
+    ref = one(f"SELECT max(ano*10+semestre) r FROM {tp_} WHERE id_municipio='{mid}'")["r"]
+    if ref is None:
+        return {"disponivel": False, "motivo": "nenhuma unidade prisional do município no SISDEPEN"}
+    ano, sem = ref // 10, ref % 10
+    onde = f"id_municipio='{mid}' AND ano={ano} AND semestre={sem}"
+    unidades = q(f"""SELECT id_unidade, any_value(nome_unidade) nome, max(capacidade_total) capacidade
+        FROM {tu} WHERE {onde} GROUP BY 1 ORDER BY 3 DESC NULLS LAST""")
+    pop = q(f"""SELECT situacao_processual, regime, sexo, sum(quantidade) n
+        FROM {tp_} WHERE {onde} GROUP BY ALL""")
+    total = sum(num(r["n"]) or 0 for r in pop)
+    capacidade = sum(num(u["capacidade"]) or 0 for u in unidades)
+
+    def soma(chave, valor):
+        return sum(num(r["n"]) or 0 for r in pop if r[chave] == valor)
+
+    def perfil(carac):
+        return [{"k": r["categoria"], "n": num(r["n"])} for r in q(
+            f"""SELECT categoria, sum(quantidade) n FROM {tc}
+                WHERE {onde} AND caracteristica='{carac}' GROUP BY 1 ORDER BY 2 DESC""")]
+    serie = q(f"""SELECT ano, semestre, sum(quantidade) n FROM {tp_}
+        WHERE id_municipio='{mid}' GROUP BY 1,2 ORDER BY 1,2""")
+    return {"fonte": "br_mj_sisdepen", "competencia": f"{ano}/{sem}",
+            "unidades": len(unidades), "capacidade": capacidade, "populacao": total,
+            "taxa_ocupacao": total / capacidade if capacidade else None,
+            "provisorios": soma("situacao_processual", "provisorio"),
+            "mulheres": soma("sexo", "feminino"),
+            "por_regime": [{"k": k, "n": soma("regime", k)} for k in ("fechado", "semiaberto", "aberto")],
+            "raca_cor": perfil("raca_cor"), "faixa_etaria": perfil("faixa_etaria"),
+            "lista": [{"nome": u["nome"], "capacidade": num(u["capacidade"])} for u in unidades[:8]],
+            "serie": [{"periodo": f"{r['ano']}/{r['semestre']}", "populacao": num(r["n"])} for r in serie]}
+
+
+# ------------------------------------------------------ INSS — benefícios mantidos
+@section
+def beneficios_inss(mid):
+    """Agrupa por categoria_beneficio: a espécie vem nula nas maiores linhas da tabela
+    de mantidos. valor_total está em reais."""
+    t = p("br_mps_beneficios", "beneficio_mantido_municipio_mes")
+    tc = p("br_mps_beneficios", "beneficio_concedido_municipio_mes")
+    am = one(f"SELECT max(ano*100+mes) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        return {"disponivel": False, "motivo": "município sem benefício mantido na base do INSS"}
+    ano, mes = am // 100, am % 100
+    onde = f"id_municipio='{mid}' AND ano={ano} AND mes={mes}"
+    cat = q(f"""SELECT categoria_beneficio categoria, sum(quantidade) n, sum(valor_total) valor
+        FROM {t} WHERE {onde} GROUP BY 1 ORDER BY 2 DESC""")
+    total = sum(num(r["n"]) or 0 for r in cat)
+    valor = sum(r["valor"] or 0 for r in cat)
+
+    def recorte(col):
+        return [{"k": r["k"], "n": num(r["n"])} for r in q(
+            f"SELECT {col} k, sum(quantidade) n FROM {t} WHERE {onde} AND {col} IS NOT NULL GROUP BY 1 ORDER BY 1")]
+    tp, ano_pop = _pop_ref()
+    taxas = one(f"""WITH b AS (SELECT id_municipio, sum(quantidade) n FROM {t}
+            WHERE ano={ano} AND mes={mes} GROUP BY 1),
+          pop AS (SELECT id_municipio, populacao FROM {tp} WHERE ano={ano_pop})
+        SELECT sum(b.n) FILTER (WHERE b.id_municipio='{mid}') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE b.id_municipio='{mid}') mun,
+               sum(b.n) FILTER (WHERE b.id_municipio LIKE '{mid[:2]}%') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE b.id_municipio LIKE '{mid[:2]}%') uf,
+               sum(b.n) * 1000.0 / sum(pop.populacao) br
+        FROM b JOIN pop USING (id_municipio)""")
+    # último mês disponível de cada ano
+    serie = q(f"""SELECT ano, mes, sum(quantidade) n, sum(valor_total) valor FROM {t}
+        WHERE id_municipio='{mid}' GROUP BY 1,2
+        QUALIFY mes = max(mes) OVER (PARTITION BY ano) ORDER BY 1""")
+    conc = q(f"""SELECT ano, count(DISTINCT mes) meses, sum(quantidade) n, sum(valor_total) valor
+        FROM {tc} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
+    return {"fonte": "br_mps_beneficios · br_ibge_populacao.municipio", "competencia": f"{ano}-{mes:02d}",
+            "beneficios": total, "valor_mensal": valor, "valor_medio": valor / total if total else None,
+            "por_1000hab": {"municipio": taxas["mun"], "uf": taxas["uf"], "brasil": taxas["br"],
+                            "ano_populacao": ano_pop},
+            "por_categoria": [{"k": r["categoria"], "n": num(r["n"]), "valor": r["valor"]} for r in cat],
+            "por_clientela": recorte("clientela"), "por_sexo": recorte("sexo"),
+            "por_faixa_etaria": recorte("faixa_etaria"),
+            "serie": [{"ano": r["ano"], "mes": r["mes"], "beneficios": num(r["n"]), "valor_mensal": r["valor"]}
+                      for r in serie],
+            "concedidos": [{"ano": r["ano"], "meses": r["meses"], "beneficios": num(r["n"]), "valor": r["valor"]}
+                           for r in conc]}
+
+
+# ------------------------------------------- SinPatinhas — cadastro de cães e gatos
+@section
+def social_sinpatinhas(mid):
+    """Cadastro voluntário aberto em 2025: mede adesão ao cadastro, não a população animal."""
+    t = p("br_mma_sinpatinhas", "microdados")
+    esp = q(f"SELECT especie k, count(*) n FROM {t} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 2 DESC")
+    if not esp:
+        return {"disponivel": False, "motivo": "nenhum animal do município no cadastro"}
+    per = one(f"SELECT min(data_cadastro)::DATE de, max(data_cadastro)::DATE ate FROM {t}")
+    tp, ano_pop = _pop_ref()
+    taxas = one(f"""WITH a AS (SELECT id_municipio, count(*) n FROM {t} GROUP BY 1),
+          pop AS (SELECT id_municipio, populacao FROM {tp} WHERE ano={ano_pop})
+        SELECT sum(a.n) FILTER (WHERE pop.id_municipio='{mid}') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE pop.id_municipio='{mid}') mun,
+               sum(a.n) FILTER (WHERE pop.id_municipio LIKE '{mid[:2]}%') * 1000.0
+                 / sum(pop.populacao) FILTER (WHERE pop.id_municipio LIKE '{mid[:2]}%') uf,
+               sum(a.n) * 1000.0 / sum(pop.populacao) br
+        FROM pop LEFT JOIN a USING (id_municipio)""")
+    return {"fonte": "br_mma_sinpatinhas.microdados · br_ibge_populacao.municipio",
+            "periodo": {"de": str(per["de"]), "ate": str(per["ate"])},
+            "animais": sum(r["n"] for r in esp), "por_especie": esp,
+            "por_1000hab": {"municipio": taxas["mun"], "uf": taxas["uf"], "brasil": taxas["br"],
+                            "ano_populacao": ano_pop}}
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("uso: extract_municipio.py <id_municipio>")
@@ -1899,7 +2091,10 @@ def main():
                 "farmacia_popular": saude_farmacia_popular(mid),
             },
             "seguranca": {"isp_rj": seguranca_isp(mid, uf), "fbsp": seguranca_fbsp(mid),
-                          "violencia_sinan": seguranca_violencia(mid)},
+                          "violencia_sinan": seguranca_violencia(mid),
+                          "sinesp": seguranca_sinesp(mid),
+                          "prf": seguranca_prf(mid),
+                          "sisdepen": seguranca_sisdepen(mid)},
             "infraestrutura": {"snis": infra_snis(mid), "atlas_esgotos": infra_ana(mid),
                                "censo_domicilios": infra_censo_domicilios(mid),
                                "frota": infra_frota(mid, uf),
@@ -1921,7 +2116,7 @@ def main():
                               "fiscal": transp_fiscal(mid),
                               "consumidor": transp_consumidor(mid, nome, uf),
                               "servidores": transp_servidores(mid)},
-            "social": social(mid),
+            "social": {**social(mid), "sinpatinhas": social_sinpatinhas(mid)},
             "comercio_exterior": comex(mid),
             "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
                          "top_empregadores": trabalho_top_empregadores(mid),
@@ -1929,7 +2124,8 @@ def main():
                          "lista_suja": trabalho_lista_suja(nome, uf)},
             "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf)},
             "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid),
-                           "cadunico_mds": beneficios_cadunico_mds(mid)},
+                           "cadunico_mds": beneficios_cadunico_mds(mid),
+                           "inss": beneficios_inss(mid)},
             "vizinhanca": vizinhanca(mid),
         },
     }

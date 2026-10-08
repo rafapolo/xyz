@@ -2182,6 +2182,245 @@
       "autoprovocadas": 189
      }
     ]
+   },
+   "sinesp": {
+    "fonte": "br_mj_sinesp.municipio_mes · br_ibge_populacao.municipio",
+    "ano": 2025,
+    "por_tipo": {
+     "feminicidio": {
+      "vitimas": 2,
+      "vitimas_feminino": 2,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "homicidio_doloso": {
+      "vitimas": 21,
+      "vitimas_feminino": 2,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "latrocinio": {
+      "vitimas": 0,
+      "vitimas_feminino": 0,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "lesao_corporal_seguida_de_morte": {
+      "vitimas": 0,
+      "vitimas_feminino": 0,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "mandado_de_prisao_cumprido": {
+      "vitimas": null,
+      "vitimas_feminino": null,
+      "ocorrencias": 99,
+      "meses": 12
+     },
+     "morte_a_esclarecer": {
+      "vitimas": 62,
+      "vitimas_feminino": 19,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "morte_no_transito_exceto_homicidio_doloso": {
+      "vitimas": 31,
+      "vitimas_feminino": 9,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "suicidio": {
+      "vitimas": 17,
+      "vitimas_feminino": 6,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "tentativa_de_feminicidio": {
+      "vitimas": 1,
+      "vitimas_feminino": 1,
+      "ocorrencias": null,
+      "meses": 12
+     },
+     "tentativa_de_homicidio": {
+      "vitimas": 22,
+      "vitimas_feminino": 0,
+      "ocorrencias": null,
+      "meses": 12
+     }
+    },
+    "ano_parcial": {
+     "ano": 2026,
+     "ate_mes": 8,
+     "por_tipo": {
+      "feminicidio": {
+       "vitimas": 0,
+       "vitimas_feminino": 0,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "homicidio_doloso": {
+       "vitimas": 16,
+       "vitimas_feminino": 0,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "latrocinio": {
+       "vitimas": 0,
+       "vitimas_feminino": 0,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "lesao_corporal_seguida_de_morte": {
+       "vitimas": 0,
+       "vitimas_feminino": 0,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "mandado_de_prisao_cumprido": {
+       "vitimas": null,
+       "vitimas_feminino": null,
+       "ocorrencias": 85,
+       "meses": 8
+      },
+      "morte_a_esclarecer": {
+       "vitimas": 29,
+       "vitimas_feminino": 8,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "morte_no_transito_exceto_homicidio_doloso": {
+       "vitimas": 18,
+       "vitimas_feminino": 6,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "suicidio": {
+       "vitimas": 12,
+       "vitimas_feminino": 2,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "tentativa_de_feminicidio": {
+       "vitimas": 5,
+       "vitimas_feminino": 5,
+       "ocorrencias": null,
+       "meses": 8
+      },
+      "tentativa_de_homicidio": {
+       "vitimas": 10,
+       "vitimas_feminino": 1,
+       "ocorrencias": null,
+       "meses": 8
+      }
+     }
+    },
+    "taxa_homicidio_doloso_100k": {
+     "municipio": 10.323620936303259,
+     "uf": 19.40366871005142,
+     "brasil": 14.753872217887427,
+     "ano_populacao": 2025
+    },
+    "serie": [
+     {
+      "ano": 2015,
+      "homicidio_doloso": 20,
+      "meses": 12
+     },
+     {
+      "ano": 2016,
+      "homicidio_doloso": 26,
+      "meses": 12
+     },
+     {
+      "ano": 2017,
+      "homicidio_doloso": 20,
+      "meses": 12
+     },
+     {
+      "ano": 2018,
+      "homicidio_doloso": 22,
+      "meses": 12
+     },
+     {
+      "ano": 2019,
+      "homicidio_doloso": 29,
+      "meses": 12
+     },
+     {
+      "ano": 2020,
+      "homicidio_doloso": 19,
+      "meses": 12
+     },
+     {
+      "ano": 2021,
+      "homicidio_doloso": 23,
+      "meses": 12
+     },
+     {
+      "ano": 2022,
+      "homicidio_doloso": 24,
+      "meses": 12
+     },
+     {
+      "ano": 2023,
+      "homicidio_doloso": 31,
+      "meses": 12
+     },
+     {
+      "ano": 2024,
+      "homicidio_doloso": 12,
+      "meses": 12
+     },
+     {
+      "ano": 2025,
+      "homicidio_doloso": 21,
+      "meses": 12
+     },
+     {
+      "ano": 2026,
+      "homicidio_doloso": 16,
+      "meses": 8
+     }
+    ]
+   },
+   "prf": {
+    "fonte": "br_prf_acidentes.ocorrencia",
+    "desde": 2021,
+    "ate": 2026,
+    "acidentes": 1,
+    "mortos": 0,
+    "feridos_graves": 0,
+    "por_ano": [
+     {
+      "ano": 2026,
+      "acidentes": 1,
+      "mortos": 0,
+      "feridos_graves": 0,
+      "feridos": 0
+     }
+    ],
+    "por_rodovia": [
+     {
+      "k": "BR-493",
+      "n": 1
+     }
+    ],
+    "por_causa": [
+     {
+      "k": "Reação tardia ou ineficiente do condutor",
+      "n": 1
+     }
+    ],
+    "por_tipo": [
+     {
+      "k": "Colisão com objeto",
+      "n": 1
+     }
+    ]
+   },
+   "sisdepen": {
+    "disponivel": false,
+    "motivo": "nenhuma unidade prisional do município no SISDEPEN"
    }
   },
   "infraestrutura": {
@@ -3982,6 +4221,30 @@
     "taxa_bruta_pre_escola": 93.9,
     "taxa_liquida_pre_escola": 85.2,
     "matriculas_pre_escola": 4282
+   },
+   "sinpatinhas": {
+    "fonte": "br_mma_sinpatinhas.microdados · br_ibge_populacao.municipio",
+    "periodo": {
+     "de": "2025-04-15",
+     "ate": "2025-12-02"
+    },
+    "animais": 820,
+    "por_especie": [
+     {
+      "k": "Cão",
+      "n": 523
+     },
+     {
+      "k": "Gato",
+      "n": 297
+     }
+    ],
+    "por_1000hab": {
+     "municipio": 4.0311281751279395,
+     "uf": 4.95850245016314,
+     "brasil": 4.351328308839583,
+     "ano_populacao": 2025
+    }
    }
   },
   "comercio_exterior": {
@@ -4591,6 +4854,285 @@
       "ano": 2026,
       "familias": 25712,
       "ref": "2026-09"
+     }
+    ]
+   },
+   "inss": {
+    "fonte": "br_mps_beneficios · br_ibge_populacao.municipio",
+    "competencia": "2026-01",
+    "beneficios": 50619,
+    "valor_mensal": 101770871.15,
+    "valor_medio": 2010.5270975325473,
+    "por_1000hab": {
+     "municipio": 248.84350865463554,
+     "uf": 185.60120049604186,
+     "brasil": 188.82861624761824,
+     "ano_populacao": 2025
+    },
+    "por_categoria": [
+     {
+      "k": "aposentadoria_idade",
+      "n": 15698,
+      "valor": 27234761.98
+     },
+     {
+      "k": "aposentadoria_tempo_contribuicao",
+      "n": 12764,
+      "valor": 32338927.7
+     },
+     {
+      "k": "pensao_morte",
+      "n": 11721,
+      "valor": 22906897.1
+     },
+     {
+      "k": "aposentadoria_invalidez",
+      "n": 4881,
+      "valor": 9245361.44
+     },
+     {
+      "k": "bpc_loas",
+      "n": 3675,
+      "valor": 5578650.0
+     },
+     {
+      "k": "aposentadoria_especial",
+      "n": 873,
+      "valor": 2947952.84
+     },
+     {
+      "k": "auxilio_incapacidade_temporaria",
+      "n": 562,
+      "valor": 1024281.26
+     },
+     {
+      "k": "auxilio_acidente",
+      "n": 363,
+      "valor": 352871.55999999994
+     },
+     {
+      "k": "salario_maternidade",
+      "n": 33,
+      "valor": 55960.72
+     },
+     {
+      "k": "renda_mensal_vitalicia",
+      "n": 24,
+      "valor": 36432.0
+     },
+     {
+      "k": "auxilio_reclusao",
+      "n": 20,
+      "valor": 28303.48
+     },
+     {
+      "k": "beneficio_especial_legislacao",
+      "n": 5,
+      "valor": 20471.07
+     }
+    ],
+    "por_clientela": [
+     {
+      "k": "rural",
+      "n": 2357
+     },
+     {
+      "k": "urbana",
+      "n": 48257
+     }
+    ],
+    "por_sexo": [
+     {
+      "k": "feminino",
+      "n": 30800
+     },
+     {
+      "k": "masculino",
+      "n": 19819
+     }
+    ],
+    "por_faixa_etaria": [
+     {
+      "k": "16 a 19 anos",
+      "n": 343
+     },
+     {
+      "k": "20 a 24 anos",
+      "n": 236
+     },
+     {
+      "k": "25 a 29 anos",
+      "n": 190
+     },
+     {
+      "k": "30 a 34 anos",
+      "n": 215
+     },
+     {
+      "k": "35 a 39 anos",
+      "n": 309
+     },
+     {
+      "k": "40 a 44 anos",
+      "n": 504
+     },
+     {
+      "k": "45 a 49 anos",
+      "n": 751
+     },
+     {
+      "k": "50 a 54 anos",
+      "n": 1337
+     },
+     {
+      "k": "55 a 59 anos",
+      "n": 2950
+     },
+     {
+      "k": "60 a 64 anos",
+      "n": 6857
+     },
+     {
+      "k": "65 a 69 anos",
+      "n": 10992
+     },
+     {
+      "k": "70 anos ou mais",
+      "n": 25113
+     },
+     {
+      "k": "até 15 anos",
+      "n": 822
+     }
+    ],
+    "serie": [
+     {
+      "ano": 2021,
+      "mes": 12,
+      "beneficios": 47454,
+      "valor_mensal": null
+     },
+     {
+      "ano": 2022,
+      "mes": 12,
+      "beneficios": 48641,
+      "valor_mensal": null
+     },
+     {
+      "ano": 2023,
+      "mes": 12,
+      "beneficios": 50197,
+      "valor_mensal": 90616789.67999999
+     },
+     {
+      "ano": 2024,
+      "mes": 12,
+      "beneficios": 50992,
+      "valor_mensal": 96455640.25999999
+     },
+     {
+      "ano": 2025,
+      "mes": 12,
+      "beneficios": 51070,
+      "valor_mensal": 102529681.69000001
+     },
+     {
+      "ano": 2026,
+      "mes": 1,
+      "beneficios": 50619,
+      "valor_mensal": 101770871.15000002
+     }
+    ],
+    "concedidos": [
+     {
+      "ano": 2012,
+      "meses": 12,
+      "beneficios": 6053,
+      "valor": 5222117.280000001
+     },
+     {
+      "ano": 2013,
+      "meses": 12,
+      "beneficios": 6504,
+      "valor": 5992379.000000001
+     },
+     {
+      "ano": 2014,
+      "meses": 12,
+      "beneficios": 6610,
+      "valor": 6561956.74
+     },
+     {
+      "ano": 2015,
+      "meses": 12,
+      "beneficios": 6060,
+      "valor": 6666761.16
+     },
+     {
+      "ano": 2016,
+      "meses": 12,
+      "beneficios": 6315,
+      "valor": 7719199.84
+     },
+     {
+      "ano": 2017,
+      "meses": 12,
+      "beneficios": 6267,
+      "valor": 8144237.279999999
+     },
+     {
+      "ano": 2018,
+      "meses": 12,
+      "beneficios": 6241,
+      "valor": 8064372.8900000015
+     },
+     {
+      "ano": 2019,
+      "meses": 12,
+      "beneficios": 5980,
+      "valor": 7949309.569999998
+     },
+     {
+      "ano": 2020,
+      "meses": 12,
+      "beneficios": 4468,
+      "valor": 5699205.970000001
+     },
+     {
+      "ano": 2021,
+      "meses": 12,
+      "beneficios": 5564,
+      "valor": 7840280.799999999
+     },
+     {
+      "ano": 2022,
+      "meses": 12,
+      "beneficios": 6005,
+      "valor": 9251855.35
+     },
+     {
+      "ano": 2023,
+      "meses": 12,
+      "beneficios": 6367,
+      "valor": 10338122.200000001
+     },
+     {
+      "ano": 2024,
+      "meses": 12,
+      "beneficios": 7026,
+      "valor": 11920359.59
+     },
+     {
+      "ano": 2025,
+      "meses": 12,
+      "beneficios": 8693,
+      "valor": 15763927.450000003
+     },
+     {
+      "ano": 2026,
+      "meses": 8,
+      "beneficios": 5960,
+      "valor": 11321506.529999997
      }
     ]
    }

@@ -1258,7 +1258,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(var(--s8-rgb),.12);color:var(--s8)">👮</div>
     <h2>Segurança Pública</h2>
-    <span class="table-name">br_fbsp_absp · br_rj_isp_estatisticas</span>
+    <span class="table-name">br_fbsp_absp · br_rj_isp_estatisticas · br_mj_sinesp · br_prf_acidentes · br_mj_sisdepen</span>
   </div>
   <div class="sub" id="fbspNota" style="margin:-.5rem 0 .8rem"></div>
   <div class="metric-row">
@@ -1280,6 +1280,40 @@ details.more > .more-body { margin-top: .4rem; }
       <h3>Taxas por 100 mil hab — município e RJ <span class="vintage" id="segAno10"></span></h3>
       <div class="chart-container"><canvas id="taxasChart"></canvas></div>
       <div class="sub" style="margin-top:.4rem" id="taxasNota"></div>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Homicídio doloso — SINESP <span class="vintage" id="snAno"></span></h3><div class="value" id="snHom"></div><div class="sub" id="snHomSub"></div></div>
+    <div class="card card-metric"><h3>Tentativa de homicídio <span class="vintage" id="snAno2"></span></h3><div class="value" id="snTent"></div><div class="sub">Vítimas</div></div>
+    <div class="card card-metric"><h3>Mortes no trânsito <span class="vintage" id="snAno3"></span></h3><div class="value" id="snTrans"></div><div class="sub">Vítimas, fora as de homicídio doloso</div></div>
+    <div class="card card-metric"><h3>Suicídio <span class="vintage" id="snAno4"></span></h3><div class="value" id="snSuic"></div><div class="sub" id="snSuicSub"></div></div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-chart">
+      <h3>Vítimas de homicídio doloso por ano <span class="vintage" id="snSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="snChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem" id="snSerieNota"></div>
+    </div>
+    <div class="card">
+      <h3>Homicídio doloso por 100 mil hab <span class="vintage" id="snAno5"></span></h3>
+      <div class="bench-bars wide" id="snTaxaBars"></div>
+      <div class="sub" style="margin-top:.6rem" id="snNota"></div>
+    </div>
+    <div class="card">
+      <h3>Outros registros do SINESP <span class="vintage" id="snAno6"></span></h3>
+      <ul class="data-list" id="snList"></ul>
+    </div>
+  </div>
+  <div class="grid-2 mt-1">
+    <div class="card">
+      <h3>Acidentes em rodovias federais <span class="vintage" id="prfAno"></span></h3>
+      <ul class="data-list" id="prfList"></ul>
+      <div class="sub" style="margin-top:.6rem">Só os acidentes atendidos pela Polícia Rodoviária Federal; ruas e rodovias estaduais ficam de fora.</div>
+    </div>
+    <div class="card">
+      <h3>Sistema prisional <span class="vintage" id="depAno"></span></h3>
+      <ul class="data-list" id="depList"></ul>
+      <div class="sub" style="margin-top:.6rem">Pessoas custodiadas nas unidades localizadas no município, inclusive monitoração eletrônica quando a unidade a informa.</div>
     </div>
   </div>
   <div class="grid-4 mt-1">
@@ -1477,7 +1511,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🤝</div>
     <h2>Social & Vulnerabilidade</h2>
-    <span class="table-name">br_ipea_avs · br_abrinq_oca</span>
+    <span class="table-name">br_ipea_avs · br_abrinq_oca · br_mma_sinpatinhas</span>
   </div>
   <div class="grid-3">
     <div class="card">
@@ -1496,6 +1530,17 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="piList"></ul>
     </div>
   </div>
+  <div class="grid-3 mt-1">
+    <div class="card card-metric"><h3>Cães e gatos cadastrados <span class="vintage" id="patAno"></span></h3><div class="value" id="patN"></div><div class="sub">Cadastro nacional voluntário, aberto em 2025 — mede a adesão ao cadastro, não a população de animais</div></div>
+    <div class="card">
+      <h3>Cadastrados por espécie <span class="vintage" id="patAno2"></span></h3>
+      <div class="bench-bars wide" id="patEspBars"></div>
+    </div>
+    <div class="card">
+      <h3>Cadastrados por 1.000 hab <span class="vintage" id="patAno3"></span></h3>
+      <div class="bench-bars wide" id="patTaxaBars"></div>
+    </div>
+  </div>
 </div>
 
 <!-- BENEFÍCIOS -->
@@ -1503,7 +1548,7 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="section-header">
     <div class="icon" style="background:rgba(var(--s4-rgb),.15);color:var(--s4)">🫂</div>
     <h2>Benefícios Sociais</h2>
-    <span class="table-name">br_cgu_beneficios_cidadao · br_mds_cadunico</span>
+    <span class="table-name">br_cgu_beneficios_cidadao · br_mds_cadunico · br_mps_beneficios</span>
   </div>
   <div class="grid-4">
     <div class="card card-metric"><h3>Bolsa Família <span class="vintage" id="bfAno"></span></h3><div class="value" id="bfFamilias"></div><div class="bench"><span id="bfBench"></span></div></div>
@@ -1552,6 +1597,32 @@ details.more > .more-body { margin-top: .4rem; }
       <h3>Esgoto nas casas do CadÚnico <span class="vintage" id="cadEsgAno"></span></h3>
       <div class="sub" style="margin-bottom:.55rem">% das famílias cadastradas</div>
       <div class="bench-bars wide" id="cadEsgBars"></div>
+    </div>
+  </div>
+  <div class="grid-4 mt-1">
+    <div class="card card-metric"><h3>Benefícios do INSS <span class="vintage" id="inssAno"></span></h3><div class="value" id="inssN"></div><div class="sub" id="inssNSub"></div></div>
+    <div class="card card-metric"><h3>Valor pago no mês <span class="vintage" id="inssAno2"></span></h3><div class="value" id="inssValor"></div><div class="sub">Soma dos benefícios mantidos no município</div></div>
+    <div class="card card-metric"><h3>Valor médio <span class="vintage" id="inssAno3"></span></h3><div class="value" id="inssMedio"></div><div class="sub">Por benefício, no mês</div></div>
+    <div class="card card-metric"><h3>Benefícios concedidos <span class="vintage" id="inssConcAno"></span></h3><div class="value" id="inssConc"></div><div class="sub" id="inssConcSub"></div></div>
+  </div>
+  <div class="grid-3 mt-1">
+    <div class="card">
+      <h3>INSS por tipo de benefício <span class="vintage" id="inssAno4"></span></h3>
+      <div class="bench-bars wide" id="inssCatBars"></div>
+      <div class="sub" style="margin-top:.6rem" id="inssBpcNota"></div>
+    </div>
+    <div class="card card-chart">
+      <h3>Benefícios mantidos <span class="vintage" id="inssSerieAno"></span></h3>
+      <div class="chart-container"><canvas id="inssChart"></canvas></div>
+      <div class="sub" style="margin-top:.4rem">Estoque no último mês disponível de cada ano</div>
+    </div>
+    <div class="card">
+      <h3>Benefícios por 1.000 hab <span class="vintage" id="inssAno5"></span></h3>
+      <div class="bench-bars wide" id="inssTaxaBars"></div>
+      <div class="sub" style="margin:.85rem 0 .55rem">Quem recebe</div>
+      <div class="bench-bars wide" id="inssSexoBars"></div>
+      <div class="sub" style="margin:.85rem 0 .55rem">Idade do beneficiário</div>
+      <div class="bench-bars wide" id="inssIdadeBars"></div>
     </div>
   </div>
 </div>
@@ -4382,6 +4453,159 @@ async function init() {
       liRow('No Brasil', fNum(ls.brasil.empregadores) + ' · ' + fNum(ls.brasil.trabalhadores) + ' trabalhadores'));
   } else {
     pill('stLs', null); vazioTabela('lsList', 3); vazioLista('lsCtxList');
+  }
+
+  // =========================================================================
+  // SEGURANÇA — SINESP, PRF e SISDEPEN
+  // =========================================================================
+  const nomeMun = g(D, 'municipio.nome'), siglaUf = g(D, 'municipio.sigla_uf') || 'UF';
+  // município × UF × Brasil na mesma régua; a primeira linha é sempre a do município
+  function barrasTresNiveis(id, t, fmt) {
+    if (!t || t.municipio == null) { barrasCategoria(id, [], 0); return; }
+    barrasCategoria(id, [
+      { k: truncaPalavra(nomeMun, 10), v: t.municipio || 0, titulo: nomeMun },
+      { k: siglaUf, v: t.uf || 0 }, { k: 'Brasil', v: t.brasil || 0 },
+    ], 0, null, { fmtValor: fmt });
+    const eu = el_(id) && el_(id).querySelector('.row');
+    if (eu) eu.classList.add('me');
+  }
+  const sn = ok(g(D, 'secoes.seguranca.sinesp'));
+  if (sn && sn.por_tipo) {
+    const tp = sn.por_tipo, vit = k => (tp[k] && tp[k].vitimas != null) ? tp[k].vitimas : null;
+    const txtVit = k => vit(k) == null ? '—' : fNum(vit(k));
+    ['snAno', 'snAno2', 'snAno3', 'snAno4', 'snAno5', 'snAno6'].forEach(id => setTxt(id, String(sn.ano)));
+    const tx = sn.taxa_homicidio_doloso_100k || {};
+    setTxt('snHom', txtVit('homicidio_doloso'));
+    setTxt('snHomSub', 'Vítimas' + (tx.municipio != null ? ' · ' + fNum1(tx.municipio) + ' por 100 mil hab' : ''));
+    setTxt('snTent', txtVit('tentativa_de_homicidio'));
+    setTxt('snTrans', txtVit('morte_no_transito_exceto_homicidio_doloso'));
+    setTxt('snSuic', txtVit('suicidio'));
+    const sFem = tp.suicidio && tp.suicidio.vitimas_feminino;
+    setTxt('snSuicSub', 'Vítimas' + (sFem != null && vit('suicidio') ? ' · ' + fNum(sFem) + ' mulheres' : ''));
+    barrasTresNiveis('snTaxaBars', tx, v => fNum1(v));
+    const isp = ok(g(D, 'secoes.seguranca.isp_rj'));
+    const ispHom = isp && isp.ano === sn.ano ? g(isp, 'ocorrencias.homicidio_doloso') : null;
+    setTxt('snNota', 'O SINESP reúne o que cada estado informa ao Ministério da Justiça e conta vítimas.' +
+      (ispHom != null && ispHom !== vit('homicidio_doloso')
+        ? ' O número não coincide com o do ISP-RJ nos cartões acima (' + fNum(ispHom) + ' em ' + sn.ano + '): são bases e critérios de contagem diferentes.' : ''));
+    const parc = sn.ano_parcial, vp = k => parc && parc.por_tipo[k] ? parc.por_tipo[k].vitimas : null;
+    setHtml('snList',
+      liRow('Feminicídio', txtVit('feminicidio')) +
+      liRow('Tentativa de feminicídio', txtVit('tentativa_de_feminicidio')) +
+      liRow('Latrocínio', txtVit('latrocinio')) +
+      liRow('Lesão corporal seguida de morte', txtVit('lesao_corporal_seguida_de_morte')) +
+      liRow('Morte a esclarecer', txtVit('morte_a_esclarecer')) +
+      liRow('Mandados de prisão cumpridos', tp.mandado_de_prisao_cumprido && tp.mandado_de_prisao_cumprido.ocorrencias != null
+        ? fNum(tp.mandado_de_prisao_cumprido.ocorrencias) : '—') +
+      (parc && vp('homicidio_doloso') != null
+        ? liRow('Homicídio doloso em ' + parc.ano + ' (até ' + String(parc.ate_mes).padStart(2, '0') + '/' + parc.ano + ')', fNum(vp('homicidio_doloso'))) : ''));
+    const serie = (sn.serie || []).filter(r => r.meses === 12);
+    if (serie.length) {
+      setTxt('snSerieAno', serie[0].ano + '–' + serie[serie.length - 1].ano);
+      setTxt('snSerieNota', 'Só anos com os 12 meses informados');
+      new Chart(el_('snChart'), {
+        type: 'bar', data: { labels: serie.map(r => String(r.ano)),
+          datasets: [{ label: 'Vítimas', data: serie.map(r => r.homicidio_doloso), backgroundColor: C.s8, maxBarThickness: 22, borderRadius: 4 }] },
+        options: { ...chartOpts, plugins: noLegend }
+      });
+    } else vazioGrafico('snChart');
+  } else {
+    vazioValores('snHom', 'snTent', 'snTrans', 'snSuic'); barrasCategoria('snTaxaBars', [], 0);
+    vazioLista('snList'); vazioGrafico('snChart');
+  }
+
+  const prf = ok(g(D, 'secoes.seguranca.prf'));
+  if (prf && prf.acidentes) {
+    setTxt('prfAno', prf.desde + '–' + prf.ate);
+    const lista = (arr, n) => (arr || []).slice(0, n).map(r => r.k + ' (' + fNum(r.n) + ')').join(' · ') || '—';
+    setHtml('prfList',
+      liRow('Acidentes', fNum(prf.acidentes)) + liRow('Mortos', fNum(prf.mortos)) +
+      liRow('Feridos graves', fNum(prf.feridos_graves)) +
+      liRow('Rodovias', lista(prf.por_rodovia, 3)) +
+      liRow('Tipo mais comum', lista(prf.por_tipo, 1)) + liRow('Causa mais comum', lista(prf.por_causa, 1)));
+  } else {
+    vazioLista('prfList', prf && prf.disponivel === false
+      ? 'Nenhum acidente atendido pela PRF no município desde ' + prf.desde : SEM_DADO);
+  }
+
+  const sisdep = ok(g(D, 'secoes.seguranca.sisdepen'));
+  if (sisdep && sisdep.unidades) {
+    setTxt('depAno', sisdep.competencia);
+    setHtml('depList',
+      liRow('Unidades prisionais', fNum(sisdep.unidades)) + liRow('Pessoas custodiadas', fNum(sisdep.populacao)) +
+      liRow('Capacidade', fNum(sisdep.capacidade)) +
+      liRow('Ocupação', sisdep.taxa_ocupacao != null ? fNum1(sisdep.taxa_ocupacao * 100) + '%' : '—') +
+      liRow('Presos provisórios', fNum(sisdep.provisorios) + ' · ' + fNum1(pctDe(sisdep.provisorios, sisdep.populacao)) + '%') +
+      liRow('Mulheres', fNum(sisdep.mulheres) + ' · ' + fNum1(pctDe(sisdep.mulheres, sisdep.populacao)) + '%'));
+  } else {
+    vazioLista('depList', sisdep && sisdep.disponivel === false ? 'Nenhuma unidade prisional no município' : SEM_DADO);
+  }
+
+  // =========================================================================
+  // BENEFÍCIOS — INSS
+  // =========================================================================
+  const CAT_INSS = { aposentadoria_idade: 'Aposentadoria por idade', aposentadoria_tempo_contribuicao: 'Aposentadoria por tempo de contribuição',
+    pensao_morte: 'Pensão por morte', aposentadoria_invalidez: 'Aposentadoria por invalidez', bpc_loas: 'BPC',
+    aposentadoria_especial: 'Aposentadoria especial', auxilio_incapacidade_temporaria: 'Auxílio por incapacidade temporária',
+    auxilio_acidente: 'Auxílio-acidente', salario_maternidade: 'Salário-maternidade' };
+  const inss = ok(g(D, 'secoes.beneficios.inss'));
+  if (inss && inss.beneficios) {
+    const comp = mesAno(inss.competencia);
+    ['inssAno', 'inssAno2', 'inssAno3', 'inssAno4', 'inssAno5'].forEach(id => setTxt(id, comp));
+    const tx = inss.por_1000hab || {};
+    setTxt('inssN', fNum(inss.beneficios));
+    setTxt('inssNSub', tx.municipio != null ? fNum(Math.round(tx.municipio)) + ' benefícios para cada 1.000 habitantes' : '');
+    setHtml('inssValor', 'R$ ' + fNum1(inss.valor_mensal / 1e6) + ' <span class="unit">mi</span>');
+    setTxt('inssMedio', fReal(inss.valor_medio));
+    const cheios = (inss.concedidos || []).filter(r => r.meses === 12);
+    const conc = cheios[cheios.length - 1];
+    if (conc) {
+      setTxt('inssConcAno', String(conc.ano)); setTxt('inssConc', fNum(conc.beneficios));
+      setTxt('inssConcSub', 'Novos benefícios no ano · R$ ' + fNum1(conc.valor / 1e6) + ' mi em valor mensal');
+    } else vazioValor('inssConc');
+    // as nove categorias nomeadas; o resto (rendas vitalícias, auxílio-reclusão…) vira "Outros"
+    const cats = (inss.por_categoria || []).filter(r => CAT_INSS[r.k]).map(r => ({ k: CAT_INSS[r.k], v: r.n }));
+    const outros = inss.beneficios - cats.reduce((a, r) => a + r.v, 0);
+    if (outros > 0) cats.push({ k: 'Outros', v: outros });
+    barrasCategoria('inssCatBars', cats, inss.beneficios, C.s4);
+    const bpcCgu = g(D, 'secoes.beneficios.bpc.beneficiarios'), bpcInss = (inss.por_categoria || []).find(r => r.k === 'bpc_loas');
+    setTxt('inssBpcNota', bpcCgu != null && bpcInss
+      ? 'O BPC aqui (' + fNum(bpcInss.n) + ') vem da folha do INSS; o cartão do topo (' + fNum(bpcCgu) + ') vem do Portal da Transparência, em outra competência.' : '');
+    barrasTresNiveis('inssTaxaBars', tx, v => fNum(Math.round(v)));
+    const rot = { feminino: 'Mulheres', masculino: 'Homens' };
+    barrasCategoria('inssSexoBars', (inss.por_sexo || []).map(r => ({ k: rot[r.k] || r.k, v: r.n })).sort((a, b) => b.v - a.v),
+      inss.beneficios, C.s4, { soPct: true });
+    const faixa = k => /^(60|65)/.test(k) ? '60 a 69 anos' : /^70/.test(k) ? '70 anos ou mais' : 'Até 59 anos';
+    const idade = agrupa((inss.por_faixa_etaria || []).map(r => ({ k: faixa(r.k), n: r.n })), 'k', 'n');
+    const ordem = ['Até 59 anos', '60 a 69 anos', '70 anos ou mais'];
+    barrasCategoria('inssIdadeBars', idade.sort((a, b) => ordem.indexOf(a.k) - ordem.indexOf(b.k)), inss.beneficios, C.s4, { soPct: true });
+    const serie = inss.serie || [];
+    if (serie.length > 1) {
+      setTxt('inssSerieAno', serie[0].ano + '–' + serie[serie.length - 1].ano);
+      new Chart(el_('inssChart'), {
+        type: 'line', data: { labels: serie.map(r => String(r.ano)),
+          datasets: [{ label: 'Benefícios', data: serie.map(r => r.beneficios), borderColor: C.s4, backgroundColor: C.s4fill, fill: true, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3 }] },
+        options: { ...chartOpts, plugins: noLegend, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { color: C.muted, callback: v => fNum(v) } } } }
+      });
+    } else vazioGrafico('inssChart');
+  } else {
+    vazioValores('inssN', 'inssValor', 'inssMedio', 'inssConc');
+    ['inssCatBars', 'inssTaxaBars', 'inssSexoBars', 'inssIdadeBars'].forEach(id => barrasCategoria(id, [], 0));
+    vazioGrafico('inssChart');
+  }
+
+  // =========================================================================
+  // SOCIAL — SinPatinhas
+  // =========================================================================
+  const pat = ok(g(D, 'secoes.social.sinpatinhas'));
+  if (pat && pat.animais) {
+    const ate = mesAno((pat.periodo.ate || '').slice(0, 7));
+    ['patAno', 'patAno2', 'patAno3'].forEach(id => setTxt(id, 'até ' + ate));
+    setTxt('patN', fNum(pat.animais));
+    barrasCategoria('patEspBars', (pat.por_especie || []).map(r => ({ k: r.k, v: r.n })), pat.animais, C.s4);
+    barrasTresNiveis('patTaxaBars', pat.por_1000hab, v => fNum1(v));
+  } else {
+    vazioValor('patN'); barrasCategoria('patEspBars', [], 0); barrasCategoria('patTaxaBars', [], 0);
   }
 
   // Insights
