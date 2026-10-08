@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lula × Flávio por município — eleições 2026</title>
 <meta name="description" content="Mapa do 1º turno presidencial de 2026, município a município: quem venceu, a inclinação ideológica do voto e os 703 municípios que trocaram de lado desde 2022.">
 <link rel="canonical" href="https://rodado.xyz/plataformas/eleicoes/?eleicao=presidente-2026">
@@ -20,7 +20,7 @@
 <meta name="twitter:title" content="Lula × Flávio, município a município">
 <meta name="twitter:description" content="1º turno de 2026 nos 5.571 municípios — e os 703 que trocaram de lado desde 2022.">
 <meta name="twitter:image" content="https://rodado.xyz/plataformas/eleicoes/og.png">
-<script>(function(){var q=new URLSearchParams(location.search),p=q.get('eleicao')==='prefeitos-2024',c=p?'':q.get('recorte'),z=c==='zonas',s=c==='secoes',f=p?'data.json':z?'data_presidente_2026_zonas.json':s?'secoes/locais.json':'data_presidente_2026.json';window.__k=(p?'prefeitos-2024':'presidente-2026')+(z?':zonas':s?':secoes':':municipios');window.__d=fetch(f).then(function(r){return r.json()});})()</script>
+<script>(function(){var q=new URLSearchParams(location.search),p=q.get('eleicao')==='prefeitos-2024',c=p?'':q.get('recorte')||'secoes',z=c==='zonas',s=c==='secoes',f=p?'data.json':z?'data_presidente_2026_zonas.json':s?'secoes/locais.json':'data_presidente_2026.json';window.__k=(p?'prefeitos-2024':'presidente-2026')+(z?':zonas':s?':secoes':':municipios');window.__d=fetch(f).then(function(r){return r.json()});})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -34,8 +34,9 @@
 <style>
   html, body { margin:0; padding:0; height:100%; background:#0b0b0b; font-family: 'Inter', Helvetica, Arial, sans-serif; overflow-x:hidden; }
   #map { position:absolute; top:0; bottom:0; left:0; right:0; background:rgb(29,33,40); }
+  :root { --borda-painel: #8b929b45; } /* o fio de 1px da busca, o mesmo em todos os painéis */
   .panel {
-    position:absolute; z-index:1000; background:rgba(20,20,20,0.88); color:#eee;
+    position:absolute; z-index:1000; background:rgba(20,20,20,0.97); color:#eee; border:1px solid var(--borda-painel);
     border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(2px);
   }
   #info { top:12px; left:12px; padding:14px 16px; max-width:350px; }
@@ -60,6 +61,35 @@
   .placar .barra .l { background:#c0394b; } .placar .barra .o { background:rgba(255,255,255,0.25); } .placar .barra .f { background:#3b82c4; }
   .placar .venceu { font-size:11px; font-variant-numeric:tabular-nums; }
   .placar .venceu > span:nth-child(2) { color:rgba(255,255,255,0.4); }
+  .placar .escopo { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:rgba(255,255,255,0.45); margin:0 0 4px; display:flex; justify-content:space-between; gap:8px; }
+  .placar .escopo .na-tela { color:#7ab8ff; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  /* busca: topo, no meio — entre o painel de leitura (esquerda) e os filtros (direita) */
+  /* moldura de 4px na cor média dos pontos na tela (calculada em atualizaPlacar) */
+  #moldura { position:fixed; inset:0; z-index:1200; box-sizing:border-box; border:4px solid #3a3a3a; pointer-events:none; transition:border-color .2s; }
+  /* centralizada, mas nunca por cima do #info (12px + 382px de largura com o padding) nem da coluna de filtros/zoom à direita (~340px) */
+  #search-bar { position:fixed; top:12px; z-index:1050; width:min(400px, calc(100vw - 760px)); left:max(406px, calc(50vw - min(400px, 100vw - 760px) / 2)); min-width:0; }
+  #search-wrapper { display:flex; align-items:center; gap:8px; height:40px; padding:0 12px; box-sizing:border-box; background:rgba(20,20,20,0.97);
+    border:1px solid var(--borda-painel); border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.5); backdrop-filter:blur(2px); transition:border-color .15s; }
+  #search-wrapper:focus-within { border-color:rgba(122,184,255,0.6); }
+  #search-icon { color:rgba(255,255,255,0.55); font-size:15px; line-height:1; flex-shrink:0; user-select:none; }
+  #search-icon.loading { font-size:0; width:13px; height:13px; border:1.5px solid rgba(255,255,255,0.2); border-top-color:rgba(255,255,255,0.6); border-radius:50%; animation:spin .75s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #search-input { flex:1; min-width:0; background:none; border:0; outline:0; color:#fff; font:inherit; font-size:13px; letter-spacing:0.02em; }
+  #search-input::placeholder { color:rgba(255,255,255,0.4); }
+  #search-clear { display:none; background:none; border:0; color:rgba(255,255,255,0.55); cursor:pointer; font-size:13px; padding:6px; margin:-6px; line-height:1; flex-shrink:0; }
+  #search-clear:hover, #search-clear:focus-visible { color:#fff; }
+  #search-results { display:none; margin-top:6px; background:rgba(20,20,20,0.97); border:1px solid var(--borda-painel); border-radius:6px; box-shadow:0 8px 32px rgba(0,0,0,0.6); max-height:min(340px, 50vh); overflow-y:auto; }
+  .sr-item { display:flex; align-items:baseline; gap:8px; padding:8px 12px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .sr-item:last-child { border-bottom:0; }
+  .sr-item:hover { background:rgba(255,255,255,0.05); }
+  .sr-item.ativo { background:rgba(122,184,255,0.16); }
+  .sr-nome { flex:1; min-width:0; color:rgba(255,255,255,0.88); font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sr-nome mark { background:none; color:#7ab8ff; font-weight:600; }
+  .sr-meta { color:rgba(255,255,255,0.45); font-size:11px; white-space:nowrap; flex-shrink:0; }
+  .sr-vazio { padding:12px; color:rgba(255,255,255,0.55); font-size:12px; text-align:center; }
+  .busca-marker { width:22px; height:22px; box-sizing:border-box; border-radius:50%; border:2.5px solid #7ab8ff; box-shadow:0 0 0 1.5px rgba(0,0,0,0.5); animation:pulso 1.2s ease-out 2; pointer-events:none; }
+  @keyframes pulso { 0% { transform:scale(0.6); opacity:1; } 100% { transform:scale(1.5); opacity:0.2; } }
   #info-more {
     display:flex; align-items:center; gap:6px; margin-top:10px; padding:0; background:none; border:0;
     color:#7ab8ff; font:500 11px Inter, sans-serif; cursor:pointer;
@@ -110,7 +140,7 @@
   #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
   #controls .seg button + button { border-left:1px solid #444; }
   #loading { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:900; padding:10px 16px; border-radius:8px;
-    background:rgba(20,20,20,0.9); color:#ccc; font-size:13px; pointer-events:none; }
+    background:rgba(20,20,20,0.97); color:#ccc; font-size:13px; pointer-events:none; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none !important; animation:none !important; } }
   #controls .seg button:focus-visible, #toggle-info:focus-visible, #toggle-legend:focus-visible { outline:2px solid #7ab8ff; outline-offset:-2px; }
   #flip-count, #secoes-status { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
@@ -119,7 +149,7 @@
     position:fixed; left:0; top:0; z-index:1000; pointer-events:none; display:none; box-sizing:border-box;
     will-change:transform; contain:layout paint;
     background: #0a0e1a;
-    color:#eee; border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    color:#eee; border:1px solid var(--borda-painel); border-radius:8px;
     padding:12px 14px; min-width:230px; max-width:300px;
     font-family:'Inter',Helvetica,Arial,sans-serif; box-shadow:0 6px 20px rgba(0,0,0,0.5);
   }
@@ -160,15 +190,29 @@
      à esquerda do #controls (268px de largura) — no meio da altura o painel passava por cima dele */
   .leaflet-top.leaflet-left { top:12px; left:auto; right:290px; }
   .leaflet-top.leaflet-left .leaflet-control { margin:0; }
-  .leaflet-bar { border:1px solid rgba(255,255,255,0.12) !important; box-shadow:0 2px 10px rgba(0,0,0,0.5) !important; }
-  .leaflet-bar a { background:rgba(20,20,20,0.88); color:#eee; border-bottom-color:rgba(255,255,255,0.12); }
+  .leaflet-bar { border:1px solid var(--borda-painel) !important; box-shadow:0 2px 10px rgba(0,0,0,0.5) !important; }
+  .leaflet-bar a { background:rgba(20,20,20,0.97); color:#eee; border-bottom-color:var(--borda-painel); }
   .leaflet-bar a:hover, .leaflet-bar a:focus { background:#222; color:#fff; }
-  .leaflet-bar a.leaflet-disabled { background:rgba(20,20,20,0.88); color:#555; }
+  .leaflet-bar a.leaflet-disabled { background:rgba(20,20,20,0.97); color:#555; }
   .leaflet-control-attribution a { color:#7ab8ff !important; }
+  /* tablet (e celular deitado): entre o #info (383px com padding e borda) e o #controls a busca ficava com ~100px
+     e invadia o #info. Ela sobe para o topo da coluna da esquerda, na largura do #info, que desce 48px.
+     Com viewport-fit=cover os painéis das bordas respeitam o notch do celular deitado */
+  @media (max-width: 1180px) and (min-width: 761px) {
+    #search-bar { left:max(12px, env(safe-area-inset-left)); top:max(12px, env(safe-area-inset-top)); transform:none; width:383px; max-width:none; min-width:0; }
+    .sr-item { min-height:44px; box-sizing:border-box; align-items:center; } /* tablet é tela de toque */
+    #info { top:calc(max(12px, env(safe-area-inset-top)) + 48px); left:max(12px, env(safe-area-inset-left)); }
+    #parties { left:max(12px, env(safe-area-inset-left)); }
+    #controls { right:max(12px, env(safe-area-inset-right)); top:max(12px, env(safe-area-inset-top)); }
+    #legend { right:max(12px, env(safe-area-inset-right)); }
+    .leaflet-top.leaflet-left { right:calc(278px + max(12px, env(safe-area-inset-right))); top:max(12px, env(safe-area-inset-top)); }
+  }
+  /* pouca altura (celular deitado): a tabela de partidos subiria até o #info */
+  @media (max-width: 1180px) and (min-width: 761px) and (max-height: 600px) { #parties { display:none; } }
 
   #toggle-info, #toggle-legend {
     display:none; position:fixed; top:12px; width:42px; height:42px; z-index:1100;
-    background:rgba(20,20,20,0.88); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
+    background:rgba(20,20,20,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:8px;
     color:#eee; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
     box-shadow:0 2px 10px rgba(0,0,0,0.5);
   }
@@ -181,6 +225,37 @@
   #sheet-backdrop.visible { display:block; }
 
   @media (max-width: 760px) {
+    /* topo do celular, de cima para baixo: busca (44px) e, 8px abaixo, o #mobile-top. Com viewport-fit=cover
+       a página entra sob o notch: as bordas respeitam as áreas seguras de cima e dos lados */
+    :root { --top-m:max(10px, env(safe-area-inset-top)); --lado-e:max(10px, env(safe-area-inset-left)); --lado-d:max(10px, env(safe-area-inset-right)); }
+    /* acima do véu e das folhas (que não sobem até o topo): com o "Sobre" aberto, tocar na busca já foca o campo */
+    #search-bar { left:var(--lado-e); right:var(--lado-d); top:var(--top-m); width:auto; max-width:none; min-width:0; transform:none; z-index:1085; }
+    #search-wrapper { height:44px; padding-right:0; }
+    #search-input { font-size:16px; } /* 16px evita o zoom automático do iOS ao focar */
+    /* o ✕ vira um alvo de 44×44 encostado na borda direita da caixa */
+    #search-clear { width:44px; height:44px; margin:0; padding:0; font-size:15px; line-height:44px; text-align:center; }
+    #toggle-info { left:max(12px, env(safe-area-inset-left)); } #toggle-legend { right:max(12px, env(safe-area-inset-right)); }
+    /* a lista cabe no que sobra acima do teclado: --vv-fundo é a borda de baixo da área visível
+       (visualViewport, ver setupBusca); sem a API, 100dvh */
+    #search-results { max-height:calc(var(--vv-fundo, 100dvh) - var(--top-m) - 44px - 6px - 10px); background:rgba(20,20,20,0.98); overscroll-behavior:contain; color-scheme:dark; }
+    /* no celular cada resultado tem duas linhas (nome inteiro e, embaixo, onde fica) e altura de dedo */
+    .sr-item { flex-direction:column; align-items:stretch; justify-content:center; gap:1px; min-height:48px; box-sizing:border-box; padding:7px 14px; }
+    .sr-nome { font-size:14px; }
+    .sr-meta { font-size:11px; overflow:hidden; text-overflow:ellipsis; }
+    .sr-vazio { padding:15px 12px; }
+    #mobile-top { top:calc(var(--top-m) + 52px) !important; left:var(--lado-e) !important; right:var(--lado-d) !important; }
+    /* moldura: abaixo das folhas e do véu (elas deslizam por cima dela), acima do mapa e do #mobile-top */
+    #moldura { z-index:1045; }
+    /* placar do celular numa linha só: % de Lula, a barra Lula/outros/Flávio de 6px e % de Flávio */
+    #mini .mini-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; column-gap:8px; margin-bottom:3px; }
+    #mini .mini-head .eyebrow { margin-bottom:0; }
+    #mp-n { font-size:10px; color:rgba(255,255,255,0.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
+    #mini-placar { display:flex; align-items:center; gap:8px; font-size:11px; color:rgba(255,255,255,0.7); font-variant-numeric:tabular-nums; white-space:nowrap; margin:1px 0 6px; }
+    #mini-placar b { font-size:14px; font-weight:700; letter-spacing:-0.2px; }
+    #mini-placar .l b { color:#e08a8a; } #mini-placar .f b { color:#7ab8ff; }
+    .mp-barra { flex:1; display:flex; height:6px; min-width:40px; border-radius:3px; overflow:hidden; gap:1px; background:rgba(255,255,255,0.08); }
+    .mp-barra .l { background:#c0394b; } .mp-barra .o { background:rgba(255,255,255,0.25); } .mp-barra .f { background:#3b82c4; }
+    #mini.sem-placar #mini-placar, #mini.sem-placar #mp-n { display:none; }
     #parties { display:none; }
     #toggle-info, #toggle-legend { display:flex; }
     #info, #right-sheets {
@@ -201,7 +276,7 @@
       background:transparent; box-shadow:none; backdrop-filter:none; padding:0 0 8px;
     }
     #right-sheets .panel { position:static; width:100%; max-width:none; box-sizing:border-box; }
-    #info, #right-sheets { overflow-x:hidden; max-height:70vh; max-height:70dvh; padding-bottom:max(8px, env(safe-area-inset-bottom)); }
+    #info, #right-sheets { color-scheme:dark; overflow-x:hidden; max-height:70vh; max-height:70dvh; padding-bottom:max(8px, env(safe-area-inset-bottom)); }
     .leaflet-control-zoom { display:none; }
     /* no celular o #info já é uma gaveta aberta pelo ☰: texto inteiro, sem acordeão */
     #info.collapsed .mais { display:block; }
@@ -213,11 +288,11 @@
     /* sempre à vista sobre o mapa: o que a cor quer dizer e a troca de métrica */
     #mobile-top { display:flex; flex-direction:column; gap:6px; position:fixed; z-index:1000;
       left:10px; right:10px; top:max(10px, env(safe-area-inset-top)); }
-    #mini { background:rgba(20,20,20,0.88); border-radius:8px; padding:8px 12px; font-size:11px; color:#eee; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
+    #mini { background:rgba(20,20,20,0.97); border-radius:8px; padding:8px 12px; font-size:11px; color:#eee; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
     #mini .eyebrow { font-size:10px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7ab8ff; margin-bottom:3px; }
     #mini-legend .bar { height:8px; border-radius:2px; margin:4px 0 3px; }
     #chips-mode { display:flex; border:1px solid #444; border-radius:8px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
-    #chips-mode button { flex:1 1 auto; background:rgba(20,20,20,0.88); color:#bbb; border:0; padding:9px 4px; font:500 12px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+    #chips-mode button { flex:1 1 auto; background:rgba(20,20,20,0.97); color:#bbb; border:0; min-height:44px; padding:6px 4px; font:500 12px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
     #chips-mode button + button { border-left:1px solid #444; }
     #chips-mode button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
     #chips-mode button:focus-visible { outline:2px solid #7ab8ff; outline-offset:-2px; }
@@ -244,19 +319,33 @@
 <body>
 <div id="map" role="application" aria-label="Mapa do 1º turno presidencial de 2026 por município"></div>
 <div id="loading" role="status">Carregando…</div>
+<div id="moldura" aria-hidden="true"></div>
+<div id="search-bar" role="search" aria-label="Buscar no mapa">
+  <div id="search-wrapper">
+    <span id="search-icon" aria-hidden="true">⌕</span>
+    <label for="search-input" class="sr-only">Buscar município ou local de votação</label>
+    <input id="search-input" type="text" placeholder="Buscar município ou escola…" autocomplete="off" spellcheck="false"
+      role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false">
+    <button id="search-clear" aria-label="Limpar busca">✕</button>
+  </div>
+  <div id="search-results" role="listbox" aria-label="Resultados da busca"></div>
+</div>
 <div id="info" class="panel collapsed">
 <div data-eleicao="presidente-2026">
   <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
   <h1>Lula × Flávio por <span data-recorte="municipios">Município</span><span data-recorte="zonas">Zona Eleitoral</span><span data-recorte="secoes">Seção Eleitoral</span></h1>
   <div class="placar" role="img" aria-label="Votos válidos no país: Lula 45,2%, Flávio Bolsonaro 47,0%, outros 7,8%">
+    <div class="escopo"><span class="na-tela" id="placar-escopo">Brasil inteiro</span><span id="placar-n"></span></div>
     <div class="nomes"><span class="l"><b>45,2%</b> Lula</span><span class="f">Flávio <b>47,0%</b></span></div>
     <div class="barra"><i class="l" style="width:45.2%"></i><i class="o" style="width:7.8%"></i><i class="f" style="width:47%"></i></div>
-    <div class="venceu"><span><span data-recorte="municipios">2.663 municípios</span><span data-recorte="zonas">2.856 zonas</span><span data-recorte="secoes">217.536 seções</span></span><span>venceu em</span><span><span data-recorte="municipios">2.908 municípios</span><span data-recorte="zonas">3.248 zonas</span><span data-recorte="secoes">278.222 seções</span></span></div>
+    <div class="venceu"><span><span id="placar-vl">2.663</span> <span class="un">municípios</span></span><span>venceu em</span><span><span id="placar-vf">2.908</span> <span class="un">municípios</span></span></div>
   </div>
   <p class="lede"><span data-recorte="municipios">Cada ponto é um <b>município</b>.</span><span data-recorte="zonas">Cada ponto
   é uma <b>zona eleitoral</b> dentro de um município — 6.106 ao todo.</span><span
   data-recorte="secoes">Afastado, cada ponto é um <b>local de votação</b> (94.539); de perto, ele se abre
-  nas suas <b>seções</b> (497.897 urnas).</span> Toque num ponto para ver o resultado dele.</p>
+  nas suas <b>seções</b> (497.897 urnas).</span> Toque num ponto para ver o resultado dele.
+  <b>O placar e a moldura da tela acompanham o que está à vista:</b> aproxime de uma cidade e eles viram o resultado de lá
+  (a moldura de 4px é a cor média dos pontos visíveis). <b>Busque</b> um município ou uma escola — atalho <b>/</b> — e o mapa voa até lá.</p>
   <div class="mais">
     <p data-modo="margin"><b>Lula × Flávio:</b> a cor é a diferença entre os dois mais votados —
     <b class="l">vermelho</b> = Lula à frente, <b class="f">azul</b> = Flávio à frente, pálido = empate.</p>
@@ -283,7 +372,8 @@
   <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
   <h1>Esquerda × Direita nas Prefeituras</h1>
   <p class="lede">Cada ponto é um <b>município</b>, colorido pela distribuição do voto para prefeito —
-  não pela sigla de quem venceu. Toque num ponto para ver o resultado dele.</p>
+  não pela sigla de quem venceu. Toque num ponto para ver o resultado dele. A moldura de 4px da tela é a cor média
+  dos pontos visíveis. <b>Busque</b> um município — atalho <b>/</b> — e o mapa voa até lá.</p>
   <div class="mais">
     <p>Cada partido recebe uma nota ideológica de 0 (esquerda) a 10 (direita) segundo o survey de
     especialistas de Bolognesi, Ribeiro &amp; Codato; a cor agrega o voto de <b>todos</b> os candidatos.</p>
@@ -374,7 +464,16 @@
   <div class="pbody"></div>
 </div>
 <div id="mobile-top">
-  <div id="mini"><div class="eyebrow"></div><div id="mini-legend"></div></div>
+  <div id="mini">
+    <div class="mini-head"><span class="eyebrow"></span><span id="mp-n" aria-hidden="true"></span></div>
+    <!-- placar do celular: só o rótulo é lido, e ele só muda quando o mapa para (atualizaPlacar) -->
+    <div id="mini-placar" role="img" aria-live="off" aria-label="Votos válidos">
+      <span class="l" aria-hidden="true"><b id="mp-l">—</b> Lula</span>
+      <span class="mp-barra" aria-hidden="true"><i class="l"></i><i class="o"></i><i class="f"></i></span>
+      <span class="f" aria-hidden="true">Flávio <b id="mp-f">—</b></span>
+    </div>
+    <div id="mini-legend"></div>
+  </div>
   <div id="chips-mode" role="group" aria-label="Métrica">
     <button data-mode="margin">Lula × Flávio</button>
     <button data-mode="swing">Swing</button>
@@ -452,7 +551,8 @@ let ELEICAO = new URLSearchParams(location.search).get('eleicao');
 if (!ELEICOES[ELEICAO]) ELEICAO = 'presidente-2026';
 function EL(){ return ELEICOES[ELEICAO]; }
 // recorte: um ponto por município, por zona eleitoral ou por seção (só onde a eleição tem os arquivos)
-let RECORTE = ['zonas', 'secoes'].includes(new URLSearchParams(location.search).get('recorte')) ? new URLSearchParams(location.search).get('recorte') : 'municipios';
+// o padrão é por seção (um ponto por local de votação, que se abre nas urnas de perto); ?recorte=municipios|zonas muda
+let RECORTE = ['municipios', 'zonas', 'secoes'].includes(new URLSearchParams(location.search).get('recorte')) ? new URLSearchParams(location.search).get('recorte') : 'secoes';
 function recorteAtivo(){ return RECORTE !== 'municipios' && EL()[RECORTE] ? RECORTE : 'municipios'; }
 
 (function(){
@@ -939,6 +1039,7 @@ function setEleicao(key){
   document.querySelectorAll('#info [data-eleicao]').forEach(d => d.classList.toggle('hide', d.dataset.eleicao !== key));
   document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
   document.querySelector('#mini .eyebrow').textContent = key === 'presidente-2026' ? 'Presidente 2026 · 1º turno' : 'Prefeitos 2024 · 1º turno';
+  document.getElementById('mini').classList.toggle('sem-placar', key !== 'presidente-2026'); // prefeito não tem Lula × Flávio para somar
   const pl = document.querySelectorAll('#legend-polar .labels span');
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
@@ -978,11 +1079,68 @@ function syncUrl(){
   MODE !== 'margin' ? url.searchParams.set('modo', MODE) : url.searchParams.delete('modo');
   FLIP === 'lost' ? url.searchParams.set('filtro', 'vira-casacas') : url.searchParams.delete('filtro');
   const rec = recorteAtivo();
-  rec !== 'municipios' ? url.searchParams.set('recorte', rec) : url.searchParams.delete('recorte');
+  rec !== (EL().secoes ? 'secoes' : 'municipios') ? url.searchParams.set('recorte', rec) : url.searchParams.delete('recorte'); // o padrão não vai na URL
   history.replaceState(null, '', url);
 }
 
+// ---- placar: soma só o que está na tela (e que o filtro não apagou). Registro: r[4] votos válidos,
+// r[15] e r[16] % de Lula e de Flávio — o voto sai de tot × %, com erro de arredondamento desprezível
+const placarEl = document.querySelector('.placar');
+let placarRaf = 0, mapaMovendo = false;
+function agendaPlacar(){ if (!placarRaf) placarRaf = requestAnimationFrame(atualizaPlacar); }
+function atualizaPlacar(){
+  placarRaf = 0;
+  if (ELEICAO !== 'presidente-2026' || !DATA.length || DATA[0].length < 17) return;
+  const b = map.getBounds(), s = b.getSouth(), n = b.getNorth(), w = b.getWest(), e = b.getEast();
+  let tot = 0, vl = 0, vf = 0, gl = 0, gf = 0, np = 0, alvo = 0, secoes = 0, cr = 0, cg = 0, cb = 0, cn = 0;
+  const passo = Math.max(1, Math.floor(DATA.length / 40000)); // em mapa com centenas de milhares de seções, a cor média sai de uma amostra
+  for (let i = 0; i < DATA.length; i++){
+    const r = DATA[i];
+    if (!flipMatch(r)) continue;
+    alvo++;
+    const la = r[2], lo = r[3];
+    if (la < s || la > n || lo < w || lo > e) continue;
+    np++; tot += r[4]; vl += r[4] * r[15] / 100; vf += r[4] * r[16] / 100;
+    if (r[15] > r[16]) gl++; else if (r[16] > r[15]) gf++;
+    if (r[19] && r[19].tipo === 'secao') secoes++;
+    if (np % passo === 0){
+      const c = colorFor(r);
+      if (/^#[0-9a-f]{6}$/i.test(c)){ cr += parseInt(c.slice(1, 3), 16); cg += parseInt(c.slice(3, 5), 16); cb += parseInt(c.slice(5, 7), 16); cn++; }
+    }
+  }
+  document.getElementById('moldura').style.borderColor = cn ? 'rgb(' + Math.round(cr / cn) + ',' + Math.round(cg / cn) + ',' + Math.round(cb / cn) + ')' : '#3a3a3a';
+  const rec = recorteAtivo(), todos = np === alvo;
+  const un = rec === 'zonas' ? 'zonas' : rec === 'secoes' ? (secoes === np ? 'seções' : secoes ? 'pontos' : 'locais') : 'municípios';
+  const pl = tot ? 100 * vl / tot : 0, pf = tot ? 100 * vf / tot : 0, po = Math.max(0, 100 - pl - pf);
+  const q = placarEl.querySelectorAll('.nomes b'), bar = placarEl.querySelectorAll('.barra i');
+  q[0].textContent = tot ? fmtPct(pl) : '—'; q[1].textContent = tot ? fmtPct(pf) : '—';
+  bar[0].style.width = pl + '%'; bar[1].style.width = po + '%'; bar[2].style.width = pf + '%';
+  document.getElementById('placar-vl').textContent = fmt.format(gl);
+  document.getElementById('placar-vf').textContent = fmt.format(gf);
+  placarEl.querySelectorAll('.un').forEach(u => u.textContent = un);
+  const esc = !np ? 'Nenhum ponto na tela' : todos ? (FLIP === 'all' ? 'Brasil inteiro' : 'Todos os vira-casacas') : 'Na tela';
+  document.getElementById('placar-escopo').textContent = esc;
+  document.getElementById('placar-n').textContent = np ? fmt.format(np) + (todos ? '' : ' de ' + fmt.format(alvo)) + ' ' + un : '';
+  const txt = !np ? 'Nenhum ponto na tela' : (todos ? esc : 'Na tela, ' + fmt.format(np) + ' ' + un) + ': Lula ' + fmtPct(pl) + ', Flávio Bolsonaro ' + fmtPct(pf) + ', outros ' + fmtPct(po);
+  // celular: a mesma conta em uma linha (% · barra · %) e o escopo curto ao lado do título
+  document.getElementById('mp-l').textContent = tot ? fmtPct(pl) : '—';
+  document.getElementById('mp-f').textContent = tot ? fmtPct(pf) : '—';
+  const mb = document.querySelectorAll('#mini-placar .mp-barra i');
+  mb[0].style.width = pl + '%'; mb[1].style.width = po + '%'; mb[2].style.width = pf + '%';
+  document.getElementById('mp-n').textContent = !np ? 'Nenhum ponto na tela'
+    : (todos ? (FLIP === 'all' ? 'Brasil' : 'Vira-casacas') : 'Na tela') + ' · ' + fmt.format(np) + ' ' + un;
+  // leitor de tela: o rótulo só muda com o mapa parado — a cada quadro de um arrasto seria ruído
+  if (!mapaMovendo){
+    placarEl.setAttribute('aria-label', 'Votos válidos. ' + txt);
+    document.getElementById('mini-placar').setAttribute('aria-label', 'Votos válidos. ' + txt);
+  }
+}
+map.on('movestart zoomstart', () => { mapaMovendo = true; });
+map.on('moveend zoomend', () => { mapaMovendo = false; agendaPlacar(); });
+map.on('move zoom resize', agendaPlacar);
+
 function applyFlip(){
+  agendaPlacar();
   const flipN = { lost: 0, won: 0 };
   DATA.forEach(function(r){ const k = flipKind(r); if (k) flipN[k]++; });
   dots.recolor();
@@ -1005,7 +1163,7 @@ function setFlip(f){
 document.querySelectorAll('#seg-flip button').forEach(b => b.addEventListener('click', () => setFlip(b.dataset.flip)));
 
 function setMode(mode){
-  MODE = mode;
+  MODE = mode; agendaPlacar();
   document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b => { b.classList.toggle('active', b.dataset.mode === mode); b.setAttribute('aria-pressed', b.dataset.mode === mode); });
   document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
   document.getElementById('legend-swing').classList.toggle('hide', mode !== 'swing');
@@ -1036,6 +1194,127 @@ L.DomEvent.disableClickPropagation(document.getElementById('info'));
 L.DomEvent.disableClickPropagation(document.getElementById('legend'));
 L.DomEvent.disableClickPropagation(document.getElementById('parties'));
 
+let fechaFolhas = () => {}; // setupMobilePanels troca pela versão que fecha #info, #right-sheets e o véu
+// ---- busca: municípios (do próprio arquivo do mapa) e locais de votação (secoes/busca.json, só nesta eleição) ----
+(function setupBusca(){
+  const bar = document.getElementById('search-bar'), input = document.getElementById('search-input'),
+        res = document.getElementById('search-results'), clr = document.getElementById('search-clear'),
+        icon = document.getElementById('search-icon');
+  const norm = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const IDX = {};        // 'mun:<eleição>' | 'loc' -> Promise<[{n, k, uf, mun, lat, lon, w, loc}]>
+  function indiceMun(){
+    const key = 'mun:' + ELEICAO;
+    if (IDX[key]) return IDX[key];
+    const ck = ELEICAO + ':municipios', cached = CACHE[ck] ? Promise.resolve(CACHE[ck]) : fetch(EL().file).then(r => r.json());
+    return IDX[key] = cached.then(rs => rs.map(r => ({ n: r[1], k: norm(r[1]), uf: r[0], lat: r[2], lon: r[3], w: r[4], z: 9.5 })));
+  }
+  function indiceLoc(){
+    if (!EL().secoes) return Promise.resolve([]);
+    if (IDX.loc) return IDX.loc;
+    return IDX.loc = fetch(EL().secoes + 'busca.json').then(r => r.json()).then(function(j){
+      let m = 0, la = 0, lo = 0; const out = new Array(j.n.length);
+      for (let i = 0; i < j.n.length; i++){
+        m += j.m[i]; la += j.la[i]; lo += j.lo[i];
+        out[i] = { n: j.n[i], k: norm(j.n[i]), uf: j.ufs[j.u[i]], mun: j.muns[m], lat: la / 1e5, lon: lo / 1e5, w: 0, z: 16, loc: true };
+      }
+      return out;
+    }).catch(() => { delete IDX.loc; return []; });
+  }
+  let hits = [], ativo = -1, seq = 0, timer = 0, marker = null, markerT = 0;
+  const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function destaca(nome, q){
+    const nn = norm(nome), i = nn.length === nome.length ? nn.indexOf(q) : -1; // sem acento o comprimento não muda; com pontuação, não marca
+    return i < 0 ? esc(nome) : esc(nome.slice(0, i)) + '<mark>' + esc(nome.slice(i, i + q.length)) + '</mark>' + esc(nome.slice(i + q.length));
+  }
+  function fecha(){ res.style.display = 'none'; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); ativo = -1; }
+  function marca(i){
+    ativo = i;
+    res.querySelectorAll('.sr-item').forEach((el, j) => { el.classList.toggle('ativo', j === i); el.setAttribute('aria-selected', j === i); if (j === i){ el.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', el.id); } });
+  }
+  function mostra(q){
+    if (!hits.length){ res.innerHTML = '<div class="sr-vazio">Nada encontrado para “' + esc(q) + '”.</div>'; }
+    else res.innerHTML = hits.map((h, i) => '<div class="sr-item" role="option" id="sr-' + i + '" data-i="' + i + '" aria-selected="false">' +
+      '<span class="sr-nome">' + destaca(h.n, q) + '</span><span class="sr-meta">' + (h.loc ? 'local de votação · ' + esc(h.mun) + ' ' : 'município · ') + h.uf + '</span></div>').join('');
+    res.style.display = 'block'; input.setAttribute('aria-expanded', 'true'); ativo = -1;
+  }
+  function roda(texto){
+    const q = norm(texto), my = ++seq;
+    clr.style.display = texto ? 'block' : 'none';
+    if (q.length < 2){ fecha(); return; }
+    icon.classList.add('loading');
+    Promise.all([indiceMun(), indiceLoc()]).then(function(r){
+      if (my !== seq) return;
+      icon.classList.remove('loading');
+      const out = [];
+      r.forEach(function(lista){
+        for (let i = 0; i < lista.length; i++){
+          const e = lista[i], p = e.k.indexOf(q);
+          if (p < 0) continue;
+          // começo do nome > começo de uma palavra > meio; depois porte (município) ou ordem alfabética (local)
+          const rank = p === 0 ? 0 : e.k.charAt(p - 1) === ' ' ? 1 : 2;
+          out.push([rank, e.loc ? 0 : -e.w, e, e.n]);
+        }
+      });
+      out.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[3].localeCompare(b[3], 'pt-BR'));
+      // até 5 municípios e 5 locais: sem isso os municípios de nome parecido tomam toda a lista
+      hits = out.filter(o => !o[2].loc).slice(0, 5).concat(out.filter(o => o[2].loc).slice(0, 5)).map(o => o[2]);
+      mostra(q);
+    });
+  }
+  // no celular o #mobile-top cobre o topo e os botões Sobre/Filtros o rodapé: o ponto buscado
+  // pousa no meio da faixa livre entre eles, não no centro da tela (que fica rente ao placar)
+  function centroLivre(h){
+    const ll = L.latLng(h.lat, h.lon);
+    if (!isSheet()) return ll;
+    const topo = document.getElementById('mobile-top').getBoundingClientRect().bottom,
+          fundo = document.getElementById('toggle-info').getBoundingClientRect().top,
+          dy = (topo + fundo) / 2 - map.getSize().y / 2;
+    return map.unproject(map.project(ll, h.z).subtract([0, dy]), h.z);
+  }
+  function vai(h){
+    fecha(); input.value = h.n + (h.loc ? ' — ' + h.mun : ''); clr.style.display = 'block'; input.blur(); hideTip();
+    // local de votação só existe no recorte por seção: troca para ele antes de voar
+    if (h.loc && recorteAtivo() !== 'secoes'){ RECORTE = 'secoes'; setEleicao(ELEICAO); }
+    // no celular: fecha as folhas e voa só depois que o teclado baixa (a área do mapa muda de tamanho)
+    if (isSheet()) fechaFolhas();
+    const voa = () => map.flyTo(centroLivre(h), h.z, { duration: 1.2 });
+    const vv = window.visualViewport;
+    if (isSheet() && vv && vv.height < innerHeight * 0.8) setTimeout(voa, 300); else voa();
+    if (marker) marker.remove(); clearTimeout(markerT);
+    marker = L.marker([h.lat, h.lon], { interactive: false, keyboard: false, icon: L.divIcon({ className: '', html: '<div class="busca-marker"></div>', iconSize: [22, 22] }) }).addTo(map);
+    markerT = setTimeout(() => { if (marker) marker.remove(); marker = null; }, 4000);
+  }
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => roda(input.value), 120); });
+  input.addEventListener('focus', function(){
+    indiceMun(); indiceLoc(); // já aquece os índices
+    if (isSheet()){ fechaFolhas(); hideTip(); } // no celular a busca toma a tela: nada de folha aberta por baixo
+    if (hits.length && input.value) res.style.display = 'block';
+  });
+  // a lista de resultados não pode passar para trás do teclado virtual: --vv-fundo é a borda de baixo
+  // da área visível (visualViewport encolhe com o teclado; o 100dvh do iOS, não)
+  const vv = window.visualViewport;
+  if (vv){
+    const fundo = () => document.documentElement.style.setProperty('--vv-fundo', Math.round(vv.offsetTop + vv.height) + 'px');
+    vv.addEventListener('resize', fundo); vv.addEventListener('scroll', fundo); fundo();
+  }
+  input.addEventListener('keydown', function(e){
+    if (e.key === 'Escape'){ if (res.style.display === 'block') fecha(); else { input.value = ''; roda(''); input.blur(); } }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+      if (!hits.length || res.style.display !== 'block') return;
+      e.preventDefault(); marca((ativo + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length);
+    } else if (e.key === 'Enter'){ if (hits.length){ e.preventDefault(); vai(hits[ativo >= 0 ? ativo : 0]); } }
+  });
+  res.addEventListener('mousedown', e => e.preventDefault()); // não deixa o input perder o foco antes do clique
+  res.addEventListener('click', e => { const el = e.target.closest('.sr-item'); if (el) vai(hits[+el.dataset.i]); });
+  res.addEventListener('mousemove', e => { const el = e.target.closest('.sr-item'); if (el && +el.dataset.i !== ativo) marca(+el.dataset.i); });
+  clr.addEventListener('click', () => { input.value = ''; hits = []; roda(''); input.focus(); });
+  document.addEventListener('click', e => { if (!bar.contains(e.target)) fecha(); });
+  document.addEventListener('keydown', function(e){ // "/" foca a busca, como em tantos sites
+    if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){ e.preventDefault(); input.focus(); input.select(); }
+  });
+  L.DomEvent.disableClickPropagation(bar);
+})();
+
 (function setupMobilePanels(){
   const toggleInfo = document.getElementById('toggle-info');
   const toggleLegend = document.getElementById('toggle-legend');
@@ -1043,13 +1322,15 @@ L.DomEvent.disableClickPropagation(document.getElementById('parties'));
   const rightSheets = document.getElementById('right-sheets');
   const backdrop = document.getElementById('sheet-backdrop');
   const allPanels = [infoPanel, rightSheets];
-  function closeAll(){ allPanels.forEach(p => p.classList.remove('open')); backdrop.classList.remove('visible'); }
+  function closeAll(){ allPanels.forEach(p => p.classList.remove('open')); backdrop.classList.remove('visible'); toggleInfo.setAttribute('aria-expanded', 'false'); }
+  fechaFolhas = closeAll;
   function togglePanel(panel){
     const isOpen = panel.classList.contains('open');
     closeAll();
     hideTip();
     // a folha de filtros não escurece o mapa: é nele que se vê o efeito de cada troca
-    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); backdrop.classList.toggle('clear', panel === rightSheets); }
+    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); backdrop.classList.toggle('clear', panel === rightSheets);
+      if (panel === infoPanel) toggleInfo.setAttribute('aria-expanded', 'true'); }
   }
   toggleInfo.addEventListener('click', () => togglePanel(infoPanel));
   toggleLegend.addEventListener('click', () => togglePanel(rightSheets));

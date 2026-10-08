@@ -8,3 +8,6 @@ dataviz/scripts/data/
 
 # brutos do TSE (66 MB), refeitos por build.py
 dataviz/eleicoes/dados/presidente_2026/raw/
+
+# planos e anotações locais
+tasks/
