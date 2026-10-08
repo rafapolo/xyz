@@ -46,14 +46,25 @@
   }
   #info p { font-size:12px; line-height:1.6; margin:0; color:rgba(255,255,255,0.65); }
   #info p + p { margin-top:8px; }
-  #info.collapsed p { display:none; }
-  #info.collapsed h1 { margin-bottom:0; padding-bottom:0; border-bottom:0; }
+  #info p.lede { color:rgba(255,255,255,0.8); }
+  #info .mais { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1); }
+  #info.collapsed .mais { display:none; }
+  #info b.l { color:#e08a8a; } #info b.f { color:#7ab8ff; }
+  #info .rodape { font-size:11px; color:rgba(255,255,255,0.45); }
+  /* placar nacional: Lula à esquerda e Flávio à direita, como na legenda */
+  .placar { margin:0 0 10px; font-size:12px; color:rgba(255,255,255,0.65); }
+  .placar .nomes, .placar .venceu { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .placar .nomes b { font-size:18px; font-weight:700; letter-spacing:-0.3px; font-variant-numeric:tabular-nums; }
+  .placar .nomes .l, .placar .nomes .l b { color:#e08a8a; } .placar .nomes .f, .placar .nomes .f b { color:#7ab8ff; }
+  .placar .barra { display:flex; height:6px; margin:5px 0; border-radius:3px; overflow:hidden; gap:1px; }
+  .placar .barra .l { background:#c0394b; } .placar .barra .o { background:rgba(255,255,255,0.25); } .placar .barra .f { background:#3b82c4; }
+  .placar .venceu { font-size:11px; font-variant-numeric:tabular-nums; }
+  .placar .venceu > span:nth-child(2) { color:rgba(255,255,255,0.4); }
   #info-more {
     display:flex; align-items:center; gap:6px; margin-top:10px; padding:0; background:none; border:0;
     color:#7ab8ff; font:500 11px Inter, sans-serif; cursor:pointer;
   }
   #info-more .caret { transition:transform .15s; }
-  #info.collapsed #info-more { margin-top:8px; }
   #info.collapsed #info-more .caret { transform:rotate(-90deg); }
   #info-more:focus-visible { outline:2px solid #7ab8ff; outline-offset:2px; }
   #info a { color:#7ab8ff; text-decoration:none; border-bottom:1px solid rgba(122,184,255,0.35); }
@@ -65,12 +76,14 @@
   #info .xref b { color:#e08a8a; }
   #info .xref b.blue { color:#7ab8ff; }
   #legend { bottom:20px; right:12px; padding:10px 14px; font-size:11px; }
-  #legend .cap { color:#ddd; margin-bottom:2px; font-weight:500; }
+  #legend .cap, #mini-legend .cap { color:#ddd; margin-bottom:2px; font-weight:500; }
   #legend .bar { width:230px; height:10px; border-radius:2px; margin:6px 0 4px; }
-  #legend .bar.lean { background: linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac); }
-  #legend .bar.polar { background: linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921); }
-  #legend .bar.margin { background: linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac); }
-  #legend .labels { display:flex; justify-content:space-between; color:#bbb; }
+  #legend .bar.lean, #mini-legend .bar.lean { background: linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac); }
+  #legend .bar.polar, #mini-legend .bar.polar { background: linear-gradient(to right, #0d0887, #7e03a8, #cc4778, #f89540, #f0f921); }
+  #legend .nota { margin-top:5px; color:#888; display:flex; align-items:center; gap:6px; }
+  #legend .nota i { width:8px; height:8px; border-radius:50%; background:#4a4d55; }
+  #legend .bar.margin, #mini-legend .bar.margin { background: linear-gradient(to right, #b2182b, #f7f7f7 50%, #2166ac); }
+  #legend .labels, #mini-legend .labels { display:flex; justify-content:space-between; color:#bbb; }
   #legend .hide { display:none; }
   #parties { bottom:20px; left:12px; padding:10px 12px; font-size:10px; max-width:320px; }
   #parties .phead { display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; }
@@ -93,6 +106,7 @@
     flex:1; background:#222; color:#bbb; border:0; padding:6px 4px; font-size:11px;
     font-family:'Inter',sans-serif; cursor:pointer; transition:background .15s,color .15s;
   }
+  #seg-mode button { padding-left:3px; padding-right:3px; white-space:nowrap; letter-spacing:-0.2px; }
   #controls .seg button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
   #controls .seg button + button { border-left:1px solid #444; }
   #loading { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:900; padding:10px 16px; border-radius:8px;
@@ -142,9 +156,9 @@
   .tt-cell .k { color:#888; }
   .tt-cell .v { font-family:'JetBrains Mono',monospace; color:#ddd; white-space:nowrap; }
   .leaflet-control-attribution { background:rgba(20,20,20,0.7) !important; color:#999 !important; }
-  /* o +/− do Leaflet nasce no canto superior esquerdo, escondido atrás do #info: vai para a borda
-     direita, no meio da altura, entre os controles e a legenda */
-  .leaflet-top.leaflet-left { top:50%; left:auto; right:12px; transform:translateY(-50%); }
+  /* o +/− do Leaflet nasce no canto superior esquerdo, escondido atrás do #info: vai para o topo,
+     à esquerda do #controls (268px de largura) — no meio da altura o painel passava por cima dele */
+  .leaflet-top.leaflet-left { top:12px; left:auto; right:290px; }
   .leaflet-top.leaflet-left .leaflet-control { margin:0; }
   .leaflet-bar { border:1px solid rgba(255,255,255,0.12) !important; box-shadow:0 2px 10px rgba(0,0,0,0.5) !important; }
   .leaflet-bar a { background:rgba(20,20,20,0.88); color:#eee; border-bottom-color:rgba(255,255,255,0.12); }
@@ -158,6 +172,9 @@
     color:#eee; font-size:17px; align-items:center; justify-content:center; cursor:pointer;
     box-shadow:0 2px 10px rgba(0,0,0,0.5);
   }
+  #mobile-top { display:none; }
+  .tt-close { display:none; }
+  #sheet-backdrop.clear { background:transparent; }
   #toggle-info { left:12px; }
   #toggle-legend { right:12px; }
   #sheet-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1050; }
@@ -187,11 +204,31 @@
     #info, #right-sheets { overflow-x:hidden; max-height:70vh; max-height:70dvh; padding-bottom:max(8px, env(safe-area-inset-bottom)); }
     .leaflet-control-zoom { display:none; }
     /* no celular o #info já é uma gaveta aberta pelo ☰: texto inteiro, sem acordeão */
-    #info.collapsed p:not(.hide) { display:block; }
-    #info.collapsed h1 { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); }
+    #info.collapsed .mais { display:block; }
     #info-more { display:none; }
     #legend .bar { width:100%; }
-    #toggle-info, #toggle-legend { width:44px; height:44px; top:max(12px, env(safe-area-inset-top)); }
+    /* os dois botões descem para o alcance do polegar e ganham rótulo; ficam por baixo das folhas */
+    #toggle-info, #toggle-legend { width:auto; height:44px; padding:0 14px; gap:7px; top:auto; bottom:max(16px, env(safe-area-inset-bottom));
+      font:500 13px 'Inter',sans-serif; z-index:1040; }
+    /* sempre à vista sobre o mapa: o que a cor quer dizer e a troca de métrica */
+    #mobile-top { display:flex; flex-direction:column; gap:6px; position:fixed; z-index:1000;
+      left:10px; right:10px; top:max(10px, env(safe-area-inset-top)); }
+    #mini { background:rgba(20,20,20,0.88); border-radius:8px; padding:8px 12px; font-size:11px; color:#eee; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
+    #mini .eyebrow { font-size:10px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; color:#7ab8ff; margin-bottom:3px; }
+    #mini-legend .bar { height:8px; border-radius:2px; margin:4px 0 3px; }
+    #chips-mode { display:flex; border:1px solid #444; border-radius:8px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.5); }
+    #chips-mode button { flex:1 1 auto; background:rgba(20,20,20,0.88); color:#bbb; border:0; padding:9px 4px; font:500 12px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+    #chips-mode button + button { border-left:1px solid #444; }
+    #chips-mode button.active { background:#7ab8ff; color:#0b0b0b; font-weight:600; }
+    #chips-mode button:focus-visible { outline:2px solid #7ab8ff; outline-offset:-2px; }
+    #chips-mode .hide { display:none; }
+    /* legenda e métrica já estão sobre o mapa: fora da folha, que assim cobre menos dele */
+    #legend, #row-mode { display:none; }
+    #controls { border-radius:16px 16px 0 0; padding-top:14px; }
+    .tt-box { pointer-events:auto; }
+    .tt-close { display:flex; align-items:center; justify-content:center; position:absolute; top:4px; right:6px; width:44px; height:44px;
+      background:none; border:0; color:#bbb; font-size:24px; line-height:1; cursor:pointer; }
+    .tt-head { padding-right:40px; }
     #controls .seg button { padding-top:10px; padding-bottom:10px; }
     .tt-box { max-height:60vh; max-height:60dvh; overflow-y:auto; padding-bottom:max(12px, env(safe-area-inset-bottom)); }
     #right-sheets .panel:first-child { border-radius:16px 16px 0 0; }
@@ -211,48 +248,71 @@
 <div data-eleicao="presidente-2026">
   <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
   <h1>Lula × Flávio por <span data-recorte="municipios">Município</span><span data-recorte="zonas">Zona Eleitoral</span><span data-recorte="secoes">Seção Eleitoral</span></h1>
-  <p><span data-recorte="municipios">Cada ponto é um município.</span><span data-recorte="zonas">Cada ponto
-  é uma zona eleitoral dentro de um município — <b>6.106</b> ao todo, no centro dos seus locais de votação.</span><span
-  data-recorte="secoes">Afastado, cada ponto é um <b>local de votação</b> (77.932); de perto, cada
-  local se abre nas suas <b>seções</b> — 497.897 urnas, em espiral em volta da escola.</span> No modo <b>Lula × Flávio</b> a cor é a diferença entre
-  os dois mais votados do país: <b style="color:#e08a8a">vermelho</b> = Lula à frente,
-  <b class="blue" style="color:#7ab8ff">azul</b> = Flávio Bolsonaro à frente, pálido = empate.</p>
-  <p>Flávio teve <b>47,0%</b> dos votos válidos e Lula <b>45,2%</b>; os dois disputam o
-  2º turno em 25/10. <span data-recorte="municipios">Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.</span><span
-  data-recorte="zonas">Flávio venceu em <b>3.248</b> desses pontos, Lula em <b>2.856</b>.</span><span
-  data-recorte="secoes">Flávio venceu em <b>278.222</b> seções, Lula em <b>217.536</b>; 2.139 empataram.</span>
-  Exterior fora do mapa.</p>
-  <p data-recorte="zonas">Todo município aparece. Os 190 que têm mais de uma zona se partem
-  nelas — São Paulo em 57, o Rio em 49 —, e uma zona que cobre vários municípios pequenos
-  vira um ponto em cada um.</p>
-  <p data-recorte="secoes">As seções de um estado só baixam quando você chega perto dele. Seções
-  não se comparam com 2022 — o TSE renumera e redistribui urnas entre eleições.</p>
+  <div class="placar" role="img" aria-label="Votos válidos no país: Lula 45,2%, Flávio Bolsonaro 47,0%, outros 7,8%">
+    <div class="nomes"><span class="l"><b>45,2%</b> Lula</span><span class="f">Flávio <b>47,0%</b></span></div>
+    <div class="barra"><i class="l" style="width:45.2%"></i><i class="o" style="width:7.8%"></i><i class="f" style="width:47%"></i></div>
+    <div class="venceu"><span><span data-recorte="municipios">2.663 municípios</span><span data-recorte="zonas">2.856 zonas</span><span data-recorte="secoes">217.536 seções</span></span><span>venceu em</span><span><span data-recorte="municipios">2.908 municípios</span><span data-recorte="zonas">3.248 zonas</span><span data-recorte="secoes">278.222 seções</span></span></div>
+  </div>
+  <p class="lede"><span data-recorte="municipios">Cada ponto é um <b>município</b>.</span><span data-recorte="zonas">Cada ponto
+  é uma <b>zona eleitoral</b> dentro de um município — 6.106 ao todo.</span><span
+  data-recorte="secoes">Afastado, cada ponto é um <b>local de votação</b> (94.539); de perto, ele se abre
+  nas suas <b>seções</b> (497.897 urnas).</span> Toque num ponto para ver o resultado dele.</p>
+  <div class="mais">
+    <p data-modo="margin"><b>Lula × Flávio:</b> a cor é a diferença entre os dois mais votados —
+    <b class="l">vermelho</b> = Lula à frente, <b class="f">azul</b> = Flávio à frente, pálido = empate.</p>
+    <p data-modo="swing"><b>Swing:</b> quanto a vantagem de Lula mudou do 1º turno de 2022 (contra
+    Bolsonaro) para o de 2026 (contra Flávio), em pontos percentuais — <b class="l">vermelho</b> = andou
+    para Lula, <b class="f">azul</b> = andou para Flávio, cinza = sem comparação com 2022. No país
+    foram cerca de 7 pontos para Flávio: Lula saiu de +5,2 para −1,8.</p>
+    <p data-modo="lean"><b>Inclinação:</b> a cor soma o voto de <b>todos</b> os candidatos. Cada partido tem uma
+    nota de 0 (esquerda) a 10 (direita), do survey de especialistas de Bolognesi, Ribeiro &amp; Codato.</p>
+    <p data-modo="polar"><b>Polarização:</b> quão dividido entre extremos ideológicos foi o voto ali —
+    não confundir com disputa apertada entre dois nomes.</p>
+    <p data-recorte="zonas">Os 190 municípios com mais de uma zona se partem nelas — São Paulo em 57,
+    o Rio em 49 —, e uma zona que cobre vários municípios pequenos vira um ponto em cada um.</p>
+    <p data-recorte="secoes">As seções de um estado só baixam quando você chega perto dele; elas ficam
+    em espiral em volta da escola. 2.139 seções empataram.</p>
+    <p><b>Vira-casacas:</b> onde Lula venceu o 1º turno de 2022 e Flávio venceu em 2026.<span
+    data-recorte="zonas"> Zona cujo território mudou no rezoneamento fica fora.</span><span
+    data-recorte="secoes"> Uma seção só se compara quando é a mesma urna: mesmo local de votação e
+    eleitorado parecido — o TSE renumera e remaneja urnas entre eleições.</span></p>
+    <p class="rodape">Lula e Flávio disputam o 2º turno em 25/10. Votos do exterior ficam fora do mapa.</p>
+  </div>
 </div>
 <div data-eleicao="prefeitos-2024">
   <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
   <h1>Esquerda × Direita nas Prefeituras</h1>
-  <p>Cada ponto é um município, colorido pela <b>distribuição</b> do voto para prefeito —
-  não pela sigla de quem venceu. Cada partido recebe uma nota ideológica de 0 (esquerda) a
-  10 (direita) segundo o survey de especialistas de Bolognesi, Ribeiro &amp; Codato; a cor
-  agrega o voto de <b>todos</b> os candidatos.</p>
-  <p><b>Inclinação:</b> vermelho = município mais à esquerda, azul = mais à direita.
-  <b>Polarização:</b> quão dividido entre extremos ideológicos foi o voto — não confundir
-  com disputa apertada entre dois nomes do mesmo campo.</p>
-  <p class="xref">Cruzando com o <a href="../religioes/">mapa religioso (Censo IBGE)</a>:
-  no <b style="color:#e08a8a">Nordeste</b> — e em parte no Sudeste — municípios mais
-  <b class="blue">evangélicos</b> pendem à direita e mais <b>católicos</b> à esquerda. Mas
-  <b style="color:#ccc">não é lei nacional</b>: no <b style="color:#e08a8a">Sul</b> católicos
-  e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
-  e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
+  <p class="lede">Cada ponto é um <b>município</b>, colorido pela distribuição do voto para prefeito —
+  não pela sigla de quem venceu. Toque num ponto para ver o resultado dele.</p>
+  <div class="mais">
+    <p>Cada partido recebe uma nota ideológica de 0 (esquerda) a 10 (direita) segundo o survey de
+    especialistas de Bolognesi, Ribeiro &amp; Codato; a cor agrega o voto de <b>todos</b> os candidatos.</p>
+    <p data-modo="lean"><b>Inclinação:</b> <b class="l">vermelho</b> = município mais à esquerda,
+    <b class="f">azul</b> = mais à direita.</p>
+    <p data-modo="polar"><b>Polarização:</b> quão dividido entre extremos ideológicos foi o voto — não confundir
+    com disputa apertada entre dois nomes do mesmo campo.</p>
+    <p class="xref">Cruzando com o <a href="../religioes/">mapa religioso (Censo IBGE)</a>:
+    no <b style="color:#e08a8a">Nordeste</b> — e em parte no Sudeste — municípios mais
+    <b class="blue">evangélicos</b> pendem à direita e mais <b>católicos</b> à esquerda. Mas
+    <b style="color:#ccc">não é lei nacional</b>: no <b style="color:#e08a8a">Sul</b> católicos
+    e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
+    e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
+  </div>
 </div>
-<button id="info-more" aria-expanded="false" aria-controls="info"><span class="caret">▾</span><span class="lbl">Sobre o mapa</span></button>
+<button id="info-more" aria-expanded="false" aria-controls="info"><span class="caret">▾</span><span class="lbl">Como ler o mapa</span></button>
 </div>
 <div id="right-sheets">
 <div id="legend" class="panel">
   <div id="legend-margin" class="hide">
     <div class="cap">Diferença Lula − Flávio (pontos percentuais)</div>
     <div class="bar margin"></div>
-    <div class="labels"><span>Lula +40</span><span>empate</span><span>Flávio +40</span></div>
+    <div class="labels"><span>Lula ≥ +40</span><span>empate</span><span>Flávio ≥ +40</span></div>
+  </div>
+  <div id="legend-swing" class="hide">
+    <div class="cap">Swing: variação da vantagem, 2022 → 2026 (pontos)</div>
+    <div class="bar margin"></div>
+    <div class="labels"><span>→ Lula +20</span><span>igual</span><span>→ Flávio +20</span></div>
+    <div class="nota"><i></i>sem comparação com 2022</div>
   </div>
   <div id="legend-lean">
     <div class="cap">Inclinação ideológica do voto</div>
@@ -282,10 +342,11 @@
     </div>
     <div id="secoes-status" class="hide"></div>
   </div>
-  <div class="row">
+  <div class="row" id="row-mode">
     <label>Métrica</label>
     <div class="seg" id="seg-mode">
       <button id="mode-margin" data-mode="margin">Lula × Flávio</button>
+      <button id="mode-swing" data-mode="swing" title="Quanto a vantagem de Lula mudou entre o 1º turno de 2022 e o de 2026">Swing</button>
       <button id="mode-lean" class="active" data-mode="lean">Inclinação</button>
       <button id="mode-polar" data-mode="polar">Polarização</button>
     </div>
@@ -294,12 +355,12 @@
     <label>Vs. presidencial 2022</label>
     <div class="seg" id="seg-flip">
       <button data-flip="all" class="active">Todos</button>
-      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 no município (ou na zona); Flávio venceu em 2026">Vira-casacas<br><span style="font-weight:400;font-size:11px">(Lula → Flávio)</span></button>
+      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 ali; Flávio venceu em 2026">Vira-casacas</button>
     </div>
     <div id="flip-count"></div>
   </div>
   <div class="row">
-    <label>Tamanho dos pontos <span id="radiusValue">2.30</span></label>
+    <label>Tamanho dos pontos <span id="radiusValue">2,30</span></label>
     <input type="range" id="radiusSlider" min="1" max="8" step="0.05" value="2.3">
   </div>
 </div>
@@ -312,8 +373,17 @@
   <div class="psub">0 = esquerda · 10 = direita · pondera o voto de cada candidato</div>
   <div class="pbody"></div>
 </div>
-<button id="toggle-info" aria-label="Sobre o mapa" aria-expanded="false">☰</button>
-<button id="toggle-legend" aria-label="Legenda e controles">▤</button>
+<div id="mobile-top">
+  <div id="mini"><div class="eyebrow"></div><div id="mini-legend"></div></div>
+  <div id="chips-mode" role="group" aria-label="Métrica">
+    <button data-mode="margin">Lula × Flávio</button>
+    <button data-mode="swing">Swing</button>
+    <button data-mode="lean">Inclinação</button>
+    <button data-mode="polar">Polarização</button>
+  </div>
+</div>
+<button id="toggle-info" aria-expanded="false"><span aria-hidden="true">ⓘ</span> Sobre</button>
+<button id="toggle-legend"><span aria-hidden="true">☰</span> Filtros</button>
 <div id="sheet-backdrop"></div>
 <script>
 // ---- color helpers ----
@@ -336,6 +406,18 @@ function marginColor(d){
   if (d >= 0) return mix(PALE, RED, clamp(d / 40, 0, 1));
   return mix(PALE, BLUE, clamp(-d / 40, 0, 1));
 }
+// swing: variação da vantagem de Lula (Lula − adversário) entre 2022 e 2026, em pontos; satura em ±20.
+// > 0 = andou para Lula. null onde não há comparação com 2022
+const SEM22 = '#4a4d55';
+function swingOf(r){ return r.length < 19 || r[17] == null ? null : (r[15] - r[16]) - (r[17] - r[18]); }
+function swingColor(d){
+  if (d == null) return SEM22;
+  return d >= 0 ? mix(PALE, RED, clamp(d / 20, 0, 1)) : mix(PALE, BLUE, clamp(-d / 20, 0, 1));
+}
+function swingLabel(d){
+  if (Math.abs(d) < 0.05) return 'Igual a 2022';
+  return (d > 0 ? '→ Lula +' : '→ Flávio +') + fmt1.format(Math.abs(d));
+}
 function leanLabel(s){
   if (s < 4.0) return 'Esquerda';
   if (s < 4.7) return 'Centro-esquerda';
@@ -357,7 +439,7 @@ const PARTY_SCORES = {
 const ELEICOES = {
   'presidente-2026': {
     file: 'data_presidente_2026.json', zonas: 'data_presidente_2026_zonas.json', secoes: 'secoes/',
-    modes: ['margin','lean','polar'], polar: [2.2, 3.0],
+    modes: ['margin','swing','lean','polar'], polar: [2.2, 3.0],
     polarLabels: ['2,2', '3,0'],
     parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA']
   },
@@ -378,7 +460,7 @@ function recorteAtivo(){ return RECORTE !== 'municipios' && EL()[RECORTE] ? RECO
   btn.addEventListener('click', function(){
     const aberto = info.classList.toggle('collapsed') === false;
     btn.setAttribute('aria-expanded', aberto);
-    btn.querySelector('.lbl').textContent = aberto ? 'Recolher' : 'Sobre o mapa';
+    btn.querySelector('.lbl').textContent = aberto ? 'Recolher' : 'Como ler o mapa';
   });
 })();
 
@@ -386,7 +468,7 @@ function renderParties(){
   const body = document.querySelector('#parties .pbody');
   const rows = EL().parties.map(k => [k, PARTY_SCORES[k]]).sort((a,b) => a[1]-b[1]).map(function(e){
     return '<div class="prow"><span class="chip" style="background:' + leanColor(e[1]) + '"></span>' +
-           '<span class="sig">' + e[0] + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
+           '<span class="sig">' + e[0] + '</span><span class="sc">' + fmt1.format(e[1]) + '</span></div>';
   }).join('');
   body.innerHTML = rows;
 }
@@ -400,18 +482,19 @@ function renderParties(){
 // município × zona), [[zona, zonas_no_municipio, outros_municipios_da_zona]]
 let DATA = [];
 const Q = new URLSearchParams(location.search);
-let MODE = ['margin', 'lean', 'polar'].includes(Q.get('modo')) ? Q.get('modo') : 'margin';
+let MODE = ['margin', 'swing', 'lean', 'polar'].includes(Q.get('modo')) ? Q.get('modo') : 'margin';
 let FLIP = Q.get('filtro') === 'vira-casacas' ? 'lost' : 'all'; // all | lost (Lula 2022 → Flávio 2026) | won (Bolsonaro 2022 → Lula 2026)
-let sortedLean = [], sortedPolar = [], sortedMargin = [];
+let sortedLean = [], sortedPolar = [], sortedMargin = [], sortedSwing = [];
 const CACHE = {};
 
 // só o Brasil: a navegação fica presa a uma caixa em volta do país e o resto do mundo
 // é coberto por uma máscara (mundo menos o contorno do Brasil) na cor do fundo
 const BR_BOUNDS = L.latLngBounds([-34.2, -74.6], [5.6, -33.4]);
+const MAX_BOUNDS = BR_BOUNDS.pad(0.08);
 const map = L.map('map', {
   preferCanvas: true, zoomControl: true, attributionControl: false,
   zoomSnap: 0, zoomDelta: 0.5, scrollWheelZoom: false,
-  maxBounds: BR_BOUNDS.pad(0.08), maxBoundsViscosity: 1.0
+  maxBounds: MAX_BOUNDS, maxBoundsViscosity: 1.0
 });
 function fitBrasil(){
   map.invalidateSize();
@@ -452,7 +535,9 @@ fetch('https://tiles.openfreemap.org/styles/dark').then(r => r.json()).then(func
 });
 
 const fmt = new Intl.NumberFormat('pt-BR');
-const fmtPct = v => v.toFixed(1) + '%';
+const fmt1 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fmt2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtPct = v => fmt1.format(v) + '%';
 let currentRadius = 2.3;
 
 const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
@@ -476,10 +561,11 @@ function flipKind(r){
 function flipMatch(r){ return FLIP === 'all' || flipKind(r) === FLIP; }
 function colorFor(r){
   if (MODE === 'margin') return marginColor(r[15] - r[16]);
+  if (MODE === 'swing') return swingColor(swingOf(r));
   return MODE === 'lean' ? leanColor(r[5]) : polarColor(r[6]);
 }
 function marginLabel(d){
-  const v = Math.abs(d).toFixed(1);
+  const v = fmt1.format(Math.abs(d));
   if (Math.abs(d) < 0.05) return 'Empate';
   return (d > 0 ? 'Lula +' : 'Flávio +') + v;
 }
@@ -490,48 +576,63 @@ function tituloDe(r){
   if (Array.isArray(x)) return { t: r[1] + ' · Zona ' + x[0], s:
     (x[1] > 1 ? 'uma das ' + x[1] + ' zonas do município' : '') + (x[1] > 1 && x[2].length ? ' · ' : '') +
     (x[2].length ? 'a zona também cobre ' + x[2].join(', ') : '') };
-  if (x && x.tipo === 'local') return { t: NOME_LOCAL.get(x.uf + '|' + x.z + '|' + x.lv) || 'Local de votação nº ' + x.lv,
+  if (x && x.tipo === 'local') return { t: NOME_LOCAL.get(x.uf + '|' + x.z + '|' + x.m + '|' + x.lv) || 'Local de votação nº ' + x.lv,
     s: x.mun + ' · Zona ' + x.z + ' · ' + x.n + (x.n > 1 ? ' seções' : ' seção') };
   if (x && x.tipo === 'secao') return { t: 'Seção ' + x.s + ' · Zona ' + x.z, s: x.local + ' · ' + x.mun };
   return { t: r[1], s: '' };
+}
+
+// cor da barra de um candidato: a do lado dele no mapa, pela nota do partido ("Lula (PT)" ou só "PP")
+function candColor(label){
+  const m = /\(([^)]+)\)$/.exec(label), sc = PARTY_SCORES[m ? m[1] : label];
+  return sc == null ? '#888' : sc < 4 ? '#c0394b' : sc > 6 ? '#3b82c4' : '#9aa3ad';
 }
 
 function tooltipHtml(r){
   const [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir] = r;
   const tt = tituloDe(r);
   const margin = MODE === 'margin' ? r[16] - r[15] : 0; // Flávio − Lula
-  const sorted = MODE === 'margin' ? sortedMargin : MODE === 'lean' ? sortedLean : sortedPolar;
-  const val = MODE === 'margin' ? margin : MODE === 'lean' ? lean : polar;
+  const sw = MODE === 'swing' ? swingOf(r) : null;       // > 0 = andou para Lula; a régua vai de Lula a Flávio, daí o −sw
+  const sorted = MODE === 'margin' ? sortedMargin : MODE === 'swing' ? sortedSwing : MODE === 'lean' ? sortedLean : sortedPolar;
+  const val = MODE === 'margin' ? margin : MODE === 'swing' ? -sw : MODE === 'lean' ? lean : polar;
+  const semRegua = MODE === 'swing' && sw == null;
+  const vant = d => (d > 0 ? '+' : d < 0 ? '−' : '') + Math.abs(d).toFixed(1).replace('.', ',');
   const pct = percentileOf(sorted, val);
   const pShown = Math.min(99, Math.round(pct * 100));
-  const grad = MODE === 'margin' ? MARGIN_GRAD : MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
+  const grad = MODE === 'margin' || MODE === 'swing' ? MARGIN_GRAD : MODE === 'lean' ? LEAN_GRAD : POLAR_GRAD;
   const lo = sorted[0], hi = sorted[sorted.length - 1];
   const metricBig = MODE === 'margin'
     ? '<div class="tt-metric" style="color:' + marginColor(-margin) + '">' + marginLabel(-margin) + '</div>' +
       '<div class="tt-metric-label">pontos · Lula ' + fmtPct(r[15]) + ' × Flávio ' + fmtPct(r[16]) + '</div>'
+    : MODE === 'swing'
+    ? (sw == null
+      ? '<div class="tt-metric" style="color:#888">Sem swing</div><div class="tt-metric-label">sem comparação com 2022</div>'
+      : '<div class="tt-metric" style="color:' + swingColor(sw) + '">' + swingLabel(sw) + '</div>' +
+        '<div class="tt-metric-label">pontos · vantagem de Lula: ' + vant(r[17] - r[18]) + ' em 2022, ' + vant(r[15] - r[16]) + ' em 2026</div>')
     : MODE === 'lean'
     ? '<div class="tt-metric" style="color:' + leanColor(lean) + '">' + leanLabel(lean) + '</div>' +
-      '<div class="tt-metric-label">nota ' + lean.toFixed(1) + ' / 10 · esq→dir</div>'
-    : '<div class="tt-metric" style="color:' + polarColor(polar) + '">' + polar.toFixed(2) + '</div>' +
+      '<div class="tt-metric-label">nota ' + fmt1.format(lean) + ' / 10 · esq→dir</div>'
+    : '<div class="tt-metric" style="color:' + polarColor(polar) + '">' + fmt2.format(polar) + '</div>' +
       '<div class="tt-metric-label">dispersão ideológica do voto</div>';
-  const fmtEdge = MODE === 'margin' ? (x => marginLabel(-x)) : MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
+  const fmtEdge = MODE === 'margin' ? (x => marginLabel(-x)) : MODE === 'swing' ? (x => swingLabel(-x)) : MODE === 'lean' ? (x => fmt1.format(x)) : (x => fmt2.format(x));
   return (
+    '<button class="tt-close" aria-label="Fechar">×</button>' +
     '<div class="tt-head"><span class="tt-name">' + tt.t + '</span><span class="tt-badge">' + uf + '</span></div>' +
     '<div class="tt-sub">' + fmt.format(tot) + ' votos válidos · ' + ncand + ' candidatos</div>' +
     (tt.s ? '<div class="tt-sub" style="margin-top:-6px">' + tt.s + '</div>' : '') +
     metricBig +
-    '<div class="tt-range">' +
+    (semRegua ? '' : '<div class="tt-range">' +
       '<div class="tt-range-head"><span>mín · máx ' + (recorteAtivo() === 'secoes' ? 'do que já baixou' : 'nacional') + '</span><span>P' + pShown + '</span></div>' +
       '<div class="tt-range-bar" style="background:' + grad + ';">' +
         '<div class="tt-range-marker" style="left:' + (pct * 100).toFixed(1) + '%;"></div>' +
       '</div>' +
       '<div class="tt-range-labels"><span>' + fmtEdge(lo) + '</span><span>' + fmtEdge(hi) + '</span></div>' +
-    '</div>' +
+    '</div>') +
     '<div class="tt-race">' +
       '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥇 ' + w1 + '</span><span class="tt-cand-pct">' + fmtPct(w1pct) + '</span></div>' +
-        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w1pct,0,100) + '%;background:#7ab8ff;"></div></div></div>' +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w1pct,0,100) + '%;background:' + candColor(w1) + ';"></div></div></div>' +
       (w2 ? '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥈 ' + w2 + '</span><span class="tt-cand-pct">' + fmtPct(w2pct) + '</span></div>' +
-        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:#888;"></div></div></div>' : '') +
+        '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:' + candColor(w2) + ';"></div></div></div>' : '') +
     '</div>' +
     (r.length > 18 && r[17] != null ? '<div class="tt-sub" style="margin-top:8px">2022: Lula ' + fmtPct(r[17]) + ' × Bolsonaro ' + fmtPct(r[18]) +
       (flipKind(r) ? ' · <b style="color:#e0a03a">trocou de lado</b>' : '') + '</div>' : '') +
@@ -651,7 +752,34 @@ function nearest(lat, lng, lp){
   }
   return best;
 }
+function placeHl(i){
+  const p = map.layerPointToContainerPoint(layerPos(i));
+  const d = (dotRadius() * (FLIP === 'all' ? 1 : 1.6) + 3) * 2;
+  hlEl.style.width = hlEl.style.height = d + 'px';
+  hlEl.style.transform = 'translate3d(' + (p.x - d / 2) + 'px,' + (p.y - d / 2) + 'px,0)';
+  return p;
+}
+// no celular a folha do tooltip cobre a parte de baixo da tela: se o ponto tocado ficou atrás dela,
+// o mapa sobe até ele aparecer, sem fechar o tooltip no caminho. maxBounds não deixaria (no zoom
+// inicial o Rio Grande do Sul fica atrás da folha), então sai enquanto o tooltip está aberto e
+// volta quando ele fecha — o setMaxBounds traz o mapa de volta para dentro da caixa
+let keepTip = false, semLimite = false;
+function revealPoint(i){
+  const p = map.layerPointToContainerPoint(layerPos(i));
+  const livre = innerHeight - tipEl.offsetHeight - 40;
+  if (p.y <= livre) return;
+  keepTip = true;
+  if (!semLimite) { semLimite = true; map.setMaxBounds(null); }
+  map.panBy([0, p.y - livre], { animate: false });
+  keepTip = false;
+  placeHl(i);
+}
+function voltaLimite(){
+  if (map.dragging && map.dragging.moving()) return map.once('moveend', voltaLimite); // no meio de um arrasto o panTo brigaria com o dedo
+  map.setMaxBounds(MAX_BOUNDS);
+}
 function hideTip(){
+  if (semLimite) { semLimite = false; setTimeout(voltaLimite, 0); }
   HOVER = -1; tipEl.classList.remove('on'); hlEl.classList.remove('on');
   map.getContainer().style.cursor = '';
 }
@@ -661,10 +789,7 @@ function showTip(i, x, y){
     HOVER = i;
     tipEl.innerHTML = tooltipHtml(r);
     tipEl.classList.add('on');
-    const p = map.layerPointToContainerPoint(layerPos(i));
-    const d = (dotRadius() * (FLIP === 'all' ? 1 : 1.6) + 3) * 2;
-    hlEl.style.width = hlEl.style.height = d + 'px';
-    hlEl.style.transform = 'translate3d(' + (p.x - d / 2) + 'px,' + (p.y - d / 2) + 'px,0)';
+    placeHl(i);
     hlEl.classList.add('on');
     map.getContainer().style.cursor = 'pointer';
   } else if (!tipEl.classList.contains('on')) {
@@ -673,7 +798,7 @@ function showTip(i, x, y){
     tipEl.innerHTML = tooltipHtml(r);
   }
   tipEl.dataset.mode = MODE; tipEl.dataset.el = ELEICAO;
-  if (isSheet()) return;
+  if (isSheet()) { revealPoint(i); return; }
   const w = tipEl.offsetWidth, h = tipEl.offsetHeight, vw = innerWidth, vh = innerHeight;
   let tx = x + 16, ty = y + 16;
   if (tx + w > vw - 8) tx = x - w - 16;
@@ -699,7 +824,8 @@ document.addEventListener('keydown', function(e){
   hideTip();
   const bd = document.getElementById('sheet-backdrop'); if (bd.classList.contains('visible')) bd.click();
 });
-map.on('movestart zoomstart', hideTip);
+map.on('movestart zoomstart', function(){ if (!keepTip) hideTip(); });
+tipEl.addEventListener('click', function(e){ if (e.target.closest('.tt-close')) hideTip(); });
 
 // zoom pela roda/trackpad contínuo, em volta do cursor: o do Leaflet anda em degraus animados
 // de 0,25 s com 40 ms de espera entre eles, trava no trackpad e estica os pontos do canvas no meio
@@ -723,10 +849,10 @@ map.getContainer().addEventListener('wheel', function(e){
 // ---- recorte por seção ----
 let LOC = null;                     // locais decodificados (registros no layout do mapa + caixa de cada UF)
 const SEC = {};                     // uf -> registros das seções (ou a Promise enquanto baixa)
-const NOME_LOCAL = new Map();       // 'uf|zona|local' -> nome da escola (vem com as seções do estado)
+const NOME_LOCAL = new Map();       // 'uf|zona|município|local' -> nome da escola (vem com as seções do estado)
 let SECKEY = null;
 // os mesmos campos de data_presidente_2026.json, calculados dos votos de cada candidato (ordem de LOC.c)
-function regFromVotes(uf, lat, lon, v, extra){
+function regFromVotes(uf, lat, lon, v, extra, l22, b22){
   const C = LOC.c;
   let tot = 0, s1 = 0, s2 = 0, esq = 0, cen = 0, dir = 0, nc = 0, a = -1, b = -1;
   for (let i = 0; i < v.length; i++){
@@ -740,7 +866,8 @@ function regFromVotes(uf, lat, lon, v, extra){
   const lean = tot ? s1 / tot : 5, polar = tot ? Math.sqrt(Math.max(0, s2 / tot - lean * lean)) : 0;
   const lab = i => i < 0 ? '' : C[i][0] + ' (' + C[i][1] + ')';
   return [uf, null, lat, lon, tot, lean, polar, nc, lab(a), a < 0 ? 0 : pct(v[a]), lab(b), b < 0 ? 0 : pct(v[b]),
-          pct(esq), pct(cen), pct(dir), pct2(v[LOC.iL]), pct2(v[LOC.iF]), null, null, extra];
+          pct(esq), pct(cen), pct(dir), pct2(v[LOC.iL]), pct2(v[LOC.iF]),
+          l22 == null ? null : l22 / 100, b22 == null ? null : b22 / 100, extra];
 }
 // secoes/locais.json vem colunar e em delta (ver build_secoes.py)
 function decodeLocais(j){
@@ -750,8 +877,10 @@ function decodeLocais(j){
   for (let i = 0; i < j.u.length; i++){
     m += j.m[i]; la += j.lat[i]; lo += j.lon[i];
     const uf = j.ufs[j.u[i]], lat = la / 1e5, lon = lo / 1e5;
-    const r = regFromVotes(uf, lat, lon, j.v.map(col => col[i]), { tipo: 'local', uf, z: j.z[i], lv: j.lv[i], mun: j.muns[m], n: j.n[i] });
-    LOC.recs.push(r); LOC.byKey.set(uf + '|' + j.z[i] + '|' + j.lv[i], r);
+    const r = regFromVotes(uf, lat, lon, j.v.map(col => col[i]), { tipo: 'local', uf, z: j.z[i], m, lv: j.lv[i], mun: j.muns[m], n: j.n[i] },
+                           j.l22[i], j.b22[i]);
+    // o número do local só é único dentro do município
+    LOC.recs.push(r); LOC.byKey.set(uf + '|' + j.z[i] + '|' + m + '|' + j.lv[i], r);
     const bb = LOC.bbox[uf] || (LOC.bbox[uf] = [lat, lon, lat, lon]);
     bb[0] = Math.min(bb[0], lat); bb[1] = Math.min(bb[1], lon); bb[2] = Math.max(bb[2], lat); bb[3] = Math.max(bb[3], lon);
   }
@@ -762,10 +891,11 @@ function loadUF(uf){
   SEC[uf] = fetch(EL().secoes + uf + '.json').then(r => r.json()).then(function(ls){
     const recs = [];
     ls.forEach(function(l){
-      const key = uf + '|' + l[0] + '|' + l[1], L0 = LOC.byKey.get(key);
-      NOME_LOCAL.set(key, l[2]);
-      l[3].forEach(function(sv, k){
-        recs.push(regFromVotes(uf, L0[2], L0[3], sv.slice(1), { tipo: 'secao', uf, z: l[0], lv: l[1], s: sv[0], k, local: l[2], mun: L0[19].mun }));
+      const key = uf + '|' + l[0] + '|' + l[2] + '|' + l[1], L0 = LOC.byKey.get(key), nc = LOC.c.length;
+      NOME_LOCAL.set(key, l[3]);
+      l[4].forEach(function(sv, k){
+        recs.push(regFromVotes(uf, L0[2], L0[3], sv.slice(1, 1 + nc), { tipo: 'secao', uf, z: l[0], lv: l[1], s: sv[0], k, local: l[3], mun: L0[19].mun },
+                               sv[1 + nc], sv[2 + nc]));
       });
     });
     return SEC[uf] = recs;
@@ -797,6 +927,7 @@ function setDATA(recs){
   sortedLean = recs.map(r => r[5]).sort((a,b) => a-b);
   sortedPolar = recs.map(r => r[6]).sort((a,b) => a-b);
   sortedMargin = recs.length && recs[0].length > 15 ? recs.map(r => r[16] - r[15]).sort((a,b) => a-b) : [];
+  sortedSwing = recs.map(swingOf).filter(d => d != null).map(d => -d).sort((a,b) => a-b);
   render();
   applyFlip();
 }
@@ -806,13 +937,13 @@ function setEleicao(key){
   const el = EL();
   document.querySelectorAll('#seg-eleicao button').forEach(b => b.classList.toggle('active', b.dataset.eleicao === key));
   document.querySelectorAll('#info [data-eleicao]').forEach(d => d.classList.toggle('hide', d.dataset.eleicao !== key));
-  document.querySelectorAll('#seg-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
+  document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
+  document.querySelector('#mini .eyebrow').textContent = key === 'presidente-2026' ? 'Presidente 2026 · 1º turno' : 'Prefeitos 2024 · 1º turno';
   const pl = document.querySelectorAll('#legend-polar .labels span');
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
   const rec = recorteAtivo();
-  if (rec === 'secoes') FLIP = 'all'; // seção não se compara com 2022
-  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026' || rec === 'secoes');
+  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
   document.getElementById('row-recorte').classList.toggle('hide', !el.zonas && !el.secoes);
   document.getElementById('secoes-status').classList.toggle('hide', rec !== 'secoes');
   document.querySelectorAll('#seg-recorte button').forEach(b => { b.classList.toggle('active', b.dataset.recorte === rec); b.setAttribute('aria-pressed', b.dataset.recorte === rec); });
@@ -856,6 +987,10 @@ function applyFlip(){
   DATA.forEach(function(r){ const k = flipKind(r); if (k) flipN[k]++; });
   dots.recolor();
   const z = recorteAtivo() === 'zonas', sem22 = z ? DATA.filter(r => r[17] == null).length : 0;
+  // por seção os números são do país (build_secoes.py): DATA só tem os estados já baixados
+  if (recorteAtivo() === 'secoes') { document.getElementById('flip-count').textContent =
+    '37.136 seções votaram em Lula em 2022 e em Flávio em 2026; 2.869 fizeram o caminho inverso. ' +
+    '85.492 ficam fora da comparação: a urna mudou de local ou de eleitores.'; return; }
   document.getElementById('flip-count').textContent = DATA[0] && DATA[0].length > 18
     ? flipN.lost + (z ? ' zonas' : ' municípios') + ' votaram em Lula em 2022 e em Flávio em 2026' +
       (flipN.won ? '; ' + flipN.won + (flipN.won === 1 ? ' fez' : ' fizeram') + ' o caminho inverso' : '; ' + (z ? 'nenhuma' : 'nenhum') + ' fez o caminho inverso') + '.' +
@@ -871,14 +1006,17 @@ document.querySelectorAll('#seg-flip button').forEach(b => b.addEventListener('c
 
 function setMode(mode){
   MODE = mode;
-  document.querySelectorAll('#seg-mode button').forEach(b => { b.classList.toggle('active', b.dataset.mode === mode); b.setAttribute('aria-pressed', b.dataset.mode === mode); });
+  document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b => { b.classList.toggle('active', b.dataset.mode === mode); b.setAttribute('aria-pressed', b.dataset.mode === mode); });
   document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
+  document.getElementById('legend-swing').classList.toggle('hide', mode !== 'swing');
   document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
   document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
+  document.getElementById('mini-legend').innerHTML = document.getElementById('legend-' + mode).innerHTML; // a legenda do celular é cópia da ativa
+  document.querySelectorAll('#info [data-modo]').forEach(d => d.classList.toggle('hide', d.dataset.modo !== mode));
   applyFlip(); syncUrl();
   if (HOVER >= 0) showTip(HOVER, lastPt.x, lastPt.y);
 }
-document.querySelectorAll('#seg-mode button').forEach(b =>
+document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b =>
   b.addEventListener('click', () => setMode(b.dataset.mode)));
 document.querySelectorAll('#seg-eleicao button').forEach(b =>
   b.addEventListener('click', () => { if (b.dataset.eleicao !== ELEICAO) setEleicao(b.dataset.eleicao); }));
@@ -890,7 +1028,7 @@ const radiusSlider = document.getElementById('radiusSlider');
 const radiusValue = document.getElementById('radiusValue');
 radiusSlider.addEventListener('input', function(){
   currentRadius = parseFloat(this.value);
-  radiusValue.textContent = currentRadius.toFixed(2);
+  radiusValue.textContent = fmt2.format(currentRadius);
   dots.paint();
 });
 L.DomEvent.disableClickPropagation(document.getElementById('controls'));
@@ -910,7 +1048,8 @@ L.DomEvent.disableClickPropagation(document.getElementById('parties'));
     const isOpen = panel.classList.contains('open');
     closeAll();
     hideTip();
-    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); }
+    // a folha de filtros não escurece o mapa: é nele que se vê o efeito de cada troca
+    if (!isOpen){ panel.classList.add('open'); backdrop.classList.add('visible'); backdrop.classList.toggle('clear', panel === rightSheets); }
   }
   toggleInfo.addEventListener('click', () => togglePanel(infoPanel));
   toggleLegend.addEventListener('click', () => togglePanel(rightSheets));

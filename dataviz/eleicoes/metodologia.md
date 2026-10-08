@@ -152,7 +152,7 @@ métricas e o mesmo filtro de vira-casacas.
 
 O terceiro botão do **Recorte** (`&recorte=secoes`) desce até a urna.
 
-- **Afastado**, um ponto por **local de votação** (77.932), com o voto somado das suas seções.
+- **Afastado**, um ponto por **local de votação** (94.539), com o voto somado das suas seções.
   **De perto** (a partir do zoom 12), cada local se abre nas suas **seções** (497.897), em
   espiral em volta da escola: todas as seções de um local têm a mesma coordenada, então a
   espiral é só para dar para ver e apontar cada uma. As seções de um estado baixam quando ele
@@ -162,9 +162,22 @@ O terceiro botão do **Recorte** (`&recorte=secoes`) desce até a urna.
   de Araujo, candidatura indeferida, 5.246 votos que não entram como válidos); sem ele a soma das
   seções fecha voto a voto com a divulgação (118.969.906).
 - **Coordenada e nome do local:** `eleitorado_local_votacao_2026`, com o mesmo descarte de
-  geocodificação a mais de 250 km do município. 1.121 locais sem coordenada válida caem no ponto
-  da sua zona naquele município.
-- **Sem comparação com 2022:** o TSE renumera e redistribui seções entre eleições.
-- `dados/presidente_2026/build_secoes.py` gera `secoes/locais.json` (colunar e em delta, ~1,1 MB
-  comprimido) e um `secoes/<UF>.json` por estado (São Paulo, o maior, ~1,1 MB comprimido). O
+  geocodificação a mais de 250 km do município. 1.691 locais sem coordenada válida caem no ponto
+  da sua zona naquele município. O número do local só é único dentro do município: a chave de um
+  local é UF + zona + município + número (só zona + número funde escolas de municípios diferentes
+  da mesma zona — eram 12.094 pontos fundidos até 08/10).
+- **Vira-casacas por seção:** o TSE renumera seções e remaneja eleitores entre elas, então uma
+  seção só se compara com 2022 quando é a mesma urna. Três condições: (1) mesmo município, zona,
+  número de seção e número de local; (2) nome do local parecido — a escola muda de nome ("EMEF"
+  vira "EMEB"), mas às vezes o número de local passa para outro prédio: tiradas as palavras que
+  todo nome de escola tem, metade das restantes precisa coincidir; (3) o voto válido da seção
+  variou entre 0,8× e 1,25× a variação do seu local (90% das urnas ficam entre 0,91 e 1,09; a
+  cauda são as que ganharam ou perderam eleitores). Passam **412.405 das 497.897 seções**: 75.001
+  caem em (1) ou (2), 10.491 em (3). Delas, **37.136** votaram em Lula em 2022 e em Flávio em 2026
+  e **2.869** fizeram o caminho inverso. O local de votação, afastado, compara a soma das suas
+  seções comparáveis, e só quando elas somam 80% do seu voto de 2026 (68.701 de 94.539 locais;
+  6.211 vira-casacas). Os votos de 2022 vêm do resultado por seção do TSE e o local de cada seção,
+  do cadastro de locais de votação de 2022.
+- `dados/presidente_2026/build_secoes.py` gera `secoes/locais.json` (colunar e em delta, ~1,7 MB
+  comprimido) e um `secoes/<UF>.json` por estado (São Paulo, o maior, ~1,7 MB comprimido). O
   navegador calcula inclinação, polarização e vencedor a partir dos votos de cada candidato.
