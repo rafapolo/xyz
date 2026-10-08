@@ -588,25 +588,55 @@ window.addEventListener('resize', function(){
     if (wasMin) map.fitBounds(BR_BOUNDS, { padding: [8, 8], animate: false });
   }, 120);
 });
-map.createPane('mask'); map.getPane('mask').style.zIndex = 390; map.getPane('mask').style.pointerEvents = 'none';
-fetch('brasil.geojson').then(r => r.json()).then(function(g){
-  const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
-  const holes = polys.map(p => p[0].map(c => [c[1], c[0]]));
-  const world = [[-89, -179], [-89, 179], [89, 179], [89, -179]];
-  const r = L.svg({ pane: 'mask', padding: 1 });
-  L.polygon([world].concat(holes), { renderer: r, pane: 'mask', stroke: false, fillColor: 'rgb(29,33,40)', fillOpacity: 1, interactive: false }).addTo(map);
-  L.polygon(holes, { renderer: r, pane: 'mask', color: 'rgba(255,255,255,0.28)', weight: 1, fill: false, interactive: false }).addTo(map);
-});
 // MapLibre GL basemap (OpenFreeMap "dark" vector style, OSM data, no API key, no rate limit)
 // replaces the CartoDB dark_all raster tiles carto deprecated for anonymous use
 // rótulos em pt-BR: o estilo vem em inglês (name_en) — troca por name:pt, com o nome local de reserva
-fetch('https://tiles.openfreemap.org/styles/dark').then(r => r.json()).then(function(style){
+const COR_MASCARA = 'rgb(29,33,40)';
+const estiloBase = fetch('https://tiles.openfreemap.org/styles/dark').then(r => r.json()).then(function(style){
   style.layers.forEach(function(l){
     const tf = l.layout && l.layout['text-field'];
     if (Array.isArray(tf) && JSON.stringify(tf).indexOf('name') >= 0)
       l.layout['text-field'] = ['coalesce', ['get', 'name:pt'], ['get', 'name']];
+    // o mar ganha a cor da máscara: no litoral quem desenha a costa é o próprio basemap, em qualquer zoom
+    if (l.type === 'fill' && l['source-layer'] === 'water')
+      l.paint['fill-color'] = ['case', ['==', ['get', 'class'], 'ocean'], COR_MASCARA, l.paint['fill-color']];
   });
-  L.maplibreGL({ style: style }).addTo(map);
+  return style;
+}).catch(function(){ return { version: 8, sources: {}, layers: [] }; }); // sem basemap a máscara ainda aparece
+// a máscara (mundo menos o Brasil) vai dentro do MapLibre, por cima de tudo (rótulos dos vizinhos inclusive):
+// são 67 mil vértices do contorno do IBGE (malha 2022 a 60 m, ver mascara.py), e ali ela é fatiada e
+// simplificada por zoom e anda no mesmo canvas do basemap. O basemap não espera por ela, e ela não espera
+// pelos tiles: entra assim que o estilo e o arquivo chegam (style.load, não load)
+const mascaraBR = fetch('mascara.geojson').then(r => r.json());
+// o fio do contorno sai dos mesmos polígonos, menos os cortes artificiais do mascara.py: retas na vertical
+// ou na horizontal sobre uma coordenada inteira (grade) ou com 5ª casa decimal (corte de ilha)
+function fioDoContorno(polys){
+  const corte = v => Number.isInteger(v) || Math.abs(v * 1e4 - Math.round(v * 1e4)) > 0.1;
+  const linhas = [];
+  polys.forEach(function(p){
+    const r = p[0];
+    let l = [r[0]];
+    for (let i = 1; i < r.length; i++) {
+      const a = r[i - 1], b = r[i];
+      if ((a[0] === b[0] && corte(a[0])) || (a[1] === b[1] && corte(a[1]))) { if (l.length > 1) linhas.push(l); l = [b]; }
+      else l.push(b);
+    }
+    if (l.length > 1) linhas.push(l);
+  });
+  return linhas;
+}
+estiloBase.then(function(style){
+  const gl = L.maplibreGL({ style: style }).addTo(map).getMaplibreMap();
+  gl.once('style.load', function(){
+    mascaraBR.then(function(g){
+      gl.addSource('mascara', { type: 'geojson', tolerance: 0.2, data: g });
+      gl.addSource('mascara-fio', { type: 'geojson', tolerance: 0.2,
+        data: { type: 'MultiLineString', coordinates: fioDoContorno(g.coordinates) } });
+      gl.addLayer({ id: 'mascara', type: 'fill', source: 'mascara', paint: { 'fill-color': COR_MASCARA, 'fill-antialias': false } });
+      gl.addLayer({ id: 'mascara-fio', type: 'line', source: 'mascara-fio', layout: { 'line-join': 'round' },
+        paint: { 'line-color': 'rgba(255,255,255,0.28)', 'line-width': 1 } });
+    });
+  });
 });
 
 const fmt = new Intl.NumberFormat('pt-BR');
