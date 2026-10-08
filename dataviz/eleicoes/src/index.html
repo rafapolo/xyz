@@ -20,7 +20,7 @@
 <meta name="twitter:title" content="Lula × Flávio, município a município">
 <meta name="twitter:description" content="1º turno de 2026 nos 5.571 municípios — e os 703 que trocaram de lado desde 2022.">
 <meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/eleicoes/og.png">
-<script>(function(){var e=new URLSearchParams(location.search).get('eleicao'),f={'prefeitos-2024':'data.json'}[e]||'data_presidente_2026.json';window.__k=f==='data.json'?'prefeitos-2024':'presidente-2026';window.__d=fetch(f).then(function(r){return r.json()});})()</script>
+<script>(function(){var q=new URLSearchParams(location.search),p=q.get('eleicao')==='prefeitos-2024',c=p?'':q.get('recorte'),z=c==='zonas',s=c==='secoes',f=p?'data.json':z?'data_presidente_2026_zonas.json':s?'secoes/locais.json':'data_presidente_2026.json';window.__k=(p?'prefeitos-2024':'presidente-2026')+(z?':zonas':s?':secoes':':municipios');window.__d=fetch(f).then(function(r){return r.json()});})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -46,6 +46,16 @@
   }
   #info p { font-size:12px; line-height:1.6; margin:0; color:rgba(255,255,255,0.65); }
   #info p + p { margin-top:8px; }
+  #info.collapsed p { display:none; }
+  #info.collapsed h1 { margin-bottom:0; padding-bottom:0; border-bottom:0; }
+  #info-more {
+    display:flex; align-items:center; gap:6px; margin-top:10px; padding:0; background:none; border:0;
+    color:#7ab8ff; font:500 11px Inter, sans-serif; cursor:pointer;
+  }
+  #info-more .caret { transition:transform .15s; }
+  #info.collapsed #info-more { margin-top:8px; }
+  #info.collapsed #info-more .caret { transform:rotate(-90deg); }
+  #info-more:focus-visible { outline:2px solid #7ab8ff; outline-offset:2px; }
   #info a { color:#7ab8ff; text-decoration:none; border-bottom:1px solid rgba(122,184,255,0.35); }
   #info a:hover { border-bottom-color:#7ab8ff; }
   #info .xref {
@@ -73,9 +83,7 @@
   #parties .prow { display:flex; align-items:center; gap:6px; line-height:1.55; break-inside:avoid; }
   #parties .chip { width:9px; height:9px; border-radius:2px; flex-shrink:0; box-shadow:0 0 0 1px rgba(255,255,255,0.12) inset; }
   #parties .sig { color:#ccc; flex:1; white-space:nowrap; }
-  #parties .sig .ast { color:#e0a03a; }
   #parties .sc { color:#999; font-family:'JetBrains Mono',monospace; }
-  #parties .pfoot { color:#777; font-size:9px; margin-top:7px; }
   #controls { top:12px; right:12px; padding:10px 14px; font-size:11px; width:240px; }
   #controls label { display:flex; justify-content:space-between; color:#ccc; margin-bottom:2px; }
   #controls input[type=range] { width:100%; accent-color:#7ab8ff; }
@@ -91,7 +99,7 @@
     background:rgba(20,20,20,0.9); color:#ccc; font-size:13px; pointer-events:none; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none !important; animation:none !important; } }
   #controls .seg button:focus-visible, #toggle-info:focus-visible, #toggle-legend:focus-visible { outline:2px solid #7ab8ff; outline-offset:-2px; }
-  #flip-count { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
+  #flip-count, #secoes-status { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.4; }
   #info .hide, #controls .hide { display:none; }
   .tt-box {
     position:fixed; left:0; top:0; z-index:1000; pointer-events:none; display:none; box-sizing:border-box;
@@ -134,6 +142,14 @@
   .tt-cell .k { color:#888; }
   .tt-cell .v { font-family:'JetBrains Mono',monospace; color:#ddd; white-space:nowrap; }
   .leaflet-control-attribution { background:rgba(20,20,20,0.7) !important; color:#999 !important; }
+  /* o +/− do Leaflet nasce no canto superior esquerdo, escondido atrás do #info: vai para a borda
+     direita, no meio da altura, entre os controles e a legenda */
+  .leaflet-top.leaflet-left { top:50%; left:auto; right:12px; transform:translateY(-50%); }
+  .leaflet-top.leaflet-left .leaflet-control { margin:0; }
+  .leaflet-bar { border:1px solid rgba(255,255,255,0.12) !important; box-shadow:0 2px 10px rgba(0,0,0,0.5) !important; }
+  .leaflet-bar a { background:rgba(20,20,20,0.88); color:#eee; border-bottom-color:rgba(255,255,255,0.12); }
+  .leaflet-bar a:hover, .leaflet-bar a:focus { background:#222; color:#fff; }
+  .leaflet-bar a.leaflet-disabled { background:rgba(20,20,20,0.88); color:#555; }
   .leaflet-control-attribution a { color:#7ab8ff !important; }
 
   #toggle-info, #toggle-legend {
@@ -170,6 +186,10 @@
     #right-sheets .panel { position:static; width:100%; max-width:none; box-sizing:border-box; }
     #info, #right-sheets { overflow-x:hidden; max-height:70vh; max-height:70dvh; padding-bottom:max(8px, env(safe-area-inset-bottom)); }
     .leaflet-control-zoom { display:none; }
+    /* no celular o #info já é uma gaveta aberta pelo ☰: texto inteiro, sem acordeão */
+    #info.collapsed p:not(.hide) { display:block; }
+    #info.collapsed h1 { margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1); }
+    #info-more { display:none; }
     #legend .bar { width:100%; }
     #toggle-info, #toggle-legend { width:44px; height:44px; top:max(12px, env(safe-area-inset-top)); }
     #controls .seg button { padding-top:10px; padding-bottom:10px; }
@@ -186,17 +206,27 @@
 </head>
 <body>
 <div id="map" role="application" aria-label="Mapa do 1º turno presidencial de 2026 por município"></div>
-<div id="loading" role="status">Carregando municípios…</div>
-<div id="info" class="panel">
+<div id="loading" role="status">Carregando…</div>
+<div id="info" class="panel collapsed">
 <div data-eleicao="presidente-2026">
   <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
-  <h1>Lula × Flávio por Município</h1>
-  <p>Cada ponto é um município. No modo <b>Lula × Flávio</b> a cor é a diferença entre
+  <h1>Lula × Flávio por <span data-recorte="municipios">Município</span><span data-recorte="zonas">Zona Eleitoral</span><span data-recorte="secoes">Seção Eleitoral</span></h1>
+  <p><span data-recorte="municipios">Cada ponto é um município.</span><span data-recorte="zonas">Cada ponto
+  é uma zona eleitoral dentro de um município — <b>6.106</b> ao todo, no centro dos seus locais de votação.</span><span
+  data-recorte="secoes">Afastado, cada ponto é um <b>local de votação</b> (77.932); de perto, cada
+  local se abre nas suas <b>seções</b> — 497.897 urnas, em espiral em volta da escola.</span> No modo <b>Lula × Flávio</b> a cor é a diferença entre
   os dois mais votados do país: <b style="color:#e08a8a">vermelho</b> = Lula à frente,
   <b class="blue" style="color:#7ab8ff">azul</b> = Flávio Bolsonaro à frente, pálido = empate.</p>
   <p>Flávio teve <b>47,0%</b> dos votos válidos e Lula <b>45,2%</b>; os dois disputam o
-  2º turno em 25/10. Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.
+  2º turno em 25/10. <span data-recorte="municipios">Flávio venceu em <b>2.908</b> municípios, Lula em <b>2.663</b>.</span><span
+  data-recorte="zonas">Flávio venceu em <b>3.248</b> desses pontos, Lula em <b>2.856</b>.</span><span
+  data-recorte="secoes">Flávio venceu em <b>278.222</b> seções, Lula em <b>217.536</b>; 2.139 empataram.</span>
   Exterior fora do mapa.</p>
+  <p data-recorte="zonas">Todo município aparece. Os 190 que têm mais de uma zona se partem
+  nelas — São Paulo em 57, o Rio em 49 —, e uma zona que cobre vários municípios pequenos
+  vira um ponto em cada um.</p>
+  <p data-recorte="secoes">As seções de um estado só baixam quando você chega perto dele. Seções
+  não se comparam com 2022 — o TSE renumera e redistribui urnas entre eleições.</p>
 </div>
 <div data-eleicao="prefeitos-2024">
   <div class="eyebrow">TSE · Eleições Municipais 2024 · 1º turno</div>
@@ -215,6 +245,7 @@
   e evangélicos votam igualmente à direita (r≈0). É um padrão regional, não religioso puro —
   e independe do <i>tipo</i> de evangélico (a fração pentecostal não prevê o voto).</p>
 </div>
+<button id="info-more" aria-expanded="false" aria-controls="info"><span class="caret">▾</span><span class="lbl">Sobre o mapa</span></button>
 </div>
 <div id="right-sheets">
 <div id="legend" class="panel">
@@ -242,6 +273,15 @@
       <button data-eleicao="prefeitos-2024">Prefeitos 2024</button>
     </div>
   </div>
+  <div class="row" id="row-recorte">
+    <label>Recorte</label>
+    <div class="seg" id="seg-recorte">
+      <button data-recorte="municipios" class="active">Municípios</button>
+      <button data-recorte="zonas">Zonas</button>
+      <button data-recorte="secoes">Seções</button>
+    </div>
+    <div id="secoes-status" class="hide"></div>
+  </div>
   <div class="row">
     <label>Métrica</label>
     <div class="seg" id="seg-mode">
@@ -254,7 +294,7 @@
     <label>Vs. presidencial 2022</label>
     <div class="seg" id="seg-flip">
       <button data-flip="all" class="active">Todos</button>
-      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 no município; Flávio venceu em 2026">Vira-casacas<br><span style="font-weight:400;font-size:11px">(Lula → Flávio)</span></button>
+      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 no município (ou na zona); Flávio venceu em 2026">Vira-casacas<br><span style="font-weight:400;font-size:11px">(Lula → Flávio)</span></button>
     </div>
     <div id="flip-count"></div>
   </div>
@@ -271,7 +311,6 @@
   </div>
   <div class="psub">0 = esquerda · 10 = direita · pondera o voto de cada candidato</div>
   <div class="pbody"></div>
-  <div class="pfoot"><span style="color:#e0a03a">*</span> fora do survey — posicionado à mão (ver metodologia). Fonte: Bolognesi, Ribeiro &amp; Codato.</div>
 </div>
 <button id="toggle-info" aria-label="Sobre o mapa" aria-expanded="false">☰</button>
 <button id="toggle-legend" aria-label="Legenda e controles">▤</button>
@@ -313,12 +352,12 @@ const PARTY_SCORES = {
   'PSDB':6.0,'PRD':6.8,'UNIÃO':6.9,'PP':7.0,'REPUBLICANOS':7.2,'DC':7.5,
   'PRTB':8.0,'NOVO':8.2,'PL':8.5,'MISSÃO':7.8,'DEMOCRATA':5.0
 };
-const PARTY_NOSURVEY = new Set(['UP','PMB','MOBILIZA','AGIR','PRD','DC','MISSÃO','DEMOCRATA']);
 
 // eleições do mapa; ?eleicao=<chave> abre direto numa delas
 const ELEICOES = {
   'presidente-2026': {
-    file: 'data_presidente_2026.json', modes: ['margin','lean','polar'], polar: [2.2, 3.0],
+    file: 'data_presidente_2026.json', zonas: 'data_presidente_2026_zonas.json', secoes: 'secoes/',
+    modes: ['margin','lean','polar'], polar: [2.2, 3.0],
     polarLabels: ['2,2', '3,0'],
     parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA']
   },
@@ -330,13 +369,24 @@ const ELEICOES = {
 let ELEICAO = new URLSearchParams(location.search).get('eleicao');
 if (!ELEICOES[ELEICAO]) ELEICAO = 'presidente-2026';
 function EL(){ return ELEICOES[ELEICAO]; }
+// recorte: um ponto por município, por zona eleitoral ou por seção (só onde a eleição tem os arquivos)
+let RECORTE = ['zonas', 'secoes'].includes(new URLSearchParams(location.search).get('recorte')) ? new URLSearchParams(location.search).get('recorte') : 'municipios';
+function recorteAtivo(){ return RECORTE !== 'municipios' && EL()[RECORTE] ? RECORTE : 'municipios'; }
+
+(function(){
+  const info = document.getElementById('info'), btn = document.getElementById('info-more');
+  btn.addEventListener('click', function(){
+    const aberto = info.classList.toggle('collapsed') === false;
+    btn.setAttribute('aria-expanded', aberto);
+    btn.querySelector('.lbl').textContent = aberto ? 'Recolher' : 'Sobre o mapa';
+  });
+})();
 
 function renderParties(){
   const body = document.querySelector('#parties .pbody');
   const rows = EL().parties.map(k => [k, PARTY_SCORES[k]]).sort((a,b) => a[1]-b[1]).map(function(e){
-    const ast = PARTY_NOSURVEY.has(e[0]) ? '<span class="ast">*</span>' : '';
     return '<div class="prow"><span class="chip" style="background:' + leanColor(e[1]) + '"></span>' +
-           '<span class="sig">' + e[0] + ast + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
+           '<span class="sig">' + e[0] + '</span><span class="sc">' + e[1].toFixed(1) + '</span></div>';
   }).join('');
   body.innerHTML = rows;
 }
@@ -346,7 +396,8 @@ function renderParties(){
 })();
 
 // record: [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir]
-// presidente-2026 acrescenta [plula, pflavio]
+// presidente-2026 acrescenta [plula, pflavio, plula22, pbolso22]; o recorte por zona (um registro por
+// município × zona), [[zona, zonas_no_municipio, outros_municipios_da_zona]]
 let DATA = [];
 const Q = new URLSearchParams(location.search);
 let MODE = ['margin', 'lean', 'polar'].includes(Q.get('modo')) ? Q.get('modo') : 'margin';
@@ -359,7 +410,7 @@ const CACHE = {};
 const BR_BOUNDS = L.latLngBounds([-34.2, -74.6], [5.6, -33.4]);
 const map = L.map('map', {
   preferCanvas: true, zoomControl: true, attributionControl: false,
-  zoomSnap: 0.1, zoomDelta: 0.5, wheelPxPerZoomLevel: 120,
+  zoomSnap: 0, zoomDelta: 0.5, scrollWheelZoom: false,
   maxBounds: BR_BOUNDS.pad(0.08), maxBoundsViscosity: 1.0
 });
 function fitBrasil(){
@@ -400,10 +451,8 @@ fetch('https://tiles.openfreemap.org/styles/dark').then(r => r.json()).then(func
   L.maplibreGL({ style: style }).addTo(map);
 });
 
-const renderer = L.canvas({ padding: 0.1 });
 const fmt = new Intl.NumberFormat('pt-BR');
 const fmtPct = v => v.toFixed(1) + '%';
-let markers = [];
 let currentRadius = 2.3;
 
 const LEAN_GRAD = 'linear-gradient(to right, #b2182b, #f7f7f7 40%, #2166ac)';
@@ -435,8 +484,21 @@ function marginLabel(d){
   return (d > 0 ? 'Lula +' : 'Flávio +') + v;
 }
 
+// título e linha de baixo do tooltip; r[19] diz o que o ponto é (zona, local de votação ou seção)
+function tituloDe(r){
+  const x = r[19];
+  if (Array.isArray(x)) return { t: r[1] + ' · Zona ' + x[0], s:
+    (x[1] > 1 ? 'uma das ' + x[1] + ' zonas do município' : '') + (x[1] > 1 && x[2].length ? ' · ' : '') +
+    (x[2].length ? 'a zona também cobre ' + x[2].join(', ') : '') };
+  if (x && x.tipo === 'local') return { t: NOME_LOCAL.get(x.uf + '|' + x.z + '|' + x.lv) || 'Local de votação nº ' + x.lv,
+    s: x.mun + ' · Zona ' + x.z + ' · ' + x.n + (x.n > 1 ? ' seções' : ' seção') };
+  if (x && x.tipo === 'secao') return { t: 'Seção ' + x.s + ' · Zona ' + x.z, s: x.local + ' · ' + x.mun };
+  return { t: r[1], s: '' };
+}
+
 function tooltipHtml(r){
   const [uf, nome, lat, lon, tot, lean, polar, ncand, w1, w1pct, w2, w2pct, pesq, pcen, pdir] = r;
+  const tt = tituloDe(r);
   const margin = MODE === 'margin' ? r[16] - r[15] : 0; // Flávio − Lula
   const sorted = MODE === 'margin' ? sortedMargin : MODE === 'lean' ? sortedLean : sortedPolar;
   const val = MODE === 'margin' ? margin : MODE === 'lean' ? lean : polar;
@@ -454,11 +516,12 @@ function tooltipHtml(r){
       '<div class="tt-metric-label">dispersão ideológica do voto</div>';
   const fmtEdge = MODE === 'margin' ? (x => marginLabel(-x)) : MODE === 'lean' ? (x => x.toFixed(1)) : (x => x.toFixed(2));
   return (
-    '<div class="tt-head"><span class="tt-name">' + nome + '</span><span class="tt-badge">' + uf + '</span></div>' +
+    '<div class="tt-head"><span class="tt-name">' + tt.t + '</span><span class="tt-badge">' + uf + '</span></div>' +
     '<div class="tt-sub">' + fmt.format(tot) + ' votos válidos · ' + ncand + ' candidatos</div>' +
+    (tt.s ? '<div class="tt-sub" style="margin-top:-6px">' + tt.s + '</div>' : '') +
     metricBig +
     '<div class="tt-range">' +
-      '<div class="tt-range-head"><span>mín · máx nacional</span><span>P' + pShown + '</span></div>' +
+      '<div class="tt-range-head"><span>mín · máx ' + (recorteAtivo() === 'secoes' ? 'do que já baixou' : 'nacional') + '</span><span>P' + pShown + '</span></div>' +
       '<div class="tt-range-bar" style="background:' + grad + ';">' +
         '<div class="tt-range-marker" style="left:' + (pct * 100).toFixed(1) + '%;"></div>' +
       '</div>' +
@@ -481,27 +544,86 @@ function tooltipHtml(r){
   );
 }
 
-function render(){
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  DATA.forEach(function(r){
-    const color = colorFor(r);
-    const marker = L.circleMarker([r[2], r[3]], {
-      renderer, radius: currentRadius, color, weight: 0, fillColor: color, fillOpacity: 0.85, interactive: false
-    });
-    marker.addTo(map);
-    markers.push(marker);
-  });
-  buildGrid();
+// ---- pontos: uma camada canvas própria, que desenha direto de arrays ----
+// 78 mil locais e meio milhão de seções não cabem em L.circleMarker (um objeto e um path por ponto).
+// Cada ponto é guardado projetado no zoom 0; no zoom z a posição é p0·2^z − origem. As seções de um
+// local têm a mesma coordenada, então se abrem numa espiral (ângulo áureo) em pixels em volta dele.
+const GA = Math.PI * (3 - Math.sqrt(5));
+const SEC_Z = 12;   // zoom a partir do qual os locais se abrem nas suas seções
+const UF_Z = 8;     // zoom a partir do qual as seções do estado na tela começam a baixar
+const DotLayer = L.Canvas.extend({
+  setData: function(recs){
+    const n = recs.length;
+    this._x = new Float64Array(n); this._y = new Float64Array(n);
+    this._ox = new Float32Array(n); this._oy = new Float32Array(n);
+    this._spiral = false; this._maxk = 0;
+    for (let i = 0; i < n; i++){
+      const r = recs[i], p = map.project([r[2], r[3]], 0);
+      this._x[i] = p.x; this._y[i] = p.y;
+      const k = r[19] && r[19].k;
+      if (k != null){
+        const d = Math.sqrt(k + 0.5);
+        this._ox[i] = d * Math.cos(k * GA); this._oy[i] = d * Math.sin(k * GA);
+        this._spiral = true; if (k > this._maxk) this._maxk = k;
+      }
+    }
+    this.recolor();
+  },
+  // um path por cor; o que o filtro apaga vai num grupo à parte, desenhado quase transparente
+  recolor: function(){
+    const on = new Map(), off = new Map();
+    for (let i = 0; i < DATA.length; i++){
+      const r = DATA[i], m = flipMatch(r) ? on : off, c = colorFor(r), a = m.get(c);
+      if (a) a.push(i); else m.set(c, [i]);
+    }
+    this._on = on; this._off = off;
+    this.paint();
+  },
+  // o L.Canvas limpa tudo e chama _draw no fim de cada _redraw (e redesenha depois de _update);
+  // pintar fora dele some na limpeza seguinte
+  _draw: function(){ this.paint(); },
+  paint: function(){
+    if (!this._map || !this._ctx || !this._x || !this._bounds) return;
+    const ctx = this._ctx, b = this._bounds, s = Math.pow(2, map.getZoom()), o = map.getPixelOrigin();
+    ctx.clearRect(b.min.x, b.min.y, b.max.x - b.min.x, b.max.y - b.min.y);
+    const R = dotRadius(), sp = spiralGap(), X = this._x, Y = this._y, OX = this._ox, OY = this._oy;
+    const x0 = b.min.x - 20, x1 = b.max.x + 20, y0 = b.min.y - 20, y1 = b.max.y + 20;
+    function draw(groups, r, alpha){
+      ctx.globalAlpha = alpha;
+      groups.forEach(function(idx, c){
+        ctx.fillStyle = c; ctx.beginPath();
+        for (let j = 0; j < idx.length; j++){
+          const i = idx[j], px = X[i] * s - o.x + OX[i] * sp, py = Y[i] * s - o.y + OY[i] * sp;
+          if (px < x0 || px > x1 || py < y0 || py > y1) continue;
+          if (r < 1.5) ctx.rect(px - r, py - r, 2 * r, 2 * r);
+          else { ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, 6.2832); }
+        }
+        ctx.fill();
+      });
+    }
+    draw(this._off, R, 0.05);
+    draw(this._on, FLIP === 'all' ? R : R * 1.6, FLIP === 'all' ? 0.85 : 0.95);
+    ctx.globalAlpha = 1;
+  }
+});
+const dots = new DotLayer({ padding: 0.1 }).addTo(map);
+// de perto as seções crescem com o zoom, para a espiral não virar poeira
+function dotRadius(){ return dots._spiral ? currentRadius * clamp(Math.pow(2, (map.getZoom() - SEC_Z) * 0.5), 1, 4) : currentRadius; }
+function spiralGap(){ return dots._spiral ? dotRadius() * 2.3 : 0; }
+function layerPos(i){
+  const s = Math.pow(2, map.getZoom()), o = map.getPixelOrigin(), sp = spiralGap();
+  return L.point(dots._x[i] * s - o.x + dots._ox[i] * sp, dots._y[i] * s - o.y + dots._oy[i] * sp);
 }
 
-// ---- hover: um único tooltip, índice em grade e nada de hit-test por marcador ----
-const CELL = 0.25; // graus
-let GRID = new Map();
+function render(){ hideTip(); dots.setData(DATA); buildGrid(); }
+
+// ---- hover: um único tooltip, índice em grade e nada de hit-test por ponto ----
+let CELL = 0.25, GRID = new Map(); // graus; mais fino quando há seções (dezenas de milhares numa capital)
 function buildGrid(){
+  CELL = dots._spiral ? 0.02 : 0.25;
   GRID = new Map();
   DATA.forEach(function(r, i){
-    const k = Math.floor(r[2] / CELL) * 10000 + Math.floor(r[3] / CELL);
+    const k = Math.floor(r[2] / CELL) * 100000 + Math.floor(r[3] / CELL);
     const a = GRID.get(k); if (a) a.push(i); else GRID.set(k, [i]);
   });
 }
@@ -510,20 +632,21 @@ const hlEl = document.createElement('div'); hlEl.id = 'hl'; document.body.append
 let HOVER = -1, lastPt = { x: 0, y: 0 }, raf = 0, pend = null;
 const isSheet = () => window.matchMedia('(max-width: 760px)').matches;
 
-function nearest(lat, lng, z){
-  const k = 256 * Math.pow(2, z) / 360;                    // px por grau de longitude
-  const R = Math.max(currentRadius * (FLIP === 'all' ? 1 : 1.6), 3) + (isSheet() ? 14 : 5); // raio de captura em px (dedo > mouse)
-  const reach = Math.max(1, Math.ceil(R / k / CELL) + 1);
+function nearest(lat, lng, lp){
+  const z = map.getZoom(), k = 256 * Math.pow(2, z) / 360;   // px por grau de longitude (o mínimo; na latitude é mais)
+  const R = Math.max(dotRadius() * (FLIP === 'all' ? 1 : 1.6), 3) + (isSheet() ? 14 : 5); // raio de captura em px (dedo > mouse)
+  const ext = spiralGap() * Math.sqrt(dots._maxk + 1);       // a espiral mais larga
+  const reach = Math.max(1, Math.ceil((R + ext) / k / CELL) + 1);
   const cy = Math.floor(lat / CELL), cx = Math.floor(lng / CELL);
-  const cosLat = Math.cos(lat * Math.PI / 180);
+  const s = Math.pow(2, z), o = map.getPixelOrigin(), sp = spiralGap();
   let best = -1, bd = R * R;
   for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
-    const a = GRID.get((cy + dy) * 10000 + cx + dx); if (!a) continue;
+    const a = GRID.get((cy + dy) * 100000 + cx + dx); if (!a) continue;
     for (let j = 0; j < a.length; j++) {
-      const r = DATA[a[j]];
-      const px = (r[3] - lng) * k, py = (r[2] - lat) * k / cosLat;
+      const i = a[j];
+      const px = dots._x[i] * s - o.x + dots._ox[i] * sp - lp.x, py = dots._y[i] * s - o.y + dots._oy[i] * sp - lp.y;
       const d = px * px + py * py;
-      if (d < bd && flipMatch(r)) { bd = d; best = a[j]; }
+      if (d < bd && flipMatch(DATA[i])) { bd = d; best = i; }
     }
   }
   return best;
@@ -538,8 +661,8 @@ function showTip(i, x, y){
     HOVER = i;
     tipEl.innerHTML = tooltipHtml(r);
     tipEl.classList.add('on');
-    const p = map.latLngToContainerPoint([r[2], r[3]]);
-    const d = (currentRadius * (FLIP === 'all' ? 1 : 1.6) + 3) * 2;
+    const p = map.layerPointToContainerPoint(layerPos(i));
+    const d = (dotRadius() * (FLIP === 'all' ? 1 : 1.6) + 3) * 2;
     hlEl.style.width = hlEl.style.height = d + 'px';
     hlEl.style.transform = 'translate3d(' + (p.x - d / 2) + 'px,' + (p.y - d / 2) + 'px,0)';
     hlEl.classList.add('on');
@@ -558,12 +681,12 @@ function showTip(i, x, y){
   tipEl.style.transform = 'translate3d(' + Math.round(tx) + 'px,' + Math.round(ty) + 'px,0)';
 }
 function onPoint(e){
-  const oe = e.originalEvent; pend = { x: oe.clientX, y: oe.clientY, ll: e.latlng };
+  const oe = e.originalEvent; pend = { x: oe.clientX, y: oe.clientY, ll: e.latlng, lp: e.layerPoint };
   if (raf) return;
   raf = requestAnimationFrame(function(){
     raf = 0; const q = pend; if (!q || !DATA.length) return;
     lastPt = q;
-    const i = nearest(q.ll.lat, q.ll.lng, map.getZoom());
+    const i = nearest(q.ll.lat, q.ll.lng, q.lp);
     if (i < 0) { if (HOVER >= 0) hideTip(); return; }
     showTip(i, q.x, q.y);
   });
@@ -578,6 +701,106 @@ document.addEventListener('keydown', function(e){
 });
 map.on('movestart zoomstart', hideTip);
 
+// zoom pela roda/trackpad contínuo, em volta do cursor: o do Leaflet anda em degraus animados
+// de 0,25 s com 40 ms de espera entre eles, trava no trackpad e estica os pontos do canvas no meio
+// do caminho. Aqui cada evento move um alvo e o mapa persegue o alvo quadro a quadro.
+let wTarget = null, wPt = null, wRaf = 0;
+function wheelStep(){
+  const z = map.getZoom(), d = wTarget - z, done = Math.abs(d) < 0.01;
+  map.setZoomAround(wPt, done ? wTarget : z + d * 0.35, { animate: false });
+  if (done) { wTarget = null; wRaf = 0; } else wRaf = requestAnimationFrame(wheelStep);
+}
+map.getContainer().addEventListener('wheel', function(e){
+  e.preventDefault();
+  // linhas/páginas viram pixels; pinça do trackpad (ctrlKey) manda deltas pequenos, então pesa mais
+  let px = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+  px = clamp(px, -150, 150) * (e.ctrlKey ? 3 : 1);
+  wTarget = clamp((wTarget == null ? map.getZoom() : wTarget) - px / 220, map.getMinZoom(), map.getMaxZoom());
+  wPt = map.mouseEventToContainerPoint(e);
+  if (!wRaf) wRaf = requestAnimationFrame(wheelStep);
+}, { passive: false });
+
+// ---- recorte por seção ----
+let LOC = null;                     // locais decodificados (registros no layout do mapa + caixa de cada UF)
+const SEC = {};                     // uf -> registros das seções (ou a Promise enquanto baixa)
+const NOME_LOCAL = new Map();       // 'uf|zona|local' -> nome da escola (vem com as seções do estado)
+let SECKEY = null;
+// os mesmos campos de data_presidente_2026.json, calculados dos votos de cada candidato (ordem de LOC.c)
+function regFromVotes(uf, lat, lon, v, extra){
+  const C = LOC.c;
+  let tot = 0, s1 = 0, s2 = 0, esq = 0, cen = 0, dir = 0, nc = 0, a = -1, b = -1;
+  for (let i = 0; i < v.length; i++){
+    const q = v[i]; if (!q) continue;
+    const sc = PARTY_SCORES[C[i][1]];
+    nc++; tot += q; s1 += sc * q; s2 += sc * sc * q;
+    if (sc < 4) esq += q; else if (sc <= 6) cen += q; else dir += q;
+    if (a < 0 || q > v[a]) { b = a; a = i; } else if (b < 0 || q > v[b]) b = i;
+  }
+  const pct = q => tot ? Math.round(1000 * q / tot) / 10 : 0, pct2 = q => tot ? Math.round(10000 * q / tot) / 100 : 0;
+  const lean = tot ? s1 / tot : 5, polar = tot ? Math.sqrt(Math.max(0, s2 / tot - lean * lean)) : 0;
+  const lab = i => i < 0 ? '' : C[i][0] + ' (' + C[i][1] + ')';
+  return [uf, null, lat, lon, tot, lean, polar, nc, lab(a), a < 0 ? 0 : pct(v[a]), lab(b), b < 0 ? 0 : pct(v[b]),
+          pct(esq), pct(cen), pct(dir), pct2(v[LOC.iL]), pct2(v[LOC.iF]), null, null, extra];
+}
+// secoes/locais.json vem colunar e em delta (ver build_secoes.py)
+function decodeLocais(j){
+  LOC = { c: j.c, ufs: j.ufs, iL: j.c.findIndex(c => c[0] === 'Lula'), iF: j.c.findIndex(c => c[0] === 'Flávio Bolsonaro'),
+          recs: [], bbox: {}, byKey: new Map() };
+  let m = 0, la = 0, lo = 0;
+  for (let i = 0; i < j.u.length; i++){
+    m += j.m[i]; la += j.lat[i]; lo += j.lon[i];
+    const uf = j.ufs[j.u[i]], lat = la / 1e5, lon = lo / 1e5;
+    const r = regFromVotes(uf, lat, lon, j.v.map(col => col[i]), { tipo: 'local', uf, z: j.z[i], lv: j.lv[i], mun: j.muns[m], n: j.n[i] });
+    LOC.recs.push(r); LOC.byKey.set(uf + '|' + j.z[i] + '|' + j.lv[i], r);
+    const bb = LOC.bbox[uf] || (LOC.bbox[uf] = [lat, lon, lat, lon]);
+    bb[0] = Math.min(bb[0], lat); bb[1] = Math.min(bb[1], lon); bb[2] = Math.max(bb[2], lat); bb[3] = Math.max(bb[3], lon);
+  }
+  return LOC;
+}
+function loadUF(uf){
+  if (SEC[uf]) return Promise.resolve(SEC[uf]);
+  SEC[uf] = fetch(EL().secoes + uf + '.json').then(r => r.json()).then(function(ls){
+    const recs = [];
+    ls.forEach(function(l){
+      const key = uf + '|' + l[0] + '|' + l[1], L0 = LOC.byKey.get(key);
+      NOME_LOCAL.set(key, l[2]);
+      l[3].forEach(function(sv, k){
+        recs.push(regFromVotes(uf, L0[2], L0[3], sv.slice(1), { tipo: 'secao', uf, z: l[0], lv: l[1], s: sv[0], k, local: l[2], mun: L0[19].mun }));
+      });
+    });
+    return SEC[uf] = recs;
+  }).catch(function(){ delete SEC[uf]; return null; });
+  return SEC[uf];
+}
+const pronto = uf => Array.isArray(SEC[uf]);
+// afastado: um ponto por local. A partir de UF_Z baixa as seções dos estados na tela; a partir de
+// SEC_Z os locais dos estados já baixados se abrem nas seções (os outros seguem como local até chegarem)
+function updateSecoes(){
+  if (recorteAtivo() !== 'secoes' || !LOC) return;
+  const z = map.getZoom(), vb = map.getBounds().pad(0.2);
+  const vis = z >= UF_Z ? LOC.ufs.filter(uf => { const b = LOC.bbox[uf]; return vb.intersects(L.latLngBounds([b[0], b[1]], [b[2], b[3]])); }) : [];
+  vis.forEach(uf => { if (!SEC[uf]) loadUF(uf).then(updateSecoes); });
+  const baixando = vis.filter(uf => !pronto(uf));
+  const st = document.getElementById('secoes-status');
+  st.textContent = baixando.length ? 'Baixando as seções de ' + baixando.join(', ') + '…'
+    : z < SEC_Z ? 'Cada ponto é um local de votação. Chegue mais perto para ver as seções.' : 'Cada ponto é uma seção, em espiral em volta do seu local.';
+  const abertos = z >= SEC_Z ? LOC.ufs.filter(pronto) : [];
+  const key = abertos.join(',');
+  if (key === SECKEY) return;
+  SECKEY = key;
+  setDATA(abertos.length ? LOC.recs.filter(r => !pronto(r[0])).concat(...abertos.map(uf => SEC[uf])) : LOC.recs);
+}
+map.on('moveend zoomend', updateSecoes);
+
+function setDATA(recs){
+  DATA = recs;
+  sortedLean = recs.map(r => r[5]).sort((a,b) => a-b);
+  sortedPolar = recs.map(r => r[6]).sort((a,b) => a-b);
+  sortedMargin = recs.length && recs[0].length > 15 ? recs.map(r => r[16] - r[15]).sort((a,b) => a-b) : [];
+  render();
+  applyFlip();
+}
+
 function setEleicao(key){
   ELEICAO = key;
   const el = EL();
@@ -587,21 +810,29 @@ function setEleicao(key){
   const pl = document.querySelectorAll('#legend-polar .labels span');
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
-  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
+  const rec = recorteAtivo();
+  if (rec === 'secoes') FLIP = 'all'; // seção não se compara com 2022
+  document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026' || rec === 'secoes');
+  document.getElementById('row-recorte').classList.toggle('hide', !el.zonas && !el.secoes);
+  document.getElementById('secoes-status').classList.toggle('hide', rec !== 'secoes');
+  document.querySelectorAll('#seg-recorte button').forEach(b => { b.classList.toggle('active', b.dataset.recorte === rec); b.setAttribute('aria-pressed', b.dataset.recorte === rec); });
+  document.querySelectorAll('#info [data-recorte]').forEach(d => d.classList.toggle('hide', d.dataset.recorte !== rec));
   if (key !== 'presidente-2026') { FLIP = 'all'; document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === 'all'); b.setAttribute('aria-pressed', b.dataset.flip === 'all'); }); }
   else document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === FLIP); b.setAttribute('aria-pressed', b.dataset.flip === FLIP); });
   syncUrl();
-  const load = CACHE[key] ? Promise.resolve(CACHE[key]) : (window.__d && window.__k === key ? window.__d : fetch(el.file).then(r => r.json()));
+  const ck = key + ':' + rec, file = rec === 'zonas' ? el.zonas : rec === 'secoes' ? el.secoes + 'locais.json' : el.file;
+  const load = CACHE[ck] ? Promise.resolve(CACHE[ck]) : (window.__d && window.__k === ck ? window.__d : fetch(file).then(r => r.json()));
   window.__d = null;
   load.then(function(json){
-    if (ELEICAO !== key) return; // trocou de novo antes de carregar
-    CACHE[key] = json;
-    DATA = json;
-    sortedLean = json.map(r => r[5]).sort((a,b) => a-b);
-    sortedPolar = json.map(r => r[6]).sort((a,b) => a-b);
-    sortedMargin = json.length && json[0].length > 15 ? json.map(r => r[16] - r[15]).sort((a,b) => a-b) : [];
+    if (ELEICAO !== key || recorteAtivo() !== rec) return; // trocou de novo antes de carregar
     MODE = el.modes.includes(MODE) ? MODE : el.modes[0];
-    render();
+    if (rec === 'secoes') {
+      CACHE[ck] = json.recs ? json : decodeLocais(json);
+      LOC = CACHE[ck]; SECKEY = null; updateSecoes();
+    } else {
+      CACHE[ck] = json;
+      setDATA(json);
+    }
     setMode(MODE);
     const ld = document.getElementById('loading'); if (ld) ld.remove();
   }).catch(function(){
@@ -615,19 +846,20 @@ function syncUrl(){
   url.searchParams.set('eleicao', ELEICAO);
   MODE !== 'margin' ? url.searchParams.set('modo', MODE) : url.searchParams.delete('modo');
   FLIP === 'lost' ? url.searchParams.set('filtro', 'vira-casacas') : url.searchParams.delete('filtro');
+  const rec = recorteAtivo();
+  rec !== 'municipios' ? url.searchParams.set('recorte', rec) : url.searchParams.delete('recorte');
   history.replaceState(null, '', url);
 }
 
 function applyFlip(){
   const flipN = { lost: 0, won: 0 };
-  DATA.forEach(function(r, i){
-    const k = flipKind(r); if (k) flipN[k]++;
-    const on = flipMatch(r), m = markers[i], c = colorFor(r);
-    m.setStyle({ color: c, fillColor: c, fillOpacity: on ? (FLIP === 'all' ? 0.85 : 0.95) : 0.05, opacity: on ? 1 : 0.05 });
-    m.setRadius(on && FLIP !== 'all' ? currentRadius * 1.6 : currentRadius);
-  });
+  DATA.forEach(function(r){ const k = flipKind(r); if (k) flipN[k]++; });
+  dots.recolor();
+  const z = recorteAtivo() === 'zonas', sem22 = z ? DATA.filter(r => r[17] == null).length : 0;
   document.getElementById('flip-count').textContent = DATA[0] && DATA[0].length > 18
-    ? flipN.lost + ' municípios votaram em Lula em 2022 e em Flávio em 2026' + (flipN.won ? '; ' + flipN.won + ' fizeram o caminho inverso' : '; nenhum fez o caminho inverso') + '.'
+    ? flipN.lost + (z ? ' zonas' : ' municípios') + ' votaram em Lula em 2022 e em Flávio em 2026' +
+      (flipN.won ? '; ' + flipN.won + (flipN.won === 1 ? ' fez' : ' fizeram') + ' o caminho inverso' : '; ' + (z ? 'nenhuma' : 'nenhum') + ' fez o caminho inverso') + '.' +
+      (sem22 ? ' ' + sem22 + ' zonas ficam fora da comparação: o rezoneamento mudou seu território desde 2022.' : '')
     : '';
 }
 function setFlip(f){
@@ -643,7 +875,6 @@ function setMode(mode){
   document.getElementById('legend-margin').classList.toggle('hide', mode !== 'margin');
   document.getElementById('legend-lean').classList.toggle('hide', mode !== 'lean');
   document.getElementById('legend-polar').classList.toggle('hide', mode !== 'polar');
-  // recolor in place (cheaper than full re-render), markers[i] aligns with DATA[i]
   applyFlip(); syncUrl();
   if (HOVER >= 0) showTip(HOVER, lastPt.x, lastPt.y);
 }
@@ -651,6 +882,8 @@ document.querySelectorAll('#seg-mode button').forEach(b =>
   b.addEventListener('click', () => setMode(b.dataset.mode)));
 document.querySelectorAll('#seg-eleicao button').forEach(b =>
   b.addEventListener('click', () => { if (b.dataset.eleicao !== ELEICAO) setEleicao(b.dataset.eleicao); }));
+document.querySelectorAll('#seg-recorte button').forEach(b =>
+  b.addEventListener('click', () => { if (b.dataset.recorte !== RECORTE) { RECORTE = b.dataset.recorte; hideTip(); setEleicao(ELEICAO); } }));
 setEleicao(ELEICAO);
 
 const radiusSlider = document.getElementById('radiusSlider');
@@ -658,7 +891,7 @@ const radiusValue = document.getElementById('radiusValue');
 radiusSlider.addEventListener('input', function(){
   currentRadius = parseFloat(this.value);
   radiusValue.textContent = currentRadius.toFixed(2);
-  applyFlip();
+  dots.paint();
 });
 L.DomEvent.disableClickPropagation(document.getElementById('controls'));
 L.DomEvent.disableClickPropagation(document.getElementById('info'));

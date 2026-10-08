@@ -119,3 +119,52 @@ O seletor **Eleição** abre o mesmo mapa com o voto para presidente
 - Centroides: `br_bd_diretorios_brasil.municipio`, como em 2024.
 - `dados/presidente_2026/build.py` refaz `data_presidente_2026.json` (baixa o que falta,
   junta com os centroides no beelink). Os JSON brutos ficam em `raw/`, fora do git.
+
+## Recorte por zona eleitoral
+
+O seletor **Recorte** (`&recorte=zonas`) troca o ponto por município por um ponto por par
+**município × zona eleitoral**, o grão do arquivo do TSE: 6.106 pontos, com as mesmas três
+métricas e o mesmo filtro de vira-casacas.
+
+- Todo município aparece. Os 190 que têm mais de uma zona se partem nelas (São Paulo em 57, o
+  Rio em 49), e uma zona que cobre vários municípios pequenos vira um ponto em cada um. O
+  tooltip diz quantas zonas o município tem e que outros municípios a zona cobre.
+- **Votos:** `votacao_candidato_munzona_2026` dos dados abertos do TSE (arquivo `_BR`, o de
+  presidente, gerado em 07/10/2026). A soma por município fecha voto a voto com o mapa por
+  município; o gerador para se não fechar. Lula e Flávio vão com 2 casas: com 1, Canutama
+  (AM), onde Flávio venceu por 2 votos, aparece empatada.
+- **Ponto:** não há polígono de zona. O ponto é a mediana, ponderada pelo eleitorado de cada
+  seção, das coordenadas dos locais de votação do município naquela zona
+  (`eleitorado_local_votacao_2026`). Seções a mais de 250 km do centroide do próprio município
+  são descartadas (762 de 514 mil; há local geocodificado em Bangladesh). Por isso o ponto cai
+  onde se vota, e não no centroide do município: Almeirim (PA) fica na sede, à beira do
+  Amazonas.
+- **2022:** `br_tse_eleicoes.resultados_candidato_municipio_zona`. Houve rezoneamento, e um
+  pedaço que ganhou ou perdeu seções mostraria virada que é só mudança de território. A
+  comparação só entra quando o par (município, zona) existe em 2022 e o crescimento do voto
+  dele ficou a ±10% do crescimento do município. Ficam de fora **72 pares**, quase todos em
+  capitais e cidades grandes (São Paulo, Rio, Campinas, Joinville, Palhoça) e zonas novas.
+- `dados/presidente_2026/build_zonas.py` refaz `data_presidente_2026_zonas.json` (1,1 MB,
+  ~330 KB comprimido, só baixado ao abrir o recorte); os dois zips do TSE (~600 MB) ficam em
+  `raw/`, fora do git.
+
+## Recorte por seção eleitoral
+
+O terceiro botão do **Recorte** (`&recorte=secoes`) desce até a urna.
+
+- **Afastado**, um ponto por **local de votação** (77.932), com o voto somado das suas seções.
+  **De perto** (a partir do zoom 12), cada local se abre nas suas **seções** (497.897), em
+  espiral em volta da escola: todas as seções de um local têm a mesma coordenada, então a
+  espiral é só para dar para ver e apontar cada uma. As seções de um estado baixam quando ele
+  entra na tela a partir do zoom 8.
+- **Votos:** `votacao_secao_2026_BR.zip` dos dados abertos do TSE (o `_BR` é o de presidente;
+  os arquivos por UF trazem só os cargos estaduais). Fica de fora o votável 28 (Leonardo Alves
+  de Araujo, candidatura indeferida, 5.246 votos que não entram como válidos); sem ele a soma das
+  seções fecha voto a voto com a divulgação (118.969.906).
+- **Coordenada e nome do local:** `eleitorado_local_votacao_2026`, com o mesmo descarte de
+  geocodificação a mais de 250 km do município. 1.121 locais sem coordenada válida caem no ponto
+  da sua zona naquele município.
+- **Sem comparação com 2022:** o TSE renumera e redistribui seções entre eleições.
+- `dados/presidente_2026/build_secoes.py` gera `secoes/locais.json` (colunar e em delta, ~1,1 MB
+  comprimido) e um `secoes/<UF>.json` por estado (São Paulo, o maior, ~1,1 MB comprimido). O
+  navegador calcula inclinação, polarização e vencedor a partir dos votos de cada candidato.
