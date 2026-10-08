@@ -1,0 +1,30 @@
+name: Aciona o deploy no rodado
+
+# O mapa de eleições (dataviz/eleicoes) vai ao ar em rodado.xyz/plataformas/eleicoes, e quem publica é
+# o workflow "Deploy Pages" do rodado, que baixa esta pasta a cada deploy. Sem este aviso, um push aqui
+# fica parado até alguém publicar o rodado. Mesmo padrão dos outros repos (tse-bens, rios-do-brasil):
+# um repository_dispatch com o segredo RODADO_DEPLOY_TOKEN.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dataviz/eleicoes/**'
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Avisa o rodado
+        env:
+          TOKEN: ${{ secrets.RODADO_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "RODADO_DEPLOY_TOKEN ainda não está definido; deploy não acionado."
+            exit 1
+          fi
+          curl -fsS -o /dev/null -w "%{http_code}\n" \
+            -X POST "https://api.github.com/repos/rafapolo/rodado/dispatches" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"event_type\":\"eleicoes-updated\",\"client_payload\":{\"sha\":\"${{ github.sha }}\"}}"
