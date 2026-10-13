@@ -393,11 +393,31 @@ def saude_cnes(mid):
     prof = one(f"SELECT count(*) vinculos FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}' AND ano={pam//100} AND mes={pam%100}")
     eam = one(f"SELECT max(ano*100+mes) am FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}'")["am"]
     eq = one(f"SELECT count(*) n FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}' AND ano={eam//100} AND mes={eam%100}")
+    # Códigos de tipo_equipe da portaria de 2023 (70 eSF, 71 eSB, 72 eMulti, 76 eAP);
+    # ano_desativacao_equipe = 9000 marca equipe ativa.
+    tipos = q(f"""SELECT CASE tipo_equipe WHEN '70' THEN 'eSF' WHEN '71' THEN 'eSB' WHEN '72' THEN 'eMulti'
+                WHEN '76' THEN 'eAP' ELSE 'outras' END tipo, count(*) n
+        FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}' AND ano={eam//100} AND mes={eam%100}
+          AND coalesce(ano_desativacao_equipe, 9000) = 9000 GROUP BY 1 ORDER BY 2 DESC""")
+    # CBO 515105 = agente comunitário de saúde, 515140 = agente de combate às endemias
+    agentes = one(f"""SELECT count(DISTINCT cartao_nacional_saude) FILTER (WHERE cbo_2002='515105') acs,
+            count(DISTINCT cartao_nacional_saude) FILTER (WHERE cbo_2002='515140') ace
+        FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}' AND ano={pam//100} AND mes={pam%100}""")
+    # tipo_unidade: 01 posto e 02 centro de saúde/UBS, 73 pronto atendimento (UPA),
+    # 70 CAPS, 42 unidade móvel de urgência (SAMU)
+    unid = one(f"""SELECT count(DISTINCT id_estabelecimento_cnes) FILTER (WHERE tipo_unidade IN ('1','01','2','02')) ubs,
+            count(DISTINCT id_estabelecimento_cnes) FILTER (WHERE tipo_unidade='73') upa,
+            count(DISTINCT id_estabelecimento_cnes) FILTER (WHERE tipo_unidade='70') caps,
+            count(DISTINCT id_estabelecimento_cnes) FILTER (WHERE tipo_unidade='42') samu
+        FROM {p('br_ms_cnes','estabelecimento')} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes}""")
     return {"fonte": "br_ms_cnes", "competencia": f"{ano}-{mes:02d}",
+            "unidades": unid and {k: num(v) for k, v in unid.items()},
+            "agentes": agentes and {"competencia": f"{pam//100}-{pam%100:02d}", "acs": num(agentes["acs"]), "ace": num(agentes["ace"])},
             "estabelecimentos": est and est["n"],
             "leitos": leito and {"competencia": f"{lam//100}-{lam%100:02d}", "total": num(leito["n"]), "sus": num(leito["sus"])},
             "profissionais": prof and {"competencia": f"{pam//100}-{pam%100:02d}", "vinculos": num(prof["vinculos"])},
-            "equipes": eq and {"competencia": f"{eam//100}-{eam%100:02d}", "total": eq["n"]}}
+            "equipes": eq and {"competencia": f"{eam//100}-{eam%100:02d}", "total": eq["n"],
+                                "por_tipo": [{"tipo": t["tipo"], "n": num(t["n"])} for t in tipos]}}
 
 
 @section
@@ -1278,12 +1298,18 @@ def empresas_cnpj(mid, rf):
         FROM {base} AND situacao_cadastral='8'
           AND extract(year FROM data_situacao_cadastral) BETWEEN {ano - 10} AND {ano}
         GROUP BY 1 ORDER BY 1""")
+    # MEI é opção da empresa (CNPJ básico), não do estabelecimento: conta matrizes ativas
+    mei = one(f"""SELECT count(DISTINCT e.cnpj_basico) n
+        FROM (SELECT cnpj_basico FROM {base} AND situacao_cadastral='2' AND identificador_matriz_filial='1') e
+        JOIN {p('br_me_cnpj','simples')} s USING (cnpj_basico)
+        WHERE s.opcao_mei = 1""")
     ab = {int(a["ano"]): num(a["n"]) for a in aberturas}
     ba = {int(b["ano"]): num(b["n"]) for b in baixas}
     anos = sorted(set(ab) | set(ba))
     return {"fonte": "br_me_cnpj.estabelecimentos (id_municipio_rf) · br_bd_diretorios_brasil.cnae_2",
             "competencia": f"{ano}-{mes:02d}",
             **{k: num(v) for k, v in r.items()},
+            "mei": mei and num(mei["n"]),
             "por_secao_cnae": [{"secao": s["secao"] or "Não informado", "ativas": num(s["n"])} for s in secoes],
             "top_atividades": [{"atividade": c["atividade"], "ativas": num(c["n"])} for c in top_cnae],
             "demografia_empresarial": [{"ano": a, "aberturas": ab.get(a, 0), "baixas": ba.get(a, 0),
@@ -1464,8 +1490,17 @@ def educacao_sisu(mid):
     cursos = q(f"""SELECT nome_curso curso, any_value(sigla_ies) ies, count(DISTINCT cpf) matriculados
         FROM {t} WHERE id_municipio_candidato='{mid}' AND ano={ano} AND status_matricula='Efetivada'
         GROUP BY 1 ORDER BY 3 DESC LIMIT 6""")
+    # Vagas ofertadas em campi do município: uma linha por candidato, então
+    # deduplica curso × modalidade antes de somar.
+    vagas = q(f"""WITH v AS (SELECT DISTINCT ano, semestre, id_curso, modalidade_concorrencia, tipo_cota,
+                quantidade_vagas_concorrencia q FROM {t} WHERE id_municipio_campus='{mid}')
+        SELECT ano, sum(q) total,
+            sum(q) FILTER (WHERE tipo_cota IS NULL OR modalidade_concorrencia ILIKE 'ampla%') ampla,
+            sum(q) FILTER (WHERE NOT (tipo_cota IS NULL OR modalidade_concorrencia ILIKE 'ampla%')) cotas
+        FROM v GROUP BY 1 HAVING sum(q) IS NOT NULL ORDER BY 1""")
     return {"fonte": "br_mec_sisu.microdados (residência do candidato; matrícula efetivada, não só aprovação)",
             "ano": ano,
+            "vagas_no_municipio": [{k: num(v) for k, v in r.items()} for r in vagas],
             "serie": [{k: num(v) for k, v in s.items()} for s in serie],
             "top_cursos": [{"curso": c["curso"], "ies": c["ies"], "matriculados": num(c["matriculados"])} for c in cursos]}
 
@@ -1995,6 +2030,10 @@ def beneficios_inss(mid):
     def recorte(col):
         return [{"k": r["k"], "n": num(r["n"])} for r in q(
             f"SELECT {col} k, sum(quantidade) n FROM {t} WHERE {onde} AND {col} IS NOT NULL GROUP BY 1 ORDER BY 1")]
+    # espécie 87 = BPC da pessoa com deficiência, 88 = BPC do idoso
+    bpc = one(f"""SELECT sum(quantidade) FILTER (WHERE especie_beneficio='87') pcd,
+            sum(quantidade) FILTER (WHERE especie_beneficio='88') idoso
+        FROM {t} WHERE {onde} AND categoria_beneficio='bpc_loas'""")
     tp, ano_pop = _pop_ref()
     taxas = one(f"""WITH b AS (SELECT id_municipio, sum(quantidade) n FROM {t}
             WHERE ano={ano} AND mes={mes} GROUP BY 1),
@@ -2016,6 +2055,7 @@ def beneficios_inss(mid):
             "por_1000hab": {"municipio": taxas["mun"], "uf": taxas["uf"], "brasil": taxas["br"],
                             "ano_populacao": ano_pop},
             "por_categoria": [{"k": r["categoria"], "n": num(r["n"]), "valor": r["valor"]} for r in cat],
+            "bpc_por_tipo": {"idoso": num(bpc["idoso"]), "pcd": num(bpc["pcd"])},
             "por_clientela": recorte("clientela"), "por_sexo": recorte("sexo"),
             "por_faixa_etaria": recorte("faixa_etaria"),
             "serie": [{"ano": r["ano"], "mes": r["mes"], "beneficios": num(r["n"]), "valor_mensal": r["valor"]}
@@ -2289,6 +2329,26 @@ def _cgu_programa(t, mid_rf, col_mes, col_valor, col_pessoa):
     return {"competencia": f"{m // 100}-{m % 100:02d}", "pessoas": num(r["pessoas"]), "valor": r["valor"],
             "serie_12m": [{"mes": f"{s['mes'] // 100}-{s['mes'] % 100:02d}", "pessoas": num(s["pessoas"]),
                            "valor": s["valor"]} for s in serie]}
+
+
+@section
+def agro_credito_rural(mid):
+    """Crédito rural do SICOR (BCB) por ano de emissão. O município da operação só
+    existe em recurso_publico_complemento_operacao, que cobre as operações com
+    recurso público (PRONAF quase inteiro, ~84% das operações do país em 2025):
+    o crédito do agronegócio com recurso livre fica de fora. id_programa 1 = PRONAF."""
+    tc = p("br_bcb_sicor", "recurso_publico_complemento_operacao")
+    to = p("br_bcb_sicor", "operacao")
+    serie = q(f"""WITH c AS (SELECT DISTINCT id_referencia_bacen, numero_ordem FROM {tc} WHERE id_municipio='{mid}')
+        SELECT o.ano_emissao ano, max(o.mes_emissao) ultimo_mes, count(*) contratos, sum(o.valor_parcela_credito) valor,
+            count(*) FILTER (WHERE o.id_programa='1') contratos_pronaf,
+            sum(o.valor_parcela_credito) FILTER (WHERE o.id_programa='1') valor_pronaf
+        FROM {to} o JOIN c USING (id_referencia_bacen, numero_ordem)
+        WHERE o.ano_emissao >= {date.today().year - 10} GROUP BY 1 ORDER BY 1""")
+    if not serie:
+        return {"disponivel": False, "motivo": "nenhuma operação de crédito rural com recurso público no município"}
+    return {"fonte": "br_bcb_sicor.operacao · recurso_publico_complemento_operacao (só operações com recurso público)",
+            "serie": [{k: num(v) for k, v in r.items()} for r in serie]}
 
 
 @section
@@ -2678,7 +2738,8 @@ def main():
             "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf),
                              "aquicultura": agro_aquicultura(mid),
                              "extracao_silvicultura": agro_extracao_silvicultura(mid),
-                             "imoveis_rurais": agro_imoveis_rurais(mid)},
+                             "imoveis_rurais": agro_imoveis_rurais(mid),
+                             "credito_rural": agro_credito_rural(mid)},
             "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid),
                            "cadunico_mds": beneficios_cadunico_mds(mid),
                            "inss": beneficios_inss(mid),

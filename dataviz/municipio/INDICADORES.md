@@ -1,4 +1,4 @@
-# Painel municipal — 594 indicadores
+# Painel municipal — 606 indicadores
 
 ## Geografia
 
@@ -95,6 +95,7 @@
 | `filiais` | Estabelecimentos ativos que são filial |
 | `registradas` | Total de estabelecimentos já registrados no município |
 | `idade_media_anos` | Idade média das empresas ativas, em anos |
+| `mei` | Empresas ativas optantes pelo MEI (microempreendedor individual) |
 | `por_secao_cnae` | Empresas ativas por seção da CNAE |
 | `top_atividades` | Atividades econômicas (CNAE) com mais empresas ativas |
 | `demografia_empresarial` | Aberturas e fechamentos de empresas por ano |
@@ -139,6 +140,7 @@
 | `censo_escolar.serie` | Escolas e matrículas ao longo dos anos |
 | `sisu.serie` | Vagas e inscrições do SISU em instituições do município, por ano |
 | `sisu.top_cursos` | Cursos com mais vagas no SISU no município |
+| `sisu.vagas_no_municipio` | Vagas do SISU em campi do município, por ampla concorrência e cotas |
 | `alfabetizacao.taxa` | Alunos do 2º ano alfabetizados na rede pública (Criança Alfabetizada) |
 | `alfabetizacao.media_municipios_uf` | Média da taxa de alfabetização dos municípios da UF |
 | `alfabetizacao.serie` | Taxa de alfabetização no 2º ano, ano a ano |
@@ -183,6 +185,13 @@
 | `cnes.leitos.sus` | Leitos hospitalares disponíveis ao SUS |
 | `cnes.profissionais.vinculos` | Vínculos de profissionais de saúde cadastrados |
 | `cnes.equipes.total` | Equipes de saúde cadastradas (ESF, saúde bucal…) |
+| `cnes.equipes.por_tipo` | Equipes por tipo: Saúde da Família, Saúde Bucal, Atenção Primária, eMulti |
+| `cnes.unidades.ubs` | Unidades básicas de saúde e postos de saúde |
+| `cnes.unidades.upa` | Unidades de pronto atendimento (UPA) |
+| `cnes.unidades.caps` | Centros de Atenção Psicossocial (CAPS) |
+| `cnes.unidades.samu` | Unidades móveis de urgência (SAMU) |
+| `cnes.agentes.acs` | Agentes comunitários de saúde (ACS) |
+| `cnes.agentes.ace` | Agentes de combate às endemias (ACE) |
 | `nascidos_vivos.nascidos_vivos` | Nascidos vivos de mães residentes no ano |
 | `nascidos_vivos.pct_cesareo` | Proporção de partos cesáreos |
 | `nascidos_vivos.pct_baixo_peso` | Proporção de nascidos com menos de 2,5 kg |
@@ -617,6 +626,7 @@
 | `imoveis_rurais.cafir.imoveis_1000ha_mais` | Imóveis rurais com 1.000 ha ou mais |
 | `imoveis_rurais.cafir.area_1000ha_mais` | Área somada dos imóveis com 1.000 ha ou mais |
 | `imoveis_rurais.itr` | ITR arrecadado por ano |
+| `credito_rural.serie` | Crédito rural com recurso público por ano, com o PRONAF separado (SICOR) |
 
 ## Benefícios sociais
 
@@ -663,6 +673,8 @@
 | `inss.por_1000hab.uf` | Benefícios do INSS por mil habitantes na UF |
 | `inss.por_1000hab.brasil` | Benefícios do INSS por mil habitantes no Brasil |
 | `inss.por_categoria` | Benefícios do INSS por espécie (aposentadoria, pensão…) |
+| `inss.bpc_por_tipo.idoso` | BPC pago a pessoas idosas |
+| `inss.bpc_por_tipo.pcd` | BPC pago a pessoas com deficiência |
 | `inss.por_clientela` | Benefícios do INSS urbanos e rurais |
 | `inss.por_sexo` | Benefícios do INSS por sexo |
 | `inss.por_faixa_etaria` | Benefícios do INSS por faixa etária |

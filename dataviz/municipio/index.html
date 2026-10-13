@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Raio-x de um município brasileiro em 594 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
+<meta name="description" content="Raio-x de um município brasileiro em 606 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
 <link rel="canonical" href="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rodado">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:title" content="O município inteiro em um painel">
-<meta property="og:description" content="594 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
+<meta property="og:description" content="606 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
 <meta property="og:url" content="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Painel municipal do Rodado: Nova Friburgo (RJ) com população, empregos, IDEB e leitos SUS, e o total de 594 indicadores">
+<meta property="og:image:alt" content="Painel municipal do Rodado: Nova Friburgo (RJ) com população, empregos, IDEB e leitos SUS, e o total de 606 indicadores">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="O município inteiro em um painel">
-<meta name="twitter:description" content="594 indicadores de mais de 80 fontes públicas num só painel municipal.">
+<meta name="twitter:description" content="606 indicadores de mais de 80 fontes públicas num só painel municipal.">
 <meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <script>
 (function () {
@@ -1180,7 +1180,7 @@ details.more > .more-body { margin-top: .4rem; }
     <div class="card card-metric"><h3>Estabelecimentos <span class="vintage" id="cnesAno"></span></h3><div class="value" id="cnesEstab"></div><div class="sub">CNES</div></div>
     <div class="card card-metric st-good-b"><h3>Leitos <span class="vintage" id="cnesAno2"></span></h3><div class="value" id="cnesLeitos"></div><div class="bench" id="cnesLeitosBench"></div></div>
     <div class="card card-metric"><h3>Profissionais <span class="vintage" id="cnesAno3"></span></h3><div class="value" id="cnesProf"></div><div class="sub">Vínculos ativos</div></div>
-    <div class="card card-metric"><h3>Equipes de saúde <span class="vintage" id="cnesAno4"></span></h3><div class="value" id="cnesEquip"></div><div class="sub">ESF + NASF</div></div>
+    <div class="card card-metric"><h3>Equipes de saúde <span class="vintage" id="cnesAno4"></span></h3><div class="value" id="cnesEquip"></div><div class="sub">Cadastradas no CNES</div></div>
   </div>
   <div class="grid-3 mt-1">
     <div class="card">
@@ -4706,6 +4706,9 @@ async function init() {
       if ((b.administracao_publica || []).length) cartaoExtra('econ', { titulo: 'BNDES com a prefeitura', vintage: String(b.administracao_publica[0].ano || ''),
         lista: b.administracao_publica.slice(0, 5).map(r => [truncaPalavra(titulo(r.projeto || r.programa || ''), 48), fRealC(r.valor)]) });
     }
+    const emp = X('secoes.empresas');
+    if (emp && emp.mei != null) cartaoExtra('econ', { titulo: 'Microempreendedores individuais (MEI)', vintage: mesAno(emp.competencia),
+      valor: fNum(emp.mei), sub: 'Empresas ativas com sede no município optantes pelo MEI' + (emp.ativas ? ' · ' + fNum1(pctDe(emp.mei, emp.ativas)) + '% dos estabelecimentos ativos' : '') });
     const m = X('secoes.economia.mineracao_cfem');
     if (m) cartaoExtra('econ', { titulo: 'CFEM — royalties da mineração', vintage: String(m.ano), valor: fRealC(m.valor_ano),
       sub: 'Recolhido no ano; o município fica com 60%',
@@ -4736,6 +4739,10 @@ async function init() {
     const e = X('secoes.educacao.especial');
     if (e && (e.por_tipo || []).some(r => r.matriculas > 0)) cartaoExtra('educ', { titulo: 'Educação especial por deficiência', vintage: String(e.ano),
       barras: { linhas: top(e.por_tipo, 'tipo', 'matriculas', 8), total: 0, cor: C.s2 } });
+    const sv = X('secoes.educacao.sisu'), vg = sv && (sv.vagas_no_municipio || []).filter(r => r.total);
+    if (vg && vg.length) { const u = vg[vg.length - 1];
+      cartaoExtra('educ', { titulo: 'Vagas do SISU em campi do município', vintage: String(u.ano), valor: fNum(u.total),
+        sub: 'Soma das vagas dos dois semestres', barras: { linhas: [{ k: 'Ampla concorrência', v: u.ampla }, { k: 'Cotas e reservas', v: u.cotas }], total: u.total, cor: C.s2 } }); }
     const q = X('secoes.educacao.cnpq');
     if (q && q.serie) { const u = q.serie[q.serie.length - 1];
       cartaoExtra('educ', { titulo: 'Bolsas do CNPq com destino no município', vintage: String(u.ano), valor: fNum(u.processos),
@@ -4743,7 +4750,21 @@ async function init() {
   }
 
   // Saúde
-  { const a = X('secoes.saude.atencao_basica');
+  { const cn = X('secoes.saude.cnes');
+    if (cn && cn.equipes && (cn.equipes.por_tipo || []).length) {
+      const ROT_EQ = { eSF: 'Saúde da Família (eSF)', eSB: 'Saúde Bucal (eSB)', eAP: 'Atenção Primária (eAP)', eMulti: 'Multiprofissionais (eMulti)', outras: 'Outras' };
+      cartaoExtra('saude', { titulo: 'Equipes de saúde por tipo', vintage: mesAno(cn.equipes.competencia),
+        barras: { linhas: cn.equipes.por_tipo.map(r => ({ k: ROT_EQ[r.tipo] || r.tipo, v: r.n })), total: cn.equipes.total, cor: C.s8 } });
+    }
+    if (cn && (cn.unidades || cn.agentes)) {
+      const u = cn.unidades || {}, ag = cn.agentes || {};
+      cartaoExtra('saude', { titulo: 'Rede de atenção', vintage: mesAno(cn.competencia), lista: [
+        ['Unidades básicas de saúde (UBS e postos)', fNum(u.ubs)], ['UPA / pronto atendimento', fNum(u.upa)],
+        ['CAPS', fNum(u.caps)], ['Unidades móveis de urgência (SAMU)', fNum(u.samu)],
+        ['Agentes comunitários de saúde (ACS)' + (ag.competencia ? ' · ' + mesAno(ag.competencia) : ''), fNum(ag.acs)],
+        ['Agentes de combate às endemias (ACE)', fNum(ag.ace)]].filter(r => r[1] !== '') });
+    }
+    const a = X('secoes.saude.atencao_basica');
     if (a) cartaoExtra('saude', { titulo: 'Cobertura da atenção básica', vintage: mesAno(a.referencia), valor: fNum1(a.cobertura_ab) + '%',
       sub: 'Estratégia Saúde da Família: ' + fNum1(a.cobertura_esf) + '% · ' + fNum(a.equipes) + ' equipes. Indicador descontinuado em 2020.' }); }
 
@@ -4835,6 +4856,13 @@ async function init() {
           fNum(i.cafir.imoveis_1000ha_mais) + ' com 1.000 ha ou mais' });
       if ((i.itr || []).length) cartaoExtra('agro', { titulo: 'ITR arrecadado', vintage: String(ultAno(i.itr)),
         barras: { linhas: i.itr.slice(-8).map(r => ({ k: String(r.ano), v: r.valor })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
+    }    const cr = X('secoes.agropecuaria.credito_rural');
+    if (cr && (cr.serie || []).length) {
+      // ano corrente ainda incompleto: o cartão destaca o último ano fechado
+      const cheios = cr.serie.filter(r => r.ultimo_mes === 12), u = cheios.length ? cheios[cheios.length - 1] : cr.serie[cr.serie.length - 1];
+      cartaoExtra('agro', { titulo: 'Crédito rural — PRONAF', vintage: String(u.ano), valor: fRealC(u.valor_pronaf),
+        sub: fNum(u.contratos_pronaf) + ' contratos de agricultura familiar · ' + fNum(u.contratos) + ' com recurso público no total (' + fRealC(u.valor) + '). Crédito com recurso livre não entra.',
+        barras: { linhas: cheios.slice(-8).map(r => ({ k: String(r.ano), v: r.valor_pronaf })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
     }
   }
 
@@ -4843,6 +4871,9 @@ async function init() {
     if (p) [['gas_do_povo', 'Gás do Povo', 'famílias'], ['pe_de_meia', 'Pé-de-Meia', 'estudantes'], ['seguro_defeso', 'Seguro Defeso', 'pescadores']]
       .forEach(([k, rot, quem]) => { const b = ok(p[k]); if (!b) return;
         cartaoExtra('benef', { titulo: rot, vintage: mesAno(b.competencia), valor: fNum(b.pessoas), sub: quem + ' · ' + fRealC(b.valor) + ' no mês' }); });
+    const ib = X('secoes.beneficios.inss'), bt = ib && ib.bpc_por_tipo;
+    if (bt && (bt.idoso || bt.pcd)) cartaoExtra('benef', { titulo: 'BPC por público', vintage: mesAno(ib.competencia),
+      barras: { linhas: [{ k: 'Pessoa idosa', v: bt.idoso || 0 }, { k: 'Pessoa com deficiência', v: bt.pcd || 0 }], total: (bt.idoso || 0) + (bt.pcd || 0), cor: C.s4 } });
   }
 
   // Seções que ficaram sem nenhum cartão extra não deixam um vão no layout
