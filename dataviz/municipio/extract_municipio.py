@@ -4,6 +4,7 @@
 
 Roda NO beelink:  python3 extract_municipio.py 3303401 > nova_friburgo.json
 Do mac:           ./extract_municipio.sh 3303401 nova_friburgo
+Conferir um JSON: python3 extract_municipio.py --validar data/nova_friburgo.json index.html
 
 Cada seção é independente: falha vira {"erro": ...} sem derrubar o resto,
 então municípios com cobertura parcial (ex.: ISP só existe para RJ) geram
@@ -2686,9 +2687,72 @@ def demografia_nomes(mid):
     return {"fonte": "br_ibge_nomes_brasil.quantidade_municipio_nome_2010", "top": rows}
 
 
+def validar(doc, html=None):
+    """Avisos sobre o JSON que costumam virar erro só na tela. Nunca derruba a
+    extração: ausência no último ano é lacuna real da fonte, não bug — o aviso
+    existe para o painel tratar o caso em vez de mostrar "R$ 0".
+
+    - série anual cujo último ano veio sem campos que o ano anterior tem;
+    - ano posterior ao da extração;
+    - série que termina no ano da extração (dado ainda em aberto);
+    - blocos que falharam ({"erro": ...}).
+    Com `html`, confere também unidade duplicada no painel: formatador que já
+    escreve "%" seguido de <span class="unit">%</span>.
+    """
+    avisos = []
+    ano_ger = int(str(doc.get("gerado_em") or date.today().isoformat())[:4])
+
+    def anda(o, caminho):
+        if isinstance(o, dict):
+            if o.get("erro"):
+                avisos.append(f"{caminho}: bloco com erro — {o['erro']}")
+                return
+            for k, v in o.items():
+                anda(v, f"{caminho}.{k}" if caminho else k)
+        elif isinstance(o, list):
+            linhas = [r for r in o if isinstance(r, dict) and isinstance(r.get("ano"), int)]
+            if len(linhas) == len(o) and len(linhas) >= 2:
+                linhas = sorted(linhas, key=lambda r: r["ano"])
+                ult, ant = linhas[-1], linhas[-2]
+                if ult["ano"] != ant["ano"]:  # várias linhas por ano não são série anual
+                    # campo vazio no último ano que algum ano anterior traz
+                    faltam = {}
+                    for k, v in ult.items():
+                        if v is None:
+                            tinha = [r["ano"] for r in linhas[:-1] if r.get(k) is not None]
+                            if tinha:
+                                faltam.setdefault(tinha[-1], []).append(k)
+                    for ano_ok, campos in sorted(faltam.items()):
+                        avisos.append(f"{caminho}: {ult['ano']} sem {', '.join(campos)} "
+                                      f"(último ano com o dado: {ano_ok})")
+                    if ult["ano"] > ano_ger:
+                        avisos.append(f"{caminho}: ano {ult['ano']} é posterior à extração ({ano_ger})")
+                    elif ult["ano"] == ano_ger:
+                        avisos.append(f"{caminho}: termina em {ano_ger}, ano em curso (dado em aberto)")
+            for i, v in enumerate(o):
+                if isinstance(v, (dict, list)):
+                    anda(v, f"{caminho}[{i}]")
+
+    anda(doc.get("secoes") or {}, "secoes")
+    if html:
+        for m in re.finditer(r'data-fmt="(pct|pctRaw)"></span>\s*<span class="unit">%</span>', html):
+            linha = html.count("\n", 0, m.start()) + 1
+            avisos.append(f"index.html:{linha}: \"%\" duplicado — o formatador {m.group(1)} já escreve a unidade")
+    return avisos
+
+
 def main():
+    # --validar <arquivo.json> [index.html]: só confere um JSON já gerado, sem extrair nada
+    if len(sys.argv) >= 3 and sys.argv[1] == "--validar":
+        with open(sys.argv[2], encoding="utf-8") as f:
+            doc = json.load(f)
+        html = open(sys.argv[3], encoding="utf-8").read() if len(sys.argv) > 3 else None
+        avisos = validar(doc, html)
+        print("\n".join(avisos) if avisos else "sem avisos")
+        print(f"{len(avisos)} aviso(s) em {sys.argv[2]}", file=sys.stderr)
+        return
     if len(sys.argv) < 2:
-        sys.exit("uso: extract_municipio.py <id_municipio>")
+        sys.exit("uso: extract_municipio.py <id_municipio>  |  --validar <arquivo.json> [index.html]")
     mid = sys.argv[1]
     prof = perfil(mid)
     uf = prof.get("sigla_uf")
@@ -2796,6 +2860,9 @@ def main():
         },
     }
     json.dump(doc, sys.stdout, ensure_ascii=False, indent=1, default=str)
+    # avisos vão para o stderr: o stdout é o JSON
+    for aviso in validar(json.loads(json.dumps(doc, default=str))):
+        print("aviso:", aviso, file=sys.stderr)
 
 
 if __name__ == "__main__":
