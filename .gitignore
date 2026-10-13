@@ -11,3 +11,7 @@ dataviz/eleicoes/dados/presidente_2026/raw/
 
 # planos e anotações locais
 tasks/
+
+# painel municipal: JSON gerados em lote (um por código IBGE) ficam fora do git
+dataviz/municipio/data/[0-9][0-9][0-9][0-9][0-9][0-9][0-9].json
+dataviz/municipio/data/municipios.json

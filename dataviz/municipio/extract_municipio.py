@@ -10,6 +10,8 @@ Cada seção é independente: falha vira {"erro": ...} sem derrubar o resto,
 então municípios com cobertura parcial (ex.: ISP só existe para RJ) geram
 JSON válido do mesmo jeito.
 """
+import functools
+import inspect
 import json
 import os
 import re
@@ -50,6 +52,7 @@ def one(sql):
     return rows[0] if rows else None
 
 
+@lru_cache(maxsize=None)
 def p(dataset, table):
     """Caminho read_parquet, ignorando restos tmp*/._* quando houver arquivo bom."""
     d = os.path.join(ROOT, dataset, table)
@@ -95,8 +98,12 @@ def demojibake(txt):
     return txt
 
 
+SECOES = {}
+
+
 def section(fn):
-    """Decora seções: captura exceção como {'erro': ...}."""
+    """Decora seções: captura exceção como {'erro': ...} e registra em SECOES."""
+    @functools.wraps(fn)
     def wrap(*a, **k):
         t0, n0 = time.time(), _CONTA["consultas"]
         try:
@@ -107,6 +114,7 @@ def section(fn):
             if PERFIL:
                 print(json.dumps({"secao": fn.__name__, "s": round(time.time() - t0, 2),
                                   "consultas": _CONTA["consultas"] - n0}), file=sys.stderr)
+    SECOES[fn.__name__] = wrap
     return wrap
 
 
@@ -2135,6 +2143,7 @@ def social_sinpatinhas(mid):
 
 
 # ============================================ fontes do espelho ainda não usadas
+@lru_cache(maxsize=None)
 def pr(dataset, table):
     """read_parquet recursivo: tabelas particionadas (ano=*/) ou com esquema que
     muda entre arquivos."""
@@ -2741,6 +2750,121 @@ def validar(doc, html=None):
     return avisos
 
 
+def contexto(mid, prof):
+    """Argumentos que as seções recebem, tirados do perfil do município."""
+    return {"mid": mid, "uf": prof.get("sigla_uf"), "nome": prof.get("nome") or "",
+            "nome_uf": prof.get("nome_uf") or "", "rf": prof.get("id_municipio_rf")}
+
+
+def args_secao(nome, ctx):
+    return {k: ctx[k] for k in inspect.signature(SECOES[nome]).parameters}
+
+
+def monta(prof, S):
+    """Documento do município. `S(nome)` devolve o bloco da seção: no modo de um
+    município chama a função; no lote (extract_lote.py) lê o bloco já calculado."""
+    return {
+        "schema_version": 1,
+        "gerado_em": date.today().isoformat(),
+        "gerador": "rodado",
+        "municipio": prof,
+        "secoes": {
+            "geografia": S("geografia"),
+            "demografia": {**S("demografia"), "censo_extra": S("demografia_censo_extra"),
+                           "nomes": S("demografia_nomes")},
+            "economia": {
+                "pib": S("economia_pib"),
+                "financas_publicas": S("economia_siconfi"),
+                "bancario": S("economia_estban"),
+                "inpc_brasil": S("economia_inpc"),
+                "combustiveis": S("economia_combustiveis"),
+                "pix": S("economia_pix"),
+                "bndes": S("economia_bndes"),
+                "mineracao_cfem": S("mineracao_cfem"),
+            },
+            "empresas": S("empresas_cnpj"),
+            "educacao": {
+                "ideb": S("educacao_ideb"),
+                "saeb": S("educacao_saeb"),
+                "indicadores": S("educacao_indicadores"),
+                "enem": S("educacao_enem"),
+                "censo_escolar": S("educacao_censo_escolar"),
+                "sisu": S("educacao_sisu"),
+                "alfabetizacao": S("educacao_alfabetizacao"),
+                "inse": S("educacao_inse"),
+                "superior": S("educacao_superior"),
+                "conectada": S("educacao_conectada"),
+                "especial": S("educacao_especial"),
+                "cnpq": S("educacao_cnpq"),
+            },
+            "saude": {
+                "cnes": S("saude_cnes"),
+                "nascidos_vivos": S("saude_sinasc"),
+                "dengue": S("saude_dengue"),
+                "sisvan": S("saude_sisvan"),
+                "mortalidade": S("saude_mortalidade"),
+                "internacoes": S("saude_internacoes"),
+                "ieps": S("saude_ieps"),
+                "imunizacao": S("saude_imunizacao"),
+                "planos_privados": S("saude_planos"),
+                "farmacia_popular": S("saude_farmacia_popular"),
+                "atencao_basica": S("saude_atencao_basica"),
+            },
+            "seguranca": {"isp_rj": S("seguranca_isp"), "fbsp": S("seguranca_fbsp"),
+                          "violencia_sinan": S("seguranca_violencia"),
+                          "sinesp": S("seguranca_sinesp"),
+                          "prf": S("seguranca_prf"),
+                          "sisdepen": S("seguranca_sisdepen")},
+            "infraestrutura": {"snis": S("infra_snis"), "atlas_esgotos": S("infra_ana"),
+                               "censo_domicilios": S("infra_censo_domicilios"),
+                               "frota": S("infra_frota"),
+                               "energia_gd": S("energia_gd"),
+                               "energia_continuidade": S("energia_continuidade"),
+                               "obras_cno": S("infra_obras_cno"),
+                               "outorgas_agua": S("infra_outorgas_agua")},
+            "meio_ambiente": {
+                "prodes": S("ambiente_prodes"), "seeg": S("ambiente_seeg"),
+                "queimadas": S("ambiente_queimadas"), "sisam": S("ambiente_sisam"),
+                "mapbiomas": S("ambiente_mapbiomas"),
+                "car": S("ambiente_car"), "ibama": S("ambiente_ibama"),
+                "desastres": S("desastres_reconhecimentos"), "estacoes_inmet": S("clima_estacoes"),
+            },
+            "conectividade": S("conectividade"),
+            "politica": {**S("politica"),
+                         "camara_municipal": S("politica_camara"),
+                         "deputados_nascidos": S("politica_deputados_nascidos"),
+                         "filiados": S("politica_filiados"),
+                         "financas_campanha": S("politica_financas_campanha")},
+            "transparencia": {**S("transparencia"),
+                              "emendas": S("transp_emendas"),
+                              "compras_federais": S("transp_compras_federais"),
+                              "diarios_oficiais": S("transp_diarios"),
+                              "fiscal": S("transp_fiscal"),
+                              "consumidor": S("transp_consumidor"),
+                              "servidores": S("transp_servidores"),
+                              "cauc": S("transp_cauc"),
+                              "fiscalizacao_cgu": S("transp_fiscalizacao_cgu")},
+            "social": {**S("social"), "sinpatinhas": S("social_sinpatinhas"),
+                       "rouanet": S("cultura_rouanet")},
+            "comercio_exterior": S("comex"),
+            "trabalho": {"rais": S("trabalho_rais"), "caged": S("trabalho_caged"),
+                         "top_empregadores": S("trabalho_top_empregadores"),
+                         "top_empregadores_publicos": S("trabalho_top_empregadores_publicos"),
+                         "lista_suja": S("trabalho_lista_suja")},
+            "agropecuaria": {**S("agropecuaria"), "assentamentos": S("agro_assentamentos"),
+                             "aquicultura": S("agro_aquicultura"),
+                             "extracao_silvicultura": S("agro_extracao_silvicultura"),
+                             "imoveis_rurais": S("agro_imoveis_rurais"),
+                             "credito_rural": S("agro_credito_rural")},
+            "beneficios": {**S("beneficios"), "cadastro_unico": S("beneficios_cadunico"),
+                           "cadunico_mds": S("beneficios_cadunico_mds"),
+                           "inss": S("beneficios_inss"),
+                           "programas_cgu": S("beneficios_programas_cgu")},
+            "vizinhanca": S("vizinhanca"),
+        },
+    }
+
+
 def main():
     # --validar <arquivo.json> [index.html]: só confere um JSON já gerado, sem extrair nada
     if len(sys.argv) >= 3 and sys.argv[1] == "--validar":
@@ -2755,110 +2879,8 @@ def main():
         sys.exit("uso: extract_municipio.py <id_municipio>  |  --validar <arquivo.json> [index.html]")
     mid = sys.argv[1]
     prof = perfil(mid)
-    uf = prof.get("sigla_uf")
-    nome = prof.get("nome") or ""
-    nome_uf = prof.get("nome_uf") or ""
-    rf = prof.get("id_municipio_rf")
-    doc = {
-        "schema_version": 1,
-        "gerado_em": date.today().isoformat(),
-        "gerador": "rodado",
-        "municipio": prof,
-        "secoes": {
-            "geografia": geografia(mid),
-            "demografia": {**demografia(mid), "censo_extra": demografia_censo_extra(mid),
-                           "nomes": demografia_nomes(mid)},
-            "economia": {
-                "pib": economia_pib(mid, uf),
-                "financas_publicas": economia_siconfi(mid),
-                "bancario": economia_estban(mid),
-                "inpc_brasil": economia_inpc(),
-                "combustiveis": economia_combustiveis(mid, nome, nome_uf),
-                "pix": economia_pix(mid),
-                "bndes": economia_bndes(mid),
-                "mineracao_cfem": mineracao_cfem(mid),
-            },
-            "empresas": empresas_cnpj(mid, rf),
-            "educacao": {
-                "ideb": educacao_ideb(mid, uf),
-                "saeb": educacao_saeb(mid),
-                "indicadores": educacao_indicadores(mid),
-                "enem": educacao_enem(mid),
-                "censo_escolar": educacao_censo_escolar(mid),
-                "sisu": educacao_sisu(mid),
-                "alfabetizacao": educacao_alfabetizacao(mid),
-                "inse": educacao_inse(mid),
-                "superior": educacao_superior(mid),
-                "conectada": educacao_conectada(mid),
-                "especial": educacao_especial(mid),
-                "cnpq": educacao_cnpq(nome, uf),
-            },
-            "saude": {
-                "cnes": saude_cnes(mid),
-                "nascidos_vivos": saude_sinasc(mid),
-                "dengue": saude_dengue(mid),
-                "sisvan": saude_sisvan(mid),
-                "mortalidade": saude_mortalidade(mid),
-                "internacoes": saude_internacoes(mid),
-                "ieps": saude_ieps(mid),
-                "imunizacao": saude_imunizacao(mid),
-                "planos_privados": saude_planos(mid),
-                "farmacia_popular": saude_farmacia_popular(mid),
-                "atencao_basica": saude_atencao_basica(mid),
-            },
-            "seguranca": {"isp_rj": seguranca_isp(mid, uf), "fbsp": seguranca_fbsp(mid),
-                          "violencia_sinan": seguranca_violencia(mid),
-                          "sinesp": seguranca_sinesp(mid),
-                          "prf": seguranca_prf(mid),
-                          "sisdepen": seguranca_sisdepen(mid)},
-            "infraestrutura": {"snis": infra_snis(mid), "atlas_esgotos": infra_ana(mid),
-                               "censo_domicilios": infra_censo_domicilios(mid),
-                               "frota": infra_frota(mid, uf),
-                               "energia_gd": energia_gd(mid),
-                               "energia_continuidade": energia_continuidade(nome),
-                               "obras_cno": infra_obras_cno(mid),
-                               "outorgas_agua": infra_outorgas_agua(nome, uf)},
-            "meio_ambiente": {
-                "prodes": ambiente_prodes(mid), "seeg": ambiente_seeg(mid),
-                "queimadas": ambiente_queimadas(mid), "sisam": ambiente_sisam(mid),
-                "mapbiomas": ambiente_mapbiomas(mid),
-                "car": ambiente_car(mid), "ibama": ambiente_ibama(mid),
-                "desastres": desastres_reconhecimentos(mid), "estacoes_inmet": clima_estacoes(mid),
-            },
-            "conectividade": conectividade(mid),
-            "politica": {**politica(mid),
-                         "camara_municipal": politica_camara(mid),
-                         "deputados_nascidos": politica_deputados_nascidos(mid),
-                         "filiados": politica_filiados(mid),
-                         "financas_campanha": politica_financas_campanha(mid)},
-            "transparencia": {**transparencia(mid),
-                              "emendas": transp_emendas(mid),
-                              "compras_federais": transp_compras_federais(mid, rf),
-                              "diarios_oficiais": transp_diarios(mid),
-                              "fiscal": transp_fiscal(mid),
-                              "consumidor": transp_consumidor(mid, nome, uf),
-                              "servidores": transp_servidores(mid),
-                              "cauc": transp_cauc(mid),
-                              "fiscalizacao_cgu": transp_fiscalizacao_cgu(mid)},
-            "social": {**social(mid), "sinpatinhas": social_sinpatinhas(mid),
-                       "rouanet": cultura_rouanet(nome, nome_uf)},
-            "comercio_exterior": comex(mid),
-            "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
-                         "top_empregadores": trabalho_top_empregadores(mid),
-                         "top_empregadores_publicos": trabalho_top_empregadores_publicos(mid),
-                         "lista_suja": trabalho_lista_suja(nome, uf)},
-            "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf),
-                             "aquicultura": agro_aquicultura(mid),
-                             "extracao_silvicultura": agro_extracao_silvicultura(mid),
-                             "imoveis_rurais": agro_imoveis_rurais(mid),
-                             "credito_rural": agro_credito_rural(mid)},
-            "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid),
-                           "cadunico_mds": beneficios_cadunico_mds(mid),
-                           "inss": beneficios_inss(mid),
-                           "programas_cgu": beneficios_programas_cgu(mid, rf)},
-            "vizinhanca": vizinhanca(mid),
-        },
-    }
+    ctx = contexto(mid, prof)
+    doc = monta(prof, lambda nome: SECOES[nome](**args_secao(nome, ctx)))
     json.dump(doc, sys.stdout, ensure_ascii=False, indent=1, default=str)
     # avisos vão para o stderr: o stdout é o JSON
     for aviso in validar(json.loads(json.dumps(doc, default=str))):
