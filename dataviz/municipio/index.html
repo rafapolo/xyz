@@ -554,8 +554,10 @@ details.more > .more-body { margin-top: .4rem; }
     padding: calc(.6rem + env(safe-area-inset-top, 0px)) .75rem .55rem;
   }
   .hero-badge { font-size: .68rem; padding: .18rem .65rem .18rem .5rem; gap: .3rem; }
-  /* o selo fica à direita do nome; só desce para a linha de baixo se não couber */
-  .hero-row { flex-wrap: wrap; gap: .35rem .6rem; }
+  /* nome e selo na mesma linha: o selo perde o "Rodado ·" e nome comprido quebra em duas linhas, sem empurrar o selo para baixo */
+  .hero-row { flex-wrap: nowrap; gap: .6rem; }
+  .hero-row h1 { flex: 1 1 auto; }
+  .hero-badge .marca { display: none; }
   .hero-sec { display: none; }
   .hero-theme { display: flex; width: 24px; height: 24px; font-size: .7rem; }
   .hero-side { gap: .35rem; }
@@ -677,7 +679,7 @@ details.more > .more-body { margin-top: .4rem; }
     <h1><span data-path="municipio.nome"></span> <span style="font-weight:400;color:var(--text2)">/</span> <span data-path="municipio.sigla_uf"></span></h1>
     <span class="hero-sec" id="heroSec" aria-hidden="true"></span>
     <div class="hero-side">
-      <a class="hero-badge" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="dot"></span>Rodado <span class="sep">·</span> <strong id="nIndicadoresHero">—</strong> <span class="lbl">indicadores</span></a>
+      <a class="hero-badge" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="dot"></span><span class="marca">Rodado <span class="sep">·</span></span> <strong id="nIndicadoresHero">—</strong> <span class="lbl">indicadores</span></a>
       <button class="theme-toggle hero-theme" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
     </div>
   </div>
