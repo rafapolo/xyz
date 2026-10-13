@@ -150,10 +150,15 @@ a { color: inherit; text-decoration: none; }
 .sidebar-item.active { color: var(--accent); background: rgba(var(--accent-rgb),.1); border-left-color: var(--accent); }
 .sidebar-item .s-icon { font-size: .85rem; flex-shrink: 0; opacity: .7; }
 .sidebar-item.active .s-icon { opacity: 1; }
-.sidebar-footer { padding: .75rem 1rem; border-top: 1px solid var(--border); font-size: .7rem; color: var(--text3); flex-shrink: 0; }
-.sidebar-footer b { color: var(--text); font-weight: 600; }
-.sidebar-footer a { color: var(--accent, var(--s1)); text-decoration: none; }
-.sidebar-footer a:hover { text-decoration: underline; }
+.sidebar-footer { padding: .9rem 1rem 1rem; border-top: 1px solid var(--border); flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: .15rem; text-align: center; }
+.sidebar-footer .sf-num { font-size: 1.45rem; font-weight: 700; line-height: 1.1; color: var(--text);
+  font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.sidebar-footer .sf-rot { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); }
+.sidebar-footer .sf-link { margin-top: .55rem; display: inline-flex; align-items: center; gap: .3rem;
+  padding: .3rem .75rem; border: 1px solid var(--border); border-radius: 999px; font-size: .7rem;
+  color: var(--accent); text-decoration: none; transition: background .15s, border-color .15s; }
+.sidebar-footer .sf-link:hover { background: rgba(var(--accent-rgb), .1); border-color: rgba(var(--accent-rgb), .45); }
 
 /* HERO */
 .hero { position: relative; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow: hidden; }
@@ -515,7 +520,11 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer"><b id="nIndicadores">—</b> indicadores · <span id="nTemas">22</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
+  <div class="sidebar-footer">
+    <span class="sf-num" id="nIndicadores">—</span>
+    <span class="sf-rot">indicadores em <span id="nTemas">21</span> temas</span>
+    <a class="sf-link" href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz ↗</a>
+  </div>
 </div>
 
 <!-- MAIN -->
