@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "gerado_em": "2026-09-25",
+ "gerado_em": "2026-10-13",
  "gerador": "rodado",
  "municipio": {
   "fonte": "br_bd_diretorios_brasil.municipio · br_ibge_censo_2022.municipio",
@@ -591,32 +591,77 @@
       }
      ]
     }
+   },
+   "nomes": {
+    "fonte": "br_ibge_nomes_brasil.quantidade_municipio_nome_2010",
+    "top": [
+     {
+      "nome": "Maria",
+      "pessoas": 9397
+     },
+     {
+      "nome": "Jose",
+      "pessoas": 3788
+     },
+     {
+      "nome": "Ana",
+      "pessoas": 3144
+     },
+     {
+      "nome": "Joao",
+      "pessoas": 2620
+     },
+     {
+      "nome": "Carlos",
+      "pessoas": 2021
+     },
+     {
+      "nome": "Paulo",
+      "pessoas": 1716
+     },
+     {
+      "nome": "Antonio",
+      "pessoas": 1556
+     },
+     {
+      "nome": "Luiz",
+      "pessoas": 1483
+     },
+     {
+      "nome": "Lucas",
+      "pessoas": 1188
+     },
+     {
+      "nome": "Marcos",
+      "pessoas": 1142
+     },
+     {
+      "nome": "Pedro",
+      "pessoas": 1062
+     },
+     {
+      "nome": "Jorge",
+      "pessoas": 1042
+     },
+     {
+      "nome": "Gabriel",
+      "pessoas": 994
+     },
+     {
+      "nome": "Marcelo",
+      "pessoas": 866
+     },
+     {
+      "nome": "Leonardo",
+      "pessoas": 832
+     }
+    ]
    }
   },
   "economia": {
    "pib": {
     "fonte": "br_ibge_pib.municipio",
     "serie": [
-     {
-      "ano": 2010,
-      "pib": 2921047000,
-      "impostos_liquidos": 265094000,
-      "va": 2655953000,
-      "va_agropecuaria": 42853000,
-      "va_industria": 505759000,
-      "va_servicos": 1326632000,
-      "va_adespss": 780710000
-     },
-     {
-      "ano": 2011,
-      "pib": 3036478000,
-      "impostos_liquidos": 274181000,
-      "va": 2762298000,
-      "va_agropecuaria": 71953000,
-      "va_industria": 477217000,
-      "va_servicos": 1368871000,
-      "va_adespss": 844257000
-     },
      {
       "ano": 2012,
       "pib": 3423564000,
@@ -709,101 +754,125 @@
      },
      {
       "ano": 2021,
-      "pib": 6324935000,
-      "impostos_liquidos": 662874000,
-      "va": 5662061000,
+      "pib": 6324877000,
+      "impostos_liquidos": 662873000,
+      "va": 5662004000,
       "va_agropecuaria": 130267000,
-      "va_industria": 768817000,
-      "va_servicos": 3169034000,
-      "va_adespss": 1593943000
+      "va_industria": 768815000,
+      "va_servicos": 3169022000,
+      "va_adespss": 1593900000
+     },
+     {
+      "ano": 2022,
+      "pib": 6774950000,
+      "impostos_liquidos": null,
+      "va": null,
+      "va_agropecuaria": null,
+      "va_industria": null,
+      "va_servicos": null,
+      "va_adespss": null
+     },
+     {
+      "ano": 2023,
+      "pib": 7367567000,
+      "impostos_liquidos": null,
+      "va": null,
+      "va_agropecuaria": null,
+      "va_industria": null,
+      "va_servicos": null,
+      "va_adespss": null
      }
     ],
     "pib_per_capita": {
-     "ano": 2021,
-     "valor": 33000.12000166959,
-     "uf": 54359.60559455119,
-     "brasil": 42247.523703372695
+     "ano": 2023,
+     "valor": 38789.121770673744,
+     "uf": 73052.55252917222,
+     "brasil": 53887.22274857544
     },
     "ranking_uf": {
-     "posicao": 23,
+     "posicao": 22,
      "total": 92,
-     "ano": 2021
+     "ano": 2023
     }
    },
    "financas_publicas": {
     "fonte": "br_me_siconfi",
-    "ano": 2024,
+    "ano": 2025,
     "receitas": {
-     "total": 901059035.25,
-     "receitas_correntes": 879322685.03,
-     "receitas_capital": 2169795.0,
-     "impostos": 181172495.65,
-     "fpm": 133286339.94,
-     "icms": 97625201.51,
-     "iptu": 71975850.6,
-     "iss": 64012960.91,
-     "fundeb": 114185627.91,
-     "sus": 87509427.22
+     "total": 963609670.05,
+     "receitas_correntes": 948894721.46,
+     "receitas_capital": 3271714.56,
+     "impostos": 200609814.67,
+     "fpm": 146313086.33,
+     "icms": 103207084.47,
+     "iptu": 79045991.48,
+     "iss": 68475224.93,
+     "fundeb": 132538967.63,
+     "sus": 103316971.81
     },
     "despesas_funcao": [
      {
       "funcao": "Saúde",
-      "valor": 310050017.86
+      "valor": 339198705.39
      },
      {
       "funcao": "Educação",
-      "valor": 241936117.69
+      "valor": 253647809.94
      },
      {
       "funcao": "Administração",
-      "valor": 152305002.84
+      "valor": 178592049.79
      },
      {
       "funcao": "Urbanismo",
-      "valor": 61128536.23
+      "valor": 60338765.8
      },
      {
       "funcao": "Previdência Social",
-      "valor": 20559688.49
+      "valor": 23505726.8
      },
      {
       "funcao": "Legislativa",
-      "valor": 19246770.42
+      "valor": 22539045.91
      },
      {
       "funcao": "Comércio e Serviços",
-      "valor": 17602324.24
+      "valor": 17173045.68
      },
      {
       "funcao": "Assistência Social",
-      "valor": 10608067.34
+      "valor": 7541830.84
      },
      {
       "funcao": "Transporte",
-      "valor": 9180510.54
+      "valor": 5321144.0
      },
      {
       "funcao": "Cultura",
-      "valor": 6589233.94
+      "valor": 3764335.14
      },
      {
       "funcao": "Desporto e Lazer",
-      "valor": 2474151.28
+      "valor": 2508399.48
      },
      {
       "funcao": "Agricultura",
-      "valor": 2452200.0
+      "valor": 1737590.29
      },
      {
       "funcao": "Gestão Ambiental",
-      "valor": 819638.75
+      "valor": 1017349.11
+     },
+     {
+      "funcao": "Segurança Pública",
+      "valor": 384300.0
      },
      {
       "funcao": "Ciência e Tecnologia",
-      "valor": 19000.0
+      "valor": 25100.0
      }
     ],
-    "despesas_total_empenhado": 877243084.1700001
+    "despesas_total_empenhado": 931760564.14
    },
    "bancario": {
     "fonte": "br_bcb_estban",
@@ -836,11 +905,11 @@
    },
    "inpc_brasil": {
     "fonte": "br_ibge_inpc.mes_brasil (Brasil)",
-    "ano": 2025,
-    "mes": 8,
-    "variacao_mensal": -0.21,
-    "variacao_anual": 3.08,
-    "variacao_doze_meses": 5.05
+    "ano": 2026,
+    "mes": 2,
+    "variacao_mensal": 0.56,
+    "variacao_anual": 0.95,
+    "variacao_doze_meses": 3.36
    },
    "combustiveis": {
     "fonte": "br_anp_combustiveis.precos (nome do município + estado)",
@@ -848,198 +917,726 @@
     "produtos": [
      {
       "produto": "DIESEL S10",
-      "preco_municipio": 7.4536734693877555,
-      "preco_uf": 7.180895196506549,
-      "preco_brasil": 7.084553581122775,
-      "postos": 7,
-      "ultima_coleta": "2026-07-22"
+      "preco_municipio": 7.465000000000001,
+      "preco_uf": 7.126366165831948,
+      "preco_brasil": 7.059121203499651,
+      "postos": 6,
+      "ultima_coleta": "2026-09-30"
      },
      {
       "produto": "DIESEL S500",
-      "preco_municipio": 7.23235294117647,
-      "preco_uf": 7.046253746253749,
-      "preco_brasil": 6.825002442598945,
+      "preco_municipio": 7.188799999999999,
+      "preco_uf": 6.949619341563786,
+      "preco_brasil": 6.696812944056383,
       "postos": 6,
-      "ultima_coleta": "2026-07-22"
+      "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "ETANOL",
-      "preco_municipio": 4.976741573033707,
-      "preco_uf": 4.8930256622516595,
-      "preco_brasil": 4.421222610827194,
+      "preco_municipio": 4.790253164556963,
+      "preco_uf": 4.787172797262621,
+      "preco_brasil": 4.2854436032413075,
       "postos": 11,
-      "ultima_coleta": "2026-07-22"
+      "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GASOLINA ADITIVADA",
-      "preco_municipio": 7.159000000000001,
-      "preco_uf": 6.880504532912888,
-      "preco_brasil": 6.840901029085804,
+      "preco_municipio": 7.162666666666667,
+      "preco_uf": 6.845111662531019,
+      "preco_brasil": 6.764444845343988,
       "postos": 10,
-      "ultima_coleta": "2026-07-22"
+      "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GASOLINA COMUM",
-      "preco_municipio": 7.007499999999999,
-      "preco_uf": 6.709298682805261,
-      "preco_brasil": 6.643828423141522,
+      "preco_municipio": 6.978924731182795,
+      "preco_uf": 6.667098426637392,
+      "preco_brasil": 6.564172353874524,
       "postos": 12,
-      "ultima_coleta": "2026-07-22"
+      "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GLP",
-      "preco_municipio": 108.06161290322581,
-      "preco_uf": 106.24099762470318,
-      "preco_brasil": 115.52725191644927,
+      "preco_municipio": 111.69064516129032,
+      "preco_uf": 107.13616397366856,
+      "preco_brasil": 115.58484623067064,
       "postos": 7,
-      "ultima_coleta": "2026-07-22"
+      "ultima_coleta": "2026-09-30"
+     }
+    ]
+   },
+   "pix": {
+    "fonte": "br_bcb_pix_municipio.transacoes",
+    "competencia": "2026-10",
+    "valor_pago": 307973697.73,
+    "valor_recebido": 319390974.05,
+    "transacoes_pagas": 845086,
+    "transacoes_recebidas": 700460,
+    "pagadores_pf": 111595,
+    "pagadores_pj": 11164,
+    "pagadores_pf_por_hab": 0.5486021325651248,
+    "serie": [
+     {
+      "mes": "2023-11",
+      "pago": 959549484.86,
+      "recebido": 1013892576.1700001
+     },
+     {
+      "mes": "2023-12",
+      "pago": 1064461605.09,
+      "recebido": 1121279931.55
+     },
+     {
+      "mes": "2024-01",
+      "pago": 972870612.87,
+      "recebido": 1031981076.72
+     },
+     {
+      "mes": "2024-02",
+      "pago": 935536485.4200001,
+      "recebido": 975157091.74
+     },
+     {
+      "mes": "2024-03",
+      "pago": 1031236643.65,
+      "recebido": 1078059738.26
+     },
+     {
+      "mes": "2024-04",
+      "pago": 1092639994.56,
+      "recebido": 1140560897.94
+     },
+     {
+      "mes": "2024-05",
+      "pago": 1114506204.62,
+      "recebido": 1149623802.01
+     },
+     {
+      "mes": "2024-06",
+      "pago": 1122114393.9,
+      "recebido": 1163756005.14
+     },
+     {
+      "mes": "2024-07",
+      "pago": 1228439017.3000002,
+      "recebido": 1267524950.92
+     },
+     {
+      "mes": "2024-08",
+      "pago": 1219105008.91,
+      "recebido": 1270952614.21
+     },
+     {
+      "mes": "2024-09",
+      "pago": 1224634102.3600001,
+      "recebido": 1260412941.38
+     },
+     {
+      "mes": "2024-10",
+      "pago": 1304634263.33,
+      "recebido": 1358865970.4299998
+     },
+     {
+      "mes": "2024-11",
+      "pago": 1311689445.79,
+      "recebido": 1359027489.05
+     },
+     {
+      "mes": "2024-12",
+      "pago": 1465465026.1399999,
+      "recebido": 1506462954.72
+     },
+     {
+      "mes": "2025-01",
+      "pago": 1236008010.9,
+      "recebido": 1269302951.4
+     },
+     {
+      "mes": "2025-02",
+      "pago": 1274773389.21,
+      "recebido": 1326699674.54
+     },
+     {
+      "mes": "2025-03",
+      "pago": 1303356501.9499998,
+      "recebido": 1355205765.85
+     },
+     {
+      "mes": "2025-04",
+      "pago": 1384407176.71,
+      "recebido": 1428407572.88
+     },
+     {
+      "mes": "2025-05",
+      "pago": 1473658192.81,
+      "recebido": 1551193572.91
+     },
+     {
+      "mes": "2025-06",
+      "pago": 1462319228.25,
+      "recebido": 1521742943.62
+     },
+     {
+      "mes": "2025-07",
+      "pago": 1538153777.56,
+      "recebido": 1598648393.76
+     },
+     {
+      "mes": "2025-08",
+      "pago": 1514605428.76,
+      "recebido": 1579828617.15
+     },
+     {
+      "mes": "2025-09",
+      "pago": 1569506510.37,
+      "recebido": 1627330872.0900002
+     },
+     {
+      "mes": "2025-10",
+      "pago": 1559537074.3400002,
+      "recebido": 1611019478.04
+     },
+     {
+      "mes": "2025-11",
+      "pago": 1629838230.45,
+      "recebido": 1669512534.6599998
+     },
+     {
+      "mes": "2025-12",
+      "pago": 1863650375.8899999,
+      "recebido": 1920631482.39
+     },
+     {
+      "mes": "2026-01",
+      "pago": 1560392956.42,
+      "recebido": 1589959801.5300002
+     },
+     {
+      "mes": "2026-02",
+      "pago": 1443671169.32,
+      "recebido": 1480097347.52
+     },
+     {
+      "mes": "2026-03",
+      "pago": 1713055991.02,
+      "recebido": 1755725973.51
+     },
+     {
+      "mes": "2026-04",
+      "pago": 1649892448.33,
+      "recebido": 1702247585.83
+     },
+     {
+      "mes": "2026-05",
+      "pago": 1724591662.26,
+      "recebido": 1772665472.78
+     },
+     {
+      "mes": "2026-06",
+      "pago": 1734698274.88,
+      "recebido": 1803116299.49
+     },
+     {
+      "mes": "2026-07",
+      "pago": 1835867405.62,
+      "recebido": 1883540800.8899999
+     },
+     {
+      "mes": "2026-08",
+      "pago": 1815692263.08,
+      "recebido": 1846223971.85
+     },
+     {
+      "mes": "2026-09",
+      "pago": 1774140167.44,
+      "recebido": 1821502914.85
+     },
+     {
+      "mes": "2026-10",
+      "pago": 307973697.73,
+      "recebido": 319390974.05
+     }
+    ]
+   },
+   "bndes": {
+    "fonte": "br_bndes_operacoes_contratadas",
+    "serie_indiretas": [
+     {
+      "ano": 2015,
+      "operacoes": 65,
+      "desembolsado": 9639632.0
+     },
+     {
+      "ano": 2016,
+      "operacoes": 110,
+      "desembolsado": 27391132.0
+     },
+     {
+      "ano": 2017,
+      "operacoes": 67,
+      "desembolsado": 23520276.0
+     },
+     {
+      "ano": 2018,
+      "operacoes": 40,
+      "desembolsado": 12121405.0
+     },
+     {
+      "ano": 2019,
+      "operacoes": 58,
+      "desembolsado": 18986330.0
+     },
+     {
+      "ano": 2020,
+      "operacoes": 72,
+      "desembolsado": 11607672.0
+     },
+     {
+      "ano": 2021,
+      "operacoes": 41,
+      "desembolsado": 6302000.0
+     },
+     {
+      "ano": 2022,
+      "operacoes": 23,
+      "desembolsado": 5836226.0
+     },
+     {
+      "ano": 2023,
+      "operacoes": 15,
+      "desembolsado": 22285448.0
+     },
+     {
+      "ano": 2024,
+      "operacoes": 35,
+      "desembolsado": 19552002.0
+     },
+     {
+      "ano": 2025,
+      "operacoes": 43,
+      "desembolsado": 29852929.0
+     },
+     {
+      "ano": 2026,
+      "operacoes": 33,
+      "desembolsado": 10542439.0
+     }
+    ],
+    "porte_5a": [
+     {
+      "porte": "MÉDIA",
+      "operacoes": 62,
+      "desembolsado": 62897105.0
+     },
+     {
+      "porte": "PEQUENA",
+      "operacoes": 89,
+      "desembolsado": 23721392.0
+     },
+     {
+      "porte": "MICRO",
+      "operacoes": 35,
+      "desembolsado": 6487601.0
+     },
+     {
+      "porte": "GRANDE",
+      "operacoes": 4,
+      "desembolsado": 1264946.0
+     }
+    ],
+    "setor_5a": [
+     {
+      "setor": "COMERCIO/SERVICOS",
+      "desembolsado": 36410912.0
+     },
+     {
+      "setor": "INFRA-ESTRUTURA",
+      "desembolsado": 33273296.0
+     },
+     {
+      "setor": "INDUSTRIA",
+      "desembolsado": 24686836.0
+     }
+    ],
+    "nao_automaticas": [
+     {
+      "contratacao": "2018-12-27",
+      "cliente": "AGUAS DE NOVA FRIBURGO LTDA.",
+      "projeto": "APOIAR PLANO DE INVESTIMENTOS 2018 - 2021 PARA A AMPLIACAO EMELHORIAS DA INFRAESTRUTURA DOS SISTEMAS DE AGUA E ESGOTO D A CONCESSIONARIA (COLETA, DISTRIBUICAO, TRATAMENTO).",
+      "produto": "BNDES FINEM",
+      "situacao": "ATIVO",
+      "valor": 27505000.0,
+      "desembolsado": 27271410.8
+     },
+     {
+      "contratacao": "2018-12-27",
+      "cliente": "AGUAS DE NOVA FRIBURGO LTDA.",
+      "projeto": "APOIAR PLANO DE INVESTIMENTOS 2018 - 2021 PARA A AMPLIACAO EMELHORIAS DA INFRAESTRUTURA DOS SISTEMAS DE AGUA E ESGOTO D A CONCESSIONARIA (COLETA, DISTRIBUICAO, TRATAMENTO).",
+      "produto": "BNDES FINEM",
+      "situacao": "ATIVO",
+      "valor": 54161000.0,
+      "desembolsado": 42201504.2
+     },
+     {
+      "contratacao": "2015-12-15",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "EXPANSAO, MODERNIZACAO E ADEQUACAO DO SISTEMA DE DISTRIBUICAO DE ENERGIA ELETRICA NAS AREAS DE CONCESSAO DAS DISTRIBUIDORAS DE ENERGIAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 2576549.2,
+      "desembolsado": 2576549.2
+     },
+     {
+      "contratacao": "2015-12-15",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "EXPANSAO, MODERNIZACAO E ADEQUACAO DO SISTEMA DE DISTRIBUICAO DE ENERGIA ELETRICA NAS AREAS DE CONCESSAO DAS DISTRIBUIDORAS DE ENERGIAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 2576549.2,
+      "desembolsado": 2576549.2
+     },
+     {
+      "contratacao": "2015-12-15",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "EXPANSAO, MODERNIZACAO E ADEQUACAO DO SISTEMA DE DISTRIBUICAO DE ENERGIA ELETRICA NAS AREAS DE CONCESSAO DAS DISTRIBUIDORAS DE ENERGIAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 2754672.66,
+      "desembolsado": 2571282.1
+     },
+     {
+      "contratacao": "2014-06-13",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "PLANO DE INVESTIMENTOS COM O OBJETIVO DE MELHORAR A SEGURANCA, ATENDER AS OBRIGACOES REGULATORIAS, AMPLIAR A CAPACIDADE INSTALADA, CONECTAR NOVAS CARGAS, MELHORAR A QUALIDADE E REDUZIR AS PERDAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 1730400.0,
+      "desembolsado": 1368699.93
+     },
+     {
+      "contratacao": "2014-06-13",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "PLANO DE INVESTIMENTOS COM O OBJETIVO DE MELHORAR A SEGURANCA, ATENDER AS OBRIGACOES REGULATORIAS, AMPLIAR A CAPACIDADE INSTALADA, CONECTAR NOVAS CARGAS, MELHORAR A QUALIDADE E REDUZIR AS PERDAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 1219800.0,
+      "desembolsado": 964829.06
+     },
+     {
+      "contratacao": "2014-06-13",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "PLANO DE INVESTIMENTOS COM O OBJETIVO DE MELHORAR A SEGURANCA, ATENDER AS OBRIGACOES REGULATORIAS, AMPLIAR A CAPACIDADE INSTALADA, CONECTAR NOVAS CARGAS, MELHORAR A QUALIDADE E REDUZIR AS PERDAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 2846200.0,
+      "desembolsado": 2251267.79
+     },
+     {
+      "contratacao": "2014-06-13",
+      "cliente": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
+      "projeto": "PLANO DE INVESTIMENTOS COM O OBJETIVO DE MELHORAR A SEGURANCA, ATENDER AS OBRIGACOES REGULATORIAS, AMPLIAR A CAPACIDADE INSTALADA, CONECTAR NOVAS CARGAS, MELHORAR A QUALIDADE E REDUZIR AS PERDAS.",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 741600.0,
+      "desembolsado": 586585.69
+     },
+     {
+      "contratacao": "2011-06-20",
+      "cliente": "AGUAS DE NOVA FRIBURGO LTDA.",
+      "projeto": "EXECUCAO DO PLANO DE INVESTIMENTOS DA POSTULANTE REFERENTE AO PERIODO DE 2010-2014, QUE VISA A RECONTRUCAO, MODERNIZACAOE EXPANSAO DOS SISTEMAS DE ABASTECIMENTO DE AGUA E ESGOTAME NTO SANITARIO DO MUNICIPIO DE NOVA FRIBURGO-RJ",
+      "produto": "BNDES FINEM",
+      "situacao": "LIQUIDADO",
+      "valor": 44816100.0,
+      "desembolsado": 44849358.52
+     }
+    ],
+    "administracao_publica": [
+     {
+      "ano": 2014,
+      "ente": "Administração Municipal",
+      "programa": "PROVIAS",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 11611750.0,
+      "desembolsado": 11270287.0
+     },
+     {
+      "ano": 2007,
+      "ente": "Administração Municipal",
+      "programa": "PROVIAS",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 384000.0,
+      "desembolsado": 384000.0
+     },
+     {
+      "ano": 2007,
+      "ente": "Administração Municipal",
+      "programa": "PROVIAS",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 381150.0,
+      "desembolsado": 381150.0
+     },
+     {
+      "ano": 2007,
+      "ente": "Administração Municipal",
+      "programa": "PROVIAS",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 884600.0,
+      "desembolsado": 884600.0
+     },
+     {
+      "ano": 2003,
+      "ente": "Administração Municipal",
+      "programa": "PMAT",
+      "projeto": "PROGRAMA DE MODERNIZACAO DA ADMINISTRACAO TRIBUTARIA E DA   GESTAO DOS SETORES SOCIAIS BASICOS",
+      "situacao": "LIQUIDADA",
+      "valor": 2286000.0,
+      "desembolsado": 2460300.0
+     },
+     {
+      "ano": 1996,
+      "ente": "Administração Municipal",
+      "programa": "MAQ.EQUIP.-COMERC.",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 175685.0,
+      "desembolsado": 175560.0
+     },
+     {
+      "ano": 1996,
+      "ente": "Administração Municipal",
+      "programa": "MAQ.EQUIP.-COMERC.",
+      "projeto": "FINAME - FINANCIAMENTO A COMPRADORA DE MAQUINA/EQUIP. OU SERVICO",
+      "situacao": "LIQUIDADA",
+      "valor": 126986.0,
+      "desembolsado": 126775.0
+     }
+    ]
+   },
+   "mineracao_cfem": {
+    "fonte": "br_anm.cfem_cfem_arrecadacao",
+    "ano": 2025,
+    "valor_ano": 9544.859999999999,
+    "serie": [
+     {
+      "ano": 2015,
+      "valor": 150845.37,
+      "pagadores": 4
+     },
+     {
+      "ano": 2016,
+      "valor": 146519.58000000005,
+      "pagadores": 4
+     },
+     {
+      "ano": 2017,
+      "valor": 238641.13999999996,
+      "pagadores": 4
+     },
+     {
+      "ano": 2018,
+      "valor": 164697.28000000003,
+      "pagadores": 4
+     },
+     {
+      "ano": 2019,
+      "valor": 115666.86000000002,
+      "pagadores": 4
+     },
+     {
+      "ano": 2020,
+      "valor": 118588.94999999998,
+      "pagadores": 5
+     },
+     {
+      "ano": 2021,
+      "valor": 102333.9,
+      "pagadores": 5
+     },
+     {
+      "ano": 2022,
+      "valor": 9030.460000000001,
+      "pagadores": 6
+     },
+     {
+      "ano": 2023,
+      "valor": 5728.26,
+      "pagadores": 4
+     },
+     {
+      "ano": 2024,
+      "valor": 7525.29,
+      "pagadores": 4
+     },
+     {
+      "ano": 2025,
+      "valor": 9544.859999999999,
+      "pagadores": 4
+     },
+     {
+      "ano": 2026,
+      "valor": 5301.379999999999,
+      "pagadores": 4
+     }
+    ],
+    "substancias": [
+     {
+      "substancia": "ÁGUA MINERAL",
+      "valor": 7169.690000000002
+     },
+     {
+      "substancia": "AREIA",
+      "valor": 2375.17
      }
     ]
    }
   },
   "empresas": {
    "fonte": "br_me_cnpj.estabelecimentos (id_municipio_rf) · br_bd_diretorios_brasil.cnae_2",
-   "competencia": "2025-09",
-   "ativas": 32255,
-   "baixadas": 36745,
-   "matrizes": 31248,
-   "filiais": 1007,
-   "registradas": 78211,
-   "idade_media_anos": 9.153526585025578,
+   "competencia": "2026-09",
+   "ativas": 33710,
+   "baixadas": 40281,
+   "matrizes": 32699,
+   "filiais": 1011,
+   "registradas": 84072,
+   "idade_media_anos": 7.88798576090181,
    "por_secao_cnae": [
     {
      "secao": "Comércio; Reparação De Veículos Automotores E Motocicletas",
-     "ativas": 9541
+     "ativas": 9812
     },
     {
      "secao": "Indústrias De Transformação",
-     "ativas": 5332
+     "ativas": 5449
     },
     {
      "secao": "Outras Atividades De Serviços",
-     "ativas": 3069
-    },
-    {
-     "secao": "Alojamento E Alimentação",
-     "ativas": 2473
-    },
-    {
-     "secao": "Atividades Administrativas E Serviços Complementares",
-     "ativas": 2199
+     "ativas": 3093
     },
     {
      "secao": "Transporte, Armazenagem E Correio",
-     "ativas": 2003
+     "ativas": 2450
+    },
+    {
+     "secao": "Alojamento E Alimentação",
+     "ativas": 2444
+    },
+    {
+     "secao": "Atividades Administrativas E Serviços Complementares",
+     "ativas": 2312
     },
     {
      "secao": "Construção",
-     "ativas": 1920
+     "ativas": 1931
     },
     {
      "secao": "Atividades Profissionais, Científicas E Técnicas",
-     "ativas": 1499
+     "ativas": 1650
     }
    ],
    "top_atividades": [
     {
      "atividade": "Comércio varejista de artigos do vestuário e acessórios",
-     "ativas": 3472
+     "ativas": 3722
     },
     {
      "atividade": "Confecção de roupas íntimas",
-     "ativas": 1293
+     "ativas": 1230
     },
     {
      "atividade": "Cabeleireiros, manicure e pedicure",
-     "ativas": 1217
+     "ativas": 1220
     },
     {
      "atividade": "Obras de alvenaria",
-     "ativas": 1006
+     "ativas": 1019
     },
     {
      "atividade": "Promoção de vendas",
-     "ativas": 708
+     "ativas": 795
     },
     {
      "atividade": "Confecção de peças do vestuário, exceto roupas íntimas e as confeccionadas sob medida",
-     "ativas": 644
+     "ativas": 721
     },
     {
      "atividade": "Condomínios prediais",
-     "ativas": 619
+     "ativas": 633
     },
     {
-     "atividade": "Restaurantes e similares",
-     "ativas": 567
+     "atividade": "Transporte rodoviário de carga, exceto produtos perigosos e mudanças, municipal",
+     "ativas": 632
     }
    ],
    "demografia_empresarial": [
     {
-     "ano": 2015,
-     "aberturas": 2421,
-     "baixas": 1815,
-     "saldo": 606
-    },
-    {
      "ano": 2016,
-     "aberturas": 3040,
-     "baixas": 1546,
-     "saldo": 1494
+     "aberturas": 3041,
+     "baixas": 1548,
+     "saldo": 1493
     },
     {
      "ano": 2017,
-     "aberturas": 2861,
+     "aberturas": 2862,
      "baixas": 1261,
-     "saldo": 1600
+     "saldo": 1601
     },
     {
      "ano": 2018,
-     "aberturas": 3321,
-     "baixas": 2891,
-     "saldo": 430
+     "aberturas": 3331,
+     "baixas": 2892,
+     "saldo": 439
     },
     {
      "ano": 2019,
      "aberturas": 3635,
-     "baixas": 1585,
-     "saldo": 2050
+     "baixas": 1588,
+     "saldo": 2047
     },
     {
      "ano": 2020,
-     "aberturas": 4422,
+     "aberturas": 4425,
      "baixas": 1376,
-     "saldo": 3046
+     "saldo": 3049
     },
     {
      "ano": 2021,
-     "aberturas": 5106,
+     "aberturas": 5128,
      "baixas": 2528,
-     "saldo": 2578
+     "saldo": 2600
     },
     {
      "ano": 2022,
-     "aberturas": 4497,
+     "aberturas": 4502,
      "baixas": 2091,
-     "saldo": 2406
+     "saldo": 2411
     },
     {
      "ano": 2023,
-     "aberturas": 4240,
+     "aberturas": 4244,
      "baixas": 2744,
-     "saldo": 1496
+     "saldo": 1500
     },
     {
      "ano": 2024,
-     "aberturas": 5238,
-     "baixas": 3476,
-     "saldo": 1762
+     "aberturas": 5257,
+     "baixas": 3478,
+     "saldo": 1779
     },
     {
      "ano": 2025,
-     "aberturas": 4225,
-     "baixas": 2507,
-     "saldo": 1718
+     "aberturas": 5648,
+     "baixas": 3492,
+     "saldo": 2156
+    },
+    {
+     "ano": 2026,
+     "aberturas": 4361,
+     "baixas": 2526,
+     "saldo": 1835
     }
    ]
   },
@@ -1100,6 +1697,12 @@
       "ideb": 6.0,
       "meta": null,
       "taxa_aprovacao": 89.7
+     },
+     {
+      "ano": 2025,
+      "ideb": 6.6,
+      "meta": null,
+      "taxa_aprovacao": 93.4
      }
     ],
     "finais": [
@@ -1156,15 +1759,21 @@
       "ideb": 4.5,
       "meta": null,
       "taxa_aprovacao": 84.2
+     },
+     {
+      "ano": 2025,
+      "ideb": 5.0,
+      "meta": null,
+      "taxa_aprovacao": 93.3
      }
     ],
     "referencia_uf": {
-     "finais": 4.5,
-     "iniciais": 5.5
+     "iniciais": 5.8,
+     "finais": 4.7
     },
     "referencia_brasil": {
-     "finais": 4.7,
-     "iniciais": 5.7
+     "finais": 5.0,
+     "iniciais": 6.1
     }
    },
    "saeb": {
@@ -1256,63 +1865,58 @@
     "presentes": 3132,
     "redacao": 698.4133738601823,
     "linguagens": 538.1975683890578,
-    "matematica": 577.1218710089398,
+    "matematica": 577.1218710089399,
     "humanas": 548.4902431610942,
     "natureza": 520.0523627075353,
     "media_geral": 579.3218030157201
    },
    "censo_escolar": {
     "fonte": "br_inep_censo_escolar.escola (escolas em atividade)",
-    "ano": 2024,
-    "escolas": 200,
-    "matriculas": 44040,
-    "docentes": 3109,
-    "turmas": 2236,
-    "escolas_rurais": 53,
-    "com_internet": 200,
-    "com_biblioteca": 82,
-    "com_quadra": 74,
-    "com_laboratorio": 54,
+    "ano": 2025,
+    "escolas": 201,
+    "matriculas": 42440,
+    "docentes": 3297,
+    "turmas": 2280,
+    "escolas_rurais": 54,
+    "com_internet": 201,
+    "com_biblioteca": 72,
+    "com_quadra": 80,
+    "com_laboratorio": 51,
     "com_esgoto_rede": 154,
     "com_rampa_acessibilidade": 119,
-    "matriculas_infantil": 8488,
-    "matriculas_fundamental": 21372,
-    "matriculas_medio": 5880,
-    "matriculas_eja": 2280,
-    "matriculas_especial": 1927,
-    "matriculas_transporte": 10783,
+    "matriculas_infantil": 8456,
+    "matriculas_fundamental": 21194,
+    "matriculas_medio": 5719,
+    "matriculas_eja": 2034,
+    "matriculas_especial": 2127,
+    "matriculas_transporte": 11476,
     "por_rede": [
      {
       "rede": "Municipal",
       "escolas": 123,
-      "matriculas": 17689,
-      "docentes": 1283
+      "matriculas": 17807,
+      "docentes": 1349
      },
      {
       "rede": "Privada",
-      "escolas": 50,
-      "matriculas": 15759,
-      "docentes": 1047
+      "escolas": 51,
+      "matriculas": 14703,
+      "docentes": 1057
      },
      {
       "rede": "Estadual",
       "escolas": 26,
-      "matriculas": 10484,
-      "docentes": 751
+      "matriculas": 9821,
+      "docentes": 862
      },
      {
       "rede": "Federal",
       "escolas": 1,
-      "matriculas": 108,
-      "docentes": 28
+      "matriculas": 109,
+      "docentes": 29
      }
     ],
     "serie": [
-     {
-      "ano": 2015,
-      "escolas": 212,
-      "matriculas": 42332
-     },
      {
       "ano": 2016,
       "escolas": 206,
@@ -1357,6 +1961,11 @@
       "ano": 2024,
       "escolas": 200,
       "matriculas": 44040
+     },
+     {
+      "ano": 2025,
+      "escolas": 201,
+      "matriculas": 42440
      }
     ]
    },
@@ -1383,14 +1992,14 @@
       "candidatos": 2207,
       "aprovados": 1186,
       "matriculados": 230,
-      "nota_media": 627.9808094848734
+      "nota_media": 627.9808094848735
      },
      {
       "ano": 2020,
       "candidatos": 2101,
       "aprovados": 1074,
       "matriculados": 213,
-      "nota_media": 618.8937660327289
+      "nota_media": 618.8937660327288
      },
      {
       "ano": 2021,
@@ -1424,19 +2033,460 @@
       "matriculados": 14
      },
      {
-      "curso": "FONOAUDIOLOGIA",
-      "ies": "UFRJ",
-      "matriculados": 13
-     },
-     {
       "curso": "ODONTOLOGIA",
       "ies": "UFF",
       "matriculados": 13
      },
      {
-      "curso": "BIOMEDICINA",
+      "curso": "FONOAUDIOLOGIA",
       "ies": "UFF",
+      "matriculados": 13
+     },
+     {
+      "curso": "FÍSICA",
+      "ies": "CEFET/RJ",
       "matriculados": 8
+     }
+    ]
+   },
+   "alfabetizacao": {
+    "fonte": "br_inep_avaliacao_alfabetizacao.municipio",
+    "ano": 2024,
+    "taxa": 68.84,
+    "media_municipios_uf": 58.742826086956526,
+    "serie": [
+     {
+      "ano": 2023,
+      "taxa_alfabetizacao": 65.29
+     },
+     {
+      "ano": 2024,
+      "taxa_alfabetizacao": 68.84
+     }
+    ],
+    "metas": [
+     {
+      "ano": 2023,
+      "id_municipio": "3303401",
+      "rede": "Municipal",
+      "taxa_alfabetizacao": 65.3,
+      "meta_alfabetizacao_2024": 67.69,
+      "meta_alfabetizacao_2025": 70.0,
+      "meta_alfabetizacao_2026": 72.22,
+      "meta_alfabetizacao_2027": 74.33,
+      "meta_alfabetizacao_2028": 76.33,
+      "meta_alfabetizacao_2029": 78.22,
+      "meta_alfabetizacao_2030": 80.0,
+      "nivel_alfabetizacao": 3,
+      "percentual_participacao": 82.36
+     },
+     {
+      "ano": 2024,
+      "id_municipio": "3303401",
+      "rede": "Municipal",
+      "taxa_alfabetizacao": 68.84,
+      "meta_alfabetizacao_2024": 67.69,
+      "meta_alfabetizacao_2025": 70.0,
+      "meta_alfabetizacao_2026": 72.22,
+      "meta_alfabetizacao_2027": 74.33,
+      "meta_alfabetizacao_2028": 76.33,
+      "meta_alfabetizacao_2029": 78.22,
+      "meta_alfabetizacao_2030": 80.0,
+      "nivel_alfabetizacao": 3,
+      "percentual_participacao": 84.85
+     }
+    ]
+   },
+   "inse": {
+    "fonte": "br_inep_indicador_nivel_socioeconomico.municipio",
+    "ano": 2021,
+    "inse": 5.18,
+    "alunos": 3270,
+    "media_municipios_uf": 5.062065217391304,
+    "media_municipios_br": 4.858620065193763,
+    "niveis_pct": [
+     {
+      "nivel": 1,
+      "pct": 0.39
+     },
+     {
+      "nivel": 2,
+      "pct": 3.89
+     },
+     {
+      "nivel": 3,
+      "pct": 12.36
+     },
+     {
+      "nivel": 4,
+      "pct": 23.68
+     },
+     {
+      "nivel": 5,
+      "pct": 26.51
+     },
+     {
+      "nivel": 6,
+      "pct": 20.39
+     },
+     {
+      "nivel": 7,
+      "pct": 12.13
+     },
+     {
+      "nivel": 8,
+      "pct": 0.66
+     }
+    ]
+   },
+   "superior": {
+    "fonte": "br_inep_censo_educacao_superior.curso",
+    "ano": 2024,
+    "cursos": 902,
+    "ies": 32,
+    "vagas": 10132,
+    "ingressantes": 4627,
+    "matriculas": 10751,
+    "concluintes": 1616,
+    "cursos_presenciais": 27,
+    "matriculas_presenciais": 4633,
+    "matriculas_ead": 6118,
+    "por_rede": [
+     {
+      "rede": "Privada",
+      "matriculas": 8607
+     },
+     {
+      "rede": "Pública",
+      "matriculas": 2144
+     }
+    ],
+    "por_area": [
+     {
+      "area": "Saúde e bem-estar",
+      "matriculas": 3340
+     },
+     {
+      "area": "Negócios, administração e direito",
+      "matriculas": 2571
+     },
+     {
+      "area": "Engenharia, produção e construção",
+      "matriculas": 1201
+     },
+     {
+      "area": "Educação",
+      "matriculas": 1125
+     },
+     {
+      "area": "Computação e Tecnologias da Informação e Comunicação (TIC)",
+      "matriculas": 874
+     },
+     {
+      "area": "Ciências sociais, comunicação e informação",
+      "matriculas": 720
+     },
+     {
+      "area": "Serviços",
+      "matriculas": 346
+     },
+     {
+      "area": "Agricultura, silvicultura, pesca e veterinária",
+      "matriculas": 316
+     },
+     {
+      "area": "Artes e humanidades",
+      "matriculas": 204
+     },
+     {
+      "area": "Ciências naturais, matemática e estatística",
+      "matriculas": 43
+     }
+    ],
+    "serie_matriculas": [
+     {
+      "ano": 2009,
+      "matriculas": 6620
+     },
+     {
+      "ano": 2010,
+      "matriculas": 7213
+     },
+     {
+      "ano": 2011,
+      "matriculas": 6937
+     },
+     {
+      "ano": 2012,
+      "matriculas": 7059
+     },
+     {
+      "ano": 2013,
+      "matriculas": 7314
+     },
+     {
+      "ano": 2014,
+      "matriculas": 7896
+     },
+     {
+      "ano": 2015,
+      "matriculas": 9007
+     },
+     {
+      "ano": 2016,
+      "matriculas": 9923
+     },
+     {
+      "ano": 2017,
+      "matriculas": 10679
+     },
+     {
+      "ano": 2018,
+      "matriculas": 10459
+     },
+     {
+      "ano": 2019,
+      "matriculas": 9988
+     },
+     {
+      "ano": 2020,
+      "matriculas": 11126
+     },
+     {
+      "ano": 2021,
+      "matriculas": 11021
+     },
+     {
+      "ano": 2022,
+      "matriculas": 10987
+     },
+     {
+      "ano": 2023,
+      "matriculas": 10773
+     },
+     {
+      "ano": 2024,
+      "matriculas": 10751
+     }
+    ]
+   },
+   "conectada": {
+    "fonte": "br_simet_educacao_conectada.escola",
+    "ano": 2023,
+    "escolas": 148,
+    "com_internet": 148,
+    "internet_aprendizagem": 68,
+    "laboratorio": 36,
+    "medidas": 97,
+    "download_mediano": 55.19,
+    "adequadas": 18,
+    "por_faixa": [
+     {
+      "faixa": "Com Mais De 50 Mbits/S",
+      "escolas": 52
+     },
+     {
+      "faixa": "Sem Medidor Instalado",
+      "escolas": 51
+     },
+     {
+      "faixa": "Com 20 A 50 Mbits/S",
+      "escolas": 33
+     },
+     {
+      "faixa": null,
+      "escolas": 12
+     }
+    ]
+   },
+   "especial": {
+    "fonte": "br_inep_educacao_especial.tipo_deficiencia",
+    "ano": 2024,
+    "por_tipo": [
+     {
+      "tipo": "Transtorno do Espectro Autista",
+      "matriculas": 902.0
+     },
+     {
+      "tipo": "Deficiência Intelectual",
+      "matriculas": 844.0
+     },
+     {
+      "tipo": "Deficiência Física",
+      "matriculas": 154.0
+     },
+     {
+      "tipo": "Baixa Visão",
+      "matriculas": 71.0
+     },
+     {
+      "tipo": "Deficiência Múltipla",
+      "matriculas": 66.0
+     },
+     {
+      "tipo": "Deficiência Auditiva",
+      "matriculas": 48.0
+     },
+     {
+      "tipo": "Altas Habilidade/Superdotação",
+      "matriculas": 25.0
+     },
+     {
+      "tipo": "Surdez",
+      "matriculas": 10.0
+     },
+     {
+      "tipo": "Cegueira",
+      "matriculas": 4.0
+     },
+     {
+      "tipo": "Surdocegueira",
+      "matriculas": 0.0
+     }
+    ],
+    "por_classe": [
+     {
+      "classe": "Classes Comuns",
+      "matriculas": 1995.0
+     },
+     {
+      "classe": "Classes Exclusivas",
+      "matriculas": 129.0
+     }
+    ]
+   },
+   "cnpq": {
+    "fonte": "br_cnpq_bolsas.microdados",
+    "ano": 2022,
+    "serie": [
+     {
+      "ano": 2002,
+      "processos": 3,
+      "valor": 34229.16
+     },
+     {
+      "ano": 2003,
+      "processos": 6,
+      "valor": 67203.06
+     },
+     {
+      "ano": 2004,
+      "processos": 9,
+      "valor": 130051.35999999999
+     },
+     {
+      "ano": 2005,
+      "processos": 13,
+      "valor": 163493.91999999998
+     },
+     {
+      "ano": 2006,
+      "processos": 14,
+      "valor": 225248.07
+     },
+     {
+      "ano": 2007,
+      "processos": 20,
+      "valor": 376754.33
+     },
+     {
+      "ano": 2008,
+      "processos": 14,
+      "valor": 136659.47999999998
+     },
+     {
+      "ano": 2009,
+      "processos": 17,
+      "valor": 128740.34
+     },
+     {
+      "ano": 2010,
+      "processos": 19,
+      "valor": 169747.4
+     },
+     {
+      "ano": 2011,
+      "processos": 15,
+      "valor": 151684.91
+     },
+     {
+      "ano": 2012,
+      "processos": 6,
+      "valor": 78867.35
+     },
+     {
+      "ano": 2013,
+      "processos": 2,
+      "valor": 31500.0
+     },
+     {
+      "ano": 2014,
+      "processos": 2,
+      "valor": 44600.0
+     },
+     {
+      "ano": 2015,
+      "processos": 8,
+      "valor": 187000.0
+     },
+     {
+      "ano": 2016,
+      "processos": 10,
+      "valor": 182600.0
+     },
+     {
+      "ano": 2017,
+      "processos": 10,
+      "valor": 191700.0
+     },
+     {
+      "ano": 2018,
+      "processos": 10,
+      "valor": 153800.0
+     },
+     {
+      "ano": 2019,
+      "processos": 5,
+      "valor": 73000.0
+     },
+     {
+      "ano": 2020,
+      "processos": 5,
+      "valor": 120800.0
+     },
+     {
+      "ano": 2021,
+      "processos": 9,
+      "valor": 130800.0
+     },
+     {
+      "ano": 2022,
+      "processos": 8,
+      "valor": 131800.0
+     }
+    ],
+    "por_modalidade": [
+     {
+      "modalidade": "PQ ",
+      "processos": 8
+     }
+    ],
+    "por_instituicao": [
+     {
+      "instituicao": "DEPARTAMENTO DE ENGENHARIA MECÂNICA E ENERGIA",
+      "processos": 3
+     },
+     {
+      "instituicao": "INSTITUTO POLITÉCNICO",
+      "processos": 3
+     },
+     {
+      "instituicao": "DEPARTAMENTO DE MATERIAIS",
+      "processos": 1
+     },
+     {
+      "instituicao": "DEPARTAMENTO DE MODELAGEM COMPUTACIONAL",
+      "processos": 1
      }
     ]
    }
@@ -1447,17 +2497,17 @@
     "competencia": "2025-08",
     "estabelecimentos": 745,
     "leitos": {
-     "competencia": "2024-03",
-     "total": 585,
-     "sus": 341
+     "competencia": "2026-02",
+     "total": 649,
+     "sus": 389
     },
     "profissionais": {
      "competencia": "2025-01",
      "vinculos": 5759
     },
     "equipes": {
-     "competencia": "2025-08",
-     "total": 45
+     "competencia": "2026-02",
+     "total": 52
     }
    },
    "nascidos_vivos": {
@@ -1467,9 +2517,9 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
-     "9": 10,
      "2": 66,
      "1": 24,
+     "9": 10,
      "3": 316,
      "4": 1419
     }
@@ -1487,8 +2537,8 @@
      "10|1": 363,
      "10|None": 2,
      "12|1": 2,
-     "11|1": 9,
-     "8 |None": 18
+     "8 |None": 18,
+     "11|1": 9
     }
    },
    "sisvan": {
@@ -1500,120 +2550,100 @@
    },
    "mortalidade": {
     "fonte": "br_ms_sim.microdados (residência) · br_datasus_cid10",
-    "ano": 2022,
-    "populacao_referencia": 189939,
-    "obitos": 1679,
+    "ano": 2026,
+    "populacao_referencia": null,
+    "obitos": 517,
     "obitos_infantis": 10,
-    "obitos_neonatais": 7,
-    "idade_media_obito": 71.36983040581465,
-    "homens": 870,
-    "mulheres": 807,
-    "causas_externas": 101,
+    "obitos_neonatais": 9,
+    "idade_media_obito": 70.23644660194175,
+    "homens": 0,
+    "mulheres": 0,
+    "causas_externas": 35,
     "suicidios": 9,
-    "agressoes": 9,
-    "transporte": 13,
+    "agressoes": 2,
+    "transporte": 1,
     "maternas": 0,
-    "mal_definidas": 134,
-    "taxa_mortalidade_1000hab": 8.83968010782409,
-    "nascidos_vivos": 1835,
-    "taxa_mortalidade_infantil_1000nv": 5.449591280653951,
+    "mal_definidas": 30,
+    "taxa_mortalidade_1000hab": null,
+    "nascidos_vivos": 0,
+    "taxa_mortalidade_infantil_1000nv": null,
     "por_capitulo": [
      {
       "capitulo": "IX.  Doenças do aparelho circulatório",
-      "obitos": 404
+      "obitos": 144
      },
      {
       "capitulo": "II.  Neoplasias (tumores)",
-      "obitos": 281
+      "obitos": 103
      },
      {
       "capitulo": "X.   Doenças do aparelho respiratório",
-      "obitos": 201
-     },
-     {
-      "capitulo": "IV.  Doenças endócrinas nutricionais e metabólicas",
-      "obitos": 134
-     },
-     {
-      "capitulo": "XVIII.Sint sinais e achad anorm ex clín e laborat",
-      "obitos": 134
-     },
-     {
-      "capitulo": "I.   Algumas doenças infecciosas e parasitárias",
-      "obitos": 132
+      "obitos": 63
      },
      {
       "capitulo": "XX.  Causas externas de morbidade e mortalidade",
-      "obitos": 101
+      "obitos": 35
+     },
+     {
+      "capitulo": "IV.  Doenças endócrinas nutricionais e metabólicas",
+      "obitos": 32
+     },
+     {
+      "capitulo": "XVIII.Sint sinais e achad anorm ex clín e laborat",
+      "obitos": 30
+     },
+     {
+      "capitulo": "XIV. Doenças do aparelho geniturinário",
+      "obitos": 27
      },
      {
       "capitulo": "XI.  Doenças do aparelho digestivo",
-      "obitos": 76
+      "obitos": 27
      }
     ],
     "top_causas": [
      {
-      "cid": "R99",
-      "descricao": "Outras causas mal definidas e as não especificadas de mortalidade",
-      "obitos": 107
-     },
-     {
-      "cid": "B342",
-      "descricao": "Infecção por coronavírus de localização não especificada",
-      "obitos": 78
-     },
-     {
       "cid": "I219",
       "descricao": "Infarto agudo do miocárdio não especificado",
-      "obitos": 73
-     },
-     {
-      "cid": "E149",
-      "descricao": "Diabetes mellitus não especificado - sem complicações",
-      "obitos": 59
+      "obitos": 31
      },
      {
       "cid": "J189",
       "descricao": "Pneumonia não especificada",
-      "obitos": 54
+      "obitos": 27
      },
      {
-      "cid": "J449",
-      "descricao": "Doença pulmonar obstrutiva crônica não especificada",
-      "obitos": 47
+      "cid": "I249",
+      "descricao": "Doença isquêmica aguda do coração não especificada",
+      "obitos": 23
      },
      {
-      "cid": "I10",
-      "descricao": "Hipertensão essencial (primária)",
-      "obitos": 40
+      "cid": "R99",
+      "descricao": "Outras causas mal definidas e as não especificadas de mortalidade",
+      "obitos": 19
      },
      {
       "cid": "N390",
       "descricao": "Infecção do trato urinário de localização não especificada",
-      "obitos": 38
+      "obitos": 17
+     },
+     {
+      "cid": "Y349",
+      "descricao": "Fatos ou eventos não especificados e intenção não determinada - local não especificado",
+      "obitos": 14
+     },
+     {
+      "cid": "I10",
+      "descricao": "Hipertensão essencial (primária)",
+      "obitos": 13
+     },
+     {
+      "cid": "C349",
+      "descricao": "Neoplasia maligna dos brônquios ou pulmões, não especificado",
+      "obitos": 11
      }
     ],
     "serie": [
-     {
-      "ano": 2011,
-      "obitos": 1778,
-      "infantis": 36
-     },
-     {
-      "ano": 2012,
-      "obitos": 1388,
-      "infantis": 26
-     },
-     {
-      "ano": 2013,
-      "obitos": 1526,
-      "infantis": 30
-     },
-     {
-      "ano": 2014,
-      "obitos": 1515,
-      "infantis": 22
-     },
      {
       "ano": 2015,
       "obitos": 1563,
@@ -1651,7 +2681,27 @@
      },
      {
       "ano": 2022,
-      "obitos": 1679,
+      "obitos": 1841,
+      "infantis": 10
+     },
+     {
+      "ano": 2023,
+      "obitos": 1754,
+      "infantis": 27
+     },
+     {
+      "ano": 2024,
+      "obitos": 1888,
+      "infantis": 21
+     },
+     {
+      "ano": 2025,
+      "obitos": 1884,
+      "infantis": 22
+     },
+     {
+      "ano": 2026,
+      "obitos": 517,
       "infantis": 10
      }
     ]
@@ -1677,7 +2727,7 @@
      {
       "capitulo": "IX.  Doenças do aparelho circulatório",
       "internacoes": 1861,
-      "valor": 7971759.269999996
+      "valor": 7971759.269999995
      },
      {
       "capitulo": "XIX. Lesões enven e alg out conseq causas externas",
@@ -1687,7 +2737,7 @@
      {
       "capitulo": "I.   Algumas doenças infecciosas e parasitárias",
       "internacoes": 1265,
-      "valor": 4456568.639999998
+      "valor": 4456568.639999999
      },
      {
       "capitulo": "X.   Doenças do aparelho respiratório",
@@ -1697,17 +2747,17 @@
      {
       "capitulo": "XI.  Doenças do aparelho digestivo",
       "internacoes": 1164,
-      "valor": 2825916.4999999995
+      "valor": 2825916.4999999986
      },
      {
       "capitulo": "XIV. Doenças do aparelho geniturinário",
       "internacoes": 885,
-      "valor": 1294414.3399999999
+      "valor": 1294414.3399999996
      },
      {
       "capitulo": "XV.  Gravidez parto e puerpério",
       "internacoes": 835,
-      "valor": 413703.89000000054
+      "valor": 413703.8900000006
      },
      {
       "capitulo": "II.  Neoplasias (tumores)",
@@ -1719,42 +2769,42 @@
      {
       "ano": 2015,
       "internacoes": 9140,
-      "valor": 14858672.520000022
+      "valor": 14858672.520000035
      },
      {
       "ano": 2016,
       "internacoes": 9193,
-      "valor": 14398007.060000017
+      "valor": 14398007.060000014
      },
      {
       "ano": 2017,
       "internacoes": 9345,
-      "valor": 14780826.09
+      "valor": 14780826.09000001
      },
      {
       "ano": 2018,
       "internacoes": 9659,
-      "valor": 16021076.859999992
+      "valor": 16021076.85999999
      },
      {
       "ano": 2019,
       "internacoes": 9945,
-      "valor": 16572105.579999996
+      "valor": 16572105.579999998
      },
      {
       "ano": 2020,
       "internacoes": 7749,
-      "valor": 14998325.309999991
+      "valor": 14998325.309999987
      },
      {
       "ano": 2021,
       "internacoes": 9031,
-      "valor": 20613815.54000003
+      "valor": 20613815.540000025
      },
      {
       "ano": 2022,
       "internacoes": 9254,
-      "valor": 19807955.800000012
+      "valor": 19807955.80000002
      },
      {
       "ano": 2023,
@@ -1764,7 +2814,7 @@
      {
       "ano": 2024,
       "internacoes": 11267,
-      "valor": 26760932.480000094
+      "valor": 26760932.48000007
      }
     ]
    },
@@ -1937,14 +2987,121 @@
       "beneficiarios": 8588
      },
      {
-      "tipo": "Individual Ou Familiar + Coletivo Empresarial + Coletivo Por Adesão",
+      "tipo": "Não Identificado",
       "beneficiarios": 1
      }
     ]
    },
    "farmacia_popular": {
     "fonte": "br_saude_farmaciapopular.estabelecimentos (id_municipio_6)",
-    "estabelecimentos_credenciados": 61
+    "estabelecimentos_credenciados": 65
+   },
+   "atencao_basica": {
+    "fonte": "br_ms_atencao_basica.municipio",
+    "referencia": "2020-12",
+    "cobertura_ab": 50.36,
+    "cobertura_esf": 34.39,
+    "equipes": 29,
+    "serie": [
+     {
+      "ano": 2007,
+      "mes": 12,
+      "cobertura_ab": 29.06,
+      "cobertura_esf": 29.06,
+      "equipes": 15
+     },
+     {
+      "ano": 2008,
+      "mes": 12,
+      "cobertura_ab": 36.19,
+      "cobertura_esf": 31.12,
+      "equipes": 19
+     },
+     {
+      "ano": 2009,
+      "mes": 12,
+      "cobertura_ab": 29.02,
+      "cobertura_esf": 29.02,
+      "equipes": 15
+     },
+     {
+      "ano": 2010,
+      "mes": 12,
+      "cobertura_ab": 28.97,
+      "cobertura_esf": 28.97,
+      "equipes": 15
+     },
+     {
+      "ano": 2011,
+      "mes": 12,
+      "cobertura_ab": 29.57,
+      "cobertura_esf": 24.63,
+      "equipes": 16
+     },
+     {
+      "ano": 2012,
+      "mes": 12,
+      "cobertura_ab": 29.47,
+      "cobertura_esf": 24.54,
+      "equipes": 16
+     },
+     {
+      "ano": 2013,
+      "mes": 12,
+      "cobertura_ab": 33.94,
+      "cobertura_esf": 28.22,
+      "equipes": 19
+     },
+     {
+      "ano": 2014,
+      "mes": 12,
+      "cobertura_ab": 51.32,
+      "cobertura_esf": 33.73,
+      "equipes": 29
+     },
+     {
+      "ano": 2015,
+      "mes": 12,
+      "cobertura_ab": 47.98,
+      "cobertura_esf": 33.67,
+      "equipes": 27
+     },
+     {
+      "ano": 2016,
+      "mes": 12,
+      "cobertura_ab": 42.7,
+      "cobertura_esf": 31.74,
+      "equipes": 24
+     },
+     {
+      "ano": 2017,
+      "mes": 12,
+      "cobertura_ab": 45.54,
+      "cobertura_esf": 31.69,
+      "equipes": 26
+     },
+     {
+      "ano": 2018,
+      "mes": 12,
+      "cobertura_ab": 55.51,
+      "cobertura_esf": 46.53,
+      "equipes": 31
+     },
+     {
+      "ano": 2019,
+      "mes": 12,
+      "cobertura_ab": 47.95,
+      "cobertura_esf": 36.3,
+      "equipes": 27
+     },
+     {
+      "ano": 2020,
+      "mes": 12,
+      "cobertura_ab": 50.36,
+      "cobertura_esf": 34.39,
+      "equipes": 29
+     }
+    ]
    }
   },
   "seguranca": {
@@ -2636,48 +3793,48 @@
    },
    "frota": {
     "fonte": "br_senatran_frota.municipio_tipo · br_ibge_populacao.municipio",
-    "competencia": "2026-07",
-    "total": 144521,
+    "competencia": "2026-08",
+    "total": 144823,
     "por_tipo": [
      {
       "tipo": "automovel",
-      "quantidade": 86881
+      "quantidade": 86962
      },
      {
       "tipo": "motocicleta",
-      "quantidade": 26737
+      "quantidade": 26831
      },
      {
       "tipo": "caminhonete",
-      "quantidade": 8860
+      "quantidade": 8896
      },
      {
       "tipo": "camioneta",
-      "quantidade": 7506
+      "quantidade": 7544
      },
      {
       "tipo": "motoneta",
-      "quantidade": 3845
+      "quantidade": 3865
      },
      {
       "tipo": "caminhao",
-      "quantidade": 3703
+      "quantidade": 3709
      },
      {
       "tipo": "reboque",
-      "quantidade": 2417
+      "quantidade": 2426
      },
      {
       "tipo": "utilitario",
-      "quantidade": 2338
+      "quantidade": 2360
      },
      {
       "tipo": "semi_reboque",
-      "quantidade": 506
+      "quantidade": 504
      },
      {
       "tipo": "micro_onibus",
-      "quantidade": 472
+      "quantidade": 470
      },
      {
       "tipo": "caminhao_trator",
@@ -2685,7 +3842,7 @@
      },
      {
       "tipo": "onibus",
-      "quantidade": 399
+      "quantidade": 398
      },
      {
       "tipo": "outros",
@@ -2697,7 +3854,7 @@
      },
      {
       "tipo": "triciclo",
-      "quantidade": 62
+      "quantidade": 63
      },
      {
       "tipo": "trator_rodas",
@@ -2713,9 +3870,9 @@
      }
     ],
     "veiculos_1000hab": {
-     "municipio": 710.4666768264206,
-     "uf": 490.56097446129996,
-     "brasil": 620.0274104238893,
+     "municipio": 711.9513118372604,
+     "uf": 492.077909387654,
+     "brasil": 622.3881564927252,
      "ano_populacao": 2025
     },
     "serie": [
@@ -2773,7 +3930,7 @@
      },
      {
       "ano": 2026,
-      "total": 144521
+      "total": 144823
      }
     ]
    },
@@ -2888,6 +4045,131 @@
    },
    "energia_continuidade": {
     "erro": "nenhum conjunto elétrico com o nome do município"
+   },
+   "obras_cno": {
+    "fonte": "br_rf_cno.microdados",
+    "data_extracao": "2025-07-28",
+    "obras": 931,
+    "por_situacao": [
+     {
+      "situacao": "Ativa",
+      "obras": 440
+     },
+     {
+      "situacao": "Encerrada",
+      "obras": 372
+     },
+     {
+      "situacao": "Paralisada",
+      "obras": 106
+     },
+     {
+      "situacao": "Nula",
+      "obras": 8
+     },
+     {
+      "situacao": "Suspensa",
+      "obras": 5
+     }
+    ],
+    "iniciadas_por_ano": [
+     {
+      "ano": 2016,
+      "obras": 43,
+      "area_m2": 30699.98
+     },
+     {
+      "ano": 2017,
+      "obras": 61,
+      "area_m2": 28486.55000000001
+     },
+     {
+      "ano": 2018,
+      "obras": 67,
+      "area_m2": 38369.95
+     },
+     {
+      "ano": 2019,
+      "obras": 64,
+      "area_m2": 46410.52000000001
+     },
+     {
+      "ano": 2020,
+      "obras": 56,
+      "area_m2": 109243.87
+     },
+     {
+      "ano": 2021,
+      "obras": 65,
+      "area_m2": 247531.56
+     },
+     {
+      "ano": 2022,
+      "obras": 93,
+      "area_m2": 86768.22999999998
+     },
+     {
+      "ano": 2023,
+      "obras": 61,
+      "area_m2": 47706.45999999999
+     },
+     {
+      "ano": 2024,
+      "obras": 53,
+      "area_m2": 49975.83
+     },
+     {
+      "ano": 2025,
+      "obras": 14,
+      "area_m2": 35984.19
+     }
+    ]
+   },
+   "outorgas_agua": {
+    "fonte": "br_ana_outorgas.captacoes (vazão média em m³/h)",
+    "outorgas": 8,
+    "vazao_total": 8.517,
+    "por_esfera": [
+     {
+      "esfera": "estadual",
+      "outorgas": 8,
+      "vazao": 8.517
+     }
+    ],
+    "maiores": [
+     {
+      "responsavel": "Oficina São Roque Ltda Me",
+      "vazao": 2.0
+     },
+     {
+      "responsavel": "Fábio Berbert",
+      "vazao": 1.417
+     },
+     {
+      "responsavel": "FIRMINO AGUIAR DA SILVA",
+      "vazao": 1.4
+     },
+     {
+      "responsavel": "NOVACAP INDÚSTRIA E COMÉRCIO DE CONCRETO BETUMINOSO LTDA",
+      "vazao": 1.3
+     },
+     {
+      "responsavel": "Adriana Gomes de Souza",
+      "vazao": 1.0
+     },
+     {
+      "responsavel": "Lucia Gomes da Silva 60341998753",
+      "vazao": 0.5
+     },
+     {
+      "responsavel": "Pousada DellŽuntos Ltda - ME",
+      "vazao": 0.5
+     },
+     {
+      "responsavel": "Valtex Comércio e Indústria LTDA",
+      "vazao": 0.4
+     }
+    ]
    }
   },
   "meio_ambiente": {
@@ -3246,9 +4528,15 @@
      },
      {
       "ano": 2025,
-      "focos": 4,
-      "frp_medio": 5.625,
-      "frp_max": 10.7
+      "focos": 101,
+      "frp_medio": 7.423762376237623,
+      "frp_max": 97.0
+     },
+     {
+      "ano": 2026,
+      "focos": 81,
+      "frp_medio": 17.274074074074083,
+      "frp_max": 91.4
      }
     ]
    },
@@ -3401,6 +4689,177 @@
       "area_2020": 2.021567424804691
      }
     ]
+   },
+   "car": {
+    "fonte": "br_sfb_sicar.area_imovel · reserva_legal · app · vegetacao_nativa · area_consolidada · uso_restrito",
+    "data_extracao": "2025-10-15",
+    "imoveis": 3480,
+    "area_ha": 69743.83639999999,
+    "pendentes": 80,
+    "suspensos": 0,
+    "por_tipo": [
+     {
+      "tipo": "IRU",
+      "imoveis": 3480,
+      "area_ha": 69743.83639999999
+     }
+    ],
+    "por_condicao": [
+     {
+      "condicao": "Aguardando analise",
+      "imoveis": 3381
+     },
+     {
+      "condicao": "Analisado, aguardando atendimento a notificacao",
+      "imoveis": 79
+     },
+     {
+      "condicao": "Aguardando analise, apos revisao ou atendimento da notificacao",
+      "imoveis": 8
+     },
+     {
+      "condicao": "Analisado, aguardando regularizacao ambiental (Lei n 12.651/2012)",
+      "imoveis": 4
+     },
+     {
+      "condicao": "Analisado, em conformidade com a Lei n 12.651/2012, com ativos ambientais",
+      "imoveis": 3
+     },
+     {
+      "condicao": "Em analise",
+      "imoveis": 2
+     }
+    ],
+    "camadas_ha": {
+     "reserva_legal": 16405.670299999998,
+     "app": 54649.955599999994,
+     "vegetacao_nativa": 40927.0036,
+     "area_consolidada": 22098.416300000023,
+     "uso_restrito": 8159.044200000009
+    }
+   },
+   "ibama": {
+    "fonte": "br_ibama_autos.auto_infracao · br_ibama_embargos_novo.termo_embargo",
+    "autos_total": 322,
+    "valor_total": 3710739.0300000003,
+    "serie": [
+     {
+      "ano": 2007,
+      "autos": 2,
+      "valor": 13900.0
+     },
+     {
+      "ano": 2008,
+      "autos": 10,
+      "valor": 360900.0
+     },
+     {
+      "ano": 2009,
+      "autos": 36,
+      "valor": 481500.0
+     },
+     {
+      "ano": 2010,
+      "autos": 5,
+      "valor": 13900.0
+     },
+     {
+      "ano": 2011,
+      "autos": 7,
+      "valor": 222080.0
+     },
+     {
+      "ano": 2012,
+      "autos": 9,
+      "valor": 93400.0
+     },
+     {
+      "ano": 2013,
+      "autos": 10,
+      "valor": 177200.0
+     },
+     {
+      "ano": 2014,
+      "autos": 10,
+      "valor": 19700.0
+     },
+     {
+      "ano": 2015,
+      "autos": 6,
+      "valor": 61900.0
+     },
+     {
+      "ano": 2016,
+      "autos": 80,
+      "valor": 133000.0
+     },
+     {
+      "ano": 2017,
+      "autos": 9,
+      "valor": 247000.0
+     },
+     {
+      "ano": 2018,
+      "autos": 1,
+      "valor": 28500.0
+     },
+     {
+      "ano": 2022,
+      "autos": 1,
+      "valor": 14000.0
+     },
+     {
+      "ano": 2023,
+      "autos": 3,
+      "valor": 1219856.56
+     },
+     {
+      "ano": 2024,
+      "autos": 1,
+      "valor": 2000.0
+     }
+    ],
+    "tipos_10a": [
+     {
+      "tipo": "Cadastro Técnico Federal",
+      "autos": 69
+     },
+     {
+      "tipo": "Outras",
+      "autos": 10
+     },
+     {
+      "tipo": "Fauna",
+      "autos": 8
+     },
+     {
+      "tipo": "Flora",
+      "autos": 6
+     },
+     {
+      "tipo": "Controle Ambiental",
+      "autos": 2
+     }
+    ],
+    "embargos": 118,
+    "embargos_5a": 2
+   },
+   "desastres": {
+    "fonte": "br_sedec_desastres.reconhecimentos_vigentes",
+    "data_extracao": "2026-10-09",
+    "vigentes": [],
+    "municipios_uf_com_reconhecimento": 0
+   },
+   "estacoes_inmet": {
+    "fonte": "br_inmet_bdmep.estacao",
+    "estacoes": [
+     {
+      "id_estacao": "A624",
+      "estacao": "NOVA FRIBURGO - SALINAS",
+      "altitude": 1070.0,
+      "fundacao": "2010-09-18"
+     }
+    ]
    }
   },
   "conectividade": {
@@ -3420,29 +4879,31 @@
   },
   "politica": {
    "fonte": "br_tse_eleicoes",
-   "ano": 2024,
+   "ano": 2026,
+   "ano_prefeito": 2024,
    "eleitorado": {
-    "aptos": 155476,
-    "biometria": 100076,
+    "aptos": 155258,
+    "biometria": 120010,
     "zonas": 2
    },
    "genero": {
-    "2": 72939,
-    "0": 118,
-    "4": 82419
+    "4": 83270,
+    "0": 102,
+    "2": 71886
    },
    "instrucao": {
-    "3": 45125,
-    "5": 33289,
-    "6": 28804,
-    "4": 13874,
-    "2": 11292,
-    "8": 11217,
-    "7": 6971,
-    "1": 4726,
-    "0": 178
+    "3": 42928,
+    "5": 33938,
+    "6": 30290,
+    "4": 13462,
+    "8": 12064,
+    "2": 10358,
+    "7": 7246,
+    "1": 4823,
+    "0": 149
    },
    "prefeito": {
+    "ano": 2024,
     "turno": 1,
     "aptos": 156323,
     "secoes": 500,
@@ -3536,7 +4997,7 @@
      {
       "cargo": "vereador",
       "candidatos": 365,
-      "receita": 3312260.0300000003
+      "receita": 3312260.03
      }
     ]
    },
@@ -3573,6 +5034,209 @@
       "nome": "MOZART LAGO",
       "nascimento": "1889-10-17",
       "falecido": false
+     }
+    ]
+   },
+   "filiados": {
+    "fonte": "br_tse_filiacao_partidaria.microdados",
+    "data_extracao": "2026-08-04",
+    "filiados": 15348,
+    "por_partido": [
+     {
+      "partido": "MDB",
+      "filiados": 2806
+     },
+     {
+      "partido": "PP",
+      "filiados": 1549
+     },
+     {
+      "partido": "UNIÃO",
+      "filiados": 1183
+     },
+     {
+      "partido": "PDT",
+      "filiados": 1182
+     },
+     {
+      "partido": "PT",
+      "filiados": 1157
+     },
+     {
+      "partido": "PL",
+      "filiados": 1077
+     },
+     {
+      "partido": "PRD",
+      "filiados": 1020
+     },
+     {
+      "partido": "PSDB",
+      "filiados": 743
+     },
+     {
+      "partido": "PSB",
+      "filiados": 559
+     },
+     {
+      "partido": "PODE",
+      "filiados": 512
+     },
+     {
+      "partido": "PSOL",
+      "filiados": 390
+     },
+     {
+      "partido": "AVANTE",
+      "filiados": 371
+     },
+     {
+      "partido": "CIDADANIA",
+      "filiados": 333
+     },
+     {
+      "partido": "REPUBLICANOS",
+      "filiados": 325
+     },
+     {
+      "partido": "PCB",
+      "filiados": 276
+     },
+     {
+      "partido": "MOBILIZA",
+      "filiados": 271
+     },
+     {
+      "partido": "PV",
+      "filiados": 251
+     },
+     {
+      "partido": "DC",
+      "filiados": 231
+     },
+     {
+      "partido": "PSD",
+      "filiados": 220
+     },
+     {
+      "partido": "NOVO",
+      "filiados": 162
+     },
+     {
+      "partido": "PCDOB",
+      "filiados": 150
+     },
+     {
+      "partido": "AGIR",
+      "filiados": 147
+     },
+     {
+      "partido": "SOLIDARIEDADE",
+      "filiados": 119
+     },
+     {
+      "partido": "DEMOCRATA",
+      "filiados": 97
+     },
+     {
+      "partido": "PRTB",
+      "filiados": 93
+     },
+     {
+      "partido": "PSTU",
+      "filiados": 58
+     },
+     {
+      "partido": "MISSÃO",
+      "filiados": 34
+     },
+     {
+      "partido": "REDE",
+      "filiados": 20
+     },
+     {
+      "partido": "UP",
+      "filiados": 10
+     },
+     {
+      "partido": "PCO",
+      "filiados": 2
+     }
+    ],
+    "por_sexo": [
+     {
+      "sexo": "Masculino",
+      "filiados": 8069
+     },
+     {
+      "sexo": "Feminino",
+      "filiados": 7258
+     },
+     {
+      "sexo": null,
+      "filiados": 21
+     }
+    ]
+   },
+   "financas_campanha": {
+    "fonte": "br_tse_eleicoes.receitas_candidato · despesas_candidato",
+    "ano": 2024,
+    "receitas_por_cargo": [
+     {
+      "cargo": "prefeito",
+      "valor": 4550546.35,
+      "candidatos": 6
+     },
+     {
+      "cargo": "vereador",
+      "valor": 3312260.03,
+      "candidatos": 365
+     }
+    ],
+    "receitas_por_origem": [
+     {
+      "origem": "recursos de partido politico",
+      "valor": 6697850.230000001
+     },
+     {
+      "origem": "recursos de pessoas fisicas",
+      "valor": 448461.89
+     },
+     {
+      "origem": "recursos de outros candidatos",
+      "valor": 432501.39999999997
+     },
+     {
+      "origem": "recursos proprios",
+      "valor": 259275.84999999998
+     },
+     {
+      "origem": "recursos de financiamento coletivo",
+      "valor": 24517.010000000002
+     },
+     {
+      "origem": "comercializacao de bens com fefc",
+      "valor": 200.0
+     },
+     {
+      "origem": null,
+      "valor": 0.0
+     }
+    ],
+    "despesas_por_cargo": [
+     {
+      "cargo": "prefeito",
+      "valor": 4455644.720000001
+     },
+     {
+      "cargo": "vereador",
+      "valor": 2632697.21
+     }
+    ],
+    "despesas_por_tipo": [
+     {
+      "tipo": null,
+      "valor": 7088341.929999999
      }
     ]
    }
@@ -3851,7 +5515,7 @@
       {
        "ano": 2020,
        "licitacoes": 365,
-       "valor": 36079796.45999999
+       "valor": 36079796.46
       },
       {
        "ano": 2021,
@@ -3873,18 +5537,13 @@
       {
        "orgao": "Comando da Marinha",
        "licitacoes": 1262,
-       "valor": 198882938.36
+       "valor": 198882938.35999998
       }
      ]
     },
     "fornecedores_locais": {
-     "snapshot_cnpj": "2025-09",
+     "snapshot_cnpj": "2026-09",
      "serie": [
-      {
-       "ano": 2018,
-       "contratos": 7,
-       "valor": 569892.38
-      },
       {
        "ano": 2019,
        "contratos": 14,
@@ -3902,13 +5561,13 @@
       },
       {
        "ano": 2022,
-       "contratos": 12,
-       "valor": 1615496.31
+       "contratos": 11,
+       "valor": 1515496.31
       },
       {
        "ano": 2023,
        "contratos": 57,
-       "valor": 24836561.440000005
+       "valor": 24836561.439999998
       },
       {
        "ano": 2024,
@@ -3917,11 +5576,21 @@
       },
       {
        "ano": 2025,
-       "contratos": 11,
-       "valor": 561327.41
+       "contratos": 12,
+       "valor": 11168307.41
+      },
+      {
+       "ano": 2026,
+       "contratos": 2,
+       "valor": 32212630
       }
      ],
      "top": [
+      {
+       "empresa": "MG ECCARD LTDA",
+       "contratos": 10,
+       "valor": 49863517.28
+      },
       {
        "empresa": "ENERGISA NOVA FRIBURGO - DISTRIBUIDORA DE ENERGIA S.A.",
        "contratos": 8,
@@ -3931,11 +5600,6 @@
        "empresa": "CASA DE SAUDE SAO LUCAS SA",
        "contratos": 2,
        "valor": 8000000.0
-      },
-      {
-       "empresa": "MG ECCARD LTDA",
-       "contratos": 8,
-       "valor": 7106537.28
       },
       {
        "empresa": "CONTRATADO : CONFEDERACAO   BRASILEIRA   DEBASKETBALL",
@@ -3955,7 +5619,7 @@
       {
        "empresa": "VILLA TOMIAZZI PAISAGISMO LTDA",
        "contratos": 9,
-       "valor": 2973876.4000000004
+       "valor": 2973876.4
       },
       {
        "empresa": "SERVICO SOCIAL DA INDUSTRIA -SESI",
@@ -3967,8 +5631,8 @@
    },
    "diarios_oficiais": {
     "fonte": "br_ok_queridodiario.diarios (territory_id)",
-    "total_edicoes": 634,
-    "ultima_edicao": "2025-10-03",
+    "total_edicoes": 657,
+    "ultima_edicao": "2025-11-06",
     "serie": [
      {
       "ano": 2023,
@@ -3982,8 +5646,8 @@
      },
      {
       "ano": 2025,
-      "edicoes": 175,
-      "extras": 12
+      "edicoes": 198,
+      "extras": 13
      }
     ]
    },
@@ -4051,13 +5715,7 @@
       "ranking_nacional": 3416
      }
     ],
-    "capag": {
-     "capag": null,
-     "nota_endividamento": "A",
-     "nota_poupanca_corrente": "C",
-     "nota_liquidez": "A",
-     "icf": "Cicf"
-    }
+    "capag": null
    },
    "consumidor": {
     "fonte": "br_mj_consumidorgovbr.reclamacoes (nome da cidade + UF)",
@@ -4201,6 +5859,178 @@
     "sem_vinculo_permanente_adm_direta": 18,
     "adm_direta_ensino_superior": null,
     "adm_direta_pos_graduacao": null
+   },
+   "cauc": {
+    "fonte": "br_tesouro_cauc.situacao_municipios",
+    "data_pesquisa": "02/10/2026",
+    "itens": 28,
+    "regulares": 23,
+    "pendencias": 3,
+    "itens_pendentes": [
+     {
+      "item": "1.2",
+      "descricao": "Regularidade no pagamento de precatórios judiciais",
+      "situacao": "!"
+     },
+     {
+      "item": "3.2.3",
+      "descricao": "Encaminhamento do Anexo 8 do Relatório Resumido de Execução Orçamentária ao Siope",
+      "situacao": "!"
+     },
+     {
+      "item": "4.2",
+      "descricao": "Regularidade Previdenciária",
+      "situacao": "!"
+     }
+    ],
+    "lista": [
+     {
+      "item": "1.1",
+      "descricao": "Regularidade quanto a Tributos, a Contribuições Previdenciárias Federais e à Dívida Ativa da União",
+      "situacao": "11/01/27"
+     },
+     {
+      "item": "1.2",
+      "descricao": "Regularidade no pagamento de precatórios judiciais",
+      "situacao": "!"
+     },
+     {
+      "item": "1.3",
+      "descricao": "Regularidade quanto a Contribuições para o FGTS",
+      "situacao": "Desabilitado"
+     },
+     {
+      "item": "1.4",
+      "descricao": "Regularidade em relação à Adimplência Financeira em Empréstimos e Financiamentos concedidos pela União",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "1.5",
+      "descricao": "Regularidade perante o Poder Público Federal",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "2.1.1",
+      "descricao": "SIAFI/Subsistema Transferências",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "2.1.2",
+      "descricao": "Transferegov.br",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "3.1.1",
+      "descricao": "Publicação do Relatório de Gestão Fiscal",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "3.1.2",
+      "descricao": "Encaminhamento do Relatório de Gestão Fiscal ao Siconfi",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "3.2.1",
+      "descricao": "Publicação do Relatório Resumido de Execução Orçamentária - RREO",
+      "situacao": "30/11/26"
+     },
+     {
+      "item": "3.2.2",
+      "descricao": "Encaminhamento do Relatório Resumido de Execução Orçamentária ao Siconfi",
+      "situacao": "30/11/26"
+     },
+     {
+      "item": "3.2.3",
+      "descricao": "Encaminhamento do Anexo 8 do Relatório Resumido de Execução Orçamentária ao Siope",
+      "situacao": "!"
+     },
+     {
+      "item": "3.2.4",
+      "descricao": "Encaminhamento do Anexo 12 do Relatório Resumido de Execução Orçamentária ao Siops",
+      "situacao": "Desabilitado"
+     },
+     {
+      "item": "3.3",
+      "descricao": "Encaminhamento das Contas Anuais",
+      "situacao": "30/04/27"
+     },
+     {
+      "item": "3.4.1",
+      "descricao": "Encaminhamento da Matriz de Saldos Contábeis Mensal",
+      "situacao": "31/10/26"
+     },
+     {
+      "item": "3.4.2",
+      "descricao": "Encaminhamento da Matriz de Saldos Contábeis de Encerramento",
+      "situacao": "31/03/27"
+     },
+     {
+      "item": "3.5",
+      "descricao": "Encaminhamento de Informações para o Cadastro da Dívida Pública - CDP",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "3.6",
+      "descricao": "Transparência da execução orçamentária e financeira em meio eletrônico de acesso público",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "3.7",
+      "descricao": "Adoção de Sistema Integrado de Administração Financeira e Controle - Siafic",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "4.1",
+      "descricao": "Exercício da Plena Competência Tributária",
+      "situacao": "30/04/27"
+     },
+     {
+      "item": "4.2",
+      "descricao": "Regularidade Previdenciária",
+      "situacao": "!"
+     },
+     {
+      "item": "5.1",
+      "descricao": "Aplicação Mínima de recursos em Educação",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "5.2",
+      "descricao": "Aplicação Mínima de recursos em Saúde",
+      "situacao": "02/10/26"
+     },
+     {
+      "item": "5.3",
+      "descricao": "Limite de Despesas com Parcerias Público-Privadas - PPP",
+      "situacao": "30/11/26"
+     },
+     {
+      "item": "5.4",
+      "descricao": "Limite de operações de crédito, inclusive por antecipação de receita",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "5.5",
+      "descricao": "Regularidade na aplicação mínima do Fundeb para pagamento de profissionais da educação básica",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "5.6",
+      "descricao": "Regularidade na aplicação mínima da complementação da União ao Fundeb em despesas de capital",
+      "situacao": "30/01/27"
+     },
+     {
+      "item": "5.7",
+      "descricao": "Regularidade na aplicação de 50% da complementação VAAT do Fundeb na educação infantil",
+      "situacao": "30/01/27"
+     }
+    ]
+   },
+   "fiscalizacao_cgu": {
+    "fonte": "br_cgu_fef.municipios_sorteados",
+    "sorteios": [
+     12
+    ]
    }
   },
   "social": {
@@ -4245,121 +6075,170 @@
      "brasil": 4.351328308839583,
      "ano_populacao": 2025
     }
+   },
+   "rouanet": {
+    "fonte": "br_minc_salic.entidades",
+    "entidades": 69,
+    "proponentes": 46,
+    "projetos": 67,
+    "valor_projetos": 3772688.0,
+    "top_proponentes": [
+     {
+      "nome": "Instituto de Pesquisa Solar e Ambiental - IPSA",
+      "projetos": 1,
+      "valor": 2424000.0
+     },
+     {
+      "nome": "Comissão Estadual de Gestores Públicos de Cultura do Rio de Janeiro - COMCULTURA",
+      "projetos": 3,
+      "valor": 956228.0
+     },
+     {
+      "nome": "Prefeitura Municipal de Nova Friburgo - RJ",
+      "projetos": 3,
+      "valor": 215000.0
+     },
+     {
+      "nome": "Kid's New Education - Educari",
+      "projetos": 3,
+      "valor": 150000.0
+     },
+     {
+      "nome": "Sociedade Musical Beneficente Euterpe Friburguense - Nova Friburgo - RJ.",
+      "projetos": 5,
+      "valor": 15060.0
+     },
+     {
+      "nome": "Presidente da Organização não Governamenal de Apoio à Diversidade Sexual - Amores",
+      "projetos": 1,
+      "valor": 10000.0
+     },
+     {
+      "nome": "INEC - Instituto de Esportes e Cultura de Nova Friburgo",
+      "projetos": 3,
+      "valor": 2400.0
+     },
+     {
+      "nome": "Christina Dora Schkolziger",
+      "projetos": 1,
+      "valor": 0.0
+     }
+    ]
    }
   },
   "comercio_exterior": {
    "fonte": "br_me_comex_stat",
    "exportacoes": {
-    "ano": 2024,
-    "total_fob_usd": "2189721",
-    "ano_anterior_fob_usd": "2832266",
+    "ano": 2025,
+    "total_fob_usd": "1743560",
+    "ano_anterior_fob_usd": "2189721",
     "top_sh4": [
      {
       "id_sh4": "8301",
-      "valor_fob_usd": "766127"
+      "valor_fob_usd": "481139"
      },
      {
       "id_sh4": "6212",
-      "valor_fob_usd": "306416"
-     },
-     {
-      "id_sh4": "2208",
-      "valor_fob_usd": "306043"
+      "valor_fob_usd": "294721"
      },
      {
       "id_sh4": "2403",
-      "valor_fob_usd": "164359"
+      "valor_fob_usd": "281760"
      },
      {
       "id_sh4": "8302",
-      "valor_fob_usd": "163383"
+      "valor_fob_usd": "141016"
+     },
+     {
+      "id_sh4": "2208",
+      "valor_fob_usd": "120469"
      },
      {
       "id_sh4": "6108",
-      "valor_fob_usd": "101858"
+      "valor_fob_usd": "102340"
      }
     ],
     "top_paises": [
      {
-      "pais_iso3": "BOL",
-      "valor_fob_usd": "560796"
-     },
-     {
       "pais_iso3": "PRY",
-      "valor_fob_usd": "422575"
+      "valor_fob_usd": "392851"
      },
      {
       "pais_iso3": "URY",
-      "valor_fob_usd": "361031"
-     },
-     {
-      "pais_iso3": "DEU",
-      "valor_fob_usd": "290858"
+      "valor_fob_usd": "377913"
      },
      {
       "pais_iso3": "USA",
-      "valor_fob_usd": "155606"
+      "valor_fob_usd": "242529"
      },
      {
-      "pais_iso3": "IND",
-      "valor_fob_usd": "93630"
+      "pais_iso3": "BOL",
+      "valor_fob_usd": "212673"
+     },
+     {
+      "pais_iso3": "NLD",
+      "valor_fob_usd": "159340"
+     },
+     {
+      "pais_iso3": "DEU",
+      "valor_fob_usd": "100758"
      }
     ]
    },
    "importacoes": {
-    "ano": 2024,
-    "total_fob_usd": "11708399",
-    "ano_anterior_fob_usd": "7564912",
+    "ano": 2025,
+    "total_fob_usd": "14470818",
+    "ano_anterior_fob_usd": "11708399",
     "top_sh4": [
      {
       "id_sh4": "2204",
-      "valor_fob_usd": "4827257"
-     },
-     {
-      "id_sh4": "8301",
-      "valor_fob_usd": "1726401"
+      "valor_fob_usd": "6194171"
      },
      {
       "id_sh4": "1101",
-      "valor_fob_usd": "1714599"
+      "valor_fob_usd": "1907019"
      },
      {
       "id_sh4": "3006",
-      "valor_fob_usd": "1071189"
+      "valor_fob_usd": "1287614"
+     },
+     {
+      "id_sh4": "8301",
+      "valor_fob_usd": "1146595"
      },
      {
       "id_sh4": "8302",
-      "valor_fob_usd": "723057"
+      "valor_fob_usd": "869159"
      },
      {
-      "id_sh4": "3005",
-      "valor_fob_usd": "194151"
+      "id_sh4": "8515",
+      "valor_fob_usd": "735793"
      }
     ],
     "top_paises": [
      {
       "pais_iso3": "ITA",
-      "valor_fob_usd": "2727120"
-     },
-     {
-      "pais_iso3": "CHL",
-      "valor_fob_usd": "1985044"
-     },
-     {
-      "pais_iso3": "ARG",
-      "valor_fob_usd": "1549627"
+      "valor_fob_usd": "4830859"
      },
      {
       "pais_iso3": "CHN",
-      "valor_fob_usd": "1543492"
+      "valor_fob_usd": "2093864"
+     },
+     {
+      "pais_iso3": "CHL",
+      "valor_fob_usd": "1808031"
+     },
+     {
+      "pais_iso3": "ARG",
+      "valor_fob_usd": "1763049"
      },
      {
       "pais_iso3": "USA",
-      "valor_fob_usd": "1373430"
+      "valor_fob_usd": "1054766"
      },
      {
-      "pais_iso3": "COL",
-      "valor_fob_usd": "922492"
+      "pais_iso3": "IND",
+      "valor_fob_usd": "1017774"
      }
     ]
    }
@@ -4367,19 +6246,19 @@
   "trabalho": {
    "rais": {
     "fonte": "br_me_rais.microdados",
-    "ano": 2024,
-    "vinculos_ativos_3112": 56975,
-    "vinculos_ativos_ano_anterior": 54441,
-    "remuneracao_media": 2443.0679684637116,
-    "estabelecimentos": 11763
+    "ano": 2025,
+    "vinculos_ativos_3112": 58127,
+    "vinculos_ativos_ano_anterior": 56975,
+    "remuneracao_media": 2572.79169993994,
+    "estabelecimentos": 11603
    },
    "caged": {
     "fonte": "br_me_caged.microdados_movimentacao",
-    "ano": 2024,
-    "admissoes": 23203,
-    "desligamentos": 22091,
-    "saldo": 1112,
-    "salario_medio_admissao": 1699.6566916180707
+    "ano": 2025,
+    "admissoes": 24877,
+    "desligamentos": 25052,
+    "saldo": -175,
+    "salario_medio_admissao": 1836.0488514306608
    },
    "top_empregadores": {
     "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
@@ -4470,16 +6349,16 @@
    },
    "lista_suja": {
     "fonte": "br_mte_listasuja.empregadores (Cadastro de Empregadores — trabalho análogo ao de escravo)",
-    "data_coleta": "2026-09-25",
+    "data_coleta": "2026-10-09",
     "total": 1,
     "trabalhadores": 8,
     "uf": {
-     "empregadores": 21,
-     "trabalhadores": 55
+     "empregadores": 13,
+     "trabalhadores": 36
     },
     "brasil": {
-     "empregadores": 578,
-     "trabalhadores": 4703
+     "empregadores": 508,
+     "trabalhadores": 3989
     },
     "empregadores": [
      {
@@ -4547,68 +6426,68 @@
     }
    ],
    "rebanhos": {
-    "ano": 2022,
+    "ano": 2025,
     "efetivos": [
+     {
+      "tipo_rebanho": "Galináceos - total",
+      "quantidade": 14600
+     },
      {
       "tipo_rebanho": "Galináceos - galinhas",
       "quantidade": 10800
      },
      {
       "tipo_rebanho": "Bovino",
-      "quantidade": 5644
+      "quantidade": 8529
      },
      {
       "tipo_rebanho": "Suíno - total",
-      "quantidade": 5200
+      "quantidade": 4500
      },
      {
       "tipo_rebanho": "Codornas",
-      "quantidade": 1250
+      "quantidade": 1750
      },
      {
       "tipo_rebanho": "Equino",
-      "quantidade": 1210
+      "quantidade": 1588
      },
      {
       "tipo_rebanho": "Caprino",
-      "quantidade": 330
+      "quantidade": 577
      },
      {
-      "tipo_rebanho": "Suíno - matrizes de suínos",
-      "quantidade": 320
-     },
-     {
-      "tipo_rebanho": "Bubalino",
-      "quantidade": 26
+      "tipo_rebanho": "Ovino",
+      "quantidade": 378
      }
     ]
    },
    "origem_animal": {
-    "ano": 2022,
+    "ano": 2025,
     "produtos": [
      {
       "produto": "Mel de abelha",
       "unidade": "Quilogramas",
-      "quantidade": 60500,
-      "valor": 2118
+      "quantidade": 57600,
+      "valor": 2016
      },
      {
       "produto": "Ovos de galinha",
       "unidade": "Mil dúzias",
-      "quantidade": 108,
-      "valor": 1050
+      "quantidade": 140,
+      "valor": 1330
      },
      {
       "produto": "Leite",
       "unidade": "Mil litros",
-      "quantidade": 170,
-      "valor": 476
+      "quantidade": 316,
+      "valor": 838
      },
      {
       "produto": "Ovos de codorna",
       "unidade": "Mil dúzias",
-      "quantidade": 18,
-      "valor": 68
+      "quantidade": 17,
+      "valor": 50
      }
     ]
    },
@@ -4619,6 +6498,90 @@
     "capacidade": 0,
     "area_ha": 0,
     "projetos": []
+   },
+   "aquicultura": {
+    "fonte": "br_ibge_ppm.producao_aquicultura (quantidade em kg ou milheiros; valor em mil R$)",
+    "ano": 2025,
+    "valor_total": 862,
+    "produtos": [
+     {
+      "produto": "Truta",
+      "quantidade": 19000,
+      "valor": 855
+     },
+     {
+      "produto": "Tilápia",
+      "quantidade": 450,
+      "valor": 7
+     }
+    ]
+   },
+   "extracao_silvicultura": {
+    "fonte": "br_ibge_pevs.producao_extracao_vegetal · producao_silvicultura",
+    "silvicultura": {
+     "ano": 2024,
+     "valor_total": 454.0,
+     "produtos": [
+      {
+       "produto": "Madeira em tora de eucalipto para outras finalidades",
+       "unidade": "Metros cúbicos",
+       "quantidade": 950,
+       "valor": 285.0
+      },
+      {
+       "produto": "Lenha de eucalipto",
+       "unidade": "Metros cúbicos",
+       "quantidade": 3750,
+       "valor": 169.0
+      }
+     ]
+    },
+    "extracao_vegetal": null
+   },
+   "imoveis_rurais": {
+    "fonte": "br_rf_cafir.imoveis_rurais · br_rf_arrecadacao.itr",
+    "cafir": {
+     "data_referencia": "2025-09-02",
+     "imoveis": 4698,
+     "area_ha": 93486.10000000038,
+     "area_mediana_ha": 7.8,
+     "imoveis_1000ha_mais": 2,
+     "area_1000ha_mais": 14505.4
+    },
+    "itr": [
+     {
+      "ano": 2017,
+      "valor": 191411.87999999998
+     },
+     {
+      "ano": 2018,
+      "valor": 205568.59
+     },
+     {
+      "ano": 2019,
+      "valor": 179836.32
+     },
+     {
+      "ano": 2020,
+      "valor": 127290.9
+     },
+     {
+      "ano": 2021,
+      "valor": 153140.60000000003
+     },
+     {
+      "ano": 2022,
+      "valor": 150965.30000000005
+     },
+     {
+      "ano": 2023,
+      "valor": 159203.06000000003
+     },
+     {
+      "ano": 2024,
+      "valor": 143376.61
+     }
+    ]
    }
   },
   "beneficios": {
@@ -4632,7 +6595,7 @@
    "bpc": {
     "competencia": "2025-07",
     "beneficiarios": 3953,
-    "repasse_mensal": 6000850.9399999995
+    "repasse_mensal": 6000850.939999999
    },
    "garantia_safra": null,
    "cadastro_unico": {
@@ -4878,7 +6841,7 @@
      {
       "k": "aposentadoria_tempo_contribuicao",
       "n": 12764,
-      "valor": 32338927.7
+      "valor": 32338927.700000003
      },
      {
       "k": "pensao_morte",
@@ -4888,7 +6851,7 @@
      {
       "k": "aposentadoria_invalidez",
       "n": 4881,
-      "valor": 9245361.44
+      "valor": 9245361.440000001
      },
      {
       "k": "bpc_loas",
@@ -4908,7 +6871,7 @@
      {
       "k": "auxilio_acidente",
       "n": 363,
-      "valor": 352871.55999999994
+      "valor": 352871.56
      },
      {
       "k": "salario_maternidade",
@@ -4923,7 +6886,7 @@
      {
       "k": "auxilio_reclusao",
       "n": 20,
-      "valor": 28303.48
+      "valor": 28303.480000000003
      },
      {
       "k": "beneficio_especial_legislacao",
@@ -5022,13 +6985,13 @@
       "ano": 2023,
       "mes": 12,
       "beneficios": 50197,
-      "valor_mensal": 90616789.67999999
+      "valor_mensal": 90616789.68
      },
      {
       "ano": 2024,
       "mes": 12,
       "beneficios": 50992,
-      "valor_mensal": 96455640.25999999
+      "valor_mensal": 96455640.26
      },
      {
       "ano": 2025,
@@ -5040,7 +7003,7 @@
       "ano": 2026,
       "mes": 1,
       "beneficios": 50619,
-      "valor_mensal": 101770871.15000002
+      "valor_mensal": 101770871.14999999
      }
     ],
     "concedidos": [
@@ -5048,7 +7011,7 @@
       "ano": 2012,
       "meses": 12,
       "beneficios": 6053,
-      "valor": 5222117.280000001
+      "valor": 5222117.279999999
      },
      {
       "ano": 2013,
@@ -5060,7 +7023,7 @@
       "ano": 2014,
       "meses": 12,
       "beneficios": 6610,
-      "valor": 6561956.74
+      "valor": 6561956.739999999
      },
      {
       "ano": 2015,
@@ -5072,31 +7035,31 @@
       "ano": 2016,
       "meses": 12,
       "beneficios": 6315,
-      "valor": 7719199.84
+      "valor": 7719199.840000002
      },
      {
       "ano": 2017,
       "meses": 12,
       "beneficios": 6267,
-      "valor": 8144237.279999999
+      "valor": 8144237.280000001
      },
      {
       "ano": 2018,
       "meses": 12,
       "beneficios": 6241,
-      "valor": 8064372.8900000015
+      "valor": 8064372.889999999
      },
      {
       "ano": 2019,
       "meses": 12,
       "beneficios": 5980,
-      "valor": 7949309.569999998
+      "valor": 7949309.57
      },
      {
       "ano": 2020,
       "meses": 12,
       "beneficios": 4468,
-      "valor": 5699205.970000001
+      "valor": 5699205.97
      },
      {
       "ano": 2021,
@@ -5132,9 +7095,123 @@
       "ano": 2026,
       "meses": 8,
       "beneficios": 5960,
-      "valor": 11321506.529999997
+      "valor": 11321506.530000001
      }
     ]
+   },
+   "programas_cgu": {
+    "fonte": "br_cgu_gas_do_povo · br_cgu_pe_de_meia · br_cgu_seguro_defeso",
+    "gas_do_povo": {
+     "competencia": "2026-07",
+     "pessoas": 1075,
+     "valor": 99975.0,
+     "serie_12m": [
+      {
+       "mes": "2026-02",
+       "pessoas": 1720,
+       "valor": 160514.68000000474
+      },
+      {
+       "mes": "2026-03",
+       "pessoas": 2385,
+       "valor": 222248.08000000648
+      },
+      {
+       "mes": "2026-05",
+       "pessoas": 543,
+       "valor": 50572.92000000055
+      },
+      {
+       "mes": "2026-06",
+       "pessoas": 1389,
+       "valor": 129492.92000000208
+      },
+      {
+       "mes": "2026-07",
+       "pessoas": 1075,
+       "valor": 99975.0
+      }
+     ]
+    },
+    "pe_de_meia": {
+     "competencia": "2026-06",
+     "pessoas": 249,
+     "valor": 313225.0,
+     "serie_12m": [
+      {
+       "mes": "2025-07",
+       "pessoas": 301,
+       "valor": 289875.0
+      },
+      {
+       "mes": "2025-08",
+       "pessoas": 328,
+       "valor": 289000.0
+      },
+      {
+       "mes": "2025-09",
+       "pessoas": 369,
+       "valor": 293400.0
+      },
+      {
+       "mes": "2025-10",
+       "pessoas": 352,
+       "valor": 284250.0
+      },
+      {
+       "mes": "2025-11",
+       "pessoas": 390,
+       "valor": 290075.0
+      },
+      {
+       "mes": "2025-12",
+       "pessoas": 383,
+       "valor": 262400.0
+      },
+      {
+       "mes": "2026-02",
+       "pessoas": 494,
+       "valor": 1356600.0
+      },
+      {
+       "mes": "2026-03",
+       "pessoas": 290,
+       "valor": 369200.0
+      },
+      {
+       "mes": "2026-04",
+       "pessoas": 199,
+       "valor": 281800.0
+      },
+      {
+       "mes": "2026-05",
+       "pessoas": 277,
+       "valor": 345725.0
+      },
+      {
+       "mes": "2026-06",
+       "pessoas": 249,
+       "valor": 313225.0
+      }
+     ]
+    },
+    "seguro_defeso": {
+     "competencia": "2026-05",
+     "pessoas": 1,
+     "valor": 3242.0,
+     "serie_12m": [
+      {
+       "mes": "2026-03",
+       "pessoas": 1,
+       "valor": 1621.0
+      },
+      {
+       "mes": "2026-05",
+       "pessoas": 1,
+       "valor": 3242.0
+      }
+     ]
+    }
    }
   },
   "vizinhanca": {
@@ -5145,70 +7222,70 @@
      "nome": "Macaé",
      "sigla_uf": "RJ",
      "populacao": 264439,
-     "pib_per_capita": 67111.94642242635
+     "pib_per_capita": 84688.18895851217
     },
     {
      "id_municipio": "3305802",
      "nome": "Teresópolis",
      "sigla_uf": "RJ",
      "populacao": 176735,
-     "pib_per_capita": 33518.81064871135
+     "pib_per_capita": 40198.862704048435
     },
     {
      "id_municipio": "3300803",
      "nome": "Cachoeiras de Macacu",
      "sigla_uf": "RJ",
      "populacao": 59861,
-     "pib_per_capita": 21809.091060957886
+     "pib_per_capita": 28439.250931324234
     },
     {
      "id_municipio": "3301306",
      "nome": "Casimiro de Abreu",
      "sigla_uf": "RJ",
      "populacao": 48636,
-     "pib_per_capita": 48362.69430051814
+     "pib_per_capita": 69151.22542972284
     },
     {
      "id_municipio": "3300506",
      "nome": "Bom Jardim",
      "sigla_uf": "RJ",
      "populacao": 29758,
-     "pib_per_capita": 29817.326433228038
+     "pib_per_capita": 34240.204314806106
     },
     {
      "id_municipio": "3305604",
      "nome": "Silva Jardim",
      "sigla_uf": "RJ",
      "populacao": 22028,
-     "pib_per_capita": 27358.089704013073
+     "pib_per_capita": 32046.123116034138
     },
     {
      "id_municipio": "3305703",
      "nome": "Sumidouro",
      "sigla_uf": "RJ",
      "populacao": 15693,
-     "pib_per_capita": 38241.70012107309
+     "pib_per_capita": 46762.3144076977
     },
     {
      "id_municipio": "3301603",
      "nome": "Duas Barras",
      "sigla_uf": "RJ",
      "populacao": 11355,
-     "pib_per_capita": 21948.0405107882
+     "pib_per_capita": 25138.529282254513
     },
     {
      "id_municipio": "3305901",
      "nome": "Trajano de Moraes",
      "sigla_uf": "RJ",
      "populacao": 10654,
-     "pib_per_capita": 22716.35066641637
+     "pib_per_capita": 27261.02872160691
     }
    ],
    "referencia": {
     "populacao_ano": 2025,
-    "pib_ano": 2021,
+    "pib_ano": 2023,
     "populacao": 203417,
-    "pib_per_capita": 31093.443517503452
+    "pib_per_capita": 36219.03282419857
    }
   }
  }

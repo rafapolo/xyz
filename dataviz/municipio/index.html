@@ -151,6 +151,9 @@ a { color: inherit; text-decoration: none; }
 .sidebar-item .s-icon { font-size: .85rem; flex-shrink: 0; opacity: .7; }
 .sidebar-item.active .s-icon { opacity: 1; }
 .sidebar-footer { padding: .75rem 1rem; border-top: 1px solid var(--border); font-size: .7rem; color: var(--text3); flex-shrink: 0; }
+.sidebar-footer b { color: var(--text); font-weight: 600; }
+.sidebar-footer a { color: var(--accent, var(--s1)); text-decoration: none; }
+.sidebar-footer a:hover { text-decoration: underline; }
 
 /* HERO */
 .hero { position: relative; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow: hidden; }
@@ -512,7 +515,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer">22 temas · Rodado</div>
+  <div class="sidebar-footer"><b id="nIndicadores">—</b> indicadores · <span id="nTemas">22</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
 </div>
 
 <!-- MAIN -->
@@ -674,6 +677,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="bench" style="margin-top:.5rem"><span>Diferença entre o maior e o menor grupo: <b id="alfRacaGap"></b></span></div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-demo"></div>
 </div>
 
 <!-- GEOGRAFIA -->
@@ -739,6 +743,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="chart-container"><canvas id="mapbiomasChart"></canvas></div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-amb"></div>
 </div>
 
 <!-- INFRAESTRUTURA -->
@@ -808,6 +813,7 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="domRecList"></ul>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-infra"></div>
 </div>
 
 <!-- ENERGIA & FROTA -->
@@ -918,6 +924,7 @@ details.more > .more-body { margin-top: .4rem; }
       </details>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-econ"></div>
 </div>
 
 <!-- EMPRESAS -->
@@ -1040,6 +1047,7 @@ details.more > .more-body { margin-top: .4rem; }
       </details>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-agro"></div>
 </div>
 
 <!-- COMÉRCIO EXTERIOR -->
@@ -1141,6 +1149,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="sub" style="margin-top:.5rem">Conta matrícula efetivada, não só aprovação — quem foi aprovado e não foi convocado não entra</div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-educ"></div>
 </div>
 
 <!-- SAÚDE -->
@@ -1193,6 +1202,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="bench" style="margin-top:.5rem"><span>Beneficiários odontológicos são contados à parte — somá-los à cobertura médico-hospitalar infla o número</span></div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-saude"></div>
 </div>
 
 <!-- MORTALIDADE & INTERNAÇÕES -->
@@ -1398,6 +1408,7 @@ details.more > .more-body { margin-top: .4rem; }
       <ul class="data-list" id="depNascList"></ul>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-pol"></div>
 </div>
 
 <!-- TRANSPARÊNCIA -->
@@ -1455,6 +1466,7 @@ details.more > .more-body { margin-top: .4rem; }
       </details>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-transp"></div>
 </div>
 
 <!-- RECURSOS FEDERAIS -->
@@ -1541,6 +1553,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="bench-bars wide" id="patTaxaBars"></div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-social"></div>
 </div>
 
 <!-- BENEFÍCIOS -->
@@ -1625,6 +1638,7 @@ details.more > .more-body { margin-top: .4rem; }
       <div class="bench-bars wide" id="inssIdadeBars"></div>
     </div>
   </div>
+  <div class="grid-3 mt-1 extras" id="extras-benef"></div>
 </div>
 
 <!-- VIZINHANÇA -->
@@ -1889,6 +1903,22 @@ async function init() {
 
   // O rodapé nomeia o arquivo que alimentou a página
   setTxt('footerJson', JSON_PATH);
+
+  // Rodapé da barra lateral: conta os indicadores que este JSON de fato traz. Um
+  // indicador é cada número não nulo ou cada série/ranking não vazio dentro de
+  // `secoes`, sem contar metadados (fonte, ano, referência…) nem blocos com erro
+  // ou "disponivel: false" — o mesmo critério para qualquer município.
+  const META = /^(fonte|fontes|ano|anos|referencia|competencia|periodo|nota|notas|motivo|disponivel|erro|data_.*|gerado_em|ano_.*|unidade|id_.*)$/;
+  const contaInd = o => {
+    if (Array.isArray(o)) return o.length ? 1 : 0;
+    if (o && typeof o === 'object') {
+      if (o.erro || o.disponivel === false) return 0;
+      return Object.entries(o).reduce((n, [k, v]) => n + (META.test(k) ? 0 : contaInd(v)), 0);
+    }
+    return (o === null || o === undefined || o === '') ? 0 : 1;
+  };
+  setTxt('nIndicadores', fNum(contaInd(g(D, 'secoes'))));
+  setTxt('nTemas', document.querySelectorAll('.sidebar-nav .sidebar-item').length - 1);
 
   // Helper: find item in array by {key: val}
   function find(arr, key, val) {
@@ -2689,7 +2719,7 @@ async function init() {
     const anoPol = pol.ano || '';
     document.getElementById('polAno').textContent = anoPol;
     document.getElementById('polAno2').textContent = anoPol;
-    document.getElementById('polAno3').textContent = anoPol;
+    document.getElementById('polAno3').textContent = pol.ano_prefeito || anoPol;
 
     const eleit = pol.eleitorado || {};
     document.getElementById('polEleitList').innerHTML =
@@ -4607,6 +4637,199 @@ async function init() {
   } else {
     vazioValor('patN'); barrasCategoria('patEspBars', [], 0); barrasCategoria('patTaxaBars', [], 0);
   }
+
+
+  // =========================================================================
+  // EXTRAS — fontes do espelho que entraram em out/2026 (CFEM, CAR, Pix, BNDES…)
+  // Cartões montados a partir de uma lista declarativa: cada um some sozinho
+  // quando o bloco veio com erro ou "disponivel: false".
+  // =========================================================================
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fMi = n => n == null ? '' : 'R$ ' + fNum1(Number(n) / 1e6) + ' mi';
+  const fRealC = n => n == null ? '' : (Math.abs(n) >= 1e6 ? fMi(n) : fReal(n));
+  const cartaoExtra = (alvo, c) => {
+    const box = el_('extras-' + alvo); if (!box) return;
+    const id = 'x' + Math.random().toString(36).slice(2, 9);
+    let h = '<div class="card' + (c.valor != null && !c.barras && !c.lista ? ' card-metric' : '') + '"><h3>' + esc(c.titulo) +
+      (c.vintage ? ' <span class="vintage">' + esc(c.vintage) + '</span>' : '') + '</h3>';
+    if (c.valor != null) h += '<div class="' + (c.barras || c.lista ? 'value-sm' : 'value') + '">' + esc(c.valor) + '</div>';
+    if (c.sub) h += '<div class="sub" style="margin-bottom:.55rem">' + c.sub + '</div>';
+    if (c.barras) h += '<div class="bench-bars wide" id="' + id + '"></div>';
+    if (c.lista) h += '<ul class="data-list">' + (c.lista.length ? c.lista.map(([a, b]) => liRow(esc(a), esc(b))).join('')
+      : '<li style="border-bottom:none;display:block"><span class="empty">' + SEM_DADO + '</span></li>') + '</ul>';
+    box.insertAdjacentHTML('beforeend', h + '</div>');
+    if (c.barras) barrasCategoria(id, c.barras.linhas, c.barras.total, c.barras.cor, c.barras.opts);
+  };
+  const X = p => ok(g(D, p)) && g(D, p).disponivel !== false ? g(D, p) : null;
+  const top = (arr, k, v, n) => (arr || []).filter(r => r[v] != null && Number(r[v]) > 0).slice(0, n || 8)
+    .map(r => ({ k: truncaPalavra(titulo(String(r[k] ?? '—')), 34), titulo: r[k], v: Number(r[v]) }));
+  const ultAno = (arr, k) => (arr && arr.length) ? arr[arr.length - 1][k || 'ano'] : '';
+
+  // Demografia
+  { const n = X('secoes.demografia.nomes');
+    if (n && n.top && n.top.length) cartaoExtra('demo', { titulo: 'Nomes mais comuns', vintage: 'Censo 2010',
+      barras: { linhas: n.top.slice(0, 10).map(r => ({ k: r.nome, v: r.pessoas })), total: 0, cor: C.s2 } }); }
+
+  // Economia
+  { const p = X('secoes.economia.pix');
+    if (p) {
+      cartaoExtra('econ', { titulo: 'Pix — valor pago no mês', vintage: mesAno(p.competencia), valor: fRealC(p.valor_pago),
+        sub: fNum(p.transacoes_pagas) + ' transações · recebido ' + fRealC(p.valor_recebido) });
+      cartaoExtra('econ', { titulo: 'Pessoas que pagam com Pix', vintage: mesAno(p.competencia), valor: fNum(p.pagadores_pf),
+        sub: (p.pagadores_pf_por_hab != null ? fNum1(p.pagadores_pf_por_hab * 100) + '% da população · ' : '') + fNum(p.pagadores_pj) + ' empresas pagadoras' });
+    }
+    const b = X('secoes.economia.bndes');
+    if (b && b.serie_indiretas && b.serie_indiretas.length) {
+      const u = b.serie_indiretas[b.serie_indiretas.length - 1];
+      cartaoExtra('econ', { titulo: 'BNDES — desembolsos via bancos', vintage: String(u.ano),
+        valor: fRealC(u.desembolsado), sub: fNum(u.operacoes) + ' operações indiretas no ano',
+        barras: { linhas: b.serie_indiretas.slice(-8).map(r => ({ k: String(r.ano), v: r.desembolsado })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
+      if (b.porte_5a && b.porte_5a.length) cartaoExtra('econ', { titulo: 'BNDES por porte do cliente', vintage: '5 anos',
+        barras: { linhas: top(b.porte_5a, 'porte', 'desembolsado'), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
+      if ((b.administracao_publica || []).length) cartaoExtra('econ', { titulo: 'BNDES com a prefeitura', vintage: String(b.administracao_publica[0].ano || ''),
+        lista: b.administracao_publica.slice(0, 5).map(r => [truncaPalavra(titulo(r.projeto || r.programa || ''), 48), fRealC(r.valor)]) });
+    }
+    const m = X('secoes.economia.mineracao_cfem');
+    if (m) cartaoExtra('econ', { titulo: 'CFEM — royalties da mineração', vintage: String(m.ano), valor: fRealC(m.valor_ano),
+      sub: 'Recolhido no ano; o município fica com 60%',
+      barras: { linhas: top(m.substancias, 'substancia', 'valor', 5), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
+  }
+
+  // Educação
+  { const a = X('secoes.educacao.alfabetizacao');
+    if (a) cartaoExtra('educ', { titulo: 'Criança Alfabetizada', vintage: String(a.ano), valor: fNum1(a.taxa) + '%',
+      sub: 'Alunos do 2º ano alfabetizados (rede pública)' + (a.media_municipios_uf != null ? ' · média dos municípios da UF ' + fNum1(a.media_municipios_uf) + '%' : '') });
+    const i = X('secoes.educacao.inse');
+    if (i) cartaoExtra('educ', { titulo: 'Nível socioeconômico dos alunos (INSE)', vintage: String(i.ano), valor: fNum1(i.inse).replace(/,0$/, ',0'),
+      sub: 'Escala 1–8 · UF ' + fNum1(i.media_municipios_uf) + ' · Brasil ' + fNum1(i.media_municipios_br),
+      barras: { linhas: (i.niveis_pct || []).map(r => ({ k: 'Nível ' + r.nivel, v: r.pct })), total: 0, cor: C.s2, opts: { fmtValor: v => fNum1(v) + '%' } } });
+    const s = X('secoes.educacao.superior');
+    if (s) {
+      cartaoExtra('educ', { titulo: 'Ensino superior — matrículas', vintage: String(s.ano), valor: fNum(s.matriculas),
+        sub: fNum(s.matriculas_presenciais) + ' presenciais em ' + fNum(s.cursos_presenciais) + ' cursos · ' + fNum(s.matriculas_ead) + ' EaD em polos · ' + fNum(s.concluintes) + ' concluintes',
+        barras: { linhas: (s.por_rede || []).map(r => ({ k: r.rede, v: r.matriculas })), total: s.matriculas, cor: C.s2 } });
+      cartaoExtra('educ', { titulo: 'Matrículas por área', vintage: String(s.ano),
+        barras: { linhas: top(s.por_area, 'area', 'matriculas', 8), total: s.matriculas, cor: C.s2 } });
+    }
+    const c = X('secoes.educacao.conectada');
+    if (c) cartaoExtra('educ', { titulo: 'Internet nas escolas públicas', vintage: String(c.ano), valor: fNum(c.com_internet) + ' de ' + fNum(c.escolas),
+      sub: fNum(c.internet_aprendizagem) + ' usam internet para aprendizagem · ' + fNum(c.laboratorio) + ' com laboratório' +
+        (c.download_mediano != null ? ' · download mediano ' + fNum1(c.download_mediano) + ' Mbps' : ''),
+      barras: { linhas: top(c.por_faixa, 'faixa', 'escolas'), total: c.escolas, cor: C.s2 } });
+    const e = X('secoes.educacao.especial');
+    if (e && (e.por_tipo || []).some(r => r.matriculas > 0)) cartaoExtra('educ', { titulo: 'Educação especial por deficiência', vintage: String(e.ano),
+      barras: { linhas: top(e.por_tipo, 'tipo', 'matriculas', 8), total: 0, cor: C.s2 } });
+    const q = X('secoes.educacao.cnpq');
+    if (q && q.serie) { const u = q.serie[q.serie.length - 1];
+      cartaoExtra('educ', { titulo: 'Bolsas do CNPq com destino no município', vintage: String(u.ano), valor: fNum(u.processos),
+        sub: fRealC(u.valor) + ' no ano', barras: { linhas: top(q.por_modalidade, 'modalidade', 'processos', 6), total: u.processos, cor: C.s2 } }); }
+  }
+
+  // Saúde
+  { const a = X('secoes.saude.atencao_basica');
+    if (a) cartaoExtra('saude', { titulo: 'Cobertura da atenção básica', vintage: mesAno(a.referencia), valor: fNum1(a.cobertura_ab) + '%',
+      sub: 'Estratégia Saúde da Família: ' + fNum1(a.cobertura_esf) + '% · ' + fNum(a.equipes) + ' equipes. Indicador descontinuado em 2020.' }); }
+
+  // Infraestrutura
+  { const o = X('secoes.infraestrutura.obras_cno');
+    if (o) {
+      cartaoExtra('infra', { titulo: 'Obras registradas na Receita (CNO)', vintage: mesAno((o.data_extracao || '').slice(0, 7)), valor: fNum(o.obras),
+        barras: { linhas: (o.por_situacao || []).map(r => ({ k: r.situacao, v: r.obras })), total: o.obras, cor: C.s3 } });
+      if ((o.iniciadas_por_ano || []).length) cartaoExtra('infra', { titulo: 'Obras iniciadas por ano',
+        barras: { linhas: o.iniciadas_por_ano.map(r => ({ k: String(r.ano), v: r.obras })), total: 0, cor: C.s3 } });
+    }
+    const w = X('secoes.infraestrutura.outorgas_agua');
+    if (w) cartaoExtra('infra', { titulo: 'Outorgas de captação de água', valor: fNum(w.outorgas), sub: 'Vazão média somada: ' + fNum1(w.vazao_total) + ' m³/h',
+      lista: (w.maiores || []).slice(0, 5).map(r => [truncaPalavra(titulo(r.responsavel), 40), fNum1(r.vazao) + ' m³/h']) });
+  }
+
+  // Meio ambiente
+  { const c = X('secoes.meio_ambiente.car');
+    if (c) {
+      const cam = c.camadas_ha || {};
+      cartaoExtra('amb', { titulo: 'Cadastro Ambiental Rural', vintage: mesAno((c.data_extracao || '').slice(0, 7)), valor: fNum(c.imoveis) + ' imóveis',
+        sub: fNum(Math.round(c.area_ha)) + ' ha cadastrados · ' + fNum(c.pendentes) + ' pendentes',
+        barras: { linhas: [['Vegetação nativa', cam.vegetacao_nativa], ['Reserva legal', cam.reserva_legal], ['APP', cam.app],
+          ['Área consolidada', cam.area_consolidada], ['Uso restrito', cam.uso_restrito]].filter(r => r[1] > 0).map(([k, v]) => ({ k, v })),
+          total: 0, cor: C.s3, opts: { fmtValor: v => fNum(Math.round(v)) + ' ha' } } });
+      cartaoExtra('amb', { titulo: 'Situação da análise do CAR', vintage: mesAno((c.data_extracao || '').slice(0, 7)),
+        barras: { linhas: top(c.por_condicao, 'condicao', 'imoveis', 5).map(r => ({ ...r, k: truncaPalavra(r.titulo, 36) })), total: c.imoveis, cor: C.s3 } });
+    }
+    const b = X('secoes.meio_ambiente.ibama');
+    if (b) cartaoExtra('amb', { titulo: 'Autos de infração do IBAMA', valor: fNum(b.autos_total),
+      sub: fRealC(b.valor_total) + ' em multas · ' + fNum(b.embargos) + ' embargos (' + fNum(b.embargos_5a) + ' nos últimos 5 anos)',
+      barras: { linhas: (b.serie || []).slice(-8).map(r => ({ k: String(r.ano), v: r.autos })), total: 0, cor: C.s3 } });
+    const d = X('secoes.meio_ambiente.desastres');
+    if (d) cartaoExtra('amb', { titulo: 'Emergência ou calamidade vigente', vintage: mesAno((d.data_extracao || '').slice(0, 7)),
+      valor: d.vigentes.length ? fNum(d.vigentes.length) : 'Nenhuma',
+      sub: fNum(d.municipios_uf_com_reconhecimento) + ' municípios da UF com reconhecimento vigente',
+      lista: d.vigentes.length ? d.vigentes.map(r => [r.desastre + ' — ' + r.situacao, 'até ' + mesAno(r.vigencia)]) : null });
+    const e = X('secoes.meio_ambiente.estacoes_inmet');
+    if (e && e.estacoes.length) cartaoExtra('amb', { titulo: 'Estações meteorológicas do INMET',
+      lista: e.estacoes.map(r => [titulo(r.estacao) + ' (' + r.id_estacao + ')', fNum(Math.round(r.altitude)) + ' m']) });
+  }
+
+  // Política
+  { const f = X('secoes.politica.filiados');
+    if (f) cartaoExtra('pol', { titulo: 'Filiados a partidos', vintage: mesAno((f.data_extracao || '').slice(0, 7)), valor: fNum(f.filiados),
+      barras: { linhas: (f.por_partido || []).slice(0, 10).map(r => ({ k: r.partido, v: r.filiados })), total: f.filiados, cor: C.s5 } });
+    const c = X('secoes.politica.financas_campanha');
+    if (c) {
+      const rec = (c.receitas_por_cargo || []).reduce((a, r) => a + (r.valor || 0), 0);
+      cartaoExtra('pol', { titulo: 'Dinheiro das campanhas', vintage: String(c.ano), valor: fRealC(rec),
+        sub: (c.receitas_por_cargo || []).map(r => titulo(r.cargo) + ': ' + fRealC(r.valor) + ' (' + fNum(r.candidatos) + ' candidaturas)').join(' · '),
+        barras: { linhas: top(c.receitas_por_origem, 'origem', 'valor', 6).map(r => ({ ...r, k: truncaPalavra(String(r.titulo).replace(/^recursos d[eo] /, ''), 30) })), total: rec, cor: C.s5 } });
+      cartaoExtra('pol', { titulo: 'Gastos das campanhas por tipo', vintage: String(c.ano),
+        barras: { linhas: top(c.despesas_por_tipo, 'tipo', 'valor', 7), total: 0, cor: C.s5, opts: { fmtValor: fRealC } } });
+    }
+  }
+
+  // Transparência
+  { const c = X('secoes.transparencia.cauc');
+    if (c) cartaoExtra('transp', { titulo: 'CAUC — requisitos para receber verba federal', vintage: c.data_pesquisa || '',
+      valor: c.pendencias ? c.pendencias + ' pendência' + (c.pendencias > 1 ? 's' : '') : 'Sem pendências',
+      sub: fNum(c.regulares) + ' de ' + fNum(c.itens) + ' itens comprovados',
+      lista: (c.itens_pendentes || []).map(r => [truncaPalavra(r.descricao, 60), r.item]) });
+    const f = X('secoes.transparencia.fiscalizacao_cgu');
+    if (f) cartaoExtra('transp', { titulo: 'Sorteios de fiscalização da CGU', valor: f.sorteios.length ? fNum(f.sorteios.length) : 'Nenhum',
+      sub: f.sorteios.length ? 'Sorteio nº ' + f.sorteios.join(', ') : 'O município nunca foi sorteado' });
+  }
+
+  // Social / cultura
+  { const r = X('secoes.social.rouanet');
+    if (r) cartaoExtra('social', { titulo: 'Lei Rouanet — proponentes locais', valor: fNum(r.proponentes),
+      sub: fNum(r.projetos) + ' projetos · ' + fRealC(r.valor_projetos) + ' aprovados para captar',
+      lista: (r.top_proponentes || []).slice(0, 5).map(x => [truncaPalavra(x.nome, 44), fRealC(x.valor)]) }); }
+
+  // Agropecuária
+  { const a = X('secoes.agropecuaria.aquicultura');
+    if (a) cartaoExtra('agro', { titulo: 'Aquicultura', vintage: String(a.ano), valor: 'R$ ' + fNum(a.valor_total) + ' mil',
+      barras: { linhas: top(a.produtos, 'produto', 'valor', 6), total: a.valor_total, cor: C.s1 } });
+    const s = X('secoes.agropecuaria.extracao_silvicultura');
+    if (s) [['silvicultura', 'Silvicultura'], ['extracao_vegetal', 'Extração vegetal']].forEach(([k, rot]) => {
+      const b = s[k]; if (!b) return;
+      cartaoExtra('agro', { titulo: rot, vintage: String(b.ano), valor: 'R$ ' + fNum(b.valor_total) + ' mil',
+        barras: { linhas: top(b.produtos, 'produto', 'valor', 6), total: b.valor_total, cor: C.s1 } });
+    });
+    const i = X('secoes.agropecuaria.imoveis_rurais');
+    if (i) {
+      if (i.cafir) cartaoExtra('agro', { titulo: 'Imóveis rurais na Receita (CAFIR)', vintage: mesAno((i.cafir.data_referencia || '').slice(0, 7)),
+        valor: fNum(i.cafir.imoveis), sub: fNum(Math.round(i.cafir.area_ha)) + ' ha · área mediana ' + fNum1(i.cafir.area_mediana_ha) + ' ha · ' +
+          fNum(i.cafir.imoveis_1000ha_mais) + ' com 1.000 ha ou mais' });
+      if ((i.itr || []).length) cartaoExtra('agro', { titulo: 'ITR arrecadado', vintage: String(ultAno(i.itr)),
+        barras: { linhas: i.itr.slice(-8).map(r => ({ k: String(r.ano), v: r.valor })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
+    }
+  }
+
+  // Benefícios
+  { const p = X('secoes.beneficios.programas_cgu');
+    if (p) [['gas_do_povo', 'Gás do Povo', 'famílias'], ['pe_de_meia', 'Pé-de-Meia', 'estudantes'], ['seguro_defeso', 'Seguro Defeso', 'pescadores']]
+      .forEach(([k, rot, quem]) => { const b = ok(p[k]); if (!b) return;
+        cartaoExtra('benef', { titulo: rot, vintage: mesAno(b.competencia), valor: fNum(b.pessoas), sub: quem + ' · ' + fRealC(b.valor) + ' no mês' }); });
+  }
+
+  // Seções que ficaram sem nenhum cartão extra não deixam um vão no layout
+  document.querySelectorAll('.extras').forEach(e => { if (!e.children.length) e.remove(); });
 
   // Insights
   // Cada destaque só entra se o dado por trás dele existir: no fixture vazio a lista

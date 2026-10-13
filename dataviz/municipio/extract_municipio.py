@@ -660,21 +660,25 @@ def politica(mid):
             count(DISTINCT zona) zonas FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano}""")
     gen = q(f"SELECT genero, sum(try_cast(eleitores AS BIGINT)) n FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1")
     ins = q(f"SELECT instrucao, sum(try_cast(eleitores AS BIGINT)) n FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC")
-    det = one(f"""SELECT * FROM {p('br_tse_eleicoes','detalhes_votacao_municipio')}
-        WHERE id_municipio='{mid}' AND ano={ano} AND cargo='prefeito' AND turno=(
-          SELECT max(turno) FROM {p('br_tse_eleicoes','detalhes_votacao_municipio')} WHERE id_municipio='{mid}' AND ano={ano} AND cargo='prefeito')""")
+    # O perfil do eleitorado já chega no ano da eleição geral (2026); prefeito só existe
+    # no ano municipal, então o resultado procura a última eleição com cargo prefeito.
+    t_det = p('br_tse_eleicoes', 'detalhes_votacao_municipio')
+    ano_pref = one(f"SELECT max(ano) a FROM {t_det} WHERE id_municipio='{mid}' AND cargo='prefeito'")["a"] or ano
+    det = one(f"""SELECT * FROM {t_det}
+        WHERE id_municipio='{mid}' AND ano={ano_pref} AND cargo='prefeito' AND turno=(
+          SELECT max(turno) FROM {t_det} WHERE id_municipio='{mid}' AND ano={ano_pref} AND cargo='prefeito')""")
     win = one(f"""SELECT r.sigla_partido, r.votos, r.turno, c.nome_urna
         FROM {p('br_tse_eleicoes','resultados_candidato_municipio')} r
         LEFT JOIN {p('br_tse_eleicoes','candidatos')} c
           ON c.ano=r.ano AND c.sequencial=r.sequencial_candidato AND c.sigla_uf=r.sigla_uf
-        WHERE r.id_municipio='{mid}' AND r.ano={ano} AND r.cargo='prefeito' AND r.resultado LIKE 'eleito%'
+        WHERE r.id_municipio='{mid}' AND r.ano={ano_pref} AND r.cargo='prefeito' AND r.resultado LIKE 'eleito%'
         ORDER BY r.turno DESC LIMIT 1""")
-    return {"fonte": "br_tse_eleicoes", "ano": ano,
+    return {"fonte": "br_tse_eleicoes", "ano": ano, "ano_prefeito": ano_pref,
             "eleitorado": tot and {"aptos": num(tot["eleitores"]), "biometria": num(tot["biometria"]), "zonas": tot["zonas"]},
             "genero": {r["genero"]: num(r["n"]) for r in gen},
             "instrucao": {r["instrucao"]: num(r["n"]) for r in ins},
             "prefeito": det and {
-                "turno": det["turno"], "aptos": num(det["aptos"]), "secoes": num(det["secoes"]),
+                "ano": ano_pref, "turno": det["turno"], "aptos": num(det["aptos"]), "secoes": num(det["secoes"]),
                 "comparecimento": num(det["comparecimento"]), "abstencoes": num(det["abstencoes"]),
                 "votos_nominais": num(det["votos_nominais"]), "votos_brancos": num(det["votos_brancos"]),
                 "votos_nulos": num(det["votos_nulos"]),
@@ -2045,6 +2049,535 @@ def social_sinpatinhas(mid):
                             "ano_populacao": ano_pop}}
 
 
+# ============================================ fontes do espelho ainda não usadas
+def pr(dataset, table):
+    """read_parquet recursivo: tabelas particionadas (ano=*/) ou com esquema que
+    muda entre arquivos."""
+    return f"read_parquet('{os.path.join(ROOT, dataset, table)}/**/*.parquet', union_by_name=true)"
+
+
+def _brl(col):
+    """Valor em texto no formato '1302,00' (CGU, ANM, IBAMA) para DOUBLE."""
+    return (f"TRY_CAST(CASE WHEN {col} LIKE '%,%' THEN replace(replace({col}, '.', ''), ',', '.') "
+            f"ELSE {col} END AS DOUBLE)")
+
+
+def _ultimo_mes(t, col_mes, filtro):
+    """Mês mais recente (AAAAMM) com linhas para o município numa tabela da CGU."""
+    r = one(f"SELECT max({col_mes}::INT) m FROM {t} WHERE {filtro}")
+    return r and r["m"]
+
+
+@section
+def mineracao_cfem(mid):
+    """CFEM é a compensação paga por quem extrai minério; o município fica com 60%."""
+    t = p("br_anm", "cfem_cfem_arrecadacao")
+    v = _brl("valorrecolhido")
+    serie = q(f"""SELECT ano, sum({v}) valor, count(DISTINCT cpf_cnpj) pagadores
+        FROM {t} WHERE codigomunicipio='{mid}' GROUP BY 1 ORDER BY 1""")
+    serie = [{**r, "ano": int(r["ano"])} for r in serie]
+    if not serie:
+        return {"disponivel": False, "motivo": "nenhuma arrecadação de CFEM no município"}
+    ano = max(r["ano"] for r in serie if r["ano"] < date.today().year) if len(serie) > 1 else serie[-1]["ano"]
+    subs = q(f"""SELECT substancia, sum({v}) valor FROM {t}
+        WHERE codigomunicipio='{mid}' AND ano::INT={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+    return {"fonte": "br_anm.cfem_cfem_arrecadacao", "ano": ano,
+            "valor_ano": next(r["valor"] for r in serie if r["ano"] == ano),
+            "serie": [{"ano": r["ano"], "valor": r["valor"], "pagadores": num(r["pagadores"])} for r in serie[-12:]],
+            "substancias": subs}
+
+
+@section
+def desastres_reconhecimentos(mid):
+    """Situação de emergência ou calamidade reconhecida pela Defesa Civil nacional e
+    ainda vigente na data da extração. Município sem reconhecimento devolve lista vazia."""
+    t = p("br_sedec_desastres", "reconhecimentos_vigentes")
+    ext = one(f"SELECT max(data_extracao) d FROM {t}")["d"]
+    rows = q(f"""SELECT nome_cobrade desastre, situacao, data_ocorrencia::VARCHAR ocorrencia,
+            data_vigencia::VARCHAR vigencia
+        FROM {t} WHERE id_municipio='{mid}' AND data_extracao='{ext}' ORDER BY data_ocorrencia DESC""")
+    uf = one(f"SELECT count(DISTINCT id_municipio) n FROM {t} WHERE id_municipio LIKE '{mid[:2]}%' AND data_extracao='{ext}'")
+    return {"fonte": "br_sedec_desastres.reconhecimentos_vigentes", "data_extracao": str(ext),
+            "vigentes": rows, "municipios_uf_com_reconhecimento": num(uf["n"])}
+
+
+@section
+def agro_extracao_silvicultura(mid):
+    """PEVS: produção da extração vegetal e da silvicultura (valor em mil R$)."""
+    out = {"fonte": "br_ibge_pevs.producao_extracao_vegetal · producao_silvicultura"}
+    for chave, tab in [("silvicultura", "producao_silvicultura"), ("extracao_vegetal", "producao_extracao_vegetal")]:
+        t = p("br_ibge_pevs", tab)
+        a = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}' AND valor > 0")
+        if not a or a["a"] is None:
+            out[chave] = None
+            continue
+        rows = q(f"""SELECT produto, unidade, quantidade, valor FROM {t}
+            WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC LIMIT 8""")
+        out[chave] = {"ano": a["a"], "valor_total": sum(r["valor"] or 0 for r in rows), "produtos": rows}
+    return out
+
+
+@section
+def agro_aquicultura(mid):
+    t = p("br_ibge_ppm", "producao_aquicultura")
+    a = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}' AND valor > 0")
+    if not a or a["a"] is None:
+        return {"disponivel": False, "motivo": "sem aquicultura registrada na PPM"}
+    rows = q(f"""SELECT produto, quantidade, valor FROM {t}
+        WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC""")
+    return {"fonte": "br_ibge_ppm.producao_aquicultura (quantidade em kg ou milheiros; valor em mil R$)",
+            "ano": a["a"], "valor_total": sum(r["valor"] or 0 for r in rows), "produtos": rows}
+
+
+@section
+def educacao_alfabetizacao(mid):
+    """Indicador Criança Alfabetizada (2º ano do EF). rede 5 = pública total."""
+    t = p("br_inep_avaliacao_alfabetizacao", "municipio")
+    rows = q(f"""SELECT ano, taxa_alfabetizacao FROM {t}
+        WHERE id_municipio='{mid}' AND rede=5 ORDER BY ano""")
+    if not rows:
+        return {"disponivel": False, "motivo": "município sem resultado no Criança Alfabetizada"}
+    ult = rows[-1]["ano"]
+    uf = one(f"""SELECT avg(taxa_alfabetizacao) v FROM {t}
+        WHERE id_municipio LIKE '{mid[:2]}%' AND rede=5 AND ano={ult}""")
+    meta = None
+    try:
+        tm = p("br_inep_avaliacao_alfabetizacao", "meta_alfabetizacao_municipio")
+        meta = q(f"SELECT * FROM {tm} WHERE id_municipio='{mid}' ORDER BY ano")
+    except Exception:  # noqa: BLE001
+        pass
+    return {"fonte": "br_inep_avaliacao_alfabetizacao.municipio", "ano": ult,
+            "taxa": rows[-1]["taxa_alfabetizacao"], "media_municipios_uf": uf and uf["v"],
+            "serie": rows, "metas": meta}
+
+
+@section
+def educacao_superior(mid):
+    """Censo da Educação Superior: cursos de graduação com oferta no município. Cursos
+    EaD (modalidade 2) contam pelo polo, por isso são centenas."""
+    t = pr("br_inep_censo_educacao_superior", "curso")
+    a = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    if a is None:
+        return {"disponivel": False, "motivo": "nenhum curso de graduação no município"}
+    tot = one(f"""SELECT count(DISTINCT id_curso) cursos, count(DISTINCT id_ies) ies,
+            sum(quantidade_vagas) vagas, sum(quantidade_ingressantes) ingressantes,
+            sum(quantidade_matriculas) matriculas, sum(quantidade_concluintes) concluintes,
+            count(DISTINCT id_curso) FILTER (WHERE tipo_modalidade_ensino::VARCHAR='1') cursos_presenciais,
+            sum(quantidade_matriculas) FILTER (WHERE tipo_modalidade_ensino::VARCHAR='1') matriculas_presenciais,
+            sum(quantidade_matriculas) FILTER (WHERE tipo_modalidade_ensino::VARCHAR='2') matriculas_ead
+        FROM {t} WHERE id_municipio='{mid}' AND ano={a}""")
+    rede = q(f"""SELECT rede, sum(quantidade_matriculas) matriculas FROM {t}
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+    areas = q(f"""SELECT nome_area_geral area, sum(quantidade_matriculas) matriculas FROM {t}
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC LIMIT 10""")
+    serie = q(f"""SELECT ano, sum(quantidade_matriculas) matriculas FROM {t}
+        WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
+    return {"fonte": "br_inep_censo_educacao_superior.curso", "ano": a,
+            **{k: num(v) for k, v in tot.items()},
+            "por_rede": [{"rede": {"1": "Pública", "2": "Privada"}.get(str(r["rede"]), r["rede"]),
+                          "matriculas": num(r["matriculas"])} for r in rede],
+            "por_area": [{"area": r["area"], "matriculas": num(r["matriculas"])} for r in areas],
+            "serie_matriculas": [{"ano": r["ano"], "matriculas": num(r["matriculas"])} for r in serie]}
+
+
+@section
+def educacao_inse(mid):
+    """INSE (Inep): nível socioeconômico médio dos alunos do Saeb, escala ~1–8.
+    rede 0 = total; tipo_localizacao 0 = total."""
+    t = p("br_inep_indicador_nivel_socioeconomico", "municipio")
+    r = one(f"""SELECT ano, inse, quantidade_alunos_inse alunos,
+            percentual_nivel_1 n1, percentual_nivel_2 n2, percentual_nivel_3 n3, percentual_nivel_4 n4,
+            percentual_nivel_5 n5, percentual_nivel_6 n6, percentual_nivel_7 n7, percentual_nivel_8 n8
+        FROM {t} WHERE id_municipio='{mid}' AND rede::VARCHAR='0' AND tipo_localizacao::VARCHAR='0'
+        ORDER BY ano DESC LIMIT 1""")
+    if not r:
+        return {"disponivel": False, "motivo": "sem INSE para o município"}
+    uf = one(f"""SELECT avg(inse) v FROM {t} WHERE sigla_uf='{one(f"SELECT sigla_uf FROM {t} WHERE id_municipio='{mid}' LIMIT 1")['sigla_uf']}'
+        AND ano={r['ano']} AND rede::VARCHAR='0' AND tipo_localizacao::VARCHAR='0'""")
+    br = one(f"SELECT avg(inse) v FROM {t} WHERE ano={r['ano']} AND rede::VARCHAR='0' AND tipo_localizacao::VARCHAR='0'")
+    return {"fonte": "br_inep_indicador_nivel_socioeconomico.municipio", "ano": r["ano"],
+            "inse": r["inse"], "alunos": num(r["alunos"]), "media_municipios_uf": uf["v"],
+            "media_municipios_br": br["v"],
+            "niveis_pct": [{"nivel": i, "pct": r[f"n{i}"]} for i in range(1, 9)]}
+
+
+@section
+def saude_atencao_basica(mid):
+    """Cobertura da atenção básica (e-Gestor). A série do espelho para em dez/2020,
+    quando o indicador foi descontinuado com o Previne Brasil."""
+    t = p("br_ms_atencao_basica", "municipio")
+    rows = q(f"""SELECT ano, mes, proporcao_cobertura_total_atencao_basica cobertura_ab,
+            proporcao_cobertura_estrategia_saude_familia cobertura_esf,
+            quantidade_equipes_atencao_basica_total equipes
+        FROM {t} WHERE id_municipio='{mid}' AND mes=12 ORDER BY ano""")
+    if not rows:
+        return {"disponivel": False, "motivo": "sem dado de cobertura"}
+    u = rows[-1]
+    return {"fonte": "br_ms_atencao_basica.municipio", "referencia": f"{u['ano']}-12",
+            "cobertura_ab": u["cobertura_ab"], "cobertura_esf": u["cobertura_esf"],
+            "equipes": num(u["equipes"]), "serie": rows}
+
+
+@section
+def ambiente_car(mid):
+    """Cadastro Ambiental Rural (SICAR). Usa a extração mais recente de cada tabela e
+    descarta cadastros cancelados (status CA). Área em hectares."""
+    ti = pr("br_sfb_sicar", "area_imovel")
+    ext = one(f"SELECT max(data_extracao) d FROM {ti} WHERE id_municipio='{mid}'")["d"]
+    if ext is None:
+        return {"disponivel": False, "motivo": "sem imóvel no CAR"}
+    im = one(f"""SELECT count(DISTINCT id_imovel) imoveis, sum(area) area,
+            count(DISTINCT id_imovel) FILTER (WHERE status='PE') pendentes,
+            count(DISTINCT id_imovel) FILTER (WHERE status='SU') suspensos
+        FROM {ti} WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA'""")
+    tipos = q(f"""SELECT tipo, count(DISTINCT id_imovel) imoveis, sum(area) area FROM {ti}
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC""")
+    cond = q(f"""SELECT condicao, count(DISTINCT id_imovel) imoveis FROM {ti}
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+    camadas = {}
+    for k in ("reserva_legal", "app", "vegetacao_nativa", "area_consolidada", "uso_restrito"):
+        try:
+            tc = pr("br_sfb_sicar", k)
+            r = one(f"""WITH x AS (SELECT * FROM {tc} WHERE id_municipio='{mid}')
+                SELECT sum(area) area FROM x WHERE data_extracao=(SELECT max(data_extracao) FROM x)""")
+            camadas[k] = r and r["area"]
+        except Exception:  # noqa: BLE001
+            camadas[k] = None
+    return {"fonte": "br_sfb_sicar.area_imovel · reserva_legal · app · vegetacao_nativa · area_consolidada · uso_restrito",
+            "data_extracao": str(ext), "imoveis": num(im["imoveis"]), "area_ha": im["area"],
+            "pendentes": num(im["pendentes"]), "suspensos": num(im["suspensos"]),
+            "por_tipo": [{"tipo": r["tipo"], "imoveis": num(r["imoveis"]), "area_ha": r["area"]} for r in tipos],
+            "por_condicao": [{"condicao": r["condicao"], "imoveis": num(r["imoveis"])} for r in cond],
+            "camadas_ha": camadas}
+
+
+@section
+def agro_imoveis_rurais(mid):
+    """CAFIR (Receita): imóveis rurais ativos (situacao_imovel '02') no retrato mais
+    recente; e o ITR arrecadado por ano (metade fica com o município, ou tudo se ele
+    fiscaliza). A coluna area vem em décimos de hectare: em Nova Friburgo os ativos somam
+    934.861, contra 93.500 ha de território — divide por 10."""
+    t = pr("br_rf_cafir", "imoveis_rurais")
+    ref = one(f"SELECT max(data_referencia) d FROM {t} WHERE id_municipio='{mid}'")["d"]
+    out = {"fonte": "br_rf_cafir.imoveis_rurais · br_rf_arrecadacao.itr"}
+    if ref:
+        r = one(f"""WITH x AS (SELECT area / 10.0 area FROM {t}
+                WHERE id_municipio='{mid}' AND data_referencia='{ref}' AND situacao_imovel='02')
+            SELECT count(*) imoveis, sum(area) area, median(area) mediana,
+                count(*) FILTER (WHERE area >= 1000) grandes, sum(area) FILTER (WHERE area >= 1000) area_grandes
+            FROM x""")
+        out["cafir"] = {"data_referencia": str(ref), "imoveis": num(r["imoveis"]), "area_ha": r["area"],
+                        "area_mediana_ha": r["mediana"], "imoveis_1000ha_mais": num(r["grandes"]),
+                        "area_1000ha_mais": r["area_grandes"]}
+    else:
+        out["cafir"] = None
+    ti = p("br_rf_arrecadacao", "itr")
+    out["itr"] = q(f"""SELECT ano, sum(valor_arrecadado) valor FROM {ti}
+        WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
+    return out
+
+
+def _cgu_programa(t, mid_rf, col_mes, col_valor, col_pessoa):
+    m = _ultimo_mes(t, col_mes, f"codigo_municipio_siafi='{mid_rf}'")
+    if not m:
+        return None
+    r = one(f"""SELECT count(DISTINCT {col_pessoa}) pessoas, sum({_brl(col_valor)}) valor
+        FROM {t} WHERE codigo_municipio_siafi='{mid_rf}' AND {col_mes}::INT={m}""")
+    serie = q(f"""SELECT {col_mes}::INT mes, count(DISTINCT {col_pessoa}) pessoas, sum({_brl(col_valor)}) valor
+        FROM {t} WHERE codigo_municipio_siafi='{mid_rf}' AND {col_mes}::INT > {m - 100}
+        GROUP BY 1 ORDER BY 1""")
+    return {"competencia": f"{m // 100}-{m % 100:02d}", "pessoas": num(r["pessoas"]), "valor": r["valor"],
+            "serie_12m": [{"mes": f"{s['mes'] // 100}-{s['mes'] % 100:02d}", "pessoas": num(s["pessoas"]),
+                           "valor": s["valor"]} for s in serie]}
+
+
+@section
+def beneficios_programas_cgu(mid, rf):
+    """Gás do Povo, Pé-de-Meia e Seguro Defeso, do Portal da Transparência. O código
+    SIAFI do município é o mesmo da Receita (id_municipio_rf)."""
+    rf = str(int(rf))
+    out = {"fonte": "br_cgu_gas_do_povo · br_cgu_pe_de_meia · br_cgu_seguro_defeso"}
+    for k, ds, tb, col_mes, col_val, col_p in [
+            ("gas_do_povo", "br_cgu_gas_do_povo", "gas_do_povo", "mes_referencia", "valor_beneficio", "cpf_beneficiario"),
+            ("pe_de_meia", "br_cgu_pe_de_meia", "pe_de_meia", "mes_referencia", "valor_parcela", "cpf_beneficiario"),
+            ("seguro_defeso", "br_cgu_seguro_defeso", "seguro_defeso", "mes_referencia", "valor_parcela", "nis_favorecido")]:
+        try:
+            out[k] = _cgu_programa(pr(ds, tb), rf, col_mes, col_val, col_p)
+        except Exception as e:  # noqa: BLE001
+            out[k] = {"erro": str(e)[:200]}
+    return out
+
+
+@section
+def ambiente_ibama(mid):
+    """Autos de infração e termos de embargo do IBAMA com local no município.
+    Autos cancelados ficam de fora."""
+    t = pr("br_ibama_autos", "auto_infracao")
+    serie = q(f"""SELECT year(dat_hora_auto_infracao::TIMESTAMP) ano, count(*) autos,
+            sum({_brl('val_auto_infracao')}) valor
+        FROM {t} WHERE cod_municipio::VARCHAR='{mid}' AND coalesce(sit_cancelado,'N') <> 'S'
+        GROUP BY 1 HAVING ano IS NOT NULL ORDER BY 1""")
+    tipos = q(f"""SELECT coalesce(tipo_infracao, 'Não informado') tipo, count(*) autos FROM {t}
+        WHERE cod_municipio::VARCHAR='{mid}' AND coalesce(sit_cancelado,'N') <> 'S'
+          AND year(dat_hora_auto_infracao::TIMESTAMP) >= {date.today().year - 10}
+        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+    te = pr("br_ibama_embargos_novo", "termo_embargo")
+    emb = one(f"""SELECT count(*) n, count(*) FILTER (WHERE year(dat_embargo::TIMESTAMP) >= {date.today().year - 5}) recentes
+        FROM {te} WHERE cod_municipio::VARCHAR='{mid}' AND coalesce(sit_cancelado,'N') <> 'S'""")
+    return {"fonte": "br_ibama_autos.auto_infracao · br_ibama_embargos_novo.termo_embargo",
+            "autos_total": sum(num(r["autos"]) for r in serie),
+            "valor_total": sum(r["valor"] or 0 for r in serie),
+            "serie": [{"ano": r["ano"], "autos": num(r["autos"]), "valor": r["valor"]} for r in serie[-15:]],
+            "tipos_10a": [{"tipo": r["tipo"], "autos": num(r["autos"])} for r in tipos],
+            "embargos": num(emb["n"]), "embargos_5a": num(emb["recentes"])}
+
+
+@section
+def economia_bndes(mid):
+    """Operações contratadas do BNDES com cliente no município: indiretas automáticas
+    (via banco repassador, o grosso para MPEs), diretas/não automáticas e com o setor público."""
+    ti = p("br_bndes_operacoes_contratadas", "operacoes_indiretas_automaticas")
+    serie = q(f"""SELECT ano, count(*) operacoes, sum(valor_desembolsado) desembolsado FROM {ti}
+        WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
+    porte = q(f"""SELECT porte_cliente porte, count(*) operacoes, sum(valor_desembolsado) desembolsado FROM {ti}
+        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 3 DESC""")
+    setor = q(f"""SELECT setor_bndes setor, sum(valor_desembolsado) desembolsado FROM {ti}
+        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+    tn = p("br_bndes_operacoes_contratadas", "operacoes_nao_automaticas")
+    na = q(f"""SELECT data_contratacao::VARCHAR AS contratacao, nome_cliente cliente, descricao_projeto projeto,
+            produto, situacao_operacao situacao, valor_operacao valor, valor_desembolsado desembolsado
+        FROM {tn} WHERE id_municipio='{mid}' ORDER BY data_contratacao DESC LIMIT 10""")
+    ta = p("br_bndes_operacoes_contratadas", "operacoes_administracao_publica")
+    ap = q(f"""SELECT ano, ente_publico ente, programa, descricao_projeto projeto, situacao_operacao situacao,
+            valor_operacao valor, valor_desembolsado desembolsado
+        FROM {ta} WHERE id_municipio='{mid}' ORDER BY ano DESC""")
+    return {"fonte": "br_bndes_operacoes_contratadas", "serie_indiretas": [
+                {"ano": r["ano"], "operacoes": num(r["operacoes"]), "desembolsado": r["desembolsado"]} for r in serie[-12:]],
+            "porte_5a": [{"porte": r["porte"], "operacoes": num(r["operacoes"]), "desembolsado": r["desembolsado"]} for r in porte],
+            "setor_5a": setor, "nao_automaticas": na, "administracao_publica": ap}
+
+
+@section
+def politica_filiados(mid):
+    """Filiados com registro regular, por partido, na extração mais recente do TSE."""
+    t = pr("br_tse_filiacao_partidaria", "microdados")
+    ext = one(f"SELECT max(data_extracao) d FROM {t} WHERE id_municipio='{mid}'")["d"]
+    cond = f"id_municipio='{mid}' AND situacao_registro='Regular'" + (f" AND data_extracao='{ext}'" if ext else "")
+    part = q(f"SELECT sigla_partido partido, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC")
+    if not part:
+        return {"disponivel": False, "motivo": "nenhum filiado regular no município"}
+    sexo = q(f"SELECT sexo, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC")
+    return {"fonte": "br_tse_filiacao_partidaria.microdados", "data_extracao": str(ext),
+            "filiados": sum(num(r["filiados"]) for r in part),
+            "por_partido": [{"partido": r["partido"], "filiados": num(r["filiados"])} for r in part],
+            "por_sexo": [{"sexo": r["sexo"], "filiados": num(r["filiados"])} for r in sexo]}
+
+
+@section
+def politica_financas_campanha(mid):
+    """Receitas e despesas declaradas pelas candidaturas da última eleição municipal."""
+    tr = pr("br_tse_eleicoes", "receitas_candidato")
+    td = pr("br_tse_eleicoes", "despesas_candidato")
+    ano = one(f"SELECT max(ano) a FROM {td} WHERE id_municipio='{mid}'")["a"]
+    if ano is None:
+        return {"disponivel": False, "motivo": "sem prestação de contas no município"}
+    rec = q(f"""SELECT cargo, sum(valor_receita) valor, count(DISTINCT sequencial_candidato) candidatos
+        FROM {tr} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC""")
+    fontes = q(f"""SELECT origem_receita origem, sum(valor_receita) valor FROM {tr}
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+    desp = q(f"""SELECT cargo, sum(valor_despesa) valor FROM {td}
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC""")
+    tipos = q(f"""SELECT tipo_despesa tipo, sum(valor_despesa) valor FROM {td}
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+    return {"fonte": "br_tse_eleicoes.receitas_candidato · despesas_candidato", "ano": ano,
+            "receitas_por_cargo": rec, "receitas_por_origem": fontes,
+            "despesas_por_cargo": desp, "despesas_por_tipo": tipos}
+
+
+@section
+def transp_cauc(mid):
+    """CAUC (Tesouro): requisitos fiscais para receber transferências voluntárias.
+    Cada item traz a data de validade da comprovação; '!' é pendência."""
+    t = p("br_tesouro_cauc", "situacao_municipios")
+    r = one(f"""SELECT * FROM {t} WHERE "Código IBGE"::VARCHAR='{mid}'""")
+    if not r:
+        return {"disponivel": False, "motivo": "município fora do extrato do CAUC"}
+    leg = {x["codigo_item"]: x["descricao"] for x in q(
+        f"SELECT codigo_item, descricao FROM {p('br_tesouro_cauc', 'legenda_itens')} WHERE nivel='municipios'")}
+    itens = [{"item": k, "descricao": leg.get(k, k), "situacao": v} for k, v in r.items() if re.match(r"^\d+(\.\d+)*$", k)]
+    pend = [i for i in itens if (i["situacao"] or "").strip() == "!"]
+    ok_ = [i for i in itens if re.match(r"^\d{2}/\d{2}/\d{2}", i["situacao"] or "")]
+    return {"fonte": "br_tesouro_cauc.situacao_municipios", "data_pesquisa": r.get("data_pesquisa"),
+            "itens": len(itens), "regulares": len(ok_), "pendencias": len(pend),
+            "itens_pendentes": pend, "lista": itens}
+
+
+@section
+def educacao_conectada(mid):
+    """Escolas públicas no levantamento Educação Conectada / SIMET: internet e velocidade medida."""
+    t = p("br_simet_educacao_conectada", "escola")
+    a = one(f"SELECT max(ano_censo) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    if a is None:
+        return {"disponivel": False, "motivo": "nenhuma escola do município no levantamento"}
+    r = one(f"""SELECT count(*) escolas,
+            count(*) FILTER (WHERE indicador_internet::VARCHAR IN ('1','true')) com_internet,
+            count(*) FILTER (WHERE indicador_internet_aprendizagem::VARCHAR IN ('1','true')) internet_aprendizagem,
+            count(*) FILTER (WHERE indicador_laboratorio_informatica::VARCHAR IN ('1','true')) laboratorio,
+            count(*) FILTER (WHERE quantidade_medicao > 0) medidas,
+            median(media_tcp_download) FILTER (WHERE quantidade_medicao > 0) download_mediano,
+            count(*) FILTER (WHERE quantidade_medicao > 0 AND media_tcp_download >= velocidade_download_necessaria) adequadas
+        FROM {t} WHERE id_municipio='{mid}' AND ano_censo={a}""")
+    faixas = q(f"""SELECT faixa_velocidade faixa, count(*) escolas FROM {t}
+        WHERE id_municipio='{mid}' AND ano_censo={a} GROUP BY 1 ORDER BY 2 DESC""")
+    return {"fonte": "br_simet_educacao_conectada.escola", "ano": a, **{k: num(v) for k, v in r.items()},
+            "por_faixa": [{"faixa": f["faixa"], "escolas": num(f["escolas"])} for f in faixas]}
+
+
+@section
+def economia_pix(mid):
+    """Pix por município (BCB): valor e quantidade de transações pagas e recebidas."""
+    t = p("br_bcb_pix_municipio", "transacoes")
+    rows = q(f"""SELECT AnoMes::INT am, VL_PagadorPF+VL_PagadorPJ pago, VL_RecebedorPF+VL_RecebedorPJ recebido,
+            QT_PagadorPF+QT_PagadorPJ qt_pago, QT_RecebedorPF+QT_RecebedorPJ qt_recebido,
+            QT_PES_PagadorPF pagadores_pf, QT_PES_PagadorPJ pagadores_pj
+        FROM {t} WHERE Municipio_Ibge::VARCHAR='{mid}' ORDER BY 1""")
+    if not rows:
+        return {"disponivel": False, "motivo": "município fora da estatística do Pix"}
+    u = rows[-1]
+    tp, ano_pop = _pop_ref()
+    pop = one(f"SELECT populacao FROM {tp} WHERE id_municipio='{mid}' AND ano={ano_pop}")
+    return {"fonte": "br_bcb_pix_municipio.transacoes", "competencia": f"{u['am'] // 100}-{u['am'] % 100:02d}",
+            "valor_pago": u["pago"], "valor_recebido": u["recebido"],
+            "transacoes_pagas": num(u["qt_pago"]), "transacoes_recebidas": num(u["qt_recebido"]),
+            "pagadores_pf": num(u["pagadores_pf"]), "pagadores_pj": num(u["pagadores_pj"]),
+            "pagadores_pf_por_hab": (num(u["pagadores_pf"]) / pop["populacao"]) if pop and pop["populacao"] else None,
+            "serie": [{"mes": f"{r['am'] // 100}-{r['am'] % 100:02d}", "pago": r["pago"], "recebido": r["recebido"]} for r in rows[-36:]]}
+
+
+@section
+def transp_fiscalizacao_cgu(mid):
+    """Programa de Fiscalização em Entes Federativos (CGU): sorteios em que o município saiu."""
+    t = p("br_cgu_fef", "municipios_sorteados")
+    rows = q(f"SELECT sorteio FROM {t} WHERE id_municipio='{mid}' ORDER BY 1")
+    return {"fonte": "br_cgu_fef.municipios_sorteados", "sorteios": [r["sorteio"] for r in rows]}
+
+
+SITUACAO_CNO = {"1": "Nula", "2": "Ativa", "3": "Suspensa", "14": "Paralisada", "15": "Encerrada"}
+
+
+@section
+def infra_obras_cno(mid):
+    """Cadastro Nacional de Obras (Receita): obras de construção civil registradas, no
+    retrato mais recente. Situação: 2 ativa, 14 paralisada, 15 encerrada."""
+    t = pr("br_rf_cno", "microdados")
+    ext = one(f"SELECT max(data_extracao) d FROM {t} WHERE id_municipio='{mid}'")["d"]
+    if ext is None:
+        return {"disponivel": False, "motivo": "nenhuma obra no CNO"}
+    sit = q(f"""SELECT situacao::VARCHAR s, count(DISTINCT id_cno) obras FROM {t}
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' GROUP BY 1 ORDER BY 2 DESC""")
+    serie = q(f"""SELECT year(data_inicio::DATE) ano, count(DISTINCT id_cno) obras, sum(area) area FROM {t}
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND year(data_inicio::DATE) >= {date.today().year - 10}
+        GROUP BY 1 ORDER BY 1""")
+    return {"fonte": "br_rf_cno.microdados", "data_extracao": str(ext),
+            "obras": sum(num(r["obras"]) for r in sit),
+            "por_situacao": [{"situacao": SITUACAO_CNO.get(str(int(r["s"])) if (r["s"] or "").isdigit() else r["s"], r["s"]),
+                              "obras": num(r["obras"])} for r in sit],
+            "iniciadas_por_ano": [{"ano": r["ano"], "obras": num(r["obras"]), "area_m2": r["area"]} for r in serie]}
+
+
+@section
+def educacao_cnpq(nome, uf):
+    """Bolsas e auxílios do CNPq com destino no município (casado pelo nome)."""
+    t = pr("br_cnpq_bolsas", "microdados")
+    nm = nome.upper().replace("'", "''")
+    serie = q(f"""SELECT ano, count(*) processos, sum(TRY_CAST(valor AS DOUBLE)) valor FROM {t}
+        WHERE {_norm_sql('municipio_destino')}=strip_accents('{nm}') AND sigla_uf_destino='{uf}'
+        GROUP BY 1 ORDER BY 1""")
+    if not serie:
+        return {"disponivel": False, "motivo": "nenhuma bolsa do CNPq com destino no município"}
+    ult = serie[-1]["ano"]
+    mod = q(f"""SELECT modalidade, count(*) processos FROM {t}
+        WHERE {_norm_sql('municipio_destino')}=strip_accents('{nm}') AND sigla_uf_destino='{uf}' AND ano={ult}
+        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+    inst = q(f"""SELECT instituicao_destino instituicao, count(*) processos FROM {t}
+        WHERE {_norm_sql('municipio_destino')}=strip_accents('{nm}') AND sigla_uf_destino='{uf}' AND ano={ult}
+        GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+    return {"fonte": "br_cnpq_bolsas.microdados", "ano": ult,
+            "serie": [{"ano": r["ano"], "processos": num(r["processos"]), "valor": r["valor"]} for r in serie],
+            "por_modalidade": mod, "por_instituicao": inst}
+
+
+@section
+def educacao_especial(mid):
+    """Matrículas da educação especial por tipo de deficiência (Inep)."""
+    t = p("br_inep_educacao_especial", "tipo_deficiencia")
+    a = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    if a is None:
+        return {"disponivel": False, "motivo": "sem matrícula de educação especial"}
+    rows = q(f"""SELECT tipo_deficiencia tipo, sum(quantidade_matricula) matriculas FROM {t}
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+    classe = q(f"""SELECT tipo_classe classe, sum(quantidade_matricula) matriculas FROM {t}
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+    return {"fonte": "br_inep_educacao_especial.tipo_deficiencia", "ano": a,
+            "por_tipo": [{"tipo": r["tipo"], "matriculas": num(r["matriculas"])} for r in rows],
+            "por_classe": [{"classe": r["classe"], "matriculas": num(r["matriculas"])} for r in classe]}
+
+
+@section
+def cultura_rouanet(nome, nome_uf):
+    """SALIC (Lei Rouanet): entidades com sede no município. A UF vem por extenso e o
+    nome da cidade ora em caixa alta, ora não."""
+    t = p("br_minc_salic", "entidades")
+    nm = nome.upper().replace("'", "''")
+    rows = q(f"""SELECT nome, projetos_count projetos, projetos_sum valor_projetos,
+            incentivos_count incentivos, incentivos_sum valor_incentivos, proponente, patrocinador
+        FROM {t} WHERE {_norm_sql('cidade_nome')}=strip_accents('{nm}') AND uf='{nome_uf.replace("'", "''")}'""")
+    if not rows:
+        return {"disponivel": False, "motivo": "nenhuma entidade do município no SALIC"}
+    prop = [r for r in rows if r["proponente"] in (True, 1, "true", "1")]
+    return {"fonte": "br_minc_salic.entidades", "entidades": len(rows), "proponentes": len(prop),
+            "projetos": sum(num(r["projetos"]) or 0 for r in rows),
+            "valor_projetos": sum(float(r["valor_projetos"] or 0) for r in rows),
+            "top_proponentes": sorted(({"nome": r["nome"], "projetos": num(r["projetos"]),
+                                        "valor": float(r["valor_projetos"] or 0)} for r in prop),
+                                      key=lambda x: -x["valor"])[:8]}
+
+
+@section
+def infra_outorgas_agua(nome, uf):
+    """Outorgas de captação de água da ANA e dos estados (casadas pelo nome do município)."""
+    t = p("br_ana_outorgas", "captacoes")
+    nm = nome.upper().replace("'", "''")
+    rows = q(f"""SELECT esfera, count(*) outorgas, sum(TRY_CAST(int_qt_vazaomedia AS DOUBLE)) vazao
+        FROM {t} WHERE {_norm_sql('ing_nm_municipio')}=strip_accents('{nm}') AND ing_sg_ufmunicipio='{uf}'
+        GROUP BY 1 ORDER BY 2 DESC""")
+    if not rows:
+        return {"disponivel": False, "motivo": "nenhuma outorga de captação no município"}
+    top = q(f"""SELECT emp_nm_responsavel responsavel, sum(TRY_CAST(int_qt_vazaomedia AS DOUBLE)) vazao
+        FROM {t} WHERE {_norm_sql('ing_nm_municipio')}=strip_accents('{nm}') AND ing_sg_ufmunicipio='{uf}'
+        GROUP BY 1 ORDER BY 2 DESC NULLS LAST LIMIT 8""")
+    return {"fonte": "br_ana_outorgas.captacoes (vazão média em m³/h)", "outorgas": sum(num(r["outorgas"]) for r in rows),
+            "vazao_total": sum(r["vazao"] or 0 for r in rows), "por_esfera": rows, "maiores": top}
+
+
+@section
+def clima_estacoes(mid):
+    """Estações meteorológicas automáticas do INMET no município."""
+    t = p("br_inmet_bdmep", "estacao")
+    rows = q(f"""SELECT id_estacao, estacao, altitude, data_fundacao::VARCHAR fundacao FROM {t}
+        WHERE id_municipio='{mid}'""")
+    return {"fonte": "br_inmet_bdmep.estacao", "estacoes": rows}
+
+
+@section
+def demografia_nomes(mid):
+    """Nomes mais registrados entre os nascidos até 2010 (Censo 2010)."""
+    t = p("br_ibge_nomes_brasil", "quantidade_municipio_nome_2010")
+    rows = q(f"""SELECT nome, quantidade_nascimentos_ate_2010 pessoas FROM {t}
+        WHERE id_municipio='{mid}' ORDER BY 2 DESC LIMIT 15""")
+    return {"fonte": "br_ibge_nomes_brasil.quantidade_municipio_nome_2010", "top": rows}
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit("uso: extract_municipio.py <id_municipio>")
@@ -2061,13 +2594,17 @@ def main():
         "municipio": prof,
         "secoes": {
             "geografia": geografia(mid),
-            "demografia": {**demografia(mid), "censo_extra": demografia_censo_extra(mid)},
+            "demografia": {**demografia(mid), "censo_extra": demografia_censo_extra(mid),
+                           "nomes": demografia_nomes(mid)},
             "economia": {
                 "pib": economia_pib(mid, uf),
                 "financas_publicas": economia_siconfi(mid),
                 "bancario": economia_estban(mid),
                 "inpc_brasil": economia_inpc(),
                 "combustiveis": economia_combustiveis(mid, nome, nome_uf),
+                "pix": economia_pix(mid),
+                "bndes": economia_bndes(mid),
+                "mineracao_cfem": mineracao_cfem(mid),
             },
             "empresas": empresas_cnpj(mid, rf),
             "educacao": {
@@ -2077,6 +2614,12 @@ def main():
                 "enem": educacao_enem(mid),
                 "censo_escolar": educacao_censo_escolar(mid),
                 "sisu": educacao_sisu(mid),
+                "alfabetizacao": educacao_alfabetizacao(mid),
+                "inse": educacao_inse(mid),
+                "superior": educacao_superior(mid),
+                "conectada": educacao_conectada(mid),
+                "especial": educacao_especial(mid),
+                "cnpq": educacao_cnpq(nome, uf),
             },
             "saude": {
                 "cnes": saude_cnes(mid),
@@ -2089,6 +2632,7 @@ def main():
                 "imunizacao": saude_imunizacao(mid),
                 "planos_privados": saude_planos(mid),
                 "farmacia_popular": saude_farmacia_popular(mid),
+                "atencao_basica": saude_atencao_basica(mid),
             },
             "seguranca": {"isp_rj": seguranca_isp(mid, uf), "fbsp": seguranca_fbsp(mid),
                           "violencia_sinan": seguranca_violencia(mid),
@@ -2099,33 +2643,46 @@ def main():
                                "censo_domicilios": infra_censo_domicilios(mid),
                                "frota": infra_frota(mid, uf),
                                "energia_gd": energia_gd(mid),
-                               "energia_continuidade": energia_continuidade(nome)},
+                               "energia_continuidade": energia_continuidade(nome),
+                               "obras_cno": infra_obras_cno(mid),
+                               "outorgas_agua": infra_outorgas_agua(nome, uf)},
             "meio_ambiente": {
                 "prodes": ambiente_prodes(mid), "seeg": ambiente_seeg(mid),
                 "queimadas": ambiente_queimadas(mid), "sisam": ambiente_sisam(mid),
                 "mapbiomas": ambiente_mapbiomas(mid),
+                "car": ambiente_car(mid), "ibama": ambiente_ibama(mid),
+                "desastres": desastres_reconhecimentos(mid), "estacoes_inmet": clima_estacoes(mid),
             },
             "conectividade": conectividade(mid),
             "politica": {**politica(mid),
                          "camara_municipal": politica_camara(mid),
-                         "deputados_nascidos": politica_deputados_nascidos(mid)},
+                         "deputados_nascidos": politica_deputados_nascidos(mid),
+                         "filiados": politica_filiados(mid),
+                         "financas_campanha": politica_financas_campanha(mid)},
             "transparencia": {**transparencia(mid),
                               "emendas": transp_emendas(mid),
                               "compras_federais": transp_compras_federais(mid, rf),
                               "diarios_oficiais": transp_diarios(mid),
                               "fiscal": transp_fiscal(mid),
                               "consumidor": transp_consumidor(mid, nome, uf),
-                              "servidores": transp_servidores(mid)},
-            "social": {**social(mid), "sinpatinhas": social_sinpatinhas(mid)},
+                              "servidores": transp_servidores(mid),
+                              "cauc": transp_cauc(mid),
+                              "fiscalizacao_cgu": transp_fiscalizacao_cgu(mid)},
+            "social": {**social(mid), "sinpatinhas": social_sinpatinhas(mid),
+                       "rouanet": cultura_rouanet(nome, nome_uf)},
             "comercio_exterior": comex(mid),
             "trabalho": {"rais": trabalho_rais(mid), "caged": trabalho_caged(mid),
                          "top_empregadores": trabalho_top_empregadores(mid),
                          "top_empregadores_publicos": trabalho_top_empregadores_publicos(mid),
                          "lista_suja": trabalho_lista_suja(nome, uf)},
-            "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf)},
+            "agropecuaria": {**agropecuaria(mid), "assentamentos": agro_assentamentos(mid, nome, uf),
+                             "aquicultura": agro_aquicultura(mid),
+                             "extracao_silvicultura": agro_extracao_silvicultura(mid),
+                             "imoveis_rurais": agro_imoveis_rurais(mid)},
             "beneficios": {**beneficios(mid), "cadastro_unico": beneficios_cadunico(mid),
                            "cadunico_mds": beneficios_cadunico_mds(mid),
-                           "inss": beneficios_inss(mid)},
+                           "inss": beneficios_inss(mid),
+                           "programas_cgu": beneficios_programas_cgu(mid, rf)},
             "vizinhanca": vizinhanca(mid),
         },
     }
