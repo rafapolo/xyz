@@ -173,22 +173,61 @@ a { color: inherit; text-decoration: none; }
 .sidebar-footer .sf-num { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* HERO */
-.hero { position: relative; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow: hidden; }
-.hero::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb),.07) 0%, transparent 60%);
-  pointer-events: none;
+/* O hero são dois blocos irmãos: .hero-top (selo + nome) fica preso no topo ao
+   rolar, com fundo translúcido; .hero (as etiquetas) rola junto com a página. */
+.hero-top {
+  position: sticky; top: 0; z-index: 50;
+  margin: 0 -2rem; padding: 1.5rem 2rem .9rem;
+  background:
+    linear-gradient(180deg, rgba(var(--accent-rgb),.07) 0%, transparent 100%),
+    color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
+.hero-top.stuck { border-bottom-color: var(--border); box-shadow: var(--shadow); }
+.hero { padding: 0 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
 .hero-badge {
-  display: inline-flex; align-items: center; gap: .5rem;
+  display: inline-flex; align-items: center; gap: .4rem;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 100px; padding: .3rem .9rem .3rem .65rem;
-  font-size: .78rem; color: var(--text2); margin-bottom: .85rem;
+  font-size: .78rem; color: var(--text2); flex-shrink: 0;
+  white-space: nowrap; transition: all var(--transition);
 }
-.hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--st-good); }
-.hero h1 { font-size: 2.6rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; }
-.hero h1 span { color: var(--accent); }
-.hero-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin: 1rem 0 0; }
+.hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--st-good); flex-shrink: 0; }
+.hero-row { display: flex; align-items: center; gap: 1rem; }
+.hero-row h1 { min-width: 0; }
+.hero-side { display: flex; align-items: center; gap: .5rem; margin-left: auto; flex-shrink: 0; }
+.hero-theme { display: none; }
+/* seção atual: só aparece com o cabeçalho preso */
+.hero-sec {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .95rem; color: var(--text2); opacity: 0; transition: opacity var(--transition);
+}
+.hero-sec::before { content: '›'; color: var(--text3); margin-right: .6rem; }
+.hero-top.stuck .hero-sec:not(:empty) { opacity: 1; }
+/* Desktop: preso, o cabeçalho encolhe. A margem devolve a altura perdida para o
+   conteúdo não pular (o JS mede as duas alturas e define --hero-gap). */
+@media (min-width: 769px) {
+  .hero-top.stuck { padding-top: .6rem; padding-bottom: .55rem; margin-bottom: var(--hero-gap, 0px); }
+  .hero-top.stuck h1 { font-size: 1.45rem; }
+}
+/* link direto da seção */
+.sec-link {
+  border: 0; background: none; cursor: pointer; padding: .15rem .3rem; border-radius: 6px;
+  font-size: .8rem; line-height: 1; color: var(--text3); opacity: 0;
+  transition: opacity var(--transition), color var(--transition);
+}
+.section-header:hover .sec-link, .sec-link:focus-visible, .sec-link.ok { opacity: 1; }
+.sec-link:hover { color: var(--accent); }
+.sec-link.ok { color: var(--st-good); }
+@media (hover: none) { .sec-link { opacity: .55; } }
+.hero-badge .sep { color: var(--text3); }
+.hero-badge strong { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+a.hero-badge:hover { border-color: var(--accent); color: var(--text); }
+.hero-top h1 { font-size: 2.6rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.1; text-wrap: balance; }
+.hero-top h1 span { color: var(--accent); }
+.hero-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin: .1rem 0 0; }
 .hero-tag {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 6px; padding: .2rem .65rem;
@@ -199,7 +238,7 @@ a { color: inherit; text-decoration: none; }
 .hero-tag:hover { border-color: var(--border-hover); color: var(--text); }
 
 /* SECTION */
-.section { margin-bottom: 2.5rem; scroll-margin-top: 1rem; }
+.section { margin-bottom: 2.5rem; scroll-margin-top: calc(var(--hero-h, 7rem) + 1rem); }
 .section-header { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
 .section-header .icon {
   width: 32px; height: 32px; border-radius: 8px;
@@ -215,9 +254,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* GRIDS */
-.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: .9rem; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; }
+/* minmax(0, 1fr) e min-width: 0: sem isso o <canvas> do Chart.js segura a
+   largura da coluna e o grid estoura a página quando a janela encolhe. */
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; }
+.grid-2 > *, .grid-3 > *, .grid-4 > * { min-width: 0; }
+@media (max-width: 1100px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* CARDS */
 .card {
@@ -361,7 +406,7 @@ a { color: inherit; text-decoration: none; }
 
 /* CHART */
 .card:has(.chart-container) { display: flex; flex-direction: column; }
-.chart-container { flex: 1; min-height: 210px; width: 100%; position: relative; }
+.chart-container { flex: 1; min-width: 0; min-height: 210px; width: 100%; position: relative; }
 .chart-container.tall { min-height: 300px; }
 
 /* METRIC ROW */
@@ -388,6 +433,7 @@ a { color: inherit; text-decoration: none; }
 .data-list li span.empty, .rank-table td span.empty { text-align: left; justify-content: flex-start; font-weight: 400; }
 .chart-container .empty { height: 100%; justify-content: center; padding: 0; }
 .card .value.empty-val { color: var(--text3); font-weight: 600; }
+.card .empty-note { font-size: .72rem; color: var(--text3); margin-top: .15rem; }
 
 /* RANK-BAR — barra proporcional dentro da rank-table */
 .rank-table td.area .rank-bar { display: flex; align-items: center; gap: .45rem; }
@@ -433,23 +479,37 @@ details.more > .more-body { margin-top: .4rem; }
   .main { margin-left: 0; }
   .container { padding: 0 .75rem; }
   .section { margin-bottom: 1.5rem; }
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: .65rem; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); gap: .65rem; }
   .metric-row { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
-  .hero { padding: 1.5rem 0 1.25rem; margin-bottom: 1.25rem; }
-  .hero h1 { font-size: 1.5rem; }
+  /* Cabeçalho preso no celular: selo à direita do nome, nome que diminui com a largura e respeito ao entalhe. */
+  .hero-top {
+    margin: 0 -.75rem;
+    padding: calc(.6rem + env(safe-area-inset-top, 0px)) .75rem .55rem;
+  }
+  .hero-badge { font-size: .68rem; padding: .18rem .65rem .18rem .5rem; gap: .3rem; }
+  /* o selo fica à direita do nome; só desce para a linha de baixo se não couber */
+  .hero-row { flex-wrap: wrap; gap: .35rem .6rem; }
+  .hero-sec { display: none; }
+  .hero-theme { display: flex; width: 24px; height: 24px; font-size: .7rem; }
+  .hero-side { gap: .35rem; }
+  .hero { padding: 0 0 1.1rem; margin-bottom: 1.25rem; }
+  .hero-top h1 { font-size: clamp(1.15rem, 6.2vw, 1.5rem); line-height: 1.15; }
   .hero-tags {
-    gap: .25rem; margin-top: .65rem;
+    gap: .25rem; margin-top: .5rem;
     flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     margin-left: -.75rem; margin-right: -.75rem;
-    padding: 0 .75rem .25rem;
+    padding: 0 2rem .25rem .75rem;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.25rem), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 2.25rem), transparent);
   }
   .hero-tags::-webkit-scrollbar { display: none; }
   .hero-tag { font-size: .7rem; padding: .15rem .5rem; white-space: nowrap; flex-shrink: 0; }
   .section-header { margin-bottom: .65rem; }
   .section-header h2 { font-size: 1rem; }
   .section-header .icon { width: 28px; height: 28px; font-size: .85rem; }
-  .section-header .table-name { font-size: .65rem; max-width: 140px; }
+  .section-header { flex-wrap: wrap; row-gap: .3rem; }
+  .section-header .table-name { font-size: .65rem; order: 9; flex-basis: 100%; max-width: 100%; background: none; padding: 0; }
   .card { padding: .9rem; }
   .card-metric { padding-left: .8rem; }
   .card .value { font-size: 1.3rem; }
@@ -475,6 +535,11 @@ details.more > .more-body { margin-top: .4rem; }
     scrollbar-width: none;
   }
   .mobile-nav::-webkit-scrollbar { display: none; }
+  /* degradê preso na borda direita: avisa que a barra rola para o lado */
+  .mobile-nav::after {
+    content: ''; position: sticky; right: 0; flex: 0 0 2rem; margin-left: -2rem;
+    background: linear-gradient(90deg, transparent, var(--surface)); pointer-events: none;
+  }
   .mobile-nav a {
     flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
     gap: 2px; padding: .4rem .6rem .35rem;
@@ -540,9 +605,17 @@ details.more > .more-body { margin-top: .4rem; }
 <div class="container">
 
 <!-- HERO -->
+<div class="hero-top" id="heroTop">
+  <div class="hero-row">
+    <h1><span data-path="municipio.nome"></span> <span style="font-weight:400;color:var(--text2)">/</span> <span data-path="municipio.sigla_uf"></span></h1>
+    <span class="hero-sec" id="heroSec" aria-hidden="true"></span>
+    <div class="hero-side">
+      <a class="hero-badge" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="dot"></span>Rodado <span class="sep">·</span> <strong id="nIndicadoresHero">—</strong> <span class="lbl">indicadores</span></a>
+      <button class="theme-toggle hero-theme" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
+    </div>
+  </div>
+</div>
 <div class="hero">
-  <div class="hero-badge"><span class="dot"></span> Rodado · Dados públicos oficiais</div>
-  <h1><span data-path="municipio.nome"></span> <span style="font-weight:400;color:var(--text2)">/</span> <span data-path="municipio.sigla_uf"></span></h1>
   <div class="hero-tags">
     <span class="hero-tag"><strong>Código IBGE:</strong> <span data-path="municipio.id_municipio"></span></span>
     <span class="hero-tag"><strong>TSE:</strong> <span data-path="municipio.id_municipio_tse"></span></span>
@@ -588,7 +661,7 @@ details.more > .more-body { margin-top: .4rem; }
     </div>
     <div class="card card-metric tile st-good-b">
       <div class="tile-top"><h3>Esgoto tratado <span class="vintage" id="esgVintage"></span></h3><span class="status st-good" id="stEsg">✓ acima da meta</span></div>
-      <div class="value"><span data-path="secoes.infraestrutura.snis.indice_tratamento_esgoto" data-fmt="pctRaw"></span> <span class="unit">%</span></div>
+      <div class="value"><span data-path="secoes.infraestrutura.snis.indice_tratamento_esgoto" data-fmt="fmt1"></span> <span class="unit">%</span></div>
       <div class="delta up" id="esgDelta"></div>
       <div class="bench"><span>Percentual do esgoto coletado que recebe tratamento</span></div>
       <div class="sub" id="esgResumoSub"></div>
@@ -1772,15 +1845,14 @@ const noLegend = { ...chartOpts.plugins, legend: { display: false } };
 const lineStyle = { borderWidth: 2, tension: .3, pointRadius: 4, pointBorderColor: C.surface, pointBorderWidth: 2 };
 
 // Alternância de tema — recarrega a página pra reconstruir os gráficos com a paleta correta
-const themeToggleBtn = document.getElementById('themeToggle');
-if (themeToggleBtn) {
+document.querySelectorAll('.theme-toggle').forEach(themeToggleBtn => {
   themeToggleBtn.textContent = THEME === 'light' ? '☀️' : '🌙';
   themeToggleBtn.addEventListener('click', () => {
     sessionStorage.setItem('rodado-scroll', String(scrollY));
     localStorage.setItem('rodado-theme', THEME === 'light' ? 'dark' : 'light');
     location.reload();
   });
-}
+});
 const fNum = n => n == null ? '' : Number(n).toLocaleString('pt-BR');
 const fNum1 = n => n == null ? '' : Number(n).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
 const fPct = n => n == null ? '' : (Number(n) * 100).toFixed(1).replace('.', ',') + '%';
@@ -1815,7 +1887,12 @@ function vazioGrafico(id, msg) {
 }
 function vazioValor(id) {
   const e = el_(id); if (!e) return;
-  e.textContent = '—'; e.classList.add('empty-val');
+  e.textContent = '—'; e.classList.add('empty-val'); e.title = SEM_DADO;
+  // No cartão, o traço sozinho não diz nada: uma linha explica a ausência.
+  const card = e.classList.contains('value') && e.closest('.card');
+  if (card && !card.querySelector('.empty-note')) {
+    e.insertAdjacentHTML('afterend', '<div class="empty-note">' + SEM_DADO + '</div>');
+  }
 }
 function vazioValores(...ids) { ids.forEach(vazioValor); }
 // Os semáforos vinham escritos à mão no HTML com o veredito de Nova Friburgo — em
@@ -1934,7 +2011,9 @@ async function init() {
     }
     return (o === null || o === undefined || o === '') ? 0 : 1;
   };
-  setTxt('nIndicadores', fNum(contaInd(g(D, 'secoes'))));
+  const nInd = fNum(contaInd(g(D, 'secoes')));
+  setTxt('nIndicadores', nInd);
+  setTxt('nIndicadoresHero', nInd);
   setTxt('nTemas', document.querySelectorAll('.sidebar-nav .sidebar-item').length - 1);
 
   // Helper: find item in array by {key: val}
@@ -2195,9 +2274,13 @@ async function init() {
     const mb = g(D, 'secoes.meio_ambiente.mapbiomas');
     const trans = (mb && mb.transicoes) || [];
     if (trans.length) {
+      const mbEstreito = matchMedia('(max-width: 768px)').matches;
+      // duas linhas por rótulo pedem mais altura, senão eles se sobrepõem
+      if (mbEstreito) document.getElementById('mapbiomasChart').parentElement.style.minHeight = (trans.length * 46 + 70) + 'px';
       new Chart(document.getElementById('mapbiomasChart'), {
         type: 'bar', data: {
-          labels: trans.map(t => t.de + ' → ' + t.para),
+          // no celular o eixo corta rótulos longos: quebra em duas linhas
+          labels: trans.map(t => mbEstreito ? [t.de + ' →', t.para] : t.de + ' → ' + t.para),
           datasets: [
             { label: '2010', data: trans.map(t => t.area_2010), backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 3 },
             { label: '2020', data: trans.map(t => t.area_2020), backgroundColor: C.s5, maxBarThickness: 16, borderRadius: 3 },
@@ -2205,7 +2288,8 @@ async function init() {
         },
         options: { ...chartOpts, indexAxis: 'y',
           plugins: { ...chartOpts.plugins, tooltip: { ...chartOpts.plugins.tooltip,
-            callbacks: { label: ctx => ctx.dataset.label + ': ' + fNum1(ctx.parsed.x) + ' km²' } } },
+            callbacks: { title: items => [].concat(items[0].label).join(' ').replace(/,/g, ' '),
+                         label: ctx => ctx.dataset.label + ': ' + fNum1(ctx.parsed.x) + ' km²' } } },
           scales: { x: { ticks: { color: C.muted, callback: v => fNum(v) + ' km²' }, grid: { color: C.grid } },
                     y: { ticks: { color: C.tick, autoSkip: false, font: { size: 10 } }, grid: { display: false } } }
         }
@@ -2284,26 +2368,32 @@ async function init() {
       setHtml('pibDelta', (dPib >= 0 ? '▲ +' : '▼ −') + Math.abs(dPib).toFixed(1).replace('.', ',') +
         '% <span class="vs">vs ' + pibAnt.ano + ' (nominal)</span>');
     }
-    document.getElementById('impAno').textContent = pibUlt.ano || '';
-    document.getElementById('liqImpVal').innerHTML = 'R$ ' + fNum(Math.round(pibUlt.impostos_liquidos / 1e6)) + ' <span class="unit">mi</span>';
-    document.getElementById('impSub').textContent = (pibUlt.impostos_liquidos && pibUlt.pib) ? (pibUlt.impostos_liquidos / pibUlt.pib * 100).toFixed(1).replace('.', ',') + '% do PIB' : '';
-    document.getElementById('vaAno').textContent = pibUlt.ano || '';
-    document.getElementById('vaTotal').innerHTML = 'R$ ' + fNum1(pibUlt.va / 1e9) + ' <span class="unit">bi</span>';
-    const vaServ = (pibUlt.va_servicos || 0) + (pibUlt.va_adespss || 0);
-    const vaTotal = pibUlt.va || 1;
+    // O ano mais recente do PIB costuma sair sem a abertura (impostos, VA por setor):
+    // esses cartões usam o último ano que a traz, em vez de mostrar "R$ 0".
+    const pibDet = [...pibSerie].reverse().find(r => r.va != null) || null;
+    if (!pibDet) { vazioValores('liqImpVal', 'vaTotal'); vazioGrafico('vaChart'); vazioLista('vaComp'); }
+    else {
+    document.getElementById('impAno').textContent = pibDet.ano || '';
+    if (pibDet.impostos_liquidos != null) document.getElementById('liqImpVal').innerHTML = 'R$ ' + fNum(Math.round(pibDet.impostos_liquidos / 1e6)) + ' <span class="unit">mi</span>';
+    else vazioValor('liqImpVal');
+    document.getElementById('impSub').textContent = (pibDet.impostos_liquidos && pibDet.pib) ? (pibDet.impostos_liquidos / pibDet.pib * 100).toFixed(1).replace('.', ',') + '% do PIB' : '';
+    document.getElementById('vaAno').textContent = pibDet.ano || '';
+    document.getElementById('vaTotal').innerHTML = 'R$ ' + fNum1(pibDet.va / 1e9) + ' <span class="unit">bi</span>';
+    const vaServ = (pibDet.va_servicos || 0) + (pibDet.va_adespss || 0);
+    const vaTotal = pibDet.va || 1;
     // Antes dizia "Serviços lideram (84%)" — os 84% eram serviços + adm. pública,
     // e o cartão ao lado mostrava serviços em 56%. Nomear a conta resolve a contradição.
     setTxt('vaSub', 'Serviços e adm. pública somam ' + (vaServ / vaTotal * 100).toFixed(0) + '% do valor adicionado');
 
     // VA chart
     if (document.getElementById('vaChart')) {
-      document.getElementById('vaSetorAno').textContent = pibUlt.ano || '';
+      document.getElementById('vaSetorAno').textContent = pibDet.ano || '';
       const vaLabels = ['Serviços', 'Indústria', 'Adm. Pública', 'Agropecuária'];
       const vaData = [
-        Math.round((pibUlt.va_servicos || 0) / 1e6),
-        Math.round((pibUlt.va_industria || 0) / 1e6),
-        Math.round((pibUlt.va_adespss || 0) / 1e6),
-        Math.round((pibUlt.va_agropecuaria || 0) / 1e6)
+        Math.round((pibDet.va_servicos || 0) / 1e6),
+        Math.round((pibDet.va_industria || 0) / 1e6),
+        Math.round((pibDet.va_adespss || 0) / 1e6),
+        Math.round((pibDet.va_agropecuaria || 0) / 1e6)
       ];
       new Chart(document.getElementById('vaChart'), {
         type: 'doughnut', data: {
@@ -2323,10 +2413,11 @@ async function init() {
 
     // VA composition
     document.getElementById('vaComp').innerHTML =
-      '<li><span>Serviços</span><span>R$ ' + fNum1((pibUlt.va_servicos || 0) / 1e9) + ' bi · ' + ((pibUlt.va_servicos || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
-      '<li><span>Indústria</span><span>R$ ' + fNum1((pibUlt.va_industria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_industria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
-      '<li><span>Adm. Pública</span><span>R$ ' + fNum1((pibUlt.va_adespss || 0) / 1e9) + ' bi · ' + ((pibUlt.va_adespss || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
-      '<li><span>Agropecuária</span><span>R$ ' + fNum1((pibUlt.va_agropecuaria || 0) / 1e9) + ' bi · ' + ((pibUlt.va_agropecuaria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>';
+      '<li><span>Serviços</span><span>R$ ' + fNum1((pibDet.va_servicos || 0) / 1e9) + ' bi · ' + ((pibDet.va_servicos || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Indústria</span><span>R$ ' + fNum1((pibDet.va_industria || 0) / 1e9) + ' bi · ' + ((pibDet.va_industria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Adm. Pública</span><span>R$ ' + fNum1((pibDet.va_adespss || 0) / 1e9) + ' bi · ' + ((pibDet.va_adespss || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>' +
+      '<li><span>Agropecuária</span><span>R$ ' + fNum1((pibDet.va_agropecuaria || 0) / 1e9) + ' bi · ' + ((pibDet.va_agropecuaria || 0) / vaTotal * 100).toFixed(1).replace('.', ',') + '%</span></li>';
+    }
   }
 
   // PIB per capita ranking
@@ -5011,6 +5102,8 @@ async function init() {
       mobileNav.querySelectorAll('a').forEach(a => {
         const on = a.getAttribute('href') === '#' + best.id;
         a.classList.toggle('active', on);
+    const ativo = [...navItems].find(a => a.getAttribute('href') === '#' + best.id);
+    setTxt('heroSec', ativo ? ativo.textContent.trim() : '');
         if (on) a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       });
     }
@@ -5025,6 +5118,48 @@ async function init() {
   if (savedScroll != null) {
     sessionStorage.removeItem('rodado-scroll');
     scrollTo(0, Number(savedScroll));
+  // Cabeçalho preso: no desktop ele encolhe ao rolar. Medimos as duas alturas
+  // (solto e preso): a presa vira --hero-h (as âncoras das seções descontam esse
+  // espaço) e a diferença vira --hero-gap, para o conteúdo não pular na troca.
+  const heroTop = document.getElementById('heroTop');
+  if (heroTop) {
+    const raiz = document.documentElement.style;
+    const medeHero = () => {
+      const preso = heroTop.classList.contains('stuck');
+      raiz.setProperty('--hero-gap', '0px');
+      heroTop.classList.remove('stuck');
+      const solto = heroTop.offsetHeight;
+      heroTop.classList.add('stuck');
+      const compacto = heroTop.offsetHeight;
+      heroTop.classList.toggle('stuck', preso);
+      raiz.setProperty('--hero-h', compacto + 'px');
+      raiz.setProperty('--hero-gap', (solto - compacto) + 'px');
+    };
+    medeHero();
+    addEventListener('resize', medeHero);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(medeHero);
+    const marcaHero = () => heroTop.classList.toggle('stuck', scrollY > 4);
+    addEventListener('scroll', marcaHero, { passive: true });
+    marcaHero();
+  }
+
+  // Link direto de cada seção: copia a URL já apontando para ela
+  sections.forEach(sec => {
+    const h2 = sec.querySelector('.section-header h2');
+    if (!h2 || !sec.id) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sec-link'; b.textContent = '🔗';
+    b.title = 'Copiar link desta seção'; b.setAttribute('aria-label', 'Copiar link da seção ' + h2.textContent.trim());
+    b.addEventListener('click', async () => {
+      const url = location.origin + location.pathname + location.search + '#' + sec.id;
+      history.replaceState(null, '', '#' + sec.id);
+      try { await navigator.clipboard.writeText(url); } catch (e) { return; }
+      b.textContent = '✓ copiado'; b.classList.add('ok');
+      setTimeout(() => { b.textContent = '🔗'; b.classList.remove('ok'); }, 1600);
+    });
+    h2.after(b);
+  });
+
   }
 }
 
