@@ -27,7 +27,7 @@
 </script>
 <title id="pageTitle">Painel municipal — Rodado</title>
 <script defer src="vendor/chart-4.4.7.umd.min.js"></script>
-<script defer src="app.js?v=1"></script>
+<script defer src="app.js?v=2"></script>
 <script>
 const JSON_PATH = new URLSearchParams(location.search).get('id')
   ? `data/${new URLSearchParams(location.search).get('id')}.json`
@@ -388,22 +388,29 @@ a.hero-badge:hover { border-color: var(--accent); color: var(--text); }
   border-radius: 5px; padding: 0 .35rem; line-height: 1.5; vertical-align: .08em; white-space: nowrap;
 }
 .cod-badge.so-celular { display: none; }
+/* causas de morte: lista mais densa */
+#simCausasList td { padding-top: .3rem; padding-bottom: .3rem; font-size: .76rem; }
 
 @media (max-width: 768px) {
   .rank-table, .rank-table thead, .rank-table tbody, .rank-table tr, .rank-table td { display: block; width: auto !important; }
   .rank-table thead { display: none; }
-  /* linha compacta: nome à esquerda e valor à direita na mesma linha; o detalhe
-     (código, atividade…) vai embaixo, discreto */
+  /* linha compacta, em flex: nome à esquerda, valor à direita; o detalhe
+     (atividade, natureza…) quebra para a linha de baixo, discreto */
   .rank-table tr {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: .75rem; row-gap: .05rem;
-    align-items: start; padding: .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4);
+    display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: .75rem;
+    padding: .5rem 0; border-bottom: 1px solid rgba(40,45,63,.4);
   }
-  .rank-table td.rank-name { grid-column: 1; grid-row: 1; }
-  .rank-table td.area { grid-column: 1; grid-row: 2; }
-  .rank-table tr > td:only-child { grid-column: 1 / -1; }
+  .rank-table td.rank-name { flex: 1; min-width: 0; order: 1; }
+  .rank-table td.area { flex-basis: 100%; order: 3; }
+  .rank-table tr > td:only-child { flex-basis: 100%; }
   /* o código vira selo ao lado do nome, em vez de ocupar uma linha */
   .rank-table td.area.cod { display: none; }
   .cod-badge.so-celular { display: inline-block; }
+  #simCausasList tr { padding: .3rem 0; }
+  #simCausasList td, #simCausasList td.rank-name { padding-top: 0; padding-bottom: 0; font-size: .76rem; }
+  #simCausasList td.valor { font-size: .8rem; line-height: 1.2; }
+  #simCausasList td.valor::after { font-size: .56rem; }
+  #simCausasList .cod-badge { font-size: .6rem; }
   .rank-table tr:last-child { border-bottom: none; }
   /* especificidade tem que bater a das regras-base (.rank-table td.rank-name),
      senão nome longo — CID-10, razão social — não quebra e estoura a tela */
@@ -412,12 +419,9 @@ a.hero-badge:hover { border-color: var(--accent); color: var(--text); }
   }
   .rank-table td.rank-name { font-size: .85rem; }
   .rank-table td.area { font-size: .72rem; }
-  .rank-table td.valor {
-    grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; align-items: flex-end;
-    font-size: .9rem; line-height: 1.3;
-  }
+  .rank-table td.valor { flex: none; order: 2; text-align: right; font-size: .9rem; line-height: 1.3; }
   .rank-table td.valor::after {
-    content: attr(data-label); font-size: .6rem; color: var(--text3);
+    content: attr(data-label); display: block; font-size: .6rem; color: var(--text3);
     text-transform: lowercase; white-space: nowrap;
   }
   /* Mortalidade: os quatro números-chave lado a lado, dois por linha */

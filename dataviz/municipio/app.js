@@ -765,6 +765,9 @@ async function init() {
         Math.round((r.iptu || 0) / 1e6),
         Math.round((r.receitas_capital || 0) / 1e6),
       ];
+      // do maior para o menor
+      const recOrd = recLabels.map((k, i) => [k, recData[i]]).sort((a, b) => b[1] - a[1]);
+      recOrd.forEach(([k, v], i) => { recLabels[i] = k; recData[i] = v; });
       criaGrafico(document.getElementById('recChart'), {
         type: 'bar', data: { labels: recLabels, datasets: [{ data: recData, backgroundColor: C.s1, maxBarThickness: 16, borderRadius: 4, borderSkipped: 'start' }] },
         options: { ...chartOpts, indexAxis: 'y',
@@ -1144,7 +1147,8 @@ async function init() {
     const totalIns = Object.values(ins).reduce((s, n) => s + (Number(n) || 0), 0);
     const linhasIns = INSTRUCAO_TSE
       .filter(([c]) => ins[c] != null)
-      .map(([c, rot]) => ({ k: rot, v: ins[c] }));
+      .map(([c, rot]) => ({ k: rot, v: ins[c] }))
+      .sort((a, b) => b.v - a.v);
     barrasCategoria('polInstrucaoBars', linhasIns, totalIns, C.s1, { soPct: true });
 
     const pref = pol.prefeito || {};
@@ -2032,7 +2036,7 @@ async function init() {
       ['Internet', ce.com_internet], ['Esgoto na rede', ce.com_esgoto_rede],
       ['Rampa de acesso', ce.com_rampa_acessibilidade], ['Biblioteca', ce.com_biblioteca],
       ['Quadra', ce.com_quadra], ['Laboratório', ce.com_laboratorio],
-    ].filter(r => r[1] != null);
+    ].filter(r => r[1] != null).sort((a, b) => b[1] - a[1]);
     setHtml('escInfraBars', infra.length ? infra.map(r => {
       const p = pctDe(r[1], ce.escolas);
       return '<div class="row"><span>' + r[0] + '</span><div class="track"><div class="fill" style="width:' +
@@ -2730,7 +2734,7 @@ async function init() {
     const esg = cadMds.esgoto || [];
     const esgTot = esg.reduce((t, r) => t + (r.familias || 0), 0);
     setTxt('cadEsgAno', comp);
-    barrasCategoria('cadEsgBars', esg.filter(r => r.familias).map(r => ({ k: r.forma, v: r.familias, titulo: r.forma })),
+    barrasCategoria('cadEsgBars', esg.filter(r => r.familias).map(r => ({ k: r.forma, v: r.familias, titulo: r.forma })).sort((a, b) => b.v - a.v),
       esgTot, C.s1, { soPct: true });
   } else {
     if (cad) {
@@ -3173,7 +3177,7 @@ async function init() {
       cartaoExtra('amb', { titulo: 'Cadastro Ambiental Rural', vintage: mesAno((c.data_extracao || '').slice(0, 7)), valor: fNum(c.imoveis) + ' imóveis',
         sub: fNum(Math.round(c.area_ha)) + ' ha cadastrados · ' + fNum(c.pendentes) + ' pendentes',
         barras: { linhas: [['Vegetação nativa', cam.vegetacao_nativa], ['Reserva legal', cam.reserva_legal], ['APP', cam.app],
-          ['Área consolidada', cam.area_consolidada], ['Uso restrito', cam.uso_restrito]].filter(r => r[1] > 0).map(([k, v]) => ({ k, v })),
+          ['Área consolidada', cam.area_consolidada], ['Uso restrito', cam.uso_restrito]].filter(r => r[1] > 0).map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v),
           total: 0, cor: C.s3, opts: { fmtValor: v => fNum(Math.round(v)) + ' ha' } } });
       cartaoExtra('amb', { titulo: 'Situação da análise do CAR', vintage: mesAno((c.data_extracao || '').slice(0, 7)),
         barras: { linhas: top(c.por_condicao, 'condicao', 'imoveis', 5).map(r => ({ ...r, k: truncaPalavra(r.titulo, 36) })), total: c.imoveis, cor: C.s3 } });
