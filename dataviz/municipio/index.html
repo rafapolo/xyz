@@ -3,13 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Raio-x de um município brasileiro em 594 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
+<link rel="canonical" href="https://xn--2dk.xyz/dataviz/municipio/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rodado">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="O município inteiro em um painel">
+<meta property="og:description" content="594 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
+<meta property="og:url" content="https://xn--2dk.xyz/dataviz/municipio/">
+<meta property="og:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Painel municipal do Rodado: Nova Friburgo (RJ) com população, empregos, IDEB e leitos SUS, e o total de 594 indicadores">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="O município inteiro em um painel">
+<meta name="twitter:description" content="594 indicadores de mais de 80 fontes públicas num só painel municipal.">
+<meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <script>
 (function () {
   var stored = localStorage.getItem('rodado-theme');
   if (stored === 'light') document.documentElement.setAttribute('data-theme', 'light');
 })();
 </script>
-<title id="pageTitle">Dashboard Municipal</title>
+<title id="pageTitle">Painel municipal — Rodado</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 const JSON_PATH = new URLSearchParams(location.search).get('id')
@@ -150,17 +166,11 @@ a { color: inherit; text-decoration: none; }
 .sidebar-item.active { color: var(--accent); background: rgba(var(--accent-rgb),.1); border-left-color: var(--accent); }
 .sidebar-item .s-icon { font-size: .85rem; flex-shrink: 0; opacity: .7; }
 .sidebar-item.active .s-icon { opacity: 1; }
-.sidebar-footer { padding: .9rem 1rem 1rem; border-top: 1px solid var(--border); flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center; gap: .15rem; text-align: center; }
-.sidebar-footer .sf-num { font-size: 1.45rem; font-weight: 700; line-height: 1.1; color: var(--text);
-  font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-a.sf-num { text-decoration: none; }
-a.sf-num:hover { color: var(--accent); }
-.sidebar-footer .sf-rot { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); }
-.sidebar-footer .sf-link { margin-top: .55rem; display: inline-flex; align-items: center; gap: .3rem;
-  padding: .3rem .75rem; border: 1px solid var(--border); border-radius: 999px; font-size: .7rem;
-  color: var(--accent); text-decoration: none; transition: background .15s, border-color .15s; }
-.sidebar-footer .sf-link:hover { background: rgba(var(--accent-rgb), .1); border-color: rgba(var(--accent-rgb), .45); }
+.sidebar-footer { padding: .6rem 1rem; border-top: 1px solid var(--border); flex-shrink: 0;
+  text-align: center; font-size: .68rem; color: var(--text3); }
+.sidebar-footer a { color: var(--text2); text-decoration: none; }
+.sidebar-footer a:hover { color: var(--accent); }
+.sidebar-footer .sf-num { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* HERO */
 .hero { position: relative; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; overflow: hidden; }
@@ -522,11 +532,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer">
-    <a class="sf-num" id="nIndicadores" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores">—</a>
-    <span class="sf-rot">indicadores em <span id="nTemas">21</span> temas</span>
-    <a class="sf-link" href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz ↗</a>
-  </div>
+  <div class="sidebar-footer"><a href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="sf-num" id="nIndicadores">—</span> indicadores</a> · <span id="nTemas">21</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
 </div>
 
 <!-- MAIN -->
