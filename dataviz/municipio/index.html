@@ -154,6 +154,8 @@ a { color: inherit; text-decoration: none; }
   display: flex; flex-direction: column; align-items: center; gap: .15rem; text-align: center; }
 .sidebar-footer .sf-num { font-size: 1.45rem; font-weight: 700; line-height: 1.1; color: var(--text);
   font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+a.sf-num { text-decoration: none; }
+a.sf-num:hover { color: var(--accent); }
 .sidebar-footer .sf-rot { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); }
 .sidebar-footer .sf-link { margin-top: .55rem; display: inline-flex; align-items: center; gap: .3rem;
   padding: .3rem .75rem; border: 1px solid var(--border); border-radius: 999px; font-size: .7rem;
@@ -521,7 +523,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
   <div class="sidebar-footer">
-    <span class="sf-num" id="nIndicadores">—</span>
+    <a class="sf-num" id="nIndicadores" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores">—</a>
     <span class="sf-rot">indicadores em <span id="nTemas">21</span> temas</span>
     <a class="sf-link" href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz ↗</a>
   </div>
@@ -533,7 +535,7 @@ details.more > .more-body { margin-top: .4rem; }
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge"><span class="dot"></span> Rodado · Simulação Interativa</div>
+  <div class="hero-badge"><span class="dot"></span> Rodado · Dados públicos oficiais</div>
   <h1><span data-path="municipio.nome"></span> <span style="font-weight:400;color:var(--text2)">/</span> <span data-path="municipio.sigla_uf"></span></h1>
   <div class="hero-tags">
     <span class="hero-tag"><strong>Código IBGE:</strong> <span data-path="municipio.id_municipio"></span></span>
