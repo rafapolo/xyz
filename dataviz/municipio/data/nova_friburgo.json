@@ -917,49 +917,49 @@
     "produtos": [
      {
       "produto": "DIESEL S10",
-      "preco_municipio": 7.464999999999999,
-      "preco_uf": 7.126366165831947,
-      "preco_brasil": 7.0591212034996556,
+      "preco_municipio": 7.465000000000001,
+      "preco_uf": 7.126366165831943,
+      "preco_brasil": 7.059121203499643,
       "postos": 6,
       "ultima_coleta": "2026-09-30"
      },
      {
       "produto": "DIESEL S500",
       "preco_municipio": 7.1888,
-      "preco_uf": 6.949619341563787,
-      "preco_brasil": 6.696812944056376,
+      "preco_uf": 6.949619341563785,
+      "preco_brasil": 6.696812944056372,
       "postos": 6,
       "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "ETANOL",
       "preco_municipio": 4.790253164556962,
-      "preco_uf": 4.787172797262622,
-      "preco_brasil": 4.285443603241312,
+      "preco_uf": 4.78717279726262,
+      "preco_brasil": 4.285443603241307,
       "postos": 11,
       "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GASOLINA ADITIVADA",
       "preco_municipio": 7.162666666666667,
-      "preco_uf": 6.845111662531019,
-      "preco_brasil": 6.76444484534399,
+      "preco_uf": 6.845111662531014,
+      "preco_brasil": 6.764444845343991,
       "postos": 10,
       "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GASOLINA COMUM",
       "preco_municipio": 6.978924731182795,
-      "preco_uf": 6.667098426637393,
-      "preco_brasil": 6.564172353874494,
+      "preco_uf": 6.667098426637388,
+      "preco_brasil": 6.564172353874519,
       "postos": 12,
       "ultima_coleta": "2026-10-01"
      },
      {
       "produto": "GLP",
-      "preco_municipio": 111.69064516129032,
-      "preco_uf": 107.13616397366856,
-      "preco_brasil": 115.58484623067068,
+      "preco_municipio": 111.69064516129033,
+      "preco_uf": 107.13616397366854,
+      "preco_brasil": 115.58484623067064,
       "postos": 7,
       "ultima_coleta": "2026-09-30"
      }
@@ -967,15 +967,20 @@
    },
    "pix": {
     "fonte": "br_bcb_pix_municipio.transacoes",
-    "competencia": "2026-10",
-    "valor_pago": 307973697.73,
-    "valor_recebido": 319390974.05,
-    "transacoes_pagas": 845086,
-    "transacoes_recebidas": 700460,
-    "pagadores_pf": 111595,
-    "pagadores_pj": 11164,
-    "pagadores_pf_por_hab": 0.5486021325651248,
+    "competencia": "2026-09",
+    "valor_pago": 1774140167.44,
+    "valor_recebido": 1821502914.85,
+    "transacoes_pagas": 5040143,
+    "transacoes_recebidas": 4114302,
+    "pagadores_pf": 138623,
+    "pagadores_pj": 15526,
+    "pagadores_pf_por_hab": 0.6814720500253174,
     "serie": [
+     {
+      "mes": "2023-10",
+      "pago": 940798895.79,
+      "recebido": 993570550.33
+     },
      {
       "mes": "2023-11",
       "pago": 959549484.86,
@@ -1150,11 +1155,6 @@
       "mes": "2026-09",
       "pago": 1774140167.44,
       "recebido": 1821502914.85
-     },
-     {
-      "mes": "2026-10",
-      "pago": 307973697.73,
-      "recebido": 319390974.05
      }
     ]
    },
@@ -1866,9 +1866,9 @@
     "presentes": 3132,
     "redacao": 698.4133738601823,
     "linguagens": 538.1975683890578,
-    "matematica": 577.1218710089398,
+    "matematica": 577.1218710089399,
     "humanas": 548.4902431610942,
-    "natureza": 520.0523627075354,
+    "natureza": 520.0523627075352,
     "media_geral": 579.3218030157201
    },
    "censo_escolar": {
@@ -1993,7 +1993,7 @@
       "candidatos": 2414,
       "aprovados": 1418,
       "matriculados": 35,
-      "nota_media": 599.502835989055
+      "nota_media": 599.5028359890553
      },
      {
       "ano": 2018,
@@ -2058,7 +2058,7 @@
       "matriculados": 13
      },
      {
-      "curso": "BIOMEDICINA",
+      "curso": "FÍSICA",
       "ies": "UFF",
       "matriculados": 8
      }
@@ -2387,12 +2387,12 @@
      {
       "ano": 2004,
       "processos": 9,
-      "valor": 130051.36
+      "valor": 130051.35999999999
      },
      {
       "ano": 2005,
       "processos": 13,
-      "valor": 163493.91999999998
+      "valor": 163493.92
      },
      {
       "ano": 2006,
@@ -2402,7 +2402,7 @@
      {
       "ano": 2007,
       "processos": 20,
-      "valor": 376754.32999999996
+      "valor": 376754.33
      },
      {
       "ano": 2008,
@@ -2565,10 +2565,10 @@
     "pct_cesareo": 69.42779291553134,
     "pct_baixo_peso": 8.773841961852861,
     "pre_natal_distribuicao": {
-     "1": 24,
      "3": 316,
      "4": 1419,
      "2": 66,
+     "1": 24,
      "9": 10
     }
    },
@@ -2581,12 +2581,12 @@
     "obitos": 0,
     "notificados_ano_anterior": 5350,
     "classificacao_bruta": {
+     "10|9": 5,
      "10|1": 363,
      "10|None": 2,
      "12|1": 2,
-     "10|9": 5,
-     "11|1": 9,
-     "8 |None": 18
+     "8 |None": 18,
+     "11|1": 9
     }
    },
    "sisvan": {
@@ -2598,100 +2598,116 @@
    },
    "mortalidade": {
     "fonte": "br_ms_sim.microdados (residência) · br_datasus_cid10",
-    "ano": 2026,
-    "populacao_referencia": null,
-    "obitos": 517,
-    "obitos_infantis": 10,
-    "obitos_neonatais": 9,
-    "idade_media_obito": 70.23644660194175,
-    "homens": 0,
-    "mulheres": 0,
-    "causas_externas": 35,
+    "ano": 2025,
+    "populacao_referencia": 203417,
+    "ano_parcial": {
+     "ano": 2026,
+     "ate_mes": 5,
+     "obitos": 517,
+     "infantis": 10
+    },
+    "obitos": 1884,
+    "obitos_infantis": 22,
+    "obitos_neonatais": 14,
+    "idade_media_obito": 70.17204146730464,
+    "homens": 998,
+    "mulheres": 886,
+    "causas_externas": 160,
     "suicidios": 9,
-    "agressoes": 2,
-    "transporte": 1,
-    "maternas": 0,
-    "mal_definidas": 30,
-    "taxa_mortalidade_1000hab": null,
-    "nascidos_vivos": 0,
-    "taxa_mortalidade_infantil_1000nv": null,
+    "agressoes": 13,
+    "transporte": 24,
+    "maternas": 3,
+    "mal_definidas": 153,
+    "taxa_mortalidade_1000hab": 9.261762782854923,
+    "infantil": {
+     "ano": 2022,
+     "obitos": 10,
+     "neonatais": 6,
+     "nascidos_vivos": 1835,
+     "taxa_1000nv": 5.449591280653951
+    },
     "por_capitulo": [
      {
       "capitulo": "IX.  Doenças do aparelho circulatório",
-      "obitos": 144
+      "obitos": 469
      },
      {
       "capitulo": "II.  Neoplasias (tumores)",
-      "obitos": 103
+      "obitos": 318
      },
      {
       "capitulo": "X.   Doenças do aparelho respiratório",
-      "obitos": 63
+      "obitos": 234
      },
      {
       "capitulo": "XX.  Causas externas de morbidade e mortalidade",
-      "obitos": 35
-     },
-     {
-      "capitulo": "IV.  Doenças endócrinas nutricionais e metabólicas",
-      "obitos": 32
+      "obitos": 160
      },
      {
       "capitulo": "XVIII.Sint sinais e achad anorm ex clín e laborat",
-      "obitos": 30
+      "obitos": 153
      },
      {
-      "capitulo": "XIV. Doenças do aparelho geniturinário",
-      "obitos": 27
+      "capitulo": "IV.  Doenças endócrinas nutricionais e metabólicas",
+      "obitos": 114
      },
      {
       "capitulo": "XI.  Doenças do aparelho digestivo",
-      "obitos": 27
+      "obitos": 110
+     },
+     {
+      "capitulo": "XIV. Doenças do aparelho geniturinário",
+      "obitos": 93
      }
     ],
     "top_causas": [
      {
       "cid": "I219",
       "descricao": "Infarto agudo do miocárdio não especificado",
-      "obitos": 31
-     },
-     {
-      "cid": "J189",
-      "descricao": "Pneumonia não especificada",
-      "obitos": 27
-     },
-     {
-      "cid": "I249",
-      "descricao": "Doença isquêmica aguda do coração não especificada",
-      "obitos": 23
+      "obitos": 98
      },
      {
       "cid": "R99",
       "descricao": "Outras causas mal definidas e as não especificadas de mortalidade",
-      "obitos": 19
+      "obitos": 92
      },
      {
-      "cid": "N390",
-      "descricao": "Infecção do trato urinário de localização não especificada",
-      "obitos": 17
-     },
-     {
-      "cid": "Y349",
-      "descricao": "Fatos ou eventos não especificados e intenção não determinada - local não especificado",
-      "obitos": 14
+      "cid": "J189",
+      "descricao": "Pneumonia não especificada",
+      "obitos": 82
      },
      {
       "cid": "I10",
       "descricao": "Hipertensão essencial (primária)",
-      "obitos": 13
+      "obitos": 64
      },
      {
-      "cid": "C349",
-      "descricao": "Neoplasia maligna dos brônquios ou pulmões, não especificado",
-      "obitos": 11
+      "cid": "N390",
+      "descricao": "Infecção do trato urinário de localização não especificada",
+      "obitos": 51
+     },
+     {
+      "cid": "A419",
+      "descricao": "Septicemia não especificada",
+      "obitos": 50
+     },
+     {
+      "cid": "Y349",
+      "descricao": "Fatos ou eventos não especificados e intenção não determinada - local não especificado",
+      "obitos": 49
+     },
+     {
+      "cid": "E149",
+      "descricao": "Diabetes mellitus não especificado - sem complicações",
+      "obitos": 39
      }
     ],
     "serie": [
+     {
+      "ano": 2014,
+      "obitos": 1515,
+      "infantis": 22
+     },
      {
       "ano": 2015,
       "obitos": 1563,
@@ -2746,11 +2762,6 @@
       "ano": 2025,
       "obitos": 1884,
       "infantis": 22
-     },
-     {
-      "ano": 2026,
-      "obitos": 517,
-      "infantis": 10
      }
     ]
    },
@@ -2758,7 +2769,7 @@
     "fonte": "br_ms_sih.aihs_reduzidas (residência do paciente, id_municipio_6)",
     "ano": 2024,
     "internacoes": 11267,
-    "valor_total": 26760932.480000086,
+    "valor_total": 26760932.48000009,
     "obitos_hospitalares": 1075,
     "permanencia_media": 8.284281530132244,
     "diarias_uti": 10772,
@@ -2780,7 +2791,7 @@
      {
       "capitulo": "XIX. Lesões enven e alg out conseq causas externas",
       "internacoes": 1489,
-      "valor": 2459538.43
+      "valor": 2459538.4299999997
      },
      {
       "capitulo": "I.   Algumas doenças infecciosas e parasitárias",
@@ -2795,39 +2806,39 @@
      {
       "capitulo": "XI.  Doenças do aparelho digestivo",
       "internacoes": 1164,
-      "valor": 2825916.4999999995
+      "valor": 2825916.4999999986
      },
      {
       "capitulo": "XIV. Doenças do aparelho geniturinário",
       "internacoes": 885,
-      "valor": 1294414.3399999996
+      "valor": 1294414.3399999999
      },
      {
       "capitulo": "XV.  Gravidez parto e puerpério",
       "internacoes": 835,
-      "valor": 413703.8900000006
+      "valor": 413703.8900000005
      },
      {
       "capitulo": "II.  Neoplasias (tumores)",
       "internacoes": 522,
-      "valor": 2069973.4700000002
+      "valor": 2069973.47
      }
     ],
     "serie": [
      {
       "ano": 2015,
       "internacoes": 9140,
-      "valor": 14858672.520000022
+      "valor": 14858672.520000035
      },
      {
       "ano": 2016,
       "internacoes": 9193,
-      "valor": 14398007.060000017
+      "valor": 14398007.060000023
      },
      {
       "ano": 2017,
       "internacoes": 9345,
-      "valor": 14780826.08999999
+      "valor": 14780826.09
      },
      {
       "ano": 2018,
@@ -2837,22 +2848,22 @@
      {
       "ano": 2019,
       "internacoes": 9945,
-      "valor": 16572105.579999987
+      "valor": 16572105.579999996
      },
      {
       "ano": 2020,
       "internacoes": 7749,
-      "valor": 14998325.309999982
+      "valor": 14998325.309999995
      },
      {
       "ano": 2021,
       "internacoes": 9031,
-      "valor": 20613815.540000018
+      "valor": 20613815.54000002
      },
      {
       "ano": 2022,
       "internacoes": 9254,
-      "valor": 19807955.80000002
+      "valor": 19807955.800000012
      },
      {
       "ano": 2023,
@@ -2862,7 +2873,7 @@
      {
       "ano": 2024,
       "internacoes": 11267,
-      "valor": 26760932.480000097
+      "valor": 26760932.48000009
      }
     ]
    },
@@ -3035,7 +3046,7 @@
       "beneficiarios": 8588
      },
      {
-      "tipo": "Individual Ou Familiar + Coletivo Empresarial + Coletivo Por Adesão",
+      "tipo": "Não Identificado",
       "beneficiarios": 1
      }
     ]
@@ -4124,7 +4135,7 @@
      {
       "ano": 2016,
       "obras": 43,
-      "area_m2": 30699.98
+      "area_m2": 30699.980000000003
      },
      {
       "ano": 2017,
@@ -4144,7 +4155,7 @@
      {
       "ano": 2020,
       "obras": 56,
-      "area_m2": 109243.87
+      "area_m2": 109243.87000000001
      },
      {
       "ano": 2021,
@@ -4206,11 +4217,11 @@
       "vazao": 1.0
      },
      {
-      "responsavel": "Lucia Gomes da Silva 60341998753",
+      "responsavel": "Pousada DellŽuntos Ltda - ME",
       "vazao": 0.5
      },
      {
-      "responsavel": "Pousada DellŽuntos Ltda - ME",
+      "responsavel": "Lucia Gomes da Silva 60341998753",
       "vazao": 0.5
      },
      {
@@ -4565,7 +4576,7 @@
      {
       "ano": 2023,
       "focos": 50,
-      "frp_medio": 5.6579999999999995,
+      "frp_medio": 5.658,
       "frp_max": 22.6
      },
      {
@@ -4780,7 +4791,7 @@
     ],
     "camadas_ha": {
      "reserva_legal": 16405.670299999998,
-     "app": 54649.955599999994,
+     "app": 54649.9556,
      "vegetacao_nativa": 40927.0036,
      "area_consolidada": 22098.416300000023,
      "uso_restrito": 8159.044200000009
@@ -4935,9 +4946,9 @@
     "zonas": 2
    },
    "genero": {
-    "0": 102,
     "2": 71886,
-    "4": 83270
+    "4": 83270,
+    "0": 102
    },
    "instrucao": {
     "3": 42928,
@@ -5237,14 +5248,14 @@
      },
      {
       "cargo": "vereador",
-      "valor": 3312260.03,
+      "valor": 3312260.0300000003,
       "candidatos": 365
      }
     ],
     "receitas_por_origem": [
      {
       "origem": "recursos de partido politico",
-      "valor": 6697850.2299999995
+      "valor": 6697850.23
      },
      {
       "origem": "recursos de pessoas fisicas",
@@ -5252,11 +5263,11 @@
      },
      {
       "origem": "recursos de outros candidatos",
-      "valor": 432501.39999999997
+      "valor": 432501.3999999999
      },
      {
       "origem": "recursos proprios",
-      "valor": 259275.85
+      "valor": 259275.84999999998
      },
      {
       "origem": "recursos de financiamento coletivo",
@@ -5284,7 +5295,7 @@
     "despesas_por_tipo": [
      {
       "tipo": null,
-      "valor": 7088341.93
+      "valor": 7088341.929999999
      }
     ]
    }
@@ -5558,17 +5569,17 @@
       {
        "ano": 2019,
        "licitacoes": 358,
-       "valor": 47052527.45
+       "valor": 47052527.449999996
       },
       {
        "ano": 2020,
        "licitacoes": 365,
-       "valor": 36079796.46
+       "valor": 36079796.45999999
       },
       {
        "ano": 2021,
        "licitacoes": 347,
-       "valor": 39793609.879999995
+       "valor": 39793609.88000001
       },
       {
        "ano": 2022,
@@ -5610,12 +5621,12 @@
       {
        "ano": 2022,
        "contratos": 11,
-       "valor": 1515496.31
+       "valor": 1515496.3100000003
       },
       {
        "ano": 2023,
        "contratos": 57,
-       "valor": 24836561.439999998
+       "valor": 24836561.44
       },
       {
        "ano": 2024,
@@ -6297,7 +6308,7 @@
     "ano": 2025,
     "vinculos_ativos_3112": 58127,
     "vinculos_ativos_ano_anterior": 56975,
-    "remuneracao_media": 2572.79169993994,
+    "remuneracao_media": 2572.791699939939,
     "estabelecimentos": 11603
    },
    "caged": {
@@ -6306,7 +6317,7 @@
     "admissoes": 24877,
     "desligamentos": 25052,
     "saldo": -175,
-    "salario_medio_admissao": 1836.0488514306683
+    "salario_medio_admissao": 1836.0488514306592
    },
    "top_empregadores": {
     "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
@@ -6638,7 +6649,7 @@
       "ano": 2016,
       "ultimo_mes": 12,
       "contratos": 164,
-      "valor": 5077652.5200000005,
+      "valor": 5077652.52,
       "contratos_pronaf": 163,
       "valor_pronaf": 4934103.23
      },
@@ -6646,25 +6657,25 @@
       "ano": 2017,
       "ultimo_mes": 12,
       "contratos": 257,
-      "valor": 8228294.840000002,
+      "valor": 8228294.840000001,
       "contratos_pronaf": 255,
-      "valor_pronaf": 7928821.65
+      "valor_pronaf": 7928821.650000001
      },
      {
       "ano": 2018,
       "ultimo_mes": 12,
       "contratos": 274,
-      "valor": 8315806.529999999,
+      "valor": 8315806.53,
       "contratos_pronaf": 271,
-      "valor_pronaf": 7895421.029999998
+      "valor_pronaf": 7895421.03
      },
      {
       "ano": 2019,
       "ultimo_mes": 12,
       "contratos": 315,
-      "valor": 9395190.469999999,
+      "valor": 9395190.47,
       "contratos_pronaf": 313,
-      "valor_pronaf": 9195660.469999999
+      "valor_pronaf": 9195660.47
      },
      {
       "ano": 2020,
@@ -6688,39 +6699,39 @@
       "contratos": 249,
       "valor": 11872613.44,
       "contratos_pronaf": 243,
-      "valor_pronaf": 9649126.349999998
+      "valor_pronaf": 9649126.350000001
      },
      {
       "ano": 2023,
       "ultimo_mes": 12,
       "contratos": 314,
-      "valor": 14538182.83,
+      "valor": 14538182.830000002,
       "contratos_pronaf": 314,
-      "valor_pronaf": 14538182.83
+      "valor_pronaf": 14538182.830000002
      },
      {
       "ano": 2024,
       "ultimo_mes": 12,
       "contratos": 439,
-      "valor": 25796237.84,
+      "valor": 25796237.839999996,
       "contratos_pronaf": 435,
-      "valor_pronaf": 24602827.84
+      "valor_pronaf": 24602827.839999996
      },
      {
       "ano": 2025,
       "ultimo_mes": 12,
       "contratos": 498,
-      "valor": 29866030.6,
+      "valor": 29866030.599999998,
       "contratos_pronaf": 487,
-      "valor_pronaf": 28336729.92
+      "valor_pronaf": 28336729.919999998
      },
      {
       "ano": 2026,
       "ultimo_mes": 2,
       "contratos": 73,
-      "valor": 4684495.7,
+      "valor": 4684495.699999999,
       "contratos_pronaf": 72,
-      "valor_pronaf": 4284495.7
+      "valor_pronaf": 4284495.699999999
      }
     ]
    }
@@ -6977,12 +6988,12 @@
      {
       "k": "aposentadoria_idade",
       "n": 15698,
-      "valor": 27234761.98
+      "valor": 27234761.980000004
      },
      {
       "k": "aposentadoria_tempo_contribuicao",
       "n": 12764,
-      "valor": 32338927.7
+      "valor": 32338927.700000003
      },
      {
       "k": "pensao_morte",
@@ -7002,7 +7013,7 @@
      {
       "k": "aposentadoria_especial",
       "n": 873,
-      "valor": 2947952.84
+      "valor": 2947952.8400000003
      },
      {
       "k": "auxilio_incapacidade_temporaria",
@@ -7136,7 +7147,7 @@
       "ano": 2024,
       "mes": 12,
       "beneficios": 50992,
-      "valor_mensal": 96455640.25999999
+      "valor_mensal": 96455640.26000002
      },
      {
       "ano": 2025,
@@ -7148,7 +7159,7 @@
       "ano": 2026,
       "mes": 1,
       "beneficios": 50619,
-      "valor_mensal": 101770871.15000002
+      "valor_mensal": 101770871.15
      }
     ],
     "concedidos": [
@@ -7168,49 +7179,49 @@
       "ano": 2014,
       "meses": 12,
       "beneficios": 6610,
-      "valor": 6561956.739999999
+      "valor": 6561956.74
      },
      {
       "ano": 2015,
       "meses": 12,
       "beneficios": 6060,
-      "valor": 6666761.159999999
+      "valor": 6666761.16
      },
      {
       "ano": 2016,
       "meses": 12,
       "beneficios": 6315,
-      "valor": 7719199.840000001
+      "valor": 7719199.84
      },
      {
       "ano": 2017,
       "meses": 12,
       "beneficios": 6267,
-      "valor": 8144237.280000001
+      "valor": 8144237.28
      },
      {
       "ano": 2018,
       "meses": 12,
       "beneficios": 6241,
-      "valor": 8064372.890000001
+      "valor": 8064372.889999999
      },
      {
       "ano": 2019,
       "meses": 12,
       "beneficios": 5980,
-      "valor": 7949309.570000001
+      "valor": 7949309.569999999
      },
      {
       "ano": 2020,
       "meses": 12,
       "beneficios": 4468,
-      "valor": 5699205.97
+      "valor": 5699205.970000001
      },
      {
       "ano": 2021,
       "meses": 12,
       "beneficios": 5564,
-      "valor": 7840280.799999999
+      "valor": 7840280.8
      },
      {
       "ano": 2022,
@@ -7228,7 +7239,7 @@
       "ano": 2024,
       "meses": 12,
       "beneficios": 7026,
-      "valor": 11920359.590000002
+      "valor": 11920359.59
      },
      {
       "ano": 2025,
@@ -7240,7 +7251,7 @@
       "ano": 2026,
       "meses": 8,
       "beneficios": 5960,
-      "valor": 11321506.530000001
+      "valor": 11321506.53
      }
     ]
    },

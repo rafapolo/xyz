@@ -224,7 +224,7 @@
 | `mortalidade.transporte` | Óbitos em acidentes de transporte |
 | `mortalidade.maternas` | Óbitos maternos |
 | `mortalidade.mal_definidas` | Óbitos com causa mal definida (qualidade do registro) |
-| `mortalidade.nascidos_vivos` | Nascidos vivos usados como base da mortalidade infantil |
+| `mortalidade.infantil` | Mortalidade infantil no último ano em que SIM e SINASC estão fechados: óbitos, neonatais, nascidos vivos e taxa por 1.000 |
 | `mortalidade.por_capitulo` | Óbitos por capítulo da CID-10 |
 | `mortalidade.top_causas` | Causas básicas de óbito mais frequentes |
 | `mortalidade.serie` | Óbitos totais e infantis ao longo dos anos |

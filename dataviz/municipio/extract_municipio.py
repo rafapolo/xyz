@@ -14,7 +14,9 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import date
+from functools import lru_cache
 
 DUCKDB = os.path.expanduser("~/bin/duckdb")
 ROOT = os.path.expanduser("~/rodado")
@@ -24,8 +26,14 @@ SETTINGS = (f"SET threads=8; SET memory_limit='8GB'; SET temp_directory='{os.pat
             "INSTALL spatial; LOAD spatial; ")
 
 
+# PERFIL=1 manda para o stderr uma linha JSON por seção: segundos e nº de consultas.
+PERFIL = bool(os.environ.get("PERFIL"))
+_CONTA = {"consultas": 0}
+
+
 def q(sql):
     """Executa SQL e devolve list[dict]."""
+    _CONTA["consultas"] += 1
     out = subprocess.run(
         [DUCKDB, "-init", "/dev/null", "-json", "-c", SETTINGS + sql],
         capture_output=True, text=True, timeout=1800,
@@ -89,11 +97,34 @@ def demojibake(txt):
 def section(fn):
     """Decora seções: captura exceção como {'erro': ...}."""
     def wrap(*a, **k):
+        t0, n0 = time.time(), _CONTA["consultas"]
         try:
             return fn(*a, **k)
         except Exception as e:  # noqa: BLE001
             return {"erro": str(e)[:300]}
+        finally:
+            if PERFIL:
+                print(json.dumps({"secao": fn.__name__, "s": round(time.time() - t0, 2),
+                                  "consultas": _CONTA["consultas"] - n0}), file=sys.stderr)
     return wrap
+
+
+@lru_cache(maxsize=None)
+def _ano_fechado(dataset, table, col_data=None):
+    """Último ano completo da tabela e, se houver, o ano parcial que vem depois:
+    (ano, {"ano", "ate_mes"} | None). Parcial é o último ano que não chega a dezembro
+    em `col_data` ou que tem menos de 70% das linhas do anterior. Olha o país inteiro,
+    não o município: em cidade pequena a contagem de um ano para o outro oscila demais."""
+    mes = f"month(max({col_data}))" if col_data else "12"
+    rows = q(f"""SELECT ano, count(*) n, {mes} mes FROM {p(dataset, table)}
+        WHERE ano IS NOT NULL GROUP BY 1 ORDER BY 1 DESC LIMIT 2""")
+    if not rows:
+        return None, None
+    ult = rows[0]
+    curto = len(rows) > 1 and int(ult["n"]) < 0.7 * int(rows[1]["n"])
+    if len(rows) > 1 and (curto or (ult["mes"] or 12) < 12):
+        return rows[1]["ano"], {"ano": ult["ano"], "ate_mes": ult["mes"] if (ult["mes"] or 12) < 12 else None}
+    return ult["ano"], None
 
 
 # -------------------------------------------------------------- geografia
@@ -423,10 +454,10 @@ def saude_cnes(mid):
 @section
 def saude_sinasc(mid):
     t = p("br_ms_sinasc", "microdados")
-    anos = q(f"SELECT ano, count(*) n FROM {t} WHERE id_municipio_residencia='{mid}' GROUP BY 1 ORDER BY 1 DESC LIMIT 3")
-    ano = anos[0]["ano"]
-    if len(anos) > 1 and int(anos[0]["n"]) < 0.7 * int(anos[1]["n"]):
-        ano = anos[1]["ano"]  # último ano parece parcial; usa o anterior
+    fechado, _ = _ano_fechado("br_ms_sinasc", "microdados", "data_nascimento")
+    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio_residencia='{mid}' AND ano <= {fechado}")["a"]
+    if ano is None:
+        raise RuntimeError("sem SINASC para o município")
     dist = q(f"SELECT tipo_parto, count(*) n FROM {t} WHERE id_municipio_residencia='{mid}' AND ano={ano} GROUP BY 1")
     pre = q(f"SELECT pre_natal_agr, count(*) n FROM {t} WHERE id_municipio_residencia='{mid}' AND ano={ano} GROUP BY 1")
     r = one(f"""SELECT count(*) total,
@@ -903,19 +934,25 @@ def saude_mortalidade(mid):
     """SIM — óbitos por residência. `idade` já vem em anos fracionários no espelho
     (0,07 = ~25 dias), não no código DATASUS de 4 dígitos, então `idade < 1` é
     mortalidade infantil de verdade. Capítulo CID-10 sai do range CATINIC..CATFIM
-    de br_datasus_cid10.capitulos — comparação de string, sem tabela de-para."""
+    de br_datasus_cid10.capitulos — comparação de string, sem tabela de-para.
+    `ano` é o último ano fechado: o corrente, que o SIM publica aos poucos, sai em
+    `ano_parcial` e fica fora da série. `sexo` mistura código ('1'/'2', até 2021) e
+    rótulo ('masculino'/'feminino'). A mortalidade infantil usa o último ano em que SIM
+    e SINASC estão fechados (`infantil.ano`), porque o SINASC para antes do SIM."""
     t = p("br_ms_sim", "microdados")
     cap = p("br_datasus_cid10", "capitulos")
     sub = p("br_datasus_cid10", "subcategorias")
-    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio_residencia='{mid}'")["a"]
+    fechado, parcial = _ano_fechado("br_ms_sim", "microdados", "data_obito")
+    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio_residencia='{mid}' AND ano <= {fechado}")["a"]
     if ano is None:
         raise RuntimeError("sem SIM para o município")
+    ano_inf = min(ano, _ano_fechado("br_ms_sinasc", "microdados", "data_nascimento")[0])
     r = one(f"""SELECT count(*) obitos,
             count(*) FILTER (WHERE idade < 1) obitos_infantis,
             count(*) FILTER (WHERE idade < 28.0/365) obitos_neonatais,
             avg(idade) FILTER (WHERE idade <= 110) idade_media_obito,
-            count(*) FILTER (WHERE sexo='1') homens,
-            count(*) FILTER (WHERE sexo='2') mulheres,
+            count(*) FILTER (WHERE sexo IN ('1', 'masculino')) homens,
+            count(*) FILTER (WHERE sexo IN ('2', 'feminino')) mulheres,
             count(*) FILTER (WHERE causa_basica >= 'V01' AND causa_basica < 'Z00') causas_externas,
             count(*) FILTER (WHERE causa_basica >= 'X60' AND causa_basica < 'X85') suicidios,
             count(*) FILTER (WHERE causa_basica >= 'X85' AND causa_basica < 'Y10') agressoes,
@@ -923,8 +960,9 @@ def saude_mortalidade(mid):
             count(*) FILTER (WHERE substr(causa_basica,1,3) BETWEEN 'O00' AND 'O99') maternas,
             count(*) FILTER (WHERE substr(causa_basica,1,3) BETWEEN 'R00' AND 'R99') mal_definidas
         FROM {t} WHERE id_municipio_residencia='{mid}' AND ano={ano}""")
-    pop = one(f"SELECT populacao FROM {p('br_ibge_populacao','municipio')} WHERE id_municipio='{mid}' AND ano={ano}")
-    nv = one(f"SELECT count(*) n FROM {p('br_ms_sinasc','microdados')} WHERE id_municipio_residencia='{mid}' AND ano={ano}")
+    pop = one(f"""SELECT populacao FROM {p('br_ibge_populacao','municipio')}
+        WHERE id_municipio='{mid}' AND ano <= {ano} ORDER BY ano DESC LIMIT 1""")
+    nv = one(f"SELECT count(*) n FROM {p('br_ms_sinasc','microdados')} WHERE id_municipio_residencia='{mid}' AND ano={ano_inf}")
     caps = q(f"""SELECT c.DESCRABREV capitulo, count(*) n
         FROM {t} s LEFT JOIN {cap} c ON substr(s.causa_basica,1,3) BETWEEN c.CATINIC AND c.CATFIM
         WHERE s.id_municipio_residencia='{mid}' AND s.ano={ano}
@@ -933,21 +971,27 @@ def saude_mortalidade(mid):
         FROM {t} s LEFT JOIN {sub} d ON d.SUBCAT = s.causa_basica
         WHERE s.id_municipio_residencia='{mid}' AND s.ano={ano} AND s.causa_basica IS NOT NULL
         GROUP BY 1 ORDER BY 3 DESC LIMIT 8""")
-    serie = q(f"""SELECT ano, count(*) obitos, count(*) FILTER (WHERE idade < 1) infantis
+    serie = q(f"""SELECT ano, count(*) obitos, count(*) FILTER (WHERE idade < 1) infantis,
+            count(*) FILTER (WHERE idade < 28.0/365) neonatais
         FROM {t} WHERE id_municipio_residencia='{mid}' AND ano >= {ano - 11} GROUP BY 1 ORDER BY 1""")
     total = int(r["obitos"] or 0)
     nasc = nv and int(nv["n"] or 0)
     populacao = pop and num(pop["populacao"])
+    inf = next((s for s in serie if s["ano"] == ano_inf), None) or {"infantis": 0, "neonatais": 0}
+    aberto = parcial and next((s for s in serie if s["ano"] == parcial["ano"]), None)
     return {
         "fonte": "br_ms_sim.microdados (residência) · br_datasus_cid10",
         "ano": ano, "populacao_referencia": populacao,
+        "ano_parcial": {**parcial, "obitos": num(aberto["obitos"]), "infantis": num(aberto["infantis"])} if aberto else None,
         **{k: num(v) for k, v in r.items()},
         "taxa_mortalidade_1000hab": total / populacao * 1000 if populacao else None,
-        "nascidos_vivos": nasc,
-        "taxa_mortalidade_infantil_1000nv": (int(r["obitos_infantis"] or 0) / nasc * 1000) if nasc else None,
+        "infantil": {"ano": ano_inf, "obitos": num(inf["infantis"]), "neonatais": num(inf["neonatais"]),
+                     "nascidos_vivos": nasc,
+                     "taxa_1000nv": (int(inf["infantis"] or 0) / nasc * 1000) if nasc else None},
         "por_capitulo": [{"capitulo": (c["capitulo"] or "Não classificado"), "obitos": num(c["n"])} for c in caps],
         "top_causas": [{"cid": c["causa_basica"], "descricao": c["descricao"], "obitos": num(c["n"])} for c in top],
-        "serie": [{"ano": s["ano"], "obitos": num(s["obitos"]), "infantis": num(s["infantis"])} for s in serie],
+        "serie": [{"ano": s["ano"], "obitos": num(s["obitos"]), "infantis": num(s["infantis"])}
+                  for s in serie if s["ano"] <= ano],
     }
 
 
@@ -2501,6 +2545,10 @@ def economia_pix(mid):
             QT_PagadorPF+QT_PagadorPJ qt_pago, QT_RecebedorPF+QT_RecebedorPJ qt_recebido,
             QT_PES_PagadorPF pagadores_pf, QT_PES_PagadorPJ pagadores_pj
         FROM {t} WHERE Municipio_Ibge::VARCHAR='{mid}' ORDER BY 1""")
+    # o mês corrente chega pela metade: se o país movimentou menos de 70% do mês anterior, fica de fora
+    br = q(f"SELECT AnoMes::INT am, sum(VL_PagadorPF+VL_PagadorPJ) v FROM {t} GROUP BY 1 ORDER BY 1 DESC LIMIT 2")
+    if len(br) > 1 and br[0]["v"] < 0.7 * br[1]["v"]:
+        rows = [r for r in rows if r["am"] < br[0]["am"]]
     if not rows:
         return {"disponivel": False, "motivo": "município fora da estatística do Pix"}
     u = rows[-1]

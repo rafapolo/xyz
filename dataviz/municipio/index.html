@@ -3188,6 +3188,9 @@ async function init() {
   // VISÃO GERAL — cartões-síntese
   // =========================================================================
   const sim = ok(g(D, 'secoes.saude.mortalidade'));
+  // Mortalidade infantil tem ano próprio: o último em que SIM e SINASC estão fechados
+  const simInf = (sim && sim.infantil) || null;
+  const simInfAnt = simInf ? (sim.serie || []).find(r => r.ano === simInf.ano - 1) || null : null;
   const sih = ok(g(D, 'secoes.saude.internacoes'));
   const viol = ok(g(D, 'secoes.seguranca.violencia_sinan'));
   const emp = ok(g(D, 'secoes.empresas'));
@@ -3246,13 +3249,12 @@ async function init() {
   } else { vazioValor('ibcVal'); }
 
   // Mortalidade infantil (resumo)
-  if (sim && sim.taxa_mortalidade_infantil_1000nv != null) {
-    setTxt('resInfAno', String(sim.ano || ''));
-    setHtml('resInfVal', fNum1(sim.taxa_mortalidade_infantil_1000nv) + ' <span class="unit">/1.000 nasc.</span>');
-    const serieSim = sim.serie || [];
-    const antSim = serieSim.length > 1 ? serieSim[serieSim.length - 2] : null;
+  if (simInf && simInf.taxa_1000nv != null) {
+    setTxt('resInfAno', String(simInf.ano || ''));
+    setHtml('resInfVal', fNum1(simInf.taxa_1000nv) + ' <span class="unit">/1.000 nasc.</span>');
+    const antSim = simInfAnt;
     if (antSim && antSim.infantis != null) {
-      const dif = (sim.obitos_infantis || 0) - antSim.infantis;
+      const dif = (simInf.obitos || 0) - antSim.infantis;
       setCls('resInfDelta', 'delta ' + (dif <= 0 ? 'down-good' : 'up-bad'));
       setHtml('resInfDelta', (dif <= 0 ? '▼ ' : '▲ +') + Math.abs(dif) + ' óbito(s) <span class="vs">vs ' + antSim.ano + '</span>');
     }
@@ -3309,10 +3311,8 @@ async function init() {
     pill('stEsg', sobe ? 'st-good' : 'st-warn', sobe ? '✓ em alta' : '! em queda');
   } else { pill('stEsg', null); }
   pillVs('stIbc', ibc && ibc.ibc, ibc && ibc.media_brasil, ['acima da média BR', 'abaixo da média BR']);
-  const simSerie = (sim && sim.serie) || [];
-  const simAnt = simSerie.length > 1 ? simSerie[simSerie.length - 2] : null;
-  if (sim && sim.obitos_infantis != null && simAnt && simAnt.infantis != null) {
-    const cai = sim.obitos_infantis <= simAnt.infantis;
+  if (simInf && simInf.obitos != null && simInfAnt && simInfAnt.infantis != null) {
+    const cai = simInf.obitos <= simInfAnt.infantis;
     pill('stInf', cai ? 'st-good' : 'st-warn', cai ? '✓ em queda' : '! em alta');
   } else { pill('stInf', null); }
 
@@ -3873,11 +3873,13 @@ async function init() {
     ['simAno', 'simAno2', 'simAno3', 'simAno4', 'simAno5', 'simAno6', 'simAno7'].forEach(id => setTxt(id, anoSim));
     setTxt('simObitos', fNum(sim.obitos || 0));
     setTxt('simTaxa', fNum1(sim.taxa_mortalidade_1000hab || 0) + ' óbitos por 1.000 habitantes');
-    setHtml('simInfantil', fNum1(sim.taxa_mortalidade_infantil_1000nv || 0) + ' <span class="unit">/1.000 nasc.</span>');
-    setTxt('simNeonatalSub', sim.obitos_infantis != null
-      ? fNum(sim.obitos_infantis) + ' óbitos de menores de 1 ano' +
-        (sim.obitos_neonatais != null ? ', ' + fNum(sim.obitos_neonatais) + ' deles no período neonatal' : '')
-      : '');
+    if (simInf && simInf.taxa_1000nv != null) {
+      setTxt('simAno2', String(simInf.ano || ''));
+      setHtml('simInfantil', fNum1(simInf.taxa_1000nv) + ' <span class="unit">/1.000 nasc.</span>');
+      setTxt('simNeonatalSub', fNum(simInf.obitos || 0) + ' óbitos de menores de 1 ano' +
+        (simInf.neonatais != null ? ', ' + fNum(simInf.neonatais) + ' deles no período neonatal' : '') +
+        ' · ' + fNum(simInf.nascidos_vivos) + ' nascidos vivos');
+    } else { vazioValor('simInfantil'); }
     setHtml('simIdade', fNum1(sim.idade_media_obito || 0) + ' <span class="unit">anos</span>');
     setTxt('simSexo', fNum(sim.homens || 0) + ' homens · ' + fNum(sim.mulheres || 0) + ' mulheres');
     setHtml('simMalDef', fNum1(pctDe(sim.mal_definidas, sim.obitos)) + ' <span class="unit">%</span>');
@@ -4788,10 +4790,13 @@ async function init() {
     }
     const b = X('secoes.economia.bndes');
     if (b && b.serie_indiretas && b.serie_indiretas.length) {
-      const u = b.serie_indiretas[b.serie_indiretas.length - 1];
+      // ano corrente ainda incompleto: o cartão destaca o último ano fechado
+      const anoGer = Number(String(g(D, 'gerado_em') || '').slice(0, 4)) || Infinity;
+      const fechados = b.serie_indiretas.filter(r => r.ano < anoGer), serieB = fechados.length ? fechados : b.serie_indiretas;
+      const u = serieB[serieB.length - 1];
       cartaoExtra('econ', { titulo: 'BNDES — desembolsos via bancos', vintage: String(u.ano),
         valor: fRealC(u.desembolsado), sub: fNum(u.operacoes) + ' operações indiretas no ano',
-        barras: { linhas: b.serie_indiretas.slice(-8).map(r => ({ k: String(r.ano), v: r.desembolsado })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
+        barras: { linhas: serieB.slice(-8).map(r => ({ k: String(r.ano), v: r.desembolsado })), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
       if (b.porte_5a && b.porte_5a.length) cartaoExtra('econ', { titulo: 'BNDES por porte do cliente', vintage: '5 anos',
         barras: { linhas: top(b.porte_5a, 'porte', 'desembolsado'), total: 0, cor: C.s1, opts: { fmtValor: fRealC } } });
       if ((b.administracao_publica || []).length) cartaoExtra('econ', { titulo: 'BNDES com a prefeitura', vintage: String(b.administracao_publica[0].ano || ''),
@@ -5022,15 +5027,14 @@ async function init() {
         '<b>Demografia:</b> ' + fNum1(envV) + ' idosos de 65+ para cada 100 jovens de 0–14 no censo 2022' +
         (idadeMed != null ? ', com idade mediana de ' + fNum1(idadeMed) + ' anos' : '') + '.');
     }
-    if (sim && sim.taxa_mortalidade_infantil_1000nv != null) {
-      const tmi = sim.taxa_mortalidade_infantil_1000nv;
-      const serieTmi = sim.serie || [];
-      const antTmi = serieTmi.length > 1 ? serieTmi[serieTmi.length - 2] : null;
-      const caiTmi = antTmi && antTmi.infantis != null ? (sim.obitos_infantis || 0) <= antTmi.infantis : null;
+    if (simInf && simInf.taxa_1000nv != null) {
+      const tmi = simInf.taxa_1000nv;
+      const antTmi = simInfAnt;
+      const caiTmi = antTmi && antTmi.infantis != null ? (simInf.obitos || 0) <= antTmi.infantis : null;
       add(caiTmi === false ? 'st-warn' : 'st-good', caiTmi === false ? '! atenção' : '✓ forte',
         '<b>Saúde materno-infantil:</b> mortalidade infantil de ' + fNum1(tmi) +
-        ' por 1.000 nascidos vivos em ' + sim.ano +
-        (antTmi ? ' (' + fNum(sim.obitos_infantis || 0) + ' óbitos, ante ' + fNum(antTmi.infantis) + ' em ' + antTmi.ano + ')' : '') +
+        ' por 1.000 nascidos vivos em ' + simInf.ano +
+        (antTmi ? ' (' + fNum(simInf.obitos || 0) + ' óbitos, ante ' + fNum(antTmi.infantis) + ' em ' + antTmi.ano + ')' : '') +
         (sim.obitos ? ' — ' + fNum1(pctDe(sim.mal_definidas, sim.obitos)) + '% dos óbitos ainda entram como causa mal definida' : '') + '.');
     }
     if (sih && sih.internacoes != null) {
@@ -5098,12 +5102,12 @@ async function init() {
     if (best.id === spyLastId) return;
     spyLastId = best.id;
     navItems.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + best.id));
+    const ativo = [...navItems].find(a => a.getAttribute('href') === '#' + best.id);
+    setTxt('heroSec', ativo ? ativo.textContent.trim() : '');
     if (mobileNav) {
       mobileNav.querySelectorAll('a').forEach(a => {
         const on = a.getAttribute('href') === '#' + best.id;
         a.classList.toggle('active', on);
-    const ativo = [...navItems].find(a => a.getAttribute('href') === '#' + best.id);
-    setTxt('heroSec', ativo ? ativo.textContent.trim() : '');
         if (on) a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       });
     }
@@ -5114,10 +5118,6 @@ async function init() {
   addEventListener('resize', updateSpy);
   updateSpy();
 
-  const savedScroll = sessionStorage.getItem('rodado-scroll');
-  if (savedScroll != null) {
-    sessionStorage.removeItem('rodado-scroll');
-    scrollTo(0, Number(savedScroll));
   // Cabeçalho preso: no desktop ele encolhe ao rolar. Medimos as duas alturas
   // (solto e preso): a presa vira --hero-h (as âncoras das seções descontam esse
   // espaço) e a diferença vira --hero-gap, para o conteúdo não pular na troca.
@@ -5160,6 +5160,10 @@ async function init() {
     h2.after(b);
   });
 
+  const savedScroll = sessionStorage.getItem('rodado-scroll');
+  if (savedScroll != null) {
+    sessionStorage.removeItem('rodado-scroll');
+    scrollTo(0, Number(savedScroll));
   }
 }
 
