@@ -152,7 +152,7 @@ def geografia(mid):
         SELECT DISTINCT b.nome_bioma,
             ST_Area(ST_Intersection(b.geometria, muni.geometria)) / ST_Area(muni.geometria) * 100 pct
         FROM {p('br_geobr_mapas','bioma')} b, muni WHERE ST_Intersects(b.geometria, muni.geometria)
-        ORDER BY 2 DESC""")
+        ORDER BY 2 DESC, 1""")
 
     ucs = q(f"""
         WITH muni AS (SELECT geometria FROM {t_muni} WHERE id_municipio='{mid}')
@@ -222,7 +222,7 @@ def demografia(mid):
              "30 a 34 anos","35 a 39 anos","40 a 44 anos","45 a 49 anos","50 a 54 anos","55 a 59 anos",
              "60 a 64 anos","65 a 69 anos","70 a 74 anos","75 a 79 anos","80 a 84 anos","85 a 89 anos",
              "90 a 94 anos","95 a 99 anos","100 anos ou mais"]
-    m = {(r["grupo_idade"], r["sexo"]): int(r["populacao"]) for r in pir}
+    m = {(r["grupo_idade"], r["sexo"]): int(r["populacao"] or 0) for r in pir}
     return {
         "fonte": "br_ibge_populacao.municipio · br_ibge_censo_2022",
         "populacao_serie": [{"ano": r["ano"], "populacao": r["populacao"]} for r in serie],
@@ -263,8 +263,8 @@ def economia_pib(mid, uf):
           FROM {p('br_ibge_pib','municipio')} m
           JOIN {p('br_bd_diretorios_brasil','municipio')} d USING (id_municipio)
           WHERE m.ano={ano} AND d.sigla_uf='{uf}')
-        SELECT count(*) AS pos, (SELECT count(*) FROM uf_pib) AS total
-        FROM uf_pib WHERE pib >= (SELECT pib FROM uf_pib WHERE id_municipio='{mid}')""")
+        SELECT count(*) FILTER (WHERE b.pib >= a.pib) AS pos, count(*) AS total
+        FROM uf_pib a, uf_pib b WHERE a.id_municipio='{mid}'""")
     return {
         "fonte": "br_ibge_pib.municipio",
         "serie": [{k: num(r[k]) for k in ("ano","pib","impostos_liquidos","va","va_agropecuaria","va_industria","va_servicos","va_adespss")} for r in reversed(serie)],
@@ -304,7 +304,7 @@ def economia_siconfi(mid):
     funcs = "', '".join(FUNCOES)
     desp = q(f"""SELECT conta_bd, sum(valor) valor FROM {t_desp}
         WHERE id_municipio='{mid}' AND ano={ano} AND estagio_bd='Despesas Empenhadas'
-        AND conta_bd IN ('{funcs}') GROUP BY 1 ORDER BY 2 DESC""")
+        AND conta_bd IN ('{funcs}') GROUP BY 1 ORDER BY 2 DESC, 1""")
     total_desp = one(f"""SELECT sum(valor) v FROM {t_desp}
         WHERE id_municipio='{mid}' AND ano={ano} AND estagio_bd='Despesas Empenhadas'
         AND conta_bd IN ('Despesas Exceto Intraorçamentárias','Despesas Intraorçamentárias')""")
@@ -319,7 +319,7 @@ def economia_siconfi(mid):
 @section
 def economia_estban(mid):
     t = p("br_bcb_estban", "municipio")
-    dic = q(f"SELECT chave, valor FROM {p('br_bcb_estban','dicionario')} WHERE nome_coluna='id_verbete'")
+    dic = q(f"SELECT chave, valor FROM {p('br_bcb_estban','dicionario')} WHERE nome_coluna='id_verbete' ORDER BY chave, valor")
     def find(*terms):
         for r in dic:
             v = (r["valor"] or "").upper()
@@ -329,6 +329,8 @@ def economia_estban(mid):
     v_deps = [r["chave"] for r in dic if "DEP" in (r["valor"] or "").upper() and "SITO" in (r["valor"] or "").upper()]
     v_cred = find("OPERAÇÕES DE CRÉDITO") or find("OPERACOES DE CREDITO")
     am = one(f"SELECT max(ano*100+mes) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem agência bancária no município")
     ano, mes = am // 100, am % 100
     def total(verbetes):
         if not verbetes:
@@ -383,7 +385,8 @@ def educacao_saeb(mid):
     rows = q(f"""SELECT disciplina, serie, media,
             nivel_0, nivel_1, nivel_2, nivel_3, nivel_4, nivel_5, nivel_6, nivel_7, nivel_8, nivel_9, nivel_10
         FROM {t} WHERE id_municipio='{mid}' AND ano={ano}
-        AND rede='total - estadual e municipal' AND localizacao='total' AND serie IN (5, 9)""")
+        AND rede='total - estadual e municipal' AND localizacao='total' AND serie IN (5, 9)
+        ORDER BY serie DESC, disciplina""")
     out = {"fonte": "br_inep_saeb.municipio (rede pública, total)", "ano": ano, "provas": []}
     for r in rows:
         niveis = [r[f"nivel_{i}"] for i in range(11)]
@@ -425,22 +428,24 @@ def educacao_enem(mid):
 @section
 def saude_cnes(mid):
     am = one(f"SELECT max(ano*100+mes) am FROM {p('br_ms_cnes','estabelecimento')} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem estabelecimento no CNES")
     ano, mes = am // 100, am % 100
     est = one(f"SELECT count(DISTINCT id_estabelecimento_cnes) n FROM {p('br_ms_cnes','estabelecimento')} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes}")
     lam = one(f"SELECT max(ano*100+mes) am FROM {p('br_ms_cnes','leito')} WHERE id_municipio='{mid}'")["am"]
-    leito = one(f"SELECT sum(quantidade_total) n, sum(quantidade_sus) sus FROM {p('br_ms_cnes','leito')} WHERE id_municipio='{mid}' AND ano={lam//100} AND mes={lam%100}")
+    leito = lam and one(f"SELECT sum(quantidade_total) n, sum(quantidade_sus) sus FROM {p('br_ms_cnes','leito')} WHERE id_municipio='{mid}' AND ano={lam//100} AND mes={lam%100}")
     pam = one(f"SELECT max(ano*100+mes) am FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}'")["am"]
-    prof = one(f"SELECT count(*) vinculos FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}' AND ano={pam//100} AND mes={pam%100}")
+    prof = pam and one(f"SELECT count(*) vinculos FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}' AND ano={pam//100} AND mes={pam%100}")
     eam = one(f"SELECT max(ano*100+mes) am FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}'")["am"]
-    eq = one(f"SELECT count(*) n FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}' AND ano={eam//100} AND mes={eam%100}")
+    eq = eam and one(f"SELECT count(*) n FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}' AND ano={eam//100} AND mes={eam%100}")
     # Códigos de tipo_equipe da portaria de 2023 (70 eSF, 71 eSB, 72 eMulti, 76 eAP);
     # ano_desativacao_equipe = 9000 marca equipe ativa.
-    tipos = q(f"""SELECT CASE tipo_equipe WHEN '70' THEN 'eSF' WHEN '71' THEN 'eSB' WHEN '72' THEN 'eMulti'
+    tipos = eam and q(f"""SELECT CASE tipo_equipe WHEN '70' THEN 'eSF' WHEN '71' THEN 'eSB' WHEN '72' THEN 'eMulti'
                 WHEN '76' THEN 'eAP' ELSE 'outras' END tipo, count(*) n
         FROM {p('br_ms_cnes','equipe')} WHERE id_municipio='{mid}' AND ano={eam//100} AND mes={eam%100}
-          AND coalesce(ano_desativacao_equipe, 9000) = 9000 GROUP BY 1 ORDER BY 2 DESC""")
+          AND coalesce(ano_desativacao_equipe, 9000) = 9000 GROUP BY 1 ORDER BY 2 DESC, 1""")
     # CBO 515105 = agente comunitário de saúde, 515140 = agente de combate às endemias
-    agentes = one(f"""SELECT count(DISTINCT cartao_nacional_saude) FILTER (WHERE cbo_2002='515105') acs,
+    agentes = pam and one(f"""SELECT count(DISTINCT cartao_nacional_saude) FILTER (WHERE cbo_2002='515105') acs,
             count(DISTINCT cartao_nacional_saude) FILTER (WHERE cbo_2002='515140') ace
         FROM {p('br_ms_cnes','profissional')} WHERE id_municipio='{mid}' AND ano={pam//100} AND mes={pam%100}""")
     # tipo_unidade: 01 posto e 02 centro de saúde/UBS, 73 pronto atendimento (UPA),
@@ -457,7 +462,7 @@ def saude_cnes(mid):
             "leitos": leito and {"competencia": f"{lam//100}-{lam%100:02d}", "total": num(leito["n"]), "sus": num(leito["sus"])},
             "profissionais": prof and {"competencia": f"{pam//100}-{pam%100:02d}", "vinculos": num(prof["vinculos"])},
             "equipes": eq and {"competencia": f"{eam//100}-{eam%100:02d}", "total": eq["n"],
-                                "por_tipo": [{"tipo": t["tipo"], "n": num(t["n"])} for t in tipos]}}
+                                "por_tipo": [{"tipo": t["tipo"], "n": num(t["n"])} for t in tipos or []]}}
 
 
 @section
@@ -637,7 +642,7 @@ def ambiente_mapbiomas(mid):
         FROM tr
         LEFT JOIN {tc} cde ON cde.chave = tr.id_classe_de
         LEFT JOIN {tc} cpa ON cpa.chave = tr.id_classe_para
-        ORDER BY tr.ano, tr.area DESC""")
+        ORDER BY tr.ano, tr.area DESC, cde.valor_pt, cpa.valor_pt""")
 
     def clean(nome):
         return re.sub(r"^[\d.]+\s*", "", nome) if nome else nome
@@ -667,7 +672,8 @@ def ambiente_seeg(mid):
     base = os.path.join(ROOT, "br_seeg_emissoes")
     dic = {}
     if os.path.isdir(os.path.join(base, "dicionario")):
-        rows = q(f"SELECT * FROM {p('br_seeg_emissoes','dicionario')}")
+        # o dicionário guarda uf e município juntos, com códigos diferentes para a mesma coluna
+        rows = q(f"SELECT * FROM {p('br_seeg_emissoes','dicionario')} WHERE tabela='municipio' ORDER BY ALL")
         if rows:
             ks = rows[0].keys()
             col = next((k for k in ks if "coluna" in k), None)
@@ -685,7 +691,7 @@ def ambiente_seeg(mid):
     flt = f"AND gas='{gas_code}'" if gas_code else ""
     flt += f" AND tipo='{tipo_code}'" if tipo_code else ""
     rows = q(f"""SELECT setor, sum(coalesce(emissao_ar5, emissao_ar6, emissao_ar4, emissao_ar2)) emissao
-        FROM {t} WHERE id_municipio='{mid}' AND ano={ano} {flt} GROUP BY 1 ORDER BY 2 DESC""")
+        FROM {t} WHERE id_municipio='{mid}' AND ano={ano} {flt} GROUP BY 1 ORDER BY 2 DESC, 1""")
     setor_map = dic.get("setor", {})
     return {"fonte": "br_seeg_emissoes.municipio", "ano": ano,
             "gas": gas_map.get(gas_code, gas_code), "tipo": tipo_map.get(tipo_code, tipo_code),
@@ -719,7 +725,7 @@ def politica(mid):
     tot = one(f"""SELECT sum(try_cast(eleitores AS BIGINT)) eleitores, sum(try_cast(eleitores_biometria AS BIGINT)) biometria,
             count(DISTINCT zona) zonas FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano}""")
     gen = q(f"SELECT genero, sum(try_cast(eleitores AS BIGINT)) n FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1")
-    ins = q(f"SELECT instrucao, sum(try_cast(eleitores AS BIGINT)) n FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC")
+    ins = q(f"SELECT instrucao, sum(try_cast(eleitores AS BIGINT)) n FROM {t_perf} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1")
     # O perfil do eleitorado já chega no ano da eleição geral (2026); prefeito só existe
     # no ano municipal, então o resultado procura a última eleição com cargo prefeito.
     t_det = p('br_tse_eleicoes', 'detalhes_votacao_municipio')
@@ -751,11 +757,11 @@ def politica(mid):
 def transparencia(mid):
     ebt = q(f"SELECT ano, nota, ranking FROM {p('br_cgu_ebt','municipio')} WHERE id_municipio='{mid}' ORDER BY ano")
     t = p("br_clp_ranking_competitividade", "nota_geral_municipio")
-    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")
-    clp = ano and q(f"SELECT pilar_dimensao, nota_geral, colocacao FROM {t} WHERE id_municipio='{mid}' AND ano={ano['a']} ORDER BY pilar_dimensao")
+    ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
+    clp = ano and q(f"SELECT pilar_dimensao, nota_geral, colocacao FROM {t} WHERE id_municipio='{mid}' AND ano={ano} ORDER BY pilar_dimensao")
     return {"fonte": "br_cgu_ebt.municipio · br_clp_ranking_competitividade",
             "ebt": [{k: num(r[k]) for k in ("ano", "nota", "ranking")} for r in ebt],
-            "clp": ano and {"ano": ano["a"], "pilares": clp}}
+            "clp": ano and {"ano": ano, "pilares": clp}}
 
 
 # ---------------------------------------------------------------- social
@@ -784,12 +790,15 @@ def comex(mid):
     for flow, tbl in (("exportacoes", "municipio_exportacao"), ("importacoes", "municipio_importacao")):
         t = p("br_me_comex_stat", tbl)
         ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}' AND mes=12")["a"]
+        if ano is None:
+            out[flow] = None
+            continue
         total = one(f"SELECT sum(valor_fob_dolar) v FROM {t} WHERE id_municipio='{mid}' AND ano={ano}")
         prev = one(f"SELECT sum(valor_fob_dolar) v FROM {t} WHERE id_municipio='{mid}' AND ano={ano-1}")
         sh4 = q(f"""SELECT id_sh4, sum(valor_fob_dolar) v FROM {t}
-            WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+            WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
         pais = q(f"""SELECT sigla_pais_iso3, sum(valor_fob_dolar) v FROM {t}
-            WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+            WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
         out[flow] = {"ano": ano, "total_fob_usd": total and total["v"], "ano_anterior_fob_usd": prev and prev["v"],
                      "top_sh4": [{"id_sh4": r["id_sh4"], "valor_fob_usd": r["v"]} for r in sh4],
                      "top_paises": [{"pais_iso3": r["sigla_pais_iso3"], "valor_fob_usd": r["v"]} for r in pais]}
@@ -837,7 +846,7 @@ def trabalho_top_empregadores(mid):
           AND e.natureza_juridica LIKE '2%' AND e.natureza_juridica NOT IN ('2143', '2330')
           AND e.quantidade_vinculos_ativos > 0
         GROUP BY e.cnpj_basico
-        ORDER BY vinculos_ativos DESC LIMIT 10""")
+        ORDER BY vinculos_ativos DESC, e.cnpj_basico LIMIT 10""")
     return {
         "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (cnae_2, natureza_juridica) — só empresas privadas (exclui setor público e cooperativas)",
         "ano": ano,
@@ -862,7 +871,7 @@ def trabalho_top_empregadores_publicos(mid):
         WHERE e.id_municipio='{mid}' AND e.ano={ano}
           AND e.natureza_juridica LIKE '1%' AND e.quantidade_vinculos_ativos > 0
         GROUP BY e.cnpj_basico
-        ORDER BY vinculos_ativos DESC LIMIT 10""")
+        ORDER BY vinculos_ativos DESC, e.cnpj_basico LIMIT 10""")
     return {
         "fonte": "br_me_rais_identificada.estabelecimentos · br_bd_diretorios_brasil (natureza_juridica) — administração pública direta e indireta",
         "ano": ano,
@@ -896,18 +905,18 @@ def agropecuaria(mid):
         if not ano or ano["a"] is None:
             continue
         rows = q(f"""SELECT produto, area_colhida, quantidade_produzida, valor_producao FROM {t}
-            WHERE id_municipio='{mid}' AND ano={ano['a']} AND valor_producao>0 ORDER BY valor_producao DESC LIMIT 6""")
+            WHERE id_municipio='{mid}' AND ano={ano['a']} AND valor_producao>0 ORDER BY valor_producao DESC, produto LIMIT 6""")
         lav += [{"tipo": tipo, "ano": ano["a"], **{k: num(v) for k, v in r.items()}} for r in rows]
     lav.sort(key=lambda r: -(r.get("valor_producao") or 0))
     out["lavouras_top"] = lav[:8]
     t = p("br_ibge_ppm", "efetivo_rebanhos")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
     out["rebanhos"] = {"ano": ano, "efetivos": q(f"""SELECT tipo_rebanho, quantidade FROM {t}
-        WHERE id_municipio='{mid}' AND ano={ano} ORDER BY quantidade DESC LIMIT 8""")}
+        WHERE id_municipio='{mid}' AND ano={ano} ORDER BY quantidade DESC, tipo_rebanho LIMIT 8""")}
     t = p("br_ibge_ppm", "producao_origem_animal")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
     out["origem_animal"] = {"ano": ano, "produtos": q(f"""SELECT produto, unidade, quantidade, valor FROM {t}
-        WHERE id_municipio='{mid}' AND ano={ano} AND quantidade IS NOT NULL ORDER BY valor DESC NULLS LAST LIMIT 6""")}
+        WHERE id_municipio='{mid}' AND ano={ano} AND quantidade IS NOT NULL ORDER BY valor DESC NULLS LAST, produto LIMIT 6""")}
     return out
 
 
@@ -975,11 +984,11 @@ def saude_mortalidade(mid):
     caps = q(f"""SELECT c.DESCRABREV capitulo, count(*) n
         FROM {t} s LEFT JOIN {cap} c ON substr(s.causa_basica,1,3) BETWEEN c.CATINIC AND c.CATFIM
         WHERE s.id_municipio_residencia='{mid}' AND s.ano={ano}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     top = q(f"""SELECT s.causa_basica, any_value(d.DESCRICAO) descricao, count(*) n
         FROM {t} s LEFT JOIN {sub} d ON d.SUBCAT = s.causa_basica
         WHERE s.id_municipio_residencia='{mid}' AND s.ano={ano} AND s.causa_basica IS NOT NULL
-        GROUP BY 1 ORDER BY 3 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 3 DESC, 1 LIMIT 8""")
     serie = q(f"""SELECT ano, count(*) obitos, count(*) FILTER (WHERE idade < 1) infantis,
             count(*) FILTER (WHERE idade < 28.0/365) neonatais
         FROM {t} WHERE id_municipio_residencia='{mid}' AND ano >= {ano - 11} GROUP BY 1 ORDER BY 1""")
@@ -1028,7 +1037,7 @@ def saude_internacoes(mid):
         FROM {t} s LEFT JOIN {cap} c
           ON coalesce(s.cid_principal_categoria, substr(s.cid_principal_subcategoria,1,3)) BETWEEN c.CATINIC AND c.CATFIM
         WHERE s.id_municipio_paciente='{mid6}' AND s.ano={ano}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     serie = q(f"""SELECT ano, count(*) internacoes, sum(valor_aih) valor
         FROM {t} WHERE id_municipio_paciente='{mid6}' AND ano >= {ano - 9} AND ano <= {ano}
         GROUP BY 1 ORDER BY 1""")
@@ -1106,7 +1115,7 @@ def saude_planos(mid):
             sum(quantidade_beneficiario_ativo) FILTER (WHERE segmentacao_beneficiario ILIKE 'Odonto%') odontologico
         FROM {t} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes}""")
     contr = q(f"""SELECT contratacao_beneficiario tipo, sum(quantidade_beneficiario_ativo) n
-        FROM {t} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} GROUP BY 1 ORDER BY 2 DESC LIMIT 4""")
+        FROM {t} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 4""")
     pop = one(f"""SELECT populacao FROM {p('br_ibge_populacao','municipio')}
         WHERE id_municipio='{mid}' ORDER BY ano DESC LIMIT 1""")
     med = num(r["medico_hospitalar"]) if r else None
@@ -1162,7 +1171,7 @@ def seguranca_violencia(mid):
         FROM {t} WHERE CAST("ID_MN_RESI" AS VARCHAR)='{mid6}' AND ano_sinan={ano}""")
     local = q(f"""SELECT "LOCAL_OCOR" cod, count(*) n FROM {t}
         WHERE CAST("ID_MN_RESI" AS VARCHAR)='{mid6}' AND ano_sinan={ano}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     ciclo = q(f"""SELECT "CICL_VID" cod, count(*) n FROM {t}
         WHERE CAST("ID_MN_RESI" AS VARCHAR)='{mid6}' AND ano_sinan={ano} GROUP BY 1 ORDER BY 1""")
     serie = q(f"""SELECT ano_sinan ano, count(*) n,
@@ -1194,10 +1203,10 @@ def transp_emendas(mid):
     ano = serie[0]["ano"]
     autores = q(f"""SELECT nome_autor_emenda autor, count(*) emendas, sum(valor_pago) pago
         FROM {t} WHERE id_municipio_gasto='{mid}' AND ano_emenda >= {ano - 5}
-        GROUP BY 1 ORDER BY 3 DESC NULLS LAST LIMIT 8""")
+        GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1 LIMIT 8""")
     funcoes = q(f"""SELECT nome_funcao funcao, sum(valor_pago) pago
         FROM {t} WHERE id_municipio_gasto='{mid}' AND ano_emenda >= {ano - 5}
-        GROUP BY 1 HAVING sum(valor_pago) > 0 ORDER BY 2 DESC LIMIT 6""")
+        GROUP BY 1 HAVING sum(valor_pago) > 0 ORDER BY 2 DESC, 1 LIMIT 6""")
     return {"fonte": "br_cgu_emendas_parlamentares.microdados (id_municipio_gasto)",
             "ano": ano, "janela_autores": f"{ano - 5}–{ano}",
             "serie": [{k: num(v) for k, v in s.items()} for s in reversed(serie)],
@@ -1216,7 +1225,7 @@ def transp_compras_federais(mid, rf):
     lic = q(f"""SELECT ano, count(*) licitacoes, sum(valor_licitacao) valor
         FROM {t_lic} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1 DESC LIMIT 8""")
     orgaos = q(f"""SELECT nome_orgao orgao, count(*) n, sum(valor_licitacao) valor
-        FROM {t_lic} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 3 DESC NULLS LAST LIMIT 5""")
+        FROM {t_lic} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1 LIMIT 5""")
     out = {"fonte": "br_cgu_licitacao_contrato (licitação por município · contrato por CNPJ local) · br_me_cnpj",
            "licitacoes_no_municipio": {
                "serie": [{k: num(v) for k, v in r.items()} for r in reversed(lic)],
@@ -1232,7 +1241,7 @@ def transp_compras_federais(mid, rf):
         GROUP BY 1 ORDER BY 1 DESC LIMIT 8""")
     top = q(f"""SELECT c.nome_contratado empresa, count(*) contratos, sum(c.valor_final_compra) valor
         FROM {t_con} c JOIN {loc} l ON regexp_replace(c.cpf_cnpj_contratado, '[^0-9]', '', 'g') = l.cnpj
-        GROUP BY 1 ORDER BY 3 DESC NULLS LAST LIMIT 8""")
+        GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1 LIMIT 8""")
     out["fornecedores_locais"] = {
         "snapshot_cnpj": f"{am // 100}-{am % 100:02d}",
         "serie": [{k: num(v) for k, v in r.items()} for r in reversed(serie)],
@@ -1288,10 +1297,10 @@ def transp_consumidor(mid, nome, uf):
         ano = serie[-2]["ano"]  # último ano parece parcial; usa o anterior
     seg = q(f"""SELECT "Segmento de Mercado" segmento, count(*) n FROM {t}
         WHERE {flt} AND CAST(TRY_CAST("Ano Abertura" AS DOUBLE) AS BIGINT)={ano}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     emp = q(f"""SELECT "Nome Fantasia" empresa, count(*) n FROM {t}
         WHERE {flt} AND CAST(TRY_CAST("Ano Abertura" AS DOUBLE) AS BIGINT)={ano}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     return {"fonte": "br_mj_consumidorgovbr.reclamacoes (nome da cidade + UF)",
             "ano": ano,
             "serie": [{k: num(v) for k, v in s.items()} for s in serie],
@@ -1337,13 +1346,13 @@ def empresas_cnpj(mid, rf):
         FROM {t} e LEFT JOIN (SELECT DISTINCT subclasse, descricao_secao FROM {cnae}) c
           ON c.subclasse = e.cnae_fiscal_principal
         WHERE e.ano={ano} AND e.mes={mes} AND e.id_municipio_rf='{rf}' AND e.situacao_cadastral='2'
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     top_cnae = q(f"""SELECT any_value(c.descricao_subclasse) atividade, count(*) n
         FROM {t} e LEFT JOIN (SELECT DISTINCT subclasse, descricao_subclasse FROM {cnae}) c
           ON c.subclasse = e.cnae_fiscal_principal
         WHERE e.ano={ano} AND e.mes={mes} AND e.id_municipio_rf='{rf}' AND e.situacao_cadastral='2'
           AND c.descricao_subclasse IS NOT NULL
-        GROUP BY e.cnae_fiscal_principal ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY e.cnae_fiscal_principal ORDER BY 2 DESC, 1 LIMIT 8""")
     aberturas = q(f"""SELECT extract(year FROM data_inicio_atividade) ano, count(*) n
         FROM {base} AND extract(year FROM data_inicio_atividade) BETWEEN {ano - 10} AND {ano}
         GROUP BY 1 ORDER BY 1""")
@@ -1377,25 +1386,25 @@ def economia_combustiveis(mid, nome, nome_uf):
     t = p("br_anp_combustiveis", "precos")
     nome_sql = nome.replace("'", "''")
     uf_sql = nome_uf.replace("'", "''")
-    rows = q(f"""
-        WITH b AS (SELECT municipio, estado, cnpj, produto,
+    janela = f"""WITH b AS (SELECT municipio, estado, cnpj, produto,
                           TRY_CAST(preco_revenda AS DOUBLE) preco,
                           TRY_CAST(data_coleta AS TIMESTAMP) d
                    FROM {t}),
              ult AS (SELECT max(d) m FROM b),
-             janela AS (SELECT * FROM b, ult WHERE d >= m - INTERVAL 60 DAY),
-             mun AS (SELECT * FROM janela
-                     WHERE upper(strip_accents(municipio))=upper(strip_accents('{nome_sql}'))
-                       AND upper(strip_accents(estado))=upper(strip_accents('{uf_sql}')))
-        SELECT j.produto,
-               (SELECT avg(preco) FROM mun WHERE mun.produto=j.produto) preco_municipio,
-               (SELECT count(DISTINCT cnpj) FROM mun WHERE mun.produto=j.produto) postos,
-               (SELECT max(d) FROM mun WHERE mun.produto=j.produto) ultima_coleta,
-               avg(j.preco) FILTER (WHERE upper(strip_accents(j.estado))=upper(strip_accents('{uf_sql}'))) preco_uf,
-               avg(j.preco) preco_brasil
-        FROM janela j GROUP BY j.produto ORDER BY j.produto""")
+             janela AS (SELECT * FROM b, ult WHERE d >= m - INTERVAL 60 DAY)"""
+    rows = q(f"""{janela}
+        SELECT produto, avg(preco) preco_municipio, count(DISTINCT cnpj) postos, max(d) ultima_coleta
+        FROM janela
+        WHERE upper(strip_accents(municipio))=upper(strip_accents('{nome_sql}'))
+          AND upper(strip_accents(estado))=upper(strip_accents('{uf_sql}'))
+        GROUP BY 1 ORDER BY 1""")
+    ref = {r["produto"]: r for r in q(f"""{janela}
+        SELECT produto,
+               avg(preco) FILTER (WHERE upper(strip_accents(estado))=upper(strip_accents('{uf_sql}'))) preco_uf,
+               avg(preco) preco_brasil
+        FROM janela GROUP BY 1""")} if rows else {}
     produtos = [{"produto": r["produto"], "preco_municipio": r["preco_municipio"],
-                 "preco_uf": r["preco_uf"], "preco_brasil": r["preco_brasil"],
+                 "preco_uf": ref[r["produto"]]["preco_uf"], "preco_brasil": ref[r["produto"]]["preco_brasil"],
                  "postos": num(r["postos"]), "ultima_coleta": r["ultima_coleta"] and str(r["ultima_coleta"])[:10]}
                 for r in rows if r["preco_municipio"] is not None]
     if not produtos:
@@ -1432,7 +1441,7 @@ def demografia_censo_extra(mid):
 
     raca = q(f"""SELECT ano, cor_raca, sum(populacao) populacao
         FROM {p('br_ibge_censo_2022','populacao_grupo_idade_sexo_raca')}
-        WHERE id_municipio='{mid}' GROUP BY 1,2 ORDER BY 1, 3 DESC""")
+        WHERE id_municipio='{mid}' GROUP BY 1,2 ORDER BY 1, 3 DESC, 2""")
     por_ano = {}
     for r in raca:
         por_ano.setdefault(r["ano"], []).append({"cor_raca": r["cor_raca"], "populacao": num(r["populacao"])})
@@ -1442,7 +1451,7 @@ def demografia_censo_extra(mid):
             sum(populacao) FILTER (WHERE alfabetizacao='Alfabetizadas') alfabetizadas,
             sum(populacao) total
         FROM {p('br_ibge_censo_2022','alfabetizacao_grupo_idade_sexo_raca')}
-        WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 3 DESC""")
+        WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 3 DESC, 1""")
     def _taxa(parte, todo):
         parte, todo = num(parte), num(todo)
         return (parte / todo * 100) if parte is not None and todo else None
@@ -1453,7 +1462,7 @@ def demografia_censo_extra(mid):
     rel = q(f"""SELECT religiao, populacao_10_mais populacao
         FROM {p('br_ibge_censo2022_religiao','populacao_religiao')}
         WHERE nivel='municipio' AND CAST(id_localidade AS VARCHAR)='{mid}'
-        ORDER BY populacao_10_mais DESC""")
+        ORDER BY populacao_10_mais DESC, religiao""")
     total_rel = next((num(r["populacao"]) for r in rel if r["religiao"] == "Total"), None)
     out["religiao"] = {
         "total_10_anos_ou_mais": total_rel,
@@ -1469,7 +1478,7 @@ def infra_censo_domicilios(mid):
     for chave, (tabela, coluna, topo) in DOM_TOPO.items():
         rows = q(f"""SELECT {coluna} categoria, sum(populacao) populacao
             FROM {p('br_ibge_censo_2022', tabela)} WHERE id_municipio='{mid}'
-            GROUP BY 1 ORDER BY 2 DESC NULLS LAST""")
+            GROUP BY 1 ORDER BY 2 DESC NULLS LAST, 1""")
         if topo:
             rows = [r for r in rows if r["categoria"] in topo]
         rows = [{"categoria": r["categoria"], "populacao": num(r["populacao"])} for r in rows if r["populacao"]]
@@ -1478,7 +1487,7 @@ def infra_censo_domicilios(mid):
                       "categorias": [{"categoria": r["categoria"], "populacao": r["populacao"],
                                       "pct": (r["populacao"] / total * 100) if total else None} for r in rows]}
     dom = q(f"""SELECT especie, domicilios FROM {p('br_ibge_censo_2022','domicilio_recenseado')}
-        WHERE id_municipio='{mid}' ORDER BY domicilios DESC""")
+        WHERE id_municipio='{mid}' ORDER BY domicilios DESC, especie""")
     out["domicilios_recenseados"] = [{"especie": d["especie"], "domicilios": num(d["domicilios"])} for d in dom]
     return out
 
@@ -1516,7 +1525,7 @@ def educacao_censo_escolar(mid):
     redes = q(f"""SELECT CAST(rede AS VARCHAR) rede, count(*) escolas,
             sum(quantidade_matricula_educacao_basica) matriculas,
             sum(quantidade_docente_educacao_basica) docentes
-        FROM {base} GROUP BY 1 ORDER BY 3 DESC NULLS LAST""")
+        FROM {base} GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1""")
     serie = q(f"""SELECT ano, count(*) escolas, sum(quantidade_matricula_educacao_basica) matriculas
         FROM {t} WHERE id_municipio='{mid}' AND ano >= {ano - 9}
           AND CAST(tipo_situacao_funcionamento AS VARCHAR)='1' GROUP BY 1 ORDER BY 1""")
@@ -1540,9 +1549,9 @@ def educacao_sisu(mid):
     if not serie:
         raise RuntimeError("sem candidatos do município no SISU")
     ano = serie[-1]["ano"]
-    cursos = q(f"""SELECT nome_curso curso, any_value(sigla_ies) ies, count(DISTINCT cpf) matriculados
+    cursos = q(f"""SELECT nome_curso curso, min(sigla_ies) ies, count(DISTINCT cpf) matriculados
         FROM {t} WHERE id_municipio_candidato='{mid}' AND ano={ano} AND status_matricula='Efetivada'
-        GROUP BY 1 ORDER BY 3 DESC LIMIT 6""")
+        GROUP BY 1 ORDER BY 3 DESC, 1 LIMIT 6""")
     # Vagas ofertadas em campi do município: uma linha por candidato, então
     # deduplica curso × modalidade antes de somar.
     vagas = q(f"""WITH v AS (SELECT DISTINCT ano, semestre, id_curso, modalidade_concorrencia, tipo_cota,
@@ -1572,7 +1581,7 @@ def politica_camara(mid):
     eleitos = q(f"""SELECT sigla_partido partido, count(*) cadeiras, sum(votos) votos
         FROM {t_res} WHERE id_municipio='{mid}' AND ano={ano} AND cargo='vereador'
           AND resultado IN ('eleito','eleito por qp','eleito por media')
-        GROUP BY 1 ORDER BY 2 DESC, 3 DESC""")
+        GROUP BY 1 ORDER BY 2 DESC, 3 DESC, 1""")
     perfil = one(f"""SELECT count(*) candidatos,
             count(*) FILTER (WHERE genero='feminino') feminino,
             count(*) FILTER (WHERE genero='masculino') masculino,
@@ -1581,7 +1590,7 @@ def politica_camara(mid):
             avg(idade) idade_media
         FROM {t_can} WHERE id_municipio='{mid}' AND ano={ano}""")
     financ = q(f"""SELECT cargo, count(DISTINCT sequencial_candidato) candidatos, sum(valor_receita) receita
-        FROM {t_rec} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 3 DESC""")
+        FROM {t_rec} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 3 DESC, 1""")
     return {"fonte": "br_tse_eleicoes (resultados_candidato_municipio, candidatos, receitas_candidato)",
             "ano": ano,
             "cadeiras_total": sum(int(e["cadeiras"]) for e in eleitos),
@@ -1595,7 +1604,7 @@ def politica_deputados_nascidos(mid):
     t = p("br_camara_dados_abertos", "deputado")
     rows = q(f"""SELECT nome, data_nascimento, data_falecimento
         FROM {t} WHERE CAST(id_municipio_nascimento AS VARCHAR)='{mid}'
-        ORDER BY data_nascimento DESC""")
+        ORDER BY data_nascimento DESC, nome""")
     return {"fonte": "br_camara_dados_abertos.deputado (id_municipio_nascimento)",
             "total": len(rows),
             "deputados": [{"nome": r["nome"], "nascimento": r["data_nascimento"] and str(r["data_nascimento"]),
@@ -1719,7 +1728,7 @@ def beneficios_cadunico_mds(mid):
             ("Amarela", "amarelas"), ("Indígena", "indígenas"), ("Sem informação", "sem informação")]],
         "grupos_especificos": {"total": val("gpte", "total de famílias gpte"), "lista": grupos},
         "situacao_rua": {"competencia": ref("rua"),
-                         "familias": val("rua", "famílias em situação de rua"),
+                         "familias": val("rua", "famílias em situação de rua", exclui=("pessoas",)),
                          "pessoas": val("rua", "pessoas em famílias"),
                          "pct_atendimento": val("rua", "proporção")},
         "local": {"urbano": val("local", "urbanos"), "rural": val("local", "rurais")},
@@ -1745,7 +1754,7 @@ def infra_frota(mid, uf):
     ano, mes = am // 100, am % 100
     tipos = q(f"""SELECT tipo_veiculo, quantidade FROM {t}
         WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} AND tipo_veiculo<>'total' AND quantidade>0
-        ORDER BY quantidade DESC""")
+        ORDER BY quantidade DESC, tipo_veiculo""")
     total = one(f"SELECT quantidade FROM {t} WHERE id_municipio='{mid}' AND ano={ano} AND mes={mes} AND tipo_veiculo='total'")
     # dezembro de cada ano (ou o último mês do ano corrente)
     serie = q(f"""SELECT ano, arg_max(quantidade, mes) total FROM {t}
@@ -1782,9 +1791,9 @@ def energia_gd(mid):
     if not r or not r["n"]:
         raise RuntimeError("município sem geração distribuída")
     classes = q(f"""SELECT DscClasseConsumo classe, count(*) n, sum(MdaPotenciaInstaladaKW::double) kw
-        FROM {base} GROUP BY 1 ORDER BY 3 DESC""")
+        FROM {base} GROUP BY 1 ORDER BY 3 DESC, 1""")
     fontes = q(f"""SELECT DscFonteGeracao fonte, count(*) n, sum(MdaPotenciaInstaladaKW::double) kw
-        FROM {base} GROUP BY 1 ORDER BY 3 DESC""")
+        FROM {base} GROUP BY 1 ORDER BY 3 DESC, 1""")
     # a ANEEL não publica data de conexão; a data de atualização cadastral é o que há
     anos = q(f"""SELECT year(DthAtualizaCadastralEmpreend::date) ano, count(*) n,
             sum(MdaPotenciaInstaladaKW::double) kw
@@ -1816,11 +1825,11 @@ def energia_continuidade(nome):
     t = p("br_aneel_dadosabertos", "indicadores_continuidade")
     lim = p("br_aneel_dadosabertos", "indicadores_continuidade_limite")
     nome_sql = nome.upper().replace("'", "''")
-    conj = q(f"""SELECT DISTINCT IdeConjUndConsumidoras id, DscConjUndConsumidoras nome, trim(SigAgente) agente
-        FROM {t}
-        WHERE AnoIndice >= year(current_date) - 3
-          AND regexp_matches({_norm_sql('DscConjUndConsumidoras')},
-                             '^' || strip_accents('{nome_sql}') || '( [0-9]+)?$')""")
+    conj = q(f"""WITH c AS (SELECT DISTINCT IdeConjUndConsumidoras id, DscConjUndConsumidoras nome, trim(SigAgente) agente
+            FROM {t} WHERE AnoIndice >= year(current_date) - 3)
+        SELECT id, nome, agente FROM c
+        WHERE regexp_replace({_norm_sql('nome')}, ' [0-9]+$', '') = strip_accents('{nome_sql}')
+        ORDER BY 1, 2, 3""")
     if not conj:
         raise RuntimeError("nenhum conjunto elétrico com o nome do município")
     ids = ", ".join(str(c["id"]) for c in conj)
@@ -1864,7 +1873,7 @@ def trabalho_lista_suja(nome, uf):
         FROM {t}
         WHERE sigla_uf='{uf}' AND regexp_matches({_norm_sql('estabelecimento')},
             '(^|[ ,.-])' || strip_accents('{nome_sql}') || ' ?[/-] ?{uf}\\b')
-        ORDER BY ano_acao_fiscal DESC""")
+        ORDER BY ano_acao_fiscal DESC, empregador, estabelecimento""")
     uf_tot = one(f"SELECT count(*) n, sum(trabalhadores_envolvidos) trab, max(data_coleta) coleta FROM {t} WHERE sigla_uf='{uf}'")
     br_tot = one(f"SELECT count(*) n, sum(trabalhadores_envolvidos) trab FROM {t}")
     cnae = p("br_bd_diretorios_brasil", "cnae_2")
@@ -1900,7 +1909,7 @@ def agro_assentamentos(mid, nome, uf):
         FROM {t} a, muni
         WHERE a.uf='{uf}' AND ({_norm_sql('a.municipio')} = strip_accents('{nome_sql}')
            OR (a.lat IS NOT NULL AND ST_Contains(muni.geometria, ST_Point(a.lon, a.lat))))
-        ORDER BY a.num_famili DESC NULLS LAST""")
+        ORDER BY a.num_famili DESC NULLS LAST, a.cd_sipra""")
     return {"fonte": "br_incra_acervo.assentamentos (SIPRA)",
             "total": len(rows),
             "familias": sum(num(r["num_famili"]) or 0 for r in rows),
@@ -1919,7 +1928,7 @@ def vizinhanca(mid):
         FROM {p('br_bd_vizinhanca','municipio')} v
         LEFT JOIN {p('br_bd_diretorios_brasil','municipio')} d ON d.id_municipio=v.id_municipio_2
         WHERE v.id_municipio_1='{mid}' AND v.ano=(SELECT max(ano) FROM {p('br_bd_vizinhanca','municipio')})
-        ORDER BY d.nome""")
+        ORDER BY d.nome, v.id_municipio_2""")
     ids = [mid] + [r["id_municipio"] for r in rows]
     ids_sql = "', '".join(ids)
 
@@ -2013,7 +2022,7 @@ def seguranca_prf(mid):
 
     def top(col):
         return [{"k": r["k"], "n": r["n"]} for r in q(
-            f"SELECT {col} k, count(*) n FROM {t} WHERE {onde} AND {col} IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 6")]
+            f"SELECT {col} k, count(*) n FROM {t} WHERE {onde} AND {col} IS NOT NULL GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6")]
     return {"fonte": "br_prf_acidentes.ocorrencia", "desde": a0, "ate": amax,
             "acidentes": sum(r["acidentes"] for r in por_ano),
             "mortos": sum(num(r["mortos"]) or 0 for r in por_ano),
@@ -2037,7 +2046,7 @@ def seguranca_sisdepen(mid):
     ano, sem = ref // 10, ref % 10
     onde = f"id_municipio='{mid}' AND ano={ano} AND semestre={sem}"
     unidades = q(f"""SELECT id_unidade, any_value(nome_unidade) nome, max(capacidade_total) capacidade
-        FROM {tu} WHERE {onde} GROUP BY 1 ORDER BY 3 DESC NULLS LAST""")
+        FROM {tu} WHERE {onde} GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1""")
     pop = q(f"""SELECT situacao_processual, regime, sexo, sum(quantidade) n
         FROM {tp_} WHERE {onde} GROUP BY ALL""")
     total = sum(num(r["n"]) or 0 for r in pop)
@@ -2049,7 +2058,7 @@ def seguranca_sisdepen(mid):
     def perfil(carac):
         return [{"k": r["categoria"], "n": num(r["n"])} for r in q(
             f"""SELECT categoria, sum(quantidade) n FROM {tc}
-                WHERE {onde} AND caracteristica='{carac}' GROUP BY 1 ORDER BY 2 DESC""")]
+                WHERE {onde} AND caracteristica='{carac}' GROUP BY 1 ORDER BY 2 DESC, 1""")]
     serie = q(f"""SELECT ano, semestre, sum(quantidade) n FROM {tp_}
         WHERE id_municipio='{mid}' GROUP BY 1,2 ORDER BY 1,2""")
     return {"fonte": "br_mj_sisdepen", "competencia": f"{ano}/{sem}",
@@ -2076,7 +2085,7 @@ def beneficios_inss(mid):
     ano, mes = am // 100, am % 100
     onde = f"id_municipio='{mid}' AND ano={ano} AND mes={mes}"
     cat = q(f"""SELECT categoria_beneficio categoria, sum(quantidade) n, sum(valor_total) valor
-        FROM {t} WHERE {onde} GROUP BY 1 ORDER BY 2 DESC""")
+        FROM {t} WHERE {onde} GROUP BY 1 ORDER BY 2 DESC, 1""")
     total = sum(num(r["n"]) or 0 for r in cat)
     valor = sum(r["valor"] or 0 for r in cat)
 
@@ -2122,7 +2131,7 @@ def beneficios_inss(mid):
 def social_sinpatinhas(mid):
     """Cadastro voluntário aberto em 2025: mede adesão ao cadastro, não a população animal."""
     t = p("br_mma_sinpatinhas", "microdados")
-    esp = q(f"SELECT especie k, count(*) n FROM {t} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 2 DESC")
+    esp = q(f"SELECT especie k, count(*) n FROM {t} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 2 DESC, 1")
     if not esp:
         return {"disponivel": False, "motivo": "nenhum animal do município no cadastro"}
     per = one(f"SELECT min(data_cadastro)::DATE de, max(data_cadastro)::DATE ate FROM {t}")
@@ -2174,7 +2183,7 @@ def mineracao_cfem(mid):
         return {"disponivel": False, "motivo": "nenhuma arrecadação de CFEM no município"}
     ano = max(r["ano"] for r in serie if r["ano"] < date.today().year) if len(serie) > 1 else serie[-1]["ano"]
     subs = q(f"""SELECT substancia, sum({v}) valor FROM {t}
-        WHERE codigomunicipio='{mid}' AND ano::INT={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        WHERE codigomunicipio='{mid}' AND ano::INT={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     return {"fonte": "br_anm.cfem_cfem_arrecadacao", "ano": ano,
             "valor_ano": next(r["valor"] for r in serie if r["ano"] == ano),
             "serie": [{"ano": r["ano"], "valor": r["valor"], "pagadores": num(r["pagadores"])} for r in serie[-12:]],
@@ -2189,7 +2198,7 @@ def desastres_reconhecimentos(mid):
     ext = one(f"SELECT max(data_extracao) d FROM {t}")["d"]
     rows = q(f"""SELECT nome_cobrade desastre, situacao, data_ocorrencia::VARCHAR ocorrencia,
             data_vigencia::VARCHAR vigencia
-        FROM {t} WHERE id_municipio='{mid}' AND data_extracao='{ext}' ORDER BY data_ocorrencia DESC""")
+        FROM {t} WHERE id_municipio='{mid}' AND data_extracao='{ext}' ORDER BY data_ocorrencia DESC, nome_cobrade""")
     uf = one(f"SELECT count(DISTINCT id_municipio) n FROM {t} WHERE id_municipio LIKE '{mid[:2]}%' AND data_extracao='{ext}'")
     return {"fonte": "br_sedec_desastres.reconhecimentos_vigentes", "data_extracao": str(ext),
             "vigentes": rows, "municipios_uf_com_reconhecimento": num(uf["n"])}
@@ -2206,7 +2215,7 @@ def agro_extracao_silvicultura(mid):
             out[chave] = None
             continue
         rows = q(f"""SELECT produto, unidade, quantidade, valor FROM {t}
-            WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC LIMIT 8""")
+            WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC, produto LIMIT 8""")
         out[chave] = {"ano": a["a"], "valor_total": sum(r["valor"] or 0 for r in rows), "produtos": rows}
     return out
 
@@ -2218,7 +2227,7 @@ def agro_aquicultura(mid):
     if not a or a["a"] is None:
         return {"disponivel": False, "motivo": "sem aquicultura registrada na PPM"}
     rows = q(f"""SELECT produto, quantidade, valor FROM {t}
-        WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC""")
+        WHERE id_municipio='{mid}' AND ano={a['a']} AND valor > 0 ORDER BY valor DESC, produto""")
     return {"fonte": "br_ibge_ppm.producao_aquicultura (quantidade em kg ou milheiros; valor em mil R$)",
             "ano": a["a"], "valor_total": sum(r["valor"] or 0 for r in rows), "produtos": rows}
 
@@ -2261,9 +2270,9 @@ def educacao_superior(mid):
             sum(quantidade_matriculas) FILTER (WHERE tipo_modalidade_ensino::VARCHAR='2') matriculas_ead
         FROM {t} WHERE id_municipio='{mid}' AND ano={a}""")
     rede = q(f"""SELECT rede, sum(quantidade_matriculas) matriculas FROM {t}
-        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC, 1""")
     areas = q(f"""SELECT nome_area_geral area, sum(quantidade_matriculas) matriculas FROM {t}
-        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC LIMIT 10""")
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 10""")
     serie = q(f"""SELECT ano, sum(quantidade_matriculas) matriculas FROM {t}
         WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
     return {"fonte": "br_inep_censo_educacao_superior.curso", "ano": a,
@@ -2325,9 +2334,9 @@ def ambiente_car(mid):
             count(DISTINCT id_imovel) FILTER (WHERE status='SU') suspensos
         FROM {ti} WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA'""")
     tipos = q(f"""SELECT tipo, count(DISTINCT id_imovel) imoveis, sum(area) area FROM {ti}
-        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC, 1""")
     cond = q(f"""SELECT condicao, count(DISTINCT id_imovel) imoveis FROM {ti}
-        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND status <> 'CA' GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     camadas = {}
     for k in ("reserva_legal", "app", "vegetacao_nativa", "area_consolidada", "uso_restrito"):
         try:
@@ -2434,7 +2443,7 @@ def ambiente_ibama(mid):
     tipos = q(f"""SELECT coalesce(tipo_infracao, 'Não informado') tipo, count(*) autos FROM {t}
         WHERE cod_municipio::VARCHAR='{mid}' AND coalesce(sit_cancelado,'N') <> 'S'
           AND year(dat_hora_auto_infracao::TIMESTAMP) >= {date.today().year - 10}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     te = pr("br_ibama_embargos_novo", "termo_embargo")
     emb = one(f"""SELECT count(*) n, count(*) FILTER (WHERE year(dat_embargo::TIMESTAMP) >= {date.today().year - 5}) recentes
         FROM {te} WHERE cod_municipio::VARCHAR='{mid}' AND coalesce(sit_cancelado,'N') <> 'S'""")
@@ -2454,17 +2463,17 @@ def economia_bndes(mid):
     serie = q(f"""SELECT ano, count(*) operacoes, sum(valor_desembolsado) desembolsado FROM {ti}
         WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 1""")
     porte = q(f"""SELECT porte_cliente porte, count(*) operacoes, sum(valor_desembolsado) desembolsado FROM {ti}
-        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 3 DESC""")
+        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 3 DESC, 1""")
     setor = q(f"""SELECT setor_bndes setor, sum(valor_desembolsado) desembolsado FROM {ti}
-        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        WHERE id_municipio='{mid}' AND ano >= {date.today().year - 5} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     tn = p("br_bndes_operacoes_contratadas", "operacoes_nao_automaticas")
     na = q(f"""SELECT data_contratacao::VARCHAR AS contratacao, nome_cliente cliente, descricao_projeto projeto,
             produto, situacao_operacao situacao, valor_operacao valor, valor_desembolsado desembolsado
-        FROM {tn} WHERE id_municipio='{mid}' ORDER BY data_contratacao DESC LIMIT 10""")
+        FROM {tn} WHERE id_municipio='{mid}' ORDER BY data_contratacao DESC, valor_operacao DESC, nome_cliente, descricao_projeto, valor_desembolsado LIMIT 10""")
     ta = p("br_bndes_operacoes_contratadas", "operacoes_administracao_publica")
     ap = q(f"""SELECT ano, ente_publico ente, programa, descricao_projeto projeto, situacao_operacao situacao,
             valor_operacao valor, valor_desembolsado desembolsado
-        FROM {ta} WHERE id_municipio='{mid}' ORDER BY ano DESC""")
+        FROM {ta} WHERE id_municipio='{mid}' ORDER BY ano DESC, valor_operacao DESC, programa, descricao_projeto, valor_desembolsado""")
     return {"fonte": "br_bndes_operacoes_contratadas", "serie_indiretas": [
                 {"ano": r["ano"], "operacoes": num(r["operacoes"]), "desembolsado": r["desembolsado"]} for r in serie[-12:]],
             "porte_5a": [{"porte": r["porte"], "operacoes": num(r["operacoes"]), "desembolsado": r["desembolsado"]} for r in porte],
@@ -2477,10 +2486,10 @@ def politica_filiados(mid):
     t = pr("br_tse_filiacao_partidaria", "microdados")
     ext = one(f"SELECT max(data_extracao) d FROM {t} WHERE id_municipio='{mid}'")["d"]
     cond = f"id_municipio='{mid}' AND situacao_registro='Regular'" + (f" AND data_extracao='{ext}'" if ext else "")
-    part = q(f"SELECT sigla_partido partido, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC")
+    part = q(f"SELECT sigla_partido partido, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC, 1")
     if not part:
         return {"disponivel": False, "motivo": "nenhum filiado regular no município"}
-    sexo = q(f"SELECT sexo, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC")
+    sexo = q(f"SELECT sexo, count(*) filiados FROM {t} WHERE {cond} GROUP BY 1 ORDER BY 2 DESC, 1")
     return {"fonte": "br_tse_filiacao_partidaria.microdados", "data_extracao": str(ext),
             "filiados": sum(num(r["filiados"]) for r in part),
             "por_partido": [{"partido": r["partido"], "filiados": num(r["filiados"])} for r in part],
@@ -2496,13 +2505,13 @@ def politica_financas_campanha(mid):
     if ano is None:
         return {"disponivel": False, "motivo": "sem prestação de contas no município"}
     rec = q(f"""SELECT cargo, sum(valor_receita) valor, count(DISTINCT sequencial_candidato) candidatos
-        FROM {tr} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC""")
+        FROM {tr} WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1""")
     fontes = q(f"""SELECT origem_receita origem, sum(valor_receita) valor FROM {tr}
-        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     desp = q(f"""SELECT cargo, sum(valor_despesa) valor FROM {td}
-        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1""")
     tipos = q(f"""SELECT tipo_despesa tipo, sum(valor_despesa) valor FROM {td}
-        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     return {"fonte": "br_tse_eleicoes.receitas_candidato · despesas_candidato", "ano": ano,
             "receitas_por_cargo": rec, "receitas_por_origem": fontes,
             "despesas_por_cargo": desp, "despesas_por_tipo": tipos}
@@ -2542,7 +2551,7 @@ def educacao_conectada(mid):
             count(*) FILTER (WHERE quantidade_medicao > 0 AND media_tcp_download >= velocidade_download_necessaria) adequadas
         FROM {t} WHERE id_municipio='{mid}' AND ano_censo={a}""")
     faixas = q(f"""SELECT faixa_velocidade faixa, count(*) escolas FROM {t}
-        WHERE id_municipio='{mid}' AND ano_censo={a} GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND ano_censo={a} GROUP BY 1 ORDER BY 2 DESC, 1""")
     return {"fonte": "br_simet_educacao_conectada.escola", "ano": a, **{k: num(v) for k, v in r.items()},
             "por_faixa": [{"faixa": f["faixa"], "escolas": num(f["escolas"])} for f in faixas]}
 
@@ -2592,7 +2601,7 @@ def infra_obras_cno(mid):
     if ext is None:
         return {"disponivel": False, "motivo": "nenhuma obra no CNO"}
     sit = q(f"""SELECT situacao::VARCHAR s, count(DISTINCT id_cno) obras FROM {t}
-        WHERE id_municipio='{mid}' AND data_extracao='{ext}' GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND data_extracao='{ext}' GROUP BY 1 ORDER BY 2 DESC, 1""")
     serie = q(f"""SELECT year(data_inicio::DATE) ano, count(DISTINCT id_cno) obras, sum(area) area FROM {t}
         WHERE id_municipio='{mid}' AND data_extracao='{ext}' AND year(data_inicio::DATE) >= {date.today().year - 10}
         GROUP BY 1 ORDER BY 1""")
@@ -2616,10 +2625,10 @@ def educacao_cnpq(nome, uf):
     ult = serie[-1]["ano"]
     mod = q(f"""SELECT modalidade, count(*) processos FROM {t}
         WHERE {_norm_sql('municipio_destino')}=strip_accents('{nm}') AND sigla_uf_destino='{uf}' AND ano={ult}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     inst = q(f"""SELECT instituicao_destino instituicao, count(*) processos FROM {t}
         WHERE {_norm_sql('municipio_destino')}=strip_accents('{nm}') AND sigla_uf_destino='{uf}' AND ano={ult}
-        GROUP BY 1 ORDER BY 2 DESC LIMIT 6""")
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     return {"fonte": "br_cnpq_bolsas.microdados", "ano": ult,
             "serie": [{"ano": r["ano"], "processos": num(r["processos"]), "valor": r["valor"]} for r in serie],
             "por_modalidade": mod, "por_instituicao": inst}
@@ -2633,9 +2642,9 @@ def educacao_especial(mid):
     if a is None:
         return {"disponivel": False, "motivo": "sem matrícula de educação especial"}
     rows = q(f"""SELECT tipo_deficiencia tipo, sum(quantidade_matricula) matriculas FROM {t}
-        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC, 1""")
     classe = q(f"""SELECT tipo_classe classe, sum(quantidade_matricula) matriculas FROM {t}
-        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC""")
+        WHERE id_municipio='{mid}' AND ano={a} GROUP BY 1 ORDER BY 2 DESC, 1""")
     return {"fonte": "br_inep_educacao_especial.tipo_deficiencia", "ano": a,
             "por_tipo": [{"tipo": r["tipo"], "matriculas": num(r["matriculas"])} for r in rows],
             "por_classe": [{"classe": r["classe"], "matriculas": num(r["matriculas"])} for r in classe]}
@@ -2649,7 +2658,8 @@ def cultura_rouanet(nome, nome_uf):
     nm = nome.upper().replace("'", "''")
     rows = q(f"""SELECT nome, projetos_count projetos, projetos_sum valor_projetos,
             incentivos_count incentivos, incentivos_sum valor_incentivos, proponente, patrocinador
-        FROM {t} WHERE {_norm_sql('cidade_nome')}=strip_accents('{nm}') AND uf='{nome_uf.replace("'", "''")}'""")
+        FROM {t} WHERE {_norm_sql('cidade_nome')}=strip_accents('{nm}') AND uf='{nome_uf.replace("'", "''")}'
+        ORDER BY projetos_sum DESC NULLS LAST, nome""")
     if not rows:
         return {"disponivel": False, "motivo": "nenhuma entidade do município no SALIC"}
     prop = [r for r in rows if r["proponente"] in (True, 1, "true", "1")]
@@ -2668,12 +2678,12 @@ def infra_outorgas_agua(nome, uf):
     nm = nome.upper().replace("'", "''")
     rows = q(f"""SELECT esfera, count(*) outorgas, sum(TRY_CAST(int_qt_vazaomedia AS DOUBLE)) vazao
         FROM {t} WHERE {_norm_sql('ing_nm_municipio')}=strip_accents('{nm}') AND ing_sg_ufmunicipio='{uf}'
-        GROUP BY 1 ORDER BY 2 DESC""")
+        GROUP BY 1 ORDER BY 2 DESC, 1""")
     if not rows:
         return {"disponivel": False, "motivo": "nenhuma outorga de captação no município"}
     top = q(f"""SELECT emp_nm_responsavel responsavel, sum(TRY_CAST(int_qt_vazaomedia AS DOUBLE)) vazao
         FROM {t} WHERE {_norm_sql('ing_nm_municipio')}=strip_accents('{nm}') AND ing_sg_ufmunicipio='{uf}'
-        GROUP BY 1 ORDER BY 2 DESC NULLS LAST LIMIT 8""")
+        GROUP BY 1 ORDER BY 2 DESC NULLS LAST, 1 LIMIT 8""")
     return {"fonte": "br_ana_outorgas.captacoes (vazão média em m³/h)", "outorgas": sum(num(r["outorgas"]) for r in rows),
             "vazao_total": sum(r["vazao"] or 0 for r in rows), "por_esfera": rows, "maiores": top}
 
@@ -2683,7 +2693,7 @@ def clima_estacoes(mid):
     """Estações meteorológicas automáticas do INMET no município."""
     t = p("br_inmet_bdmep", "estacao")
     rows = q(f"""SELECT id_estacao, estacao, altitude, data_fundacao::VARCHAR fundacao FROM {t}
-        WHERE id_municipio='{mid}'""")
+        WHERE id_municipio='{mid}' ORDER BY id_estacao""")
     return {"fonte": "br_inmet_bdmep.estacao", "estacoes": rows}
 
 
@@ -2692,7 +2702,7 @@ def demografia_nomes(mid):
     """Nomes mais registrados entre os nascidos até 2010 (Censo 2010)."""
     t = p("br_ibge_nomes_brasil", "quantidade_municipio_nome_2010")
     rows = q(f"""SELECT nome, quantidade_nascimentos_ate_2010 pessoas FROM {t}
-        WHERE id_municipio='{mid}' ORDER BY 2 DESC LIMIT 15""")
+        WHERE id_municipio='{mid}' ORDER BY 2 DESC, 1 LIMIT 15""")
     return {"fonte": "br_ibge_nomes_brasil.quantidade_municipio_nome_2010", "top": rows}
 
 

@@ -36,6 +36,8 @@ LIT = re.compile(r"'(?:[^']|'')*'|(?<![\w.\"])\d+(?:\.\d+)?(?![\w.])")
 DATA = re.compile(r"^'\d{4}-\d{2}-\d{2}'$")
 MOMENTO = re.compile(r"^'\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(\.\d+)?'$")
 # seções mais caras primeiro, para os workers não terminarem com uma só rodando
+# cruzamento espacial de bioma estoura o limite de memória de um worker: roda antes, sozinha
+PESADAS = {"geografia"}
 PESO = {"geografia": 99, "empresas_cnpj": 40, "saude_cnes": 38, "trabalho_rais": 36, "beneficios_inss": 24,
         "saude_internacoes": 22, "transp_compras_federais": 22, "beneficios": 21, "comex": 18, "saude_planos": 16,
         "politica": 13, "ambiente_car": 13, "saude_mortalidade": 11, "beneficios_programas_cgu": 11,
@@ -99,12 +101,15 @@ def q_lote(sql):
 
 
 def executa(sql, timeout=None):
-    """Roda no DuckDB com teto de tempo; devolve (colunas, linhas cruas)."""
+    """Roda no DuckDB com teto de tempo; devolve (colunas, conversores, linhas cruas).
+    O `-json` do CLI escreve HUGEINT (soma de BIGINT) entre aspas: aqui também vira texto."""
     timer = threading.Timer(timeout or CFG["timeout"], CON.interrupt)
     timer.start()
     try:
         cur = CON.execute(sql)
-        return [d[0] for d in cur.description], cur.fetchall()
+        conv = [(lambda v: v if v is None else str(v)) if str(d[1]) in ("HUGEINT", "UHUGEINT") else norm
+                for d in cur.description]
+        return [d[0] for d in cur.description], conv, cur.fetchall()
     finally:
         timer.cancel()
 
@@ -112,8 +117,8 @@ def executa(sql, timeout=None):
 def uma_a_uma(sqls):
     for sql in sqls:
         try:
-            cols, rows = executa(sql, 600)
-            CACHE[sql] = [dict(zip(cols, map(norm, r))) for r in rows]
+            cols, conv, rows = executa(sql, 600)
+            CACHE[sql] = [{c: f(v) for c, f, v in zip(cols, conv, r)} for r in rows]
         except Exception as e:  # noqa: BLE001
             CACHE[sql] = Erro(str(e).strip()[-500:])
 
@@ -236,8 +241,8 @@ def em_lote(sqls):
         for insere_tudo in (False, True):
             try:
                 tmpl, chaves = ordenacao(molde(com_data), insere_tudo)
-                cols, rows = executa(f"SELECT _prm._k, _s.* FROM _prm, LATERAL ({tmpl}) _s")
-                cols = cols[1:]
+                cols, conv, rows = executa(f"SELECT _prm._k, _s.* FROM _prm, LATERAL ({tmpl}) _s")
+                cols, conv = cols[1:], conv[1:]
                 por = {}
                 for r in rows:
                     por.setdefault(r[0], []).append(r[1:])
@@ -246,7 +251,7 @@ def em_lote(sqls):
                 for k, linhas in por.items():
                     if chaves:
                         linhas = ordena(linhas, cols, chaves)
-                    saida[k] = [{cols[i]: norm(r[i]) for i in guarda} for r in linhas]
+                    saida[k] = [{cols[i]: conv[i](r[i]) for i in guarda} for r in linhas]
                 for s in sqls:
                     CACHE[s] = saida.get(chave[s], [])
                 return len(params)
@@ -257,10 +262,15 @@ def em_lote(sqls):
     raise ultimo
 
 
+def _forma(m):
+    """Caminho de arquivo faz parte do molde: read_parquet não aceita coluna como parâmetro."""
+    return m.group(0) if m.group(0).startswith("'/") else "?"
+
+
 def resolve(sqls, stats):
     grupos = {}
     for s in sqls:
-        grupos.setdefault(LIT.sub("?", s), []).append(s)
+        grupos.setdefault(LIT.sub(_forma, s), []).append(s)
     for forma, grupo in grupos.items():
         t0 = time.time()
         if len(grupo) == 1:
@@ -352,16 +362,25 @@ def main():
     fazer = [n for n in nomes if a.refaz or not os.path.exists(os.path.join(BASE, "secoes", n + ".jsonl"))]
     fazer.sort(key=lambda n: -PESO.get(n, 1))
     print(f"{len(fazer)} seções a calcular, {len(nomes) - len(fazer)} já prontas", file=sys.stderr)
-    if fazer:
-        with mp.get_context("fork").Pool(a.workers, _init, (muns, a.threads, a.mem, 0), maxtasksperchild=1) as pool, \
-                open(os.path.join(BASE, "log.jsonl"), "a") as log:
-            for st in pool.imap_unordered(roda_secao, fazer, chunksize=1):
-                log.write(json.dumps(st, ensure_ascii=False) + "\n")
-                log.flush()
-                print(f"{st['secao']:36s} {st['s']:7.1f} s  rodadas={st['rodadas']:2d} lotes={st['lotes']:2d} "
-                      f"quedas={len(st['quedas'])} erro={st['com_erro']}", file=sys.stderr)
-                for qd in st["quedas"]:
-                    print(f"    QUEDA n={qd['n']} {qd['s']} s: {qd['erro'][:160]} || {qd['sql'][:140]}", file=sys.stderr)
+    ctx_fork = mp.get_context("fork")
+    with open(os.path.join(BASE, "log.jsonl"), "a") as log:
+        def anota(st):
+            log.write(json.dumps(st, ensure_ascii=False) + "\n")
+            log.flush()
+            print(f"{st['secao']:36s} {st['s']:7.1f} s  rodadas={st['rodadas']:2d} lotes={st['lotes']:2d} "
+                  f"quedas={len(st['quedas'])} erro={st['com_erro']}", file=sys.stderr)
+            for qd in st["quedas"]:
+                print(f"    QUEDA n={qd['n']} {qd['s']} s: {qd['erro'][:160]} || {qd['sql'][:140]}", file=sys.stderr)
+        sos = [n for n in fazer if n in PESADAS]
+        if sos:
+            with ctx_fork.Pool(1, _init, (muns, a.threads * a.workers, a.mem * a.workers - 4, 0)) as pool:
+                for st in pool.imap(roda_secao, sos):
+                    anota(st)
+        resto = [n for n in fazer if n not in PESADAS]
+        if resto:
+            with ctx_fork.Pool(a.workers, _init, (muns, a.threads, a.mem, 0), maxtasksperchild=1) as pool:
+                for st in pool.imap_unordered(roda_secao, resto, chunksize=1):
+                    anota(st)
     print(f"seções prontas em {time.time() - t0:.0f} s", file=sys.stderr)
     if a.sem_montar:
         return
