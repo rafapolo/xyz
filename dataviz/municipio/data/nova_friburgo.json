@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "gerado_em": "2026-10-13",
+ "gerado_em": "2026-10-15",
  "gerador": "rodado",
  "municipio": {
   "fonte": "br_bd_diretorios_brasil.municipio · br_ibge_censo_2022.municipio",
@@ -7442,6 +7442,580 @@
     "pib_ano": 2023,
     "populacao": 203417,
     "pib_per_capita": 36219.03282419857
+   }
+  },
+  "comunicabr": {
+   "fonte": "br_presidencia_comunicabr.municipio (painel ComunicaBR, Presidência)",
+   "coleta": "2026-10-13",
+   "temas": {
+    "cultura": [
+     {
+      "programa": "Lei Paulo Gustavo",
+      "variavel": "Valor transferido para o município (com correção)",
+      "unidade": "R$",
+      "ano": 2025,
+      "valor": 1642195.9,
+      "ref": "10/2025"
+     },
+     {
+      "programa": "Lei Paulo Gustavo",
+      "variavel": "Valor utilizado pelo município",
+      "unidade": "R$",
+      "ano": 2025,
+      "valor": 1636410.63,
+      "ref": "10/2025"
+     },
+     {
+      "programa": "Política Nacional Aldir Blanc",
+      "variavel": "Valor transferido para o município (com correção)",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 2786916.36,
+      "ref": "06/2026"
+     },
+     {
+      "programa": "Política Nacional Aldir Blanc",
+      "variavel": "Valor utilizado pelo município",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1412358.65,
+      "ref": "06/2026"
+     }
+    ],
+    "educacao": [
+     {
+      "programa": "Compromisso Nacional Criança Alfabetizada",
+      "variavel": "Cantinhos de leitura criados",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 218.0,
+      "ref": "03/2026"
+     },
+     {
+      "programa": "Compromisso Nacional Criança Alfabetizada",
+      "variavel": "Escolas com Cantinho de Leitura",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 92.0,
+      "ref": "03/2026"
+     },
+     {
+      "programa": "Compromisso Nacional Criança Alfabetizada",
+      "variavel": "Valores repassados para Cantinhos de Leitura",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 269230.0,
+      "ref": "03/2026"
+     },
+     {
+      "programa": "Compromisso Nacional Criança Alfabetizada",
+      "variavel": "Valores repassados para Gestão, organização e orientação da política de alfabetização",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 16800.0,
+      "ref": "03/2026"
+     },
+     {
+      "programa": "Educação em Tempo Integral",
+      "variavel": "Matrículas em educação em tempo integral desde 2023",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 535.0,
+      "ref": "08/2025"
+     },
+     {
+      "programa": "Educação em Tempo Integral",
+      "variavel": "Valores repassados para apoiar o município desde 2023",
+      "unidade": "R$",
+      "ano": 2025,
+      "valor": 3452660.0,
+      "ref": "08/2025"
+     },
+     {
+      "programa": "PDDE",
+      "variavel": "Escolas Atendidas",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 143.0,
+      "ref": "09/2025"
+     },
+     {
+      "programa": "PDDE",
+      "variavel": "Estudantes Beneficiados",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 27592.0,
+      "ref": "09/2025"
+     },
+     {
+      "programa": "PDDE",
+      "variavel": "Valor Repassado",
+      "unidade": "R$",
+      "ano": 2025,
+      "valor": 935530.0,
+      "ref": "09/2025"
+     },
+     {
+      "programa": "PNAE",
+      "variavel": "Escolas Atendidas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 126.0,
+      "ref": "05/2026"
+     },
+     {
+      "programa": "PNAE",
+      "variavel": "Estudantes Atendidos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 18544.0,
+      "ref": "05/2026"
+     },
+     {
+      "programa": "PNAE",
+      "variavel": "Valor Repassado",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1627132.0,
+      "ref": "05/2026"
+     },
+     {
+      "programa": "PNATE",
+      "variavel": "Estudantes - Rede Municipal",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 1785.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "PNATE",
+      "variavel": "Repasse - Município",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 126168.2,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "PNLD",
+      "variavel": "Exemplares Distribuídos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 125898.0,
+      "ref": "04/2026"
+     },
+     {
+      "programa": "PNLD",
+      "variavel": "Valor Total Investido",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1713291.24,
+      "ref": "04/2026"
+     },
+     {
+      "programa": "FIES",
+      "variavel": "Contratos Firmados",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 38.0,
+      "ref": "02/2025"
+     },
+     {
+      "programa": "ProUni",
+      "variavel": "Bolsistas Ativos",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 552.0,
+      "ref": "06/2025"
+     },
+     {
+      "programa": "ProUni",
+      "variavel": "Bolsistas Formados",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 31.0,
+      "ref": "06/2025"
+     },
+     {
+      "programa": "ProUni",
+      "variavel": "Total de Bolsistas",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 147.0,
+      "ref": "06/2025"
+     },
+     {
+      "programa": "ENEM",
+      "variavel": "Inscritos isentos de taxa",
+      "unidade": "QTD",
+      "ano": 2024,
+      "valor": 973.0,
+      "ref": "09/2024"
+     },
+     {
+      "programa": "Expansão da Rede Federal Ensino Técnico",
+      "variavel": "Campi existentes",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 1.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Expansão das Universidades Federais",
+      "variavel": "Campi existentes",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 1.0,
+      "ref": "04/2026"
+     }
+    ],
+    "agro": [
+     {
+      "programa": "ATER",
+      "variavel": "Famílias em atendimento pelo ATER",
+      "unidade": "QTD",
+      "ano": 2024,
+      "valor": 3.0,
+      "ref": "04/2026"
+     },
+     {
+      "programa": "PAA",
+      "variavel": "Agricultores Beneficiados",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 203.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "PAA",
+      "variavel": "Valor Pago",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1000705.61,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "Plano Safra - Agronegócio",
+      "variavel": "Contratos Agronegócio",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 17.0,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Plano Safra - Agronegócio",
+      "variavel": "Valor Agronegócio",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 3320509.22,
+      "ref": "09/2026"
+     }
+    ],
+    "produtivo": [
+     {
+      "programa": "Acredita - Procred360",
+      "variavel": "Operações Realizadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 148.0,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Acredita - Procred360",
+      "variavel": "Valor Contratado",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 4820556.79,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Acredita - PRONAMPE",
+      "variavel": "Operações Realizadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 536.0,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Acredita - PRONAMPE",
+      "variavel": "Valor Contratado",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 77972760.58,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "BMP",
+      "variavel": "Brasil Mais Produtivo - Atendimentos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 73.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "EMBRAPII",
+      "variavel": "Projetos Apoiados",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 1.0,
+      "ref": "03/2026"
+     },
+     {
+      "programa": "FNDCT",
+      "variavel": "Projetos Não Reembolsáveis",
+      "unidade": "QTD",
+      "ano": 2025,
+      "valor": 1.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "FNDCT",
+      "variavel": "Valor Não Reembolsável",
+      "unidade": "R$",
+      "ano": 2025,
+      "valor": 600.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Fungetur",
+      "variavel": "Operações realizadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 4.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Fungetur",
+      "variavel": "Valor Concedido",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1050000.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Nova Indústria Brasil",
+      "variavel": "Plano Mais Produção (P+P) - Contratos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 34.0,
+      "ref": "06/2026"
+     },
+     {
+      "programa": "Nova Indústria Brasil",
+      "variavel": "Plano Mais Produção (P+P) - Valor Investimento",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 23604002.05,
+      "ref": "06/2026"
+     }
+    ],
+    "moradia_dividas": [
+     {
+      "programa": "MCMV",
+      "variavel": "FGTS - Moradias contratadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 206.0,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "MCMV",
+      "variavel": "FGTS - Valor Financiado",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 41927681.45,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "MCMV",
+      "variavel": "Total - Moradias contratadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 673.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "MCMV",
+      "variavel": "Total - Valor financiado",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 115354508.45,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "Desenrola Brasil 2023/2024",
+      "variavel": "Pessoas beneficiadas - Faixa 1",
+      "unidade": "QTD",
+      "ano": 2024,
+      "valor": 3763.0,
+      "ref": "06/2024"
+     },
+     {
+      "programa": "Desenrola Brasil 2023/2024",
+      "variavel": "Saldo devedor antes da negociação - Faixa 1",
+      "unidade": "R$",
+      "ano": 2024,
+      "valor": 21080674.53,
+      "ref": "06/2024"
+     },
+     {
+      "programa": "Desenrola Brasil 2023/2024",
+      "variavel": "Saldo devedor após a negociação - Faixa 1",
+      "unidade": "R$",
+      "ano": 2024,
+      "valor": 2666340.35,
+      "ref": "06/2024"
+     },
+     {
+      "programa": "Desenrola FIES 2023/2024",
+      "variavel": "Contratos renegociados",
+      "unidade": "QTD",
+      "ano": 2024,
+      "valor": 287.0,
+      "ref": "12/2024"
+     },
+     {
+      "programa": "Desenrola FIES 2023/2024",
+      "variavel": "Saldo devedor antes da negociação",
+      "unidade": "R$",
+      "ano": 2024,
+      "valor": 12480392.11,
+      "ref": "12/2024"
+     },
+     {
+      "programa": "Desenrola FIES 2023/2024",
+      "variavel": "Saldo devedor após a negociação",
+      "unidade": "R$",
+      "ano": 2024,
+      "valor": 2514218.99,
+      "ref": "12/2024"
+     }
+    ],
+    "social": [
+     {
+      "programa": "Luz do Povo",
+      "variavel": "Famílias beneficiadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 10946.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "Luz do Povo",
+      "variavel": "Pessoas beneficiadas",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 27291.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "Seguro-Desemprego",
+      "variavel": "Beneficiários Seguro-Desemprego no ano",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 4093.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Seguro-Desemprego",
+      "variavel": "Valor pago - Seguro-Desemprego",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 24609630.61,
+      "ref": "06/2026"
+     },
+     {
+      "programa": "FNAS",
+      "variavel": "Repasse Municipal - Fundo Nacional de Assistência Social",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1473314.54,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Bolsa Família",
+      "variavel": "Crianças de 0 a 6 anos beneficiadas com R$ 150,00",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 3352.0,
+      "ref": "09/2026"
+     }
+    ],
+    "saude": [
+     {
+      "programa": "Mais Médicos",
+      "variavel": "Médicos atendendo pelo programa",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 36.0,
+      "ref": "09/2026"
+     },
+     {
+      "programa": "Piso Enfermagem",
+      "variavel": "Valor transferido ao município",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 1322324.65,
+      "ref": "05/2026"
+     },
+     {
+      "programa": "Farmácia Popular",
+      "variavel": "Beneficiados pelo Farmácia Popular",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 27166.0,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "SAMU",
+      "variavel": "Quantidade Veículos doados pelo Governo Federal desde 2023",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 1.0,
+      "ref": "07/2026"
+     },
+     {
+      "programa": "Prevenção Câncer",
+      "variavel": "Exames de Mama",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 596.0,
+      "ref": "06/2026"
+     }
+    ],
+    "gerais": [
+     {
+      "programa": "MEI",
+      "variavel": "Total de MEI",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 23069.0,
+      "ref": "06/2026"
+     },
+     {
+      "programa": "Jovem Aprendiz",
+      "variavel": "Total de Contratos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 763.0,
+      "ref": "05/2026"
+     },
+     {
+      "programa": "Transferências para estados e municípios",
+      "variavel": "Total transferido ao município no ano",
+      "unidade": "R$",
+      "ano": 2026,
+      "valor": 210669670.02,
+      "ref": "08/2026"
+     },
+     {
+      "programa": "Território",
+      "variavel": "Quantidade de Distritos",
+      "unidade": "QTD",
+      "ano": 2026,
+      "valor": 8.0,
+      "ref": "2026"
+     }
+    ]
    }
   }
  }

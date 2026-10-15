@@ -2671,6 +2671,59 @@ def cultura_rouanet(nome, nome_uf):
                                       key=lambda x: -x["valor"])[:8]}
 
 
+# Programas do painel ComunicaBR (Presidência) que o painel não tem por fonte primária.
+# (programa, variável) — variável None = todas as do programa. Cuidados do gotcha
+# (rodado: docs/context/gotchas/br_presidencia_comunicabr.yml): total e partes são
+# variáveis irmãs (nunca somar), `%` vem em fração, cada variável tem o seu `ref`
+# ("dado até"), e só a última coleta vale.
+COMUNICABR = {
+    "cultura": [("Lei Paulo Gustavo", None), ("Política Nacional Aldir Blanc", None)],
+    "educacao": [("Compromisso Nacional Criança Alfabetizada", None), ("Educação em Tempo Integral", None),
+                 ("PDDE", None), ("PNAE", None), ("PNATE", None), ("PNLD", None), ("FIES", None),
+                 ("ProUni", None), ("ENEM", "Inscritos isentos de taxa"),
+                 ("Expansão da Rede Federal Ensino Técnico", None), ("Expansão das Universidades Federais", None)],
+    "agro": [("ATER", None), ("PAA", None), ("Plano Safra - Agronegócio", None)],
+    "produtivo": [("Acredita - Procred360", None), ("Acredita - PRONAMPE", None), ("BMP", None),
+                  ("EMBRAPII", None), ("FNDCT", None), ("Fungetur", None), ("Nova Indústria Brasil", None)],
+    "moradia_dividas": [("MCMV", None), ("Desenrola Brasil 2023/2024", None), ("Desenrola FIES 2023/2024", None)],
+    "social": [("Luz do Povo", None), ("Seguro-Desemprego", None), ("FNAS", None),
+               ("Bolsa Família", "Crianças de 0 a 6 anos beneficiadas com R$ 150,00")],
+    "saude": [("Mais Médicos", None), ("Piso Enfermagem", None),
+              ("Farmácia Popular", "Beneficiados pelo Farmácia Popular"),
+              ("SAMU", "Quantidade Veículos doados pelo Governo Federal desde 2023"), ("Prevenção Câncer", None)],
+    "gerais": [("MEI", None), ("Jovem Aprendiz", None), ("Transferências para estados e municípios", None),
+               ("Território", "Quantidade de Distritos")],
+}
+
+
+@section
+def comunicabr(mid):
+    """ComunicaBR: último ano de cada variável dos programas em COMUNICABR, com o `ref`
+    da fonte (mês até onde o dado vai). Agregado do painel da Presidência, não microdado."""
+    t = p("br_presidencia_comunicabr", "municipio")
+    rows = q(f"""SELECT programa, variavel, unidade, ano, valor, "ref" r, data_coleta
+        FROM {t} WHERE id_municipio='{mid}' AND valor IS NOT NULL
+          AND data_coleta = (SELECT max(data_coleta) FROM {t})
+        ORDER BY programa, variavel, ano""")
+    if not rows:
+        return {"disponivel": False, "motivo": "município sem linha no ComunicaBR"}
+    ultimo = {}
+    for r in rows:   # ordenado por ano: o último fica
+        ultimo[(r["programa"], r["variavel"])] = r
+    temas = {}
+    for tema, itens in COMUNICABR.items():
+        for prog, var in itens:
+            for (pg, vr), r in ultimo.items():
+                if pg == prog and (var is None or vr == var):
+                    temas.setdefault(tema, []).append({
+                        "programa": pg, "variavel": vr, "unidade": r["unidade"],
+                        "ano": num(r["ano"]), "valor": float(r["valor"]), "ref": r["r"]})
+    if not temas:
+        return {"disponivel": False, "motivo": "nenhum dos programas selecionados no município"}
+    return {"fonte": "br_presidencia_comunicabr.municipio (painel ComunicaBR, Presidência)",
+            "coleta": str(rows[0]["data_coleta"]), "temas": temas}
+
+
 @section
 def infra_outorgas_agua(nome, uf):
     """Outorgas de captação de água da ANA e dos estados (casadas pelo nome do município)."""
@@ -2871,6 +2924,7 @@ def monta(prof, S):
                            "inss": S("beneficios_inss"),
                            "programas_cgu": S("beneficios_programas_cgu")},
             "vizinhanca": S("vizinhanca"),
+            "comunicabr": S("comunicabr"),
         },
     }
 

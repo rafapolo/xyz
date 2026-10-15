@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Raio-x de um município brasileiro em 611 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
+<meta name="description" content="Raio-x de um município brasileiro em 690 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
 <link rel="canonical" href="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rodado">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:title" content="O município inteiro em um painel">
-<meta property="og:description" content="611 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
+<meta property="og:description" content="690 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
 <meta property="og:url" content="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <meta property="og:image:width" content="1200">
@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="Painel municipal do Rodado: Nova Friburgo (RJ) com população, empregos, IDEB e leitos SUS, e o total de 606 indicadores">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="O município inteiro em um painel">
-<meta name="twitter:description" content="611 indicadores de mais de 80 fontes públicas num só painel municipal.">
+<meta name="twitter:description" content="690 indicadores de mais de 80 fontes públicas num só painel municipal.">
 <meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <script>
 (function () {
@@ -538,6 +538,9 @@ details.more > .more-body { margin-top: .4rem; }
 .minimap .mm-center-label { fill: var(--text); font-weight: 600; }
 
 .mt-1 { margin-top: .85rem; }
+.cbr-nota { color: var(--text3); font-size: .85rem; margin: -.2rem 0 .4rem; }
+.cbr-tema { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin: 1.3rem 0 .55rem; }
+#cbrTemas .card-metric .sub b { color: var(--text); font-weight: 600; }
 
 /* MOBILE */
 .mobile-nav { display: none; }
@@ -664,6 +667,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#federal"><span class="s-icon">🏛️</span> Recursos Federais</a>
     <a class="sidebar-item" href="#social"><span class="s-icon">🤝</span> Vulnerabilidade</a>
     <a class="sidebar-item" href="#benef"><span class="s-icon">🫂</span> Benefícios</a>
+    <a class="sidebar-item" href="#programas"><span class="s-icon">🧾</span> Programas Federais</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
   <div class="sidebar-footer"><a href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="sf-num" id="nIndicadores">—</span> indicadores</a> · <span id="nTemas">21</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
@@ -1800,6 +1804,17 @@ details.more > .more-body { margin-top: .4rem; }
   <div class="grid-3 mt-1 extras" id="extras-benef"></div>
 </div>
 
+<!-- PROGRAMAS FEDERAIS (ComunicaBR) -->
+<div class="section" id="programas">
+  <div class="section-header">
+    <div class="icon" style="background:rgba(var(--s2-rgb),.15);color:var(--s2)">🧾</div>
+    <h2>Programas Federais</h2>
+    <span class="table-name">br_presidencia_comunicabr</span>
+  </div>
+  <p class="cbr-nota">Painel ComunicaBR da Presidência: programas federais que o resto do painel não cobre pela fonte primária. Cada box traz o último ano com dado; valores nominais.</p>
+  <div id="cbrTemas"></div>
+</div>
+
 <!-- VIZINHANÇA -->
 <div class="section" id="vizi">
   <div class="section-header">
@@ -1869,6 +1884,7 @@ details.more > .more-body { margin-top: .4rem; }
   <a href="#federal"><span class="m-icon">🏛️</span>Federal</a>
   <a href="#social"><span class="m-icon">🤝</span>Social</a>
   <a href="#benef"><span class="m-icon">🫂</span>Benefícios</a>
+  <a href="#programas"><span class="m-icon">🧾</span>Programas</a>
   <a href="#vizi"><span class="m-icon">📍</span>Vizinhança</a>
 </nav>
 

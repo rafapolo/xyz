@@ -1,4 +1,4 @@
-# Painel municipal — 606 indicadores
+# Painel municipal — 685 indicadores
 
 ## Geografia
 
@@ -695,3 +695,89 @@
 | Indicador | Descrição |
 |---|---|
 | `municipios` | Municípios vizinhos com população, PIB e indicadores para comparação |
+
+## Programas federais (ComunicaBR)
+
+Painel ComunicaBR da Presidência (`br_presidencia_comunicabr.municipio`, última coleta), só os programas que o painel não tem por fonte primária. Agregado municipal, não microdado: cada variável traz o último ano com valor e o `ref` da fonte (mês até onde o dado vai); total e partes aparecem lado a lado, nunca somados; valores nominais.
+
+| Indicador | Descrição |
+|---|---|
+| `temas.cultura` · Lei Paulo Gustavo — Valor transferido para o município (com correção) | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.cultura` · Lei Paulo Gustavo — Valor utilizado pelo município | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.cultura` · Política Nacional Aldir Blanc — Valor transferido para o município (com correção) | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.cultura` · Política Nacional Aldir Blanc — Valor utilizado pelo município | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · Compromisso Nacional Criança Alfabetizada — Cantinhos de leitura criados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Compromisso Nacional Criança Alfabetizada — Escolas com Cantinho de Leitura | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Compromisso Nacional Criança Alfabetizada — Valores repassados para Cantinhos de Leitura | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · Compromisso Nacional Criança Alfabetizada — Valores repassados para Gestão, organização e orientação da política de alfabetização | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · Educação em Tempo Integral — Matrículas em educação em tempo integral desde 2023 | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Educação em Tempo Integral — Valores repassados para apoiar o município desde 2023 | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · PDDE — Escolas Atendidas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PDDE — Estudantes Beneficiados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PDDE — Valor Repassado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · PNAE — Escolas Atendidas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PNAE — Estudantes Atendidos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PNAE — Valor Repassado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · PNATE — Estudantes - Rede Municipal | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PNATE — Repasse - Município | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · PNLD — Exemplares Distribuídos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · PNLD — Valor Total Investido | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.educacao` · FIES — Contratos Firmados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · ProUni — Bolsistas Ativos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · ProUni — Bolsistas Formados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · ProUni — Total de Bolsistas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · ENEM — Inscritos isentos de taxa | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Expansão da Rede Federal Ensino Técnico — Campi existentes | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Expansão da Rede Federal Ensino Técnico — Novos campi da expansão | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Expansão das Universidades Federais — Campi existentes | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.educacao` · Expansão das Universidades Federais — Novos campi da expansão | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.agro` · ATER — Famílias em atendimento pelo ATER | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.agro` · PAA — Agricultores Beneficiados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.agro` · PAA — Valor Pago | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.agro` · Plano Safra - Agronegócio — Contratos Agronegócio | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.agro` · Plano Safra - Agronegócio — Valor Agronegócio | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · Acredita - Procred360 — Operações Realizadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · Acredita - Procred360 — Valor Contratado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · Acredita - PRONAMPE — Operações Realizadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · Acredita - PRONAMPE — Valor Contratado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · BMP — Brasil Mais Produtivo - Atendimentos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · EMBRAPII — Projetos Apoiados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · FNDCT — Projetos Não Reembolsáveis | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · FNDCT — Projetos Reembolsáveis | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · FNDCT — Valor Não Reembolsável | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · FNDCT — Valor Reembolsável | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · Fungetur — Operações realizadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · Fungetur — Valor Concedido | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.produtivo` · Nova Indústria Brasil — Plano Mais Produção (P+P) - Contratos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.produtivo` · Nova Indústria Brasil — Plano Mais Produção (P+P) - Valor Investimento | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — FGTS - Moradias contratadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — FGTS - Valor Financiado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — OGU - Empreendimentos contratados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — OGU - Moradias com obras retomadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — OGU - Moradias contratadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — OGU - Valor Financiado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — OGU - Valor das obras retomadas | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — Total - Moradias contratadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · MCMV — Total - Valor financiado | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola Brasil 2023/2024 — Pessoas beneficiadas - Faixa 1 | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola Brasil 2023/2024 — Saldo devedor antes da negociação - Faixa 1 | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola Brasil 2023/2024 — Saldo devedor após a negociação - Faixa 1 | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola FIES 2023/2024 — Contratos renegociados | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola FIES 2023/2024 — Saldo devedor antes da negociação | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.moradia_dividas` · Desenrola FIES 2023/2024 — Saldo devedor após a negociação | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.social` · Luz do Povo — Famílias beneficiadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.social` · Luz do Povo — Pessoas beneficiadas | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.social` · Seguro-Desemprego — Beneficiários Seguro-Desemprego no ano | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.social` · Seguro-Desemprego — Valor pago - Seguro-Desemprego | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.social` · FNAS — Repasse Municipal - Fundo Nacional de Assistência Social | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.social` · Bolsa Família — Crianças de 0 a 6 anos beneficiadas com R$ 150,00 | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.saude` · Mais Médicos — Médicos atendendo pelo programa | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.saude` · Piso Enfermagem — Valor transferido ao município | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.saude` · Farmácia Popular — Beneficiados pelo Farmácia Popular | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.saude` · SAMU — Quantidade Veículos doados pelo Governo Federal desde 2023 | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.saude` · Prevenção Câncer — Exames de Colo | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.saude` · Prevenção Câncer — Exames de Mama | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.gerais` · MEI — Total de MEI | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.gerais` · Jovem Aprendiz — Total de Contratos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |
+| `temas.gerais` · Transferências para estados e municípios — Total transferido ao município no ano | Último ano da variável no ComunicaBR (R$), com o mês de referência da fonte |
+| `temas.gerais` · Território — Quantidade de Distritos | Último ano da variável no ComunicaBR (quantidade), com o mês de referência da fonte |

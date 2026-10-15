@@ -3265,6 +3265,39 @@ async function init() {
       barras: { linhas: [{ k: 'Pessoa idosa', v: bt.idoso || 0 }, { k: 'Pessoa com deficiência', v: bt.pcd || 0 }], total: (bt.idoso || 0) + (bt.pcd || 0), cor: C.s4 } });
   }
 
+  // ComunicaBR (painel da Presidência): seção própria, um box pequeno por programa,
+  // agrupado por tema. O valor em destaque é a primeira variável; as outras vão em
+  // linhas curtas. Total e partes ficam lado a lado, nunca somados; % vem em fração; o
+  // ref ("dado até") é da variável, então só aparece quando o valor é do ano dele.
+  { const cb = X('secoes.comunicabr'), alvo = el_('cbrTemas');
+    if (alvo && cb && cb.temas) {
+      const TEMAS = [['educacao', 'Educação'], ['saude', 'Saúde'], ['social', 'Proteção social'],
+        ['moradia_dividas', 'Moradia e renegociação de dívidas'], ['produtivo', 'Crédito e fomento à produção'],
+        ['agro', 'Campo'], ['cultura', 'Cultura'], ['gerais', 'Transferências, MEI e aprendizes']];
+      // espaço não separável: "R$ 3,5 mi" não quebra em três linhas
+      const fmt = r => (r.unidade === 'R$' ? fRealC(r.valor) : r.unidade === '%' ? fPct(r.valor) : fNum(r.valor)).replace(/ /g, '\u00a0');
+      const quando = r => r.ref && /^\d{2}\/\d{4}$/.test(r.ref) && r.ref.slice(3) === String(r.ano) ? 'até ' + r.ref : String(r.ano);
+      let h = '';
+      TEMAS.forEach(([tema, rot]) => {
+        const porProg = {};
+        (cb.temas[tema] || []).forEach(r => (porProg[r.programa] = porProg[r.programa] || []).push(r));
+        if (!Object.keys(porProg).length) return;
+        h += '<h3 class="cbr-tema">' + esc(rot) + '</h3><div class="grid-4">' + Object.entries(porProg).map(([prog, vs]) => {
+          const [a, ...resto] = vs;
+          return '<div class="card card-metric"><h3>' + esc(prog) + ' <span class="vintage">' + esc(quando(a)) + '</span></h3>' +
+            '<div class="value">' + esc(fmt(a)) + '</div><div class="sub">' + esc(a.variavel) +
+            resto.map(r => '<br>' + esc(r.variavel) + ': <b>' + esc(fmt(r)) + '</b>' +
+              (quando(r) !== quando(a) ? ' (' + esc(quando(r)) + ')' : '')).join('') + '</div></div>';
+        }).join('') + '</div>';
+      });
+      alvo.innerHTML = h;
+    } else {
+      // município sem linha no ComunicaBR: a seção e os dois atalhos somem
+      const sec = el_('programas'); if (sec) sec.remove();
+      document.querySelectorAll('a[href="#programas"]').forEach(a => a.remove());
+    }
+  }
+
   // Seções que ficaram sem nenhum cartão extra não deixam um vão no layout
   document.querySelectorAll('.extras').forEach(e => { if (!e.children.length) e.remove(); });
 
