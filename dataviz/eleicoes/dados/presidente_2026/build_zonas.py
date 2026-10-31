@@ -55,13 +55,13 @@ def le_csv(zip_path, membro):
         yield from csv.DictReader(io.TextIOWrapper(f, encoding='latin-1'), delimiter=';')
 
 
-def votos2022():
-    sql = """SET enable_progress_bar=false;
+def votos2022(turno=1):
+    sql = f"""SET enable_progress_bar=false;
 SELECT sigla_uf uf, ltrim(id_municipio_tse,'0') cd, ltrim(zona,'0') zona, sum(votos) tot,
   sum(votos) FILTER (WHERE numero_candidato='13') lula,
   sum(votos) FILTER (WHERE numero_candidato='22') bolso
 FROM read_parquet('~/rodado/br_tse_eleicoes/resultados_candidato_municipio_zona/*.parquet')
-WHERE ano=2022 AND cargo='presidente' AND turno=1 GROUP BY ALL;"""
+WHERE ano=2022 AND cargo='presidente' AND turno={turno} GROUP BY ALL;"""
     out = subprocess.run(['ssh', os.environ.get('BEELINK_HOST', 'beelink'),
                           '~/bin/duckdb -readonly -csv ~/rodado/basedosdados.duckdb'],
                          input=sql, capture_output=True, text=True, check=True).stdout
@@ -104,6 +104,10 @@ def main():
         k = (r['SG_UF'], r['CD_MUNICIPIO'].lstrip('0'), r['NR_ZONA'].lstrip('0'))
         mz_cand[k][r['NR_CANDIDATO']] += int(r['QT_VOTOS_NOMINAIS_VALIDOS'])
         info[r['NR_CANDIDATO']] = (NOMES[r['NM_URNA_CANDIDATO']], r['SG_PARTIDO'])
+    escreve(mz_cand, info, tse2ibge, cent, v22, 'locais', '1', OUT)
+
+
+def escreve(mz_cand, info, tse2ibge, cent, v22, zip_locais, turno, out, mun_json='data_presidente_2026.json'):
     nome = lambda uf, cd: cent[tse2ibge[(uf, cd)]]['nome']
 
     mun26, mun22 = defaultdict(int), defaultdict(int)
@@ -117,15 +121,15 @@ def main():
 
     # confere com o mapa por município (divulgação do TSE)
     por_mun = {(uf, nome(uf, cd)): t for (uf, cd), t in mun26.items()}
-    mun = {(r[0], r[1]): r[4] for r in json.load(open(os.path.join(os.path.dirname(OUT), 'data_presidente_2026.json')))}
+    mun = {(r[0], r[1]): r[4] for r in json.load(open(os.path.join(os.path.dirname(out), mun_json)))}
     difs = [(k, por_mun.get(k), t) for k, t in mun.items() if por_mun.get(k) != t]
     assert not difs, f'{len(difs)} municípios não batem com a divulgação: {difs[:5]}'
 
     # ponto: locais de votação do município naquela zona
     secoes = defaultdict(list)  # (uf, cd_tse, zona) -> [(lat, lon, eleitores)]
     descartadas = 0
-    for r in le_csv(baixa_zip('locais'), 'eleitorado_local_votacao_2026_BRASIL.csv'):
-        if r['NR_TURNO'] != '1' or r['SG_UF'] == 'ZZ':
+    for r in le_csv(baixa_zip(zip_locais), 'eleitorado_local_votacao_2026_BRASIL.csv'):
+        if r['NR_TURNO'] != turno or r['SG_UF'] == 'ZZ':
             continue
         lat, lon = float(r['NR_LATITUDE'].replace(',', '.')), float(r['NR_LONGITUDE'].replace(',', '.'))
         if lat == -1 or lon == -1:
@@ -183,10 +187,10 @@ def main():
              sorted(nome(uf, o) for o in muns_zona[(uf, zona)] if o != cd)],
         ])
     recs.sort(key=lambda r: (r[0], r[1], r[19][0]))
-    with open(OUT, 'w') as f:
+    with open(out, 'w') as f:
         f.write('[\n' + ',\n'.join(json.dumps(r, ensure_ascii=False, separators=(',', ':')) for r in recs) + '\n]\n')
 
-    print(len(recs), 'pares município × zona ->', os.path.relpath(OUT))
+    print(len(recs), 'pares município × zona ->', os.path.relpath(out))
     print(f'{descartadas} seções descartadas por estarem a mais de {MAX_KM} km do município; '
           f'{sem_coord} pares sem coordenada (centroide do município)')
     print(f'{len(sem22)} pares sem comparação com 2022:')

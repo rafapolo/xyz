@@ -76,20 +76,20 @@ def mesmo_local(a, b):
     return len(a & b) / min(len(a), len(b)) >= 0.5
 
 
-def votos2022():
-    """(uf, cd, zona, secao) -> (local, nome do local, válidos, lula, bolsonaro), 1º turno de 2022"""
-    sql = """SET enable_progress_bar=false;
+def votos2022(turno=1):
+    """(uf, cd, zona, secao) -> (local, nome do local, válidos, lula, bolsonaro), no turno pedido de 2022"""
+    sql = f"""SET enable_progress_bar=false;
 WITH v AS (
   SELECT sigla_uf uf, ltrim(id_municipio_tse,'0') cd, CAST(zona AS INT) zona, CAST(secao AS INT) secao,
     sum(votos) tot, coalesce(sum(votos) FILTER (WHERE numero_candidato='13'), 0) lula,
     coalesce(sum(votos) FILTER (WHERE numero_candidato='22'), 0) bolso
   FROM read_parquet('~/rodado/br_tse_eleicoes/resultados_candidato_secao/*.parquet')
-  WHERE ano=2022 AND cargo='presidente' AND turno=1 AND sigla_uf<>'ZZ' GROUP BY ALL),
+  WHERE ano=2022 AND cargo='presidente' AND turno={turno} AND sigla_uf<>'ZZ' GROUP BY ALL),
 l AS (
   SELECT DISTINCT sigla_uf uf, ltrim(id_municipio_tse,'0') cd, CAST(zona AS INT) zona, CAST(secao AS INT) secao,
     CAST(numero AS INT) lv, nome
   FROM read_parquet('~/rodado/br_tse_eleicoes/perfil_eleitorado_local_votacao/*.parquet')
-  WHERE ano=2022 AND turno=1)
+  WHERE ano=2022 AND turno={turno})
 SELECT v.*, l.lv, l.nome FROM v JOIN l USING (uf, cd, zona, secao);"""
     out = subprocess.run(['ssh', os.environ.get('BEELINK_HOST', 'beelink'),
                           '~/bin/duckdb -readonly -csv ~/rodado/basedosdados.duckdb'],
@@ -106,7 +106,6 @@ def main():
     cent = centroides()
     for cdi, (lat, lon) in CENTROIDE_CORRIGIDO.items():
         cent[cdi] = dict(cent[cdi], lat=lat, lon=lon)
-    nome_mun = lambda uf, cd: cent[tse2ibge[(uf, cd)]]['nome']
 
     # votos por seção
     secao = defaultdict(lambda: defaultdict(int))   # (uf, zona, secao) -> nr -> votos
@@ -124,8 +123,14 @@ def main():
     total = sum(sum(v.values()) for v in secao.values())
     assert total == 118969906, f'soma das seções {total} não fecha com a divulgação'
 
+    escreve(secao, local_de, nm_local, tse2ibge, cent, 'locais', '1', ZONAS, OUT)
+
+
+def escreve(secao, local_de, nm_local, tse2ibge, cent, zip_locais, turno, zonas_json, out):
+    nome_mun = lambda uf, cd: cent[tse2ibge[(uf, cd)]]['nome']
+
     # candidatos na ordem dos votos (número -> nome de urna e partido, como no munzona)
-    zonas = json.load(open(ZONAS))
+    zonas = json.load(open(zonas_json))
     por_nr = defaultdict(int)
     for v in secao.values():
         for nr, q in v.items():
@@ -135,8 +140,8 @@ def main():
 
     # coordenadas dos locais
     coord = {}
-    for r in le_csv(baixa_zip('locais'), 'eleitorado_local_votacao_2026_BRASIL.csv'):
-        if r['NR_TURNO'] != '1' or r['SG_UF'] == 'ZZ':
+    for r in le_csv(baixa_zip(zip_locais), 'eleitorado_local_votacao_2026_BRASIL.csv'):
+        if r['NR_TURNO'] != turno or r['SG_UF'] == 'ZZ':
             continue
         k = (r['SG_UF'], int(r['NR_ZONA']), r['CD_MUNICIPIO'].lstrip('0'), int(r['NR_LOCAL_VOTACAO']))
         if k in coord:
@@ -148,7 +153,7 @@ def main():
     ponto_zona = {(r[0], r[1], r[19][0]): (r[2], r[3]) for r in zonas}
 
     # 2022: candidata = mesma urna no mesmo local; depois o voto tem que ter variado como o do local
-    v22 = votos2022()
+    v22 = votos2022(int(turno))
     cand = {}
     for (uf, zona, sec), (cd, lv) in local_de.items():
         p = v22.get((uf, cd, zona, sec))
@@ -200,17 +205,17 @@ def main():
 
     delta = lambda a: [a[0]] + [a[i] - a[i - 1] for i in range(1, len(a))]
     col = lambda i: [l[i] for l in out_l]
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(out, exist_ok=True)
     dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':'))
-    with open(os.path.join(OUT, 'locais.json'), 'w') as f:
+    with open(os.path.join(out, 'locais.json'), 'w') as f:
         f.write(dump({'c': meta, 'ufs': ufs, 'muns': muns, 'u': col(0), 'm': delta(col(1)), 'z': col(2),
                       'lv': col(3), 'lat': delta(col(4)), 'lon': delta(col(5)), 'n': col(6),
                       'v': [[l[7][i] for l in out_l] for i in range(len(ordem))],
                       'l22': col(8), 'b22': col(9)}) + '\n')
     for uf, ls in out_uf.items():
-        with open(os.path.join(OUT, f'{uf}.json'), 'w') as f:
+        with open(os.path.join(out, f'{uf}.json'), 'w') as f:
             f.write('[\n' + ',\n'.join(dump(l) for l in ls) + '\n]\n')
-    print(f'{len(out_l)} locais, {len(secao)} seções, {len(out_uf)} UFs -> {os.path.relpath(OUT)}; '
+    print(f'{len(out_l)} locais, {len(secao)} seções, {len(out_uf)} UFs -> {os.path.relpath(out)}; '
           f'{sem_coord} locais sem coordenada (ponto da zona)')
     # vira-casaca (Lula 2022 -> Flávio 2026) e o inverso, na mesma regra do mapa
     vira = lambda v, p: ('lost' if p[3] > p[4] and v.get('22', 0) > v.get('13', 0) else

@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lula × Flávio por município — eleições 2026</title>
-<meta name="description" content="Mapa do 1º turno presidencial de 2026, município a município: quem venceu, a inclinação ideológica do voto e os 703 municípios que trocaram de lado desde 2022.">
+<meta name="description" content="Mapa dos dois turnos presidenciais de 2026, município a município: quem venceu, a inclinação ideológica do voto e os 275 municípios que foram de Lula em 2022 a Flávio no 2º turno.">
 <link rel="canonical" href="https://rodado.xyz/plataformas/eleicoes/?eleicao=presidente-2026">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="xn--2dk.xyz">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:title" content="Lula × Flávio, município a município">
-<meta property="og:description" content="1º turno de 2026 nos 5.571 municípios: Flávio venceu em 2.908, Lula em 2.663 — e 703 trocaram de lado desde 2022. Passe o mouse e filtre os vira-casacas.">
+<meta property="og:description" content="2º turno de 2026 nos 5.571 municípios: Lula venceu em 2.875, Flávio em 2.695 — e 304 trocaram de lado desde 2022. O 1º turno está no mesmo mapa.">
 <meta property="og:url" content="https://rodado.xyz/plataformas/eleicoes/?eleicao=presidente-2026">
 <meta property="og:image" content="https://rodado.xyz/plataformas/eleicoes/og.png">
 <meta property="og:image:width" content="1200">
@@ -18,9 +18,9 @@
 <meta property="og:image:alt" content="Mapa do Brasil com um ponto por município, em vermelho onde Lula venceu e em azul onde Flávio Bolsonaro venceu">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lula × Flávio, município a município">
-<meta name="twitter:description" content="1º turno de 2026 nos 5.571 municípios — e os 703 que trocaram de lado desde 2022.">
+<meta name="twitter:description" content="Os dois turnos de 2026 nos 5.571 municípios — e os 304 que trocaram de lado desde 2022.">
 <meta name="twitter:image" content="https://rodado.xyz/plataformas/eleicoes/og.png">
-<script>(function(){var q=new URLSearchParams(location.search),p=q.get('eleicao')==='prefeitos-2024',c=p?'':q.get('recorte')||'secoes',z=c==='zonas',s=c==='secoes',f=p?'data.json':z?'data_presidente_2026_zonas.json':s?'secoes/locais.json':'data_presidente_2026.json';window.__k=(p?'prefeitos-2024':'presidente-2026')+(z?':zonas':s?':secoes':':municipios');window.__d=fetch(f).then(function(r){return r.json()});})()</script>
+<script>(function(){var q=new URLSearchParams(location.search),p=q.get('eleicao')==='prefeitos-2024',t=q.get('turno')==='1'?1:2,b=t===2?'_2t':'',c=p?'':q.get('recorte')||'secoes',z=c==='zonas',s=c==='secoes',f=p?'data.json':z?'data_presidente_2026'+b+'_zonas.json':s?'secoes'+b+'/locais.json':'data_presidente_2026'+b+'.json';window.__k=(p?'prefeitos-2024':'presidente-2026:'+t)+(z?':zonas':s?':secoes':':municipios');window.__d=fetch(f).then(function(r){return r.json()});})()</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -333,7 +333,7 @@
 <script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
 </head>
 <body>
-<div id="map" role="application" aria-label="Mapa do 1º turno presidencial de 2026 por município"></div>
+<div id="map" role="application" aria-label="Mapa presidencial de 2026 por município"></div>
 <div id="loading" role="status">Carregando…</div>
 <div id="moldura" aria-hidden="true"></div>
 <div id="search-bar" role="search" aria-label="Buscar no mapa">
@@ -348,16 +348,16 @@
 </div>
 <div id="info" class="panel">
 <div data-eleicao="presidente-2026">
-  <div class="eyebrow">TSE · Eleições 2026 · Presidente · 1º turno (04/10)</div>
+  <div class="eyebrow">TSE · Eleições 2026 · Presidente · <span data-turno="1">1º turno (04/10)</span><span data-turno="2">2º turno (25/10)</span></div>
   <h1>Lula × Flávio por <span data-recorte="municipios">Município</span><span data-recorte="zonas">Zona Eleitoral</span><span data-recorte="secoes">Seção Eleitoral</span></h1>
-  <div class="placar" role="img" aria-label="Votos válidos no país: Lula 45,2%, Flávio Bolsonaro 47,0%, outros 7,8%">
+  <div class="placar" role="img" aria-label="Votos válidos no país: Lula 51,8%, Flávio Bolsonaro 48,2%">
     <div class="escopo"><span class="na-tela" id="placar-escopo">Brasil inteiro</span><span id="placar-n"></span></div>
-    <div class="nomes"><span class="l"><b>45,2%</b> Lula</span><span class="f">Flávio <b>47,0%</b></span></div>
-    <div class="barra"><i class="l" style="width:45.2%"></i><i class="o" style="width:7.8%"></i><i class="f" style="width:47%"></i></div>
-    <div class="venceu"><span><span id="placar-vl">2.663</span> <span class="un">municípios</span></span><span>venceu em</span><span><span id="placar-vf">2.908</span> <span class="un">municípios</span></span></div>
+    <div class="nomes"><span class="l"><b>51,8%</b> Lula</span><span class="f">Flávio <b>48,2%</b></span></div>
+    <div class="barra"><i class="l" style="width:51.8%"></i><i class="o" style="width:0"></i><i class="f" style="width:48.2%"></i></div>
+    <div class="venceu"><span><span id="placar-vl">2.875</span> <span class="un">municípios</span></span><span>venceu em</span><span><span id="placar-vf">2.695</span> <span class="un">municípios</span></span></div>
   </div>
   <p class="lede"><span data-recorte="municipios">Cada ponto é um <b>município</b>.</span><span data-recorte="zonas">Cada ponto
-  é uma <b>zona eleitoral</b> (6.106).</span><span data-recorte="secoes">Cada ponto é um <b>local de votação</b> (94.539);
+  é uma <b>zona eleitoral</b> (6.106).</span><span data-recorte="secoes">Cada ponto é um <b>local de votação</b> (<span data-turno="1">94.539</span><span data-turno="2">94.046</span>);
   de perto, ele se abre nas <b>seções</b>.</span> Toque num ponto para ver o resultado. O placar e a moldura
   refletem os dados da área na tela. <button type="button" class="baixar-csv">Baixar dados desta área</button></p>
 </div>
@@ -404,11 +404,18 @@
       <button data-eleicao="prefeitos-2024">Prefeitos 2024</button>
     </div>
   </div>
+  <div class="row" id="row-turno">
+    <div class="rot" id="rot-turno">Turno</div>
+    <div class="seg" id="seg-turno" role="group" aria-labelledby="rot-turno">
+      <button data-turno="1">1º turno</button>
+      <button data-turno="2">2º turno</button>
+    </div>
+  </div>
   <div class="row" id="row-mode">
     <div class="rot" id="rot-mode">Cor dos pontos</div>
     <div class="seg" id="seg-mode" role="group" aria-labelledby="rot-mode" aria-describedby="mode-help">
       <button id="mode-margin" data-mode="margin">Candidatos</button>
-      <button id="mode-swing" data-mode="swing" title="Quanto a vantagem de Lula mudou entre o 1º turno de 2022 e o de 2026">Swing</button>
+      <button id="mode-swing" data-mode="swing">Swing</button>
       <button id="mode-lean" class="active" data-mode="lean">Inclinação</button>
       <button id="mode-polar" data-mode="polar">Polarização</button>
     </div>
@@ -418,7 +425,7 @@
     <div class="rot" id="rot-flip">Comparação com 2022</div>
     <div class="seg" id="seg-flip" role="group" aria-labelledby="rot-flip" aria-describedby="flip-count">
       <button data-flip="all" class="active">Todos</button>
-      <button data-flip="lost" title="Lula venceu o 1º turno de 2022 ali; Flávio venceu em 2026">Vira-casacas</button>
+      <button data-flip="lost">Vira-casacas</button>
     </div>
     <div class="ajuda" id="flip-count"></div>
   </div>
@@ -521,16 +528,27 @@ const PARTY_SCORES = {
 // eleições do mapa; ?eleicao=<chave> abre direto numa delas
 const ELEICOES = {
   'presidente-2026': {
-    file: 'data_presidente_2026.json', zonas: 'data_presidente_2026_zonas.json', secoes: 'secoes/',
-    modes: ['margin','swing','lean','polar'], polar: [2.2, 3.0],
-    polarLabels: ['2,2', '3,0'],
-    parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA']
+    modes: ['margin','swing','lean','polar']
   },
   'prefeitos-2024': {
     file: 'data.json', modes: ['lean','polar'], polar: [0, 2.0], polarLabels: ['consenso', 'dividido'],
     parties: Object.keys(PARTY_SCORES).filter(k => k !== 'MISSÃO' && k !== 'DEMOCRATA')
   }
 };
+// presidente 2026: o que muda de um turno para o outro. Cada turno compara com o mesmo turno de 2022
+const TURNOS = {
+  1: { file: 'data_presidente_2026.json', zonas: 'data_presidente_2026_zonas.json', secoes: 'secoes/',
+       polar: [2.2, 3.0], polarLabels: ['2,2', '3,0'], ref22: '1º turno de 2022',
+       parties: ['PCO','PCB','UP','PSTU','PT','AVANTE','PSD','DC','MISSÃO','NOVO','PL','DEMOCRATA'],
+       flipSecoes: '37.136 seções foram de Lula (2022) para Flávio (2026); 2.869 o inverso. 85.492 sem comparação: a urna mudou.' },
+  2: { file: 'data_presidente_2026_2t.json', zonas: 'data_presidente_2026_2t_zonas.json', secoes: 'secoes_2t/',
+       polar: [1.6, 3.0], polarLabels: ['1,6', '3,0'], ref22: '2º turno de 2022',
+       parties: ['PT','PL'],
+       flipSecoes: '9.640 seções foram de Lula (2022) para Flávio (2026); 17.804 o inverso. 86.323 sem comparação: a urna mudou.' }
+};
+// o padrão é o 2º turno, o resultado final; ?turno=1 abre o primeiro
+let TURNO = new URLSearchParams(location.search).get('turno') === '1' ? 1 : 2;
+Object.assign(ELEICOES['presidente-2026'], TURNOS[TURNO]);
 let ELEICAO = new URLSearchParams(location.search).get('eleicao');
 if (!ELEICOES[ELEICAO]) ELEICAO = 'presidente-2026';
 function EL(){ return ELEICOES[ELEICAO]; }
@@ -538,6 +556,7 @@ function EL(){ return ELEICOES[ELEICAO]; }
 // o padrão é por seção (um ponto por local de votação, que se abre nas urnas de perto); ?recorte=municipios|zonas muda
 let RECORTE = ['municipios', 'zonas', 'secoes'].includes(new URLSearchParams(location.search).get('recorte')) ? new URLSearchParams(location.search).get('recorte') : 'secoes';
 function recorteAtivo(){ return RECORTE !== 'municipios' && EL()[RECORTE] ? RECORTE : 'municipios'; }
+function cacheKey(rec){ return (ELEICAO === 'presidente-2026' ? ELEICAO + ':' + TURNO : ELEICAO) + ':' + rec; }
 
 function renderParties(){
   const body = document.querySelector('#parties .pbody');
@@ -656,7 +675,7 @@ function percentileOf(sortedArr, val){
   return sortedArr.length ? lo / sortedArr.length : 0;
 }
 
-// vira-casaca: quem venceu o 1º turno de 2022 (Lula × Bolsonaro) não é quem venceu em 2026 (Lula × Flávio)
+// vira-casaca: quem venceu em 2022 (Lula × Bolsonaro, no mesmo turno) não é quem venceu em 2026 (Lula × Flávio)
 function flipKind(r){
   if (r.length < 19 || r[17] == null) return null;
   if (r[17] > r[18] && r[16] > r[15]) return 'lost';
@@ -739,7 +758,7 @@ function tooltipHtml(r){
       (w2 ? '<div class="tt-cand"><div class="tt-cand-top"><span class="tt-cand-party">🥈 ' + w2 + '</span><span class="tt-cand-pct">' + fmtPct(w2pct) + '</span></div>' +
         '<div class="tt-cand-bar"><div class="tt-cand-fill" style="width:' + clamp(w2pct,0,100) + '%;background:' + candColor(w2) + ';"></div></div></div>' : '') +
     '</div>' +
-    (r.length > 18 && r[17] != null ? '<div class="tt-sub" style="margin-top:8px">2022: Lula ' + fmtPct(r[17]) + ' × Bolsonaro ' + fmtPct(r[18]) +
+    (r.length > 18 && r[17] != null ? '<div class="tt-sub" style="margin-top:8px">' + EL().ref22 + ': Lula ' + fmtPct(r[17]) + ' × Bolsonaro ' + fmtPct(r[18]) +
       (flipKind(r) ? ' · <b style="color:#e0a03a">trocou de lado</b>' : '') + '</div>' : '') +
     '<div class="tt-grid">' +
       '<div class="tt-cell"><span class="k">Voto esquerda</span><span class="v">' + fmtPct(pesq) + '</span></div>' +
@@ -953,8 +972,9 @@ map.getContainer().addEventListener('wheel', function(e){
 
 // ---- recorte por seção ----
 let LOC = null;                     // locais decodificados (registros no layout do mapa + caixa de cada UF)
-const SEC = {};                     // uf -> registros das seções (ou a Promise enquanto baixa)
-const NOME_LOCAL = new Map();       // 'uf|zona|município|local' -> nome da escola (vem com as seções do estado)
+const SECS = { 1: {}, 2: {} };      // por turno: uf -> registros das seções (ou a Promise enquanto baixa)
+const NOMES_LOCAL = { 1: new Map(), 2: new Map() }; // por turno: 'uf|zona|município|local' -> nome da escola (vem com as seções do estado)
+let SEC = SECS[TURNO], NOME_LOCAL = NOMES_LOCAL[TURNO];
 let SECKEY = null;
 // os mesmos campos de data_presidente_2026.json, calculados dos votos de cada candidato (ordem de LOC.c)
 function regFromVotes(uf, lat, lon, v, extra, l22, b22){
@@ -993,7 +1013,9 @@ function decodeLocais(j){
 }
 function loadUF(uf){
   if (SEC[uf]) return Promise.resolve(SEC[uf]);
-  SEC[uf] = fetch(EL().secoes + uf + '.json').then(r => r.json()).then(function(ls){
+  const S = SEC; // trocou de turno enquanto baixava: descarta, regFromVotes usa os candidatos do LOC atual
+  S[uf] = fetch(EL().secoes + uf + '.json').then(r => r.json()).then(function(ls){
+    if (S !== SEC || !LOC) { delete S[uf]; return null; }
     const recs = [];
     ls.forEach(function(l){
       const key = uf + '|' + l[0] + '|' + l[2] + '|' + l[1], L0 = LOC.byKey.get(key), nc = LOC.c.length;
@@ -1003,9 +1025,9 @@ function loadUF(uf){
                                sv[1 + nc], sv[2 + nc]));
       });
     });
-    return SEC[uf] = recs;
-  }).catch(function(){ delete SEC[uf]; return null; });
-  return SEC[uf];
+    return S[uf] = recs;
+  }).catch(function(){ delete S[uf]; return null; });
+  return S[uf];
 }
 const pronto = uf => Array.isArray(SEC[uf]);
 // afastado: um ponto por local. A partir de UF_Z baixa as seções dos estados na tela; a partir de
@@ -1037,19 +1059,30 @@ function setDATA(recs){
   applyFlip();
 }
 
+function setTurno(t){
+  TURNO = t; Object.assign(ELEICOES['presidente-2026'], TURNOS[t]);
+  SEC = SECS[t]; NOME_LOCAL = NOMES_LOCAL[t]; LOC = null;
+  hideTip(); setEleicao(ELEICAO);
+}
+
 function setEleicao(key){
   ELEICAO = key;
   const el = EL();
   document.querySelectorAll('#seg-eleicao button').forEach(b => { b.classList.toggle('active', b.dataset.eleicao === key); b.setAttribute('aria-pressed', b.dataset.eleicao === key); });
   document.querySelectorAll('#info [data-eleicao]').forEach(d => d.classList.toggle('hide', d.dataset.eleicao !== key));
   document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b => b.classList.toggle('hide', !el.modes.includes(b.dataset.mode)));
-  document.querySelector('#mini .eyebrow').textContent = key === 'presidente-2026' ? 'Presidente 2026 · 1º turno' : 'Prefeitos 2024 · 1º turno';
+  document.querySelector('#mini .eyebrow').textContent = key === 'presidente-2026' ? 'Presidente 2026 · ' + TURNO + 'º turno' : 'Prefeitos 2024 · 1º turno';
   document.getElementById('mini').classList.toggle('sem-placar', key !== 'presidente-2026'); // prefeito não tem Lula × Flávio para somar
   const pl = document.querySelectorAll('#legend-polar .labels span');
   pl[0].textContent = el.polarLabels[0]; pl[1].textContent = el.polarLabels[1];
   renderParties();
   const rec = recorteAtivo();
   document.getElementById('row-flip').classList.toggle('hide', key !== 'presidente-2026');
+  document.getElementById('row-turno').classList.toggle('hide', key !== 'presidente-2026');
+  document.querySelectorAll('#seg-turno button').forEach(b => { b.classList.toggle('active', +b.dataset.turno === TURNO); b.setAttribute('aria-pressed', +b.dataset.turno === TURNO); });
+  document.querySelectorAll('#info [data-turno]').forEach(d => d.classList.toggle('hide', +d.dataset.turno !== TURNO));
+  document.getElementById('mode-swing').title = 'Quanto a vantagem de Lula mudou entre o ' + TURNO + 'º turno de 2022 e o de 2026';
+  document.querySelector('#seg-flip [data-flip=lost]').title = 'Lula venceu o ' + TURNO + 'º turno de 2022 ali; Flávio venceu em 2026';
   document.getElementById('row-recorte').classList.toggle('hide', !el.zonas && !el.secoes);
   document.getElementById('secoes-status').classList.toggle('hide', rec !== 'secoes');
   document.querySelectorAll('#seg-recorte button').forEach(b => { b.classList.toggle('active', b.dataset.recorte === rec); b.setAttribute('aria-pressed', b.dataset.recorte === rec); });
@@ -1057,11 +1090,11 @@ function setEleicao(key){
   if (key !== 'presidente-2026') { FLIP = 'all'; document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === 'all'); b.setAttribute('aria-pressed', b.dataset.flip === 'all'); }); }
   else document.querySelectorAll('#seg-flip button').forEach(b => { b.classList.toggle('active', b.dataset.flip === FLIP); b.setAttribute('aria-pressed', b.dataset.flip === FLIP); });
   syncUrl();
-  const ck = key + ':' + rec, file = rec === 'zonas' ? el.zonas : rec === 'secoes' ? el.secoes + 'locais.json' : el.file;
+  const turno = TURNO, ck = cacheKey(rec), file = rec === 'zonas' ? el.zonas : rec === 'secoes' ? el.secoes + 'locais.json' : el.file;
   const load = CACHE[ck] ? Promise.resolve(CACHE[ck]) : (window.__d && window.__k === ck ? window.__d : fetch(file).then(r => r.json()));
   window.__d = null;
   load.then(function(json){
-    if (ELEICAO !== key || recorteAtivo() !== rec) return; // trocou de novo antes de carregar
+    if (ELEICAO !== key || TURNO !== turno || recorteAtivo() !== rec) return; // trocou de novo antes de carregar
     MODE = el.modes.includes(MODE) ? MODE : el.modes[0];
     if (rec === 'secoes') {
       CACHE[ck] = json.recs ? json : decodeLocais(json);
@@ -1081,6 +1114,7 @@ function setEleicao(key){
 function syncUrl(){
   const url = new URL(location.href);
   url.searchParams.set('eleicao', ELEICAO);
+  ELEICAO === 'presidente-2026' && TURNO === 1 ? url.searchParams.set('turno', '1') : url.searchParams.delete('turno');
   MODE !== 'margin' ? url.searchParams.set('modo', MODE) : url.searchParams.delete('modo');
   FLIP === 'lost' ? url.searchParams.set('filtro', 'vira-casacas') : url.searchParams.delete('filtro');
   const rec = recorteAtivo();
@@ -1172,12 +1206,12 @@ function baixarCsv(){
   if (rec === 'zonas') cab.push('zona');
   if (rec === 'secoes') cab.push('tipo', 'zona', 'local_num', 'local', 'secao');
   cab.push('lat', 'lon', 'votos_validos');
-  if (pres) cab.push('pct_lula', 'pct_flavio', 'vencedor', 'pct_lula_2022_1t', 'pct_bolsonaro_2022_1t');
+  if (pres) cab.push('pct_lula', 'pct_flavio', 'vencedor', 'pct_lula_2022_' + TURNO + 't', 'pct_bolsonaro_2022_' + TURNO + 't');
   else cab.push('mais_votado', 'pct_mais_votado', 'segundo', 'pct_segundo', 'inclinacao_0a10', 'polarizacao');
   const blob = new Blob(['﻿' + cab.join(',') + '\n' + linhas.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = ELEICAO + '-' + rec + '-na-tela.csv';
+  a.download = ELEICAO + (pres ? '-' + TURNO + 't' : '') + '-' + rec + '-na-tela.csv';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
@@ -1192,8 +1226,7 @@ function applyFlip(){
   // por seção os números são do país (build_secoes.py): DATA só tem os estados já baixados
   // a frase define o vira-casaca e dá a conta; curta, para caber em duas linhas do painel
   atualizaRestaurar();
-  if (recorteAtivo() === 'secoes') { document.getElementById('flip-count').textContent =
-    '37.136 seções foram de Lula (2022) para Flávio (2026); 2.869 o inverso. 85.492 sem comparação: a urna mudou.'; return; }
+  if (recorteAtivo() === 'secoes') { document.getElementById('flip-count').textContent = EL().flipSecoes; return; }
   document.getElementById('flip-count').textContent = DATA[0] && DATA[0].length > 18
     ? fmt.format(flipN.lost) + (z ? ' zonas foram' : ' municípios foram') + ' de Lula (2022) para Flávio (2026); ' +
       (flipN.won ? fmt.format(flipN.won) + ' o inverso' : (z ? 'nenhuma' : 'nenhum') + ' o inverso') + '.' +
@@ -1231,6 +1264,8 @@ document.querySelectorAll('#seg-mode button, #chips-mode button').forEach(b =>
   b.addEventListener('click', () => setMode(b.dataset.mode)));
 document.querySelectorAll('#seg-eleicao button').forEach(b =>
   b.addEventListener('click', () => { if (b.dataset.eleicao !== ELEICAO) setEleicao(b.dataset.eleicao); }));
+document.querySelectorAll('#seg-turno button').forEach(b =>
+  b.addEventListener('click', () => { if (+b.dataset.turno !== TURNO) setTurno(+b.dataset.turno); }));
 document.querySelectorAll('#seg-recorte button').forEach(b =>
   b.addEventListener('click', () => { if (b.dataset.recorte !== RECORTE) { RECORTE = b.dataset.recorte; hideTip(); setEleicao(ELEICAO); } }));
 setEleicao(ELEICAO);
@@ -1249,12 +1284,12 @@ document.getElementById('restaurar').addEventListener('click', function(){
   setMode(MODO_PADRAO()); // repinta, recalcula o placar, esconde o botão e atualiza o endereço
   document.querySelector('#seg-eleicao button.active').focus(); // o foco não cai no vazio
 });
-// fechado, o cabeçalho do painel resume a escolha atual (cor · comparação · recorte); qualquer troca de .active refaz
+// fechado, o cabeçalho do painel resume a escolha atual (turno · cor · comparação · recorte); qualquer troca de .active refaz
 const painelControles = document.getElementById('controls');
 function atualizaResumos(){
   const ativo = id => { const b = document.querySelector('#' + id + ' button.active'); return b ? b.textContent : ''; };
   const flip = ELEICAO === 'presidente-2026' && FLIP !== 'all' ? ativo('seg-flip') : '';
-  document.getElementById('resumo-controles').textContent = [ativo('seg-mode'), flip, ativo('seg-recorte')].filter(Boolean).join(' · ');
+  document.getElementById('resumo-controles').textContent = [ELEICAO === 'presidente-2026' ? ativo('seg-turno') : '', ativo('seg-mode'), flip, ativo('seg-recorte')].filter(Boolean).join(' · ');
 }
 new MutationObserver(atualizaResumos).observe(painelControles, { subtree: true, attributes: true, attributeFilter: ['class'] });
 document.getElementById('restaurar').addEventListener('click', atualizaResumos);
@@ -1275,24 +1310,25 @@ let fechaFolhas = () => {}; // setupMobilePanels troca pela versão que fecha #i
         res = document.getElementById('search-results'), clr = document.getElementById('search-clear'),
         icon = document.getElementById('search-icon');
   const norm = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
-  const IDX = {};        // 'mun:<eleição>' | 'loc' -> Promise<[{n, k, uf, mun, lat, lon, w, loc}]>
+  const IDX = {};        // 'mun:<eleição>' | 'loc:<turno>' -> Promise<[{n, k, uf, mun, lat, lon, w, loc}]>
   function indiceMun(){
     const key = 'mun:' + ELEICAO;
     if (IDX[key]) return IDX[key];
-    const ck = ELEICAO + ':municipios', cached = CACHE[ck] ? Promise.resolve(CACHE[ck]) : fetch(EL().file).then(r => r.json());
+    const ck = cacheKey('municipios'), cached = CACHE[ck] ? Promise.resolve(CACHE[ck]) : fetch(EL().file).then(r => r.json());
     return IDX[key] = cached.then(rs => rs.map(r => ({ n: r[1], k: norm(r[1]), uf: r[0], lat: r[2], lon: r[3], w: r[4], z: 9.5 })));
   }
   function indiceLoc(){
     if (!EL().secoes) return Promise.resolve([]);
-    if (IDX.loc) return IDX.loc;
-    return IDX.loc = fetch(EL().secoes + 'busca.json').then(r => r.json()).then(function(j){
+    const key = 'loc:' + TURNO;
+    if (IDX[key]) return IDX[key];
+    return IDX[key] = fetch(EL().secoes + 'busca.json').then(r => r.json()).then(function(j){
       let m = 0, la = 0, lo = 0; const out = new Array(j.n.length);
       for (let i = 0; i < j.n.length; i++){
         m += j.m[i]; la += j.la[i]; lo += j.lo[i];
         out[i] = { n: j.n[i], k: norm(j.n[i]), uf: j.ufs[j.u[i]], mun: j.muns[m], lat: la / 1e5, lon: lo / 1e5, w: 0, z: 16, loc: true };
       }
       return out;
-    }).catch(() => { delete IDX.loc; return []; });
+    }).catch(() => { delete IDX[key]; return []; });
   }
   let hits = [], ativo = -1, seq = 0, timer = 0, marker = null, markerT = 0;
   const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

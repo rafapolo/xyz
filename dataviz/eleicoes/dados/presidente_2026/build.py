@@ -88,18 +88,46 @@ FROM read_parquet('~/rodado/br_bd_diretorios_brasil/municipio/*.parquet');"""
     return {r['id_municipio']: r for r in csv.DictReader(io.StringIO(out))}
 
 
-def votos2022():
-    sql = """SET enable_progress_bar=false;
+def votos2022(turno=1):
+    sql = f"""SET enable_progress_bar=false;
 WITH t AS (SELECT id_municipio, sum(votos) tot,
   sum(votos) FILTER (WHERE numero_candidato='13') lula,
   sum(votos) FILTER (WHERE numero_candidato='22') bolso
   FROM read_parquet('~/rodado/br_tse_eleicoes/resultados_candidato_municipio/*.parquet')
-  WHERE ano=2022 AND cargo='presidente' AND turno=1 GROUP BY id_municipio)
+  WHERE ano=2022 AND cargo='presidente' AND turno={turno} GROUP BY id_municipio)
 SELECT id_municipio, round(100.0*lula/tot,1) lula, round(100.0*bolso/tot,1) bolso FROM t WHERE tot>0;"""
     out = subprocess.run(['ssh', os.environ.get('BEELINK_HOST', 'beelink'),
                           '~/bin/duckdb -readonly -csv ~/rodado/basedosdados.duckdb'],
                          input=sql, capture_output=True, text=True, check=True).stdout
     return {r['id_municipio']: r for r in csv.DictReader(io.StringIO(out))}
+
+
+def registro(uf, m, cands, l22, b22, casas=1):
+    """um registro do mapa; cands = [(nome, partido, votos)]; casas = decimais de plula e pflavio"""
+    tot = sum(v for _, _, v in cands)
+    sc = [(SCORES[sg], v) for _, sg, v in cands]
+    lean = sum(s * v for s, v in sc) / tot
+    polar = max(0.0, sum(s * s * v for s, v in sc) / tot - lean ** 2) ** 0.5
+    cands = sorted(cands, key=lambda c: -c[2])
+    pct = lambda v, n=1: round(100 * v / tot, n)
+    voto = {n: v for n, _, v in cands}
+    return [
+        uf.upper(), m['nome'], float(m['lat']), float(m['lon']), tot,
+        round(lean, 3), round(polar, 3), sum(1 for c in cands if c[2]),
+        f'{cands[0][0]} ({cands[0][1]})', pct(cands[0][2]),
+        f'{cands[1][0]} ({cands[1][1]})', pct(cands[1][2]),
+        pct(sum(v for s, v in sc if s < 4.0)),
+        pct(sum(v for s, v in sc if 4.0 <= s <= 6.0)),
+        pct(sum(v for s, v in sc if s > 6.0)),
+        pct(voto['Lula'], casas), pct(voto['Flávio Bolsonaro'], casas), l22, b22,
+    ]
+
+
+def escreve(recs, out):
+    recs.sort(key=lambda r: (r[0], r[1]))
+    with open(out, 'w') as f:
+        f.write('[\n' + ',\n'.join(json.dumps(r, ensure_ascii=False, separators=(',', ':')) for r in recs) + '\n]\n')
+    print(len(recs), 'municípios ->', os.path.relpath(out))
 
 
 def main():
@@ -112,33 +140,14 @@ def main():
         assert d['s']['pst'] == '100,00', f'{uf}{cd} com seções por totalizar'
         cands = [(NOMES[c['nmu']], p['sg'], int(c['vap']))
                  for ag in d['carg'][0]['agr'] for p in ag['par'] for c in p['cand']]
-        tot = sum(v for _, _, v in cands)
-        if not tot:
+        if not sum(v for _, _, v in cands):
             continue
-        sc = [(SCORES[sg], v) for _, sg, v in cands]
-        lean = sum(s * v for s, v in sc) / tot
-        polar = max(0.0, sum(s * s * v for s, v in sc) / tot - lean ** 2) ** 0.5
-        cands.sort(key=lambda c: -c[2])
-        pct = lambda v: round(100 * v / tot, 1)
-        voto = {n: v for n, _, v in cands}
         m = dict(cent[cdi])
         if cdi in CENTROIDE_CORRIGIDO:
             m['lat'], m['lon'] = CENTROIDE_CORRIGIDO[cdi]
-        recs.append([
-            uf.upper(), m['nome'], float(m['lat']), float(m['lon']), tot,
-            round(lean, 3), round(polar, 3), sum(1 for c in cands if c[2]),
-            f'{cands[0][0]} ({cands[0][1]})', pct(cands[0][2]),
-            f'{cands[1][0]} ({cands[1][1]})', pct(cands[1][2]),
-            pct(sum(v for s, v in sc if s < 4.0)),
-            pct(sum(v for s, v in sc if 4.0 <= s <= 6.0)),
-            pct(sum(v for s, v in sc if s > 6.0)),
-            pct(voto['Lula']), pct(voto['Flávio Bolsonaro']),
-            float(v22[cdi]['lula']) if cdi in v22 else None, float(v22[cdi]['bolso']) if cdi in v22 else None,
-        ])
-    recs.sort(key=lambda r: (r[0], r[1]))
-    with open(OUT, 'w') as f:
-        f.write('[\n' + ',\n'.join(json.dumps(r, ensure_ascii=False, separators=(',', ':')) for r in recs) + '\n]\n')
-    print(len(recs), 'municípios ->', os.path.relpath(OUT))
+        recs.append(registro(uf, m, cands, float(v22[cdi]['lula']) if cdi in v22 else None,
+                             float(v22[cdi]['bolso']) if cdi in v22 else None))
+    escreve(recs, OUT)
 
 
 if __name__ == '__main__':

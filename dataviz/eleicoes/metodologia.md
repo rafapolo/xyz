@@ -91,6 +91,34 @@ Para cada município, sobre os votos de prefeito no 1º turno de 2024:
 
 ---
 
+# Presidente 2026 — 2º turno (25/10/2026)
+
+O seletor **Turno** troca os dados do mapa inteiro, nos três recortes (`&turno=1` abre o 1º
+turno; sem parâmetro, o 2º, o resultado final). Os cálculos são os das seções abaixo; o que
+muda:
+
+- **Votos:** `br_tse_eleicoes.resultados_candidato_municipio`, `_municipio_zona` e `_secao`
+  (ano 2026, turno 2). As três somam, com o exterior, o total da divulgação do TSE: Lula
+  64.256.232, Flávio 59.826.041, válidos 124.082.273; o gerador para se não fecharem.
+- **O exterior fica fora do mapa**, como no 1º turno: 371.651 válidos. O placar do mapa soma
+  123.710.622 (Lula 51,78%, Flávio 48,22%), e o resultado oficial, com o exterior, é 51,79% a
+  48,21%.
+- **5.571 municípios:** Lula venceu em 2.875, Flávio em 2.695, e Marquinho (PR) empatou. No
+  recorte por município Lula e Flávio vão com 2 casas, como nas zonas.
+- **Local de cada seção:** `eleitorado_local_votacao_2026` do TSE, regerado em 25/10, linhas de
+  `NR_TURNO` 2 (o arquivo no espelho só tem o 1º turno). Há seções que votaram noutro local no
+  2º turno, então a seção aparece onde votou naquele turno. São 94.046 locais, contra 94.539 no
+  1º turno, e 820 sem coordenada válida (ponto da zona).
+- **Comparação com 2022:** o 2º turno com o 2º turno, Lula × Bolsonaro. Vale para o Swing, para
+  os vira-casacas e para o tooltip. Nas mesmas regras, 275 municípios foram de Lula em 2022 para
+  Flávio e 29 fizeram o inverso; por seção, 9.640 e 17.804, com 411.574 das 497.897 seções
+  comparáveis.
+- **Inclinação e polarização** com dois candidatos só dependem da divisão PT × PL. A escala de
+  cor da polarização vai de 1,6 a 3,0, e a inclinação é a própria margem em outra régua.
+- `dados/presidente_2026/build_2t.py` refaz `data_presidente_2026_2t.json`,
+  `data_presidente_2026_2t_zonas.json` e `secoes_2t/`, e `build_busca.py secoes_2t` refaz o
+  índice de busca.
+
 # Presidente 2026 — 1º turno (04/10/2026)
 
 O seletor **Eleição** abre o mesmo mapa com o voto para presidente

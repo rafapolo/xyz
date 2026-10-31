@@ -5,11 +5,11 @@ locais.json). A busca do mapa precisa dos nomes de todo o país sem baixar os 27
 este arquivo junta só o que ela usa, na mesma ordem de locais.json:
   {"ufs": [...], "muns": [...], "n": [nome do local], "u": [uf], "m": [município, em delta],
    "la", "lo": lat e lon × 1e5, em delta}
-Roda depois de build_secoes.py, sem tocar no TSE:  python3 dataviz/eleicoes/dados/presidente_2026/build_busca.py
+Roda depois de build_secoes.py, sem tocar no TSE:  python3 dataviz/eleicoes/dados/presidente_2026/build_busca.py [pasta, por padrão secoes]
 """
-import json, os
+import json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
-S = os.path.join(HERE, '..', '..', 'secoes')
+S = os.path.join(HERE, '..', '..', sys.argv[1] if len(sys.argv) > 1 else 'secoes')
 d = json.load(open(os.path.join(S, 'locais.json')))
 nomes = {}
 for uf in d['ufs']:
