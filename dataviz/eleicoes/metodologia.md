@@ -108,7 +108,8 @@ muda:
 - **Local de cada seção:** `eleitorado_local_votacao_2026` do TSE, regerado em 25/10, linhas de
   `NR_TURNO` 2 (o arquivo no espelho só tem o 1º turno). Há seções que votaram noutro local no
   2º turno, então a seção aparece onde votou naquele turno. São 94.046 locais, contra 94.539 no
-  1º turno, e 820 sem coordenada válida (ponto da zona).
+  1º turno; 244 seguem sem coordenada válida (ponto da zona), contra 820 antes da conferência
+  pelo polígono do município (ver "Coordenada de cada local", abaixo).
 - **Comparação com 2022:** o 2º turno com o 2º turno, Lula × Bolsonaro. Vale para o Swing, para
   os vira-casacas e para o tooltip. Nas mesmas regras, 275 municípios foram de Lula em 2022 para
   Flávio e 29 fizeram o inverso; por seção, 9.640 e 17.804, com 411.574 das 497.897 seções
@@ -163,8 +164,9 @@ métricas e o mesmo filtro de vira-casacas.
   (AM), onde Flávio venceu por 2 votos, aparece empatada.
 - **Ponto:** não há polígono de zona. O ponto é a mediana, ponderada pelo eleitorado de cada
   seção, das coordenadas dos locais de votação do município naquela zona
-  (`eleitorado_local_votacao_2026`). Seções a mais de 250 km do centroide do próprio município
-  são descartadas (762 de 514 mil; há local geocodificado em Bangladesh). Por isso o ponto cai
+  (`eleitorado_local_votacao_2026`). Seções cuja coordenada cai fora do polígono do próprio
+  município, com 2 km de folga, são descartadas (1.037 de 514 mil no 1º turno, 1.091 no 2º; há
+  local geocodificado em Bangladesh e escola de Minduri, MG, no centro de Belo Horizonte). Por isso o ponto cai
   onde se vota, e não no centroide do município: Almeirim (PA) fica na sede, à beira do
   Amazonas.
 - **2022:** `br_tse_eleicoes.resultados_candidato_municipio_zona`. Houve rezoneamento, e um
@@ -189,9 +191,9 @@ O terceiro botão do **Recorte** (`&recorte=secoes`) desce até a urna.
   os arquivos por UF trazem só os cargos estaduais). Fica de fora o votável 28 (Leonardo Alves
   de Araujo, candidatura indeferida, 5.246 votos que não entram como válidos); sem ele a soma das
   seções fecha voto a voto com a divulgação (118.969.906).
-- **Coordenada e nome do local:** `eleitorado_local_votacao_2026`, com o mesmo descarte de
-  geocodificação a mais de 250 km do município. 1.691 locais sem coordenada válida caem no ponto
-  da sua zona naquele município. O número do local só é único dentro do município: a chave de um
+- **Coordenada e nome do local:** `eleitorado_local_votacao_2026`; ver "Coordenada de cada local",
+  abaixo. 190 locais seguem sem coordenada válida e caem no ponto da sua zona naquele município
+  (eram 1.691). O número do local só é único dentro do município: a chave de um
   local é UF + zona + município + número (só zona + número funde escolas de municípios diferentes
   da mesma zona — eram 12.094 pontos fundidos até 08/10).
 - **Vira-casacas por seção:** o TSE renumera seções e remaneja eleitores entre elas, então uma
@@ -206,6 +208,20 @@ O terceiro botão do **Recorte** (`&recorte=secoes`) desce até a urna.
   seções comparáveis, e só quando elas somam 80% do seu voto de 2026 (68.701 de 94.539 locais;
   6.211 vira-casacas). Os votos de 2022 vêm do resultado por seção do TSE e o local de cada seção,
   do cadastro de locais de votação de 2022.
+- **Coordenada de cada local** (`dados/presidente_2026/geo_local.py`, desde 01/11/2026): o ponto
+  precisa cair dentro do polígono do próprio município (`br_geobr_mapas.municipio`), com 2 km de
+  folga para a divisa simplificada. Antes valia qualquer ponto a até 250 km do centroide, o que
+  deixava passar ~200 locais geocodificados em outro município (até 232 km longe, quase todos em
+  MG). Vale a primeira coordenada que passa: (1) a do TSE no arquivo do turno, salvo quando é a
+  mesma de 3 ou mais locais do município, que costuma ser a sede no lugar da escola rural; (2) o
+  mesmo local no cadastro do TSE de 2026 (1º turno), 2024 ou 2022, com nome parecido ou mesmo
+  endereço; (3) outro local do município no mesmo endereço; (4) estimativa pelo CNEFE do Censo
+  2022: escola de mesmo nome no município, centro do CEP ou do bairro/povoado; (5) o ponto da
+  zona. 1.208 locais com voto do 1º turno só aparecem nas linhas de 2º turno do arquivo de locais e
+  passaram a usar a coordenada delas. Resultado, 1º e 2º turnos: 93.469 e 92.676 locais com a
+  coordenada do TSE de 2026, ~400 com a de anos anteriores, 464 e 675 pelo CNEFE, 190 e 244 no
+  ponto da zona; nenhum local fica a mais de 2 km do próprio município (3 locais de Boa Esperança
+  do Norte, MT, sem polígono na malha, mantêm a regra dos 250 km).
 - `dados/presidente_2026/build_secoes.py` gera `secoes/locais.json` (colunar e em delta, ~1,7 MB
   comprimido) e um `secoes/<UF>.json` por estado (São Paulo, o maior, ~1,7 MB comprimido). O
   navegador calcula inclinação, polarização e vencedor a partir dos votos de cada candidato.

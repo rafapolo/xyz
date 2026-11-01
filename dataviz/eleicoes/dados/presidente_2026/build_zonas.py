@@ -13,10 +13,10 @@ plula/pflavio/plula22/pbolso22 com 2 casas (o resto com 1)
 
 - votos: votacao_candidato_munzona_2026 (dados abertos do TSE, arquivo _BR = presidente)
 - ponto: mediana, ponderada pelo eleitorado da seção, das coordenadas dos locais de
-  votação do município naquela zona (eleitorado_local_votacao_2026); seções a mais de MAX_KM do
-  centroide do próprio município são descartadas (há local geocodificado em
-  Bangladesh). O corte é largo porque município da Amazônia tem seção rural a 200 km
-  da sede; a mediana cuida do resto
+  votação do município naquela zona (eleitorado_local_votacao_2026); seções cuja coordenada
+  cai fora do polígono do próprio município (com a folga de geo_local.TOL_KM) são
+  descartadas — há local geocodificado em Bangladesh e escola de Minduri (MG) no centro de
+  Belo Horizonte
 - 2022: br_tse_eleicoes.resultados_candidato_municipio_zona no beelink. Houve
   rezoneamento, e uma zona que ganhou ou perdeu seções mostraria virada que é só
   mudança de território. Só entra quando o par (município, zona) existe em 2022 e
@@ -30,6 +30,7 @@ import csv, io, json, math, os, subprocess, urllib.request, zipfile
 from collections import defaultdict
 
 from build import BASE, CENTROIDE_CORRIGIDO, NOMES, RAW, SCORES, centroides, get
+from geo_local import Geo
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data_presidente_2026_zonas.json')
 CDN = 'https://cdn.tse.jus.br/estatistica/sead/odsele'
@@ -37,7 +38,6 @@ ZIPS = {
     'munzona': f'{CDN}/votacao_candidato_munzona/votacao_candidato_munzona_2026.zip',
     'locais': f'{CDN}/eleitorado_locais_votacao/eleitorado_local_votacao_2026.zip',
 }
-MAX_KM = 250
 RAZAO_OK = (0.9, 1.1)
 
 
@@ -67,12 +67,6 @@ WHERE ano=2022 AND cargo='presidente' AND turno={turno} GROUP BY ALL;"""
                          input=sql, capture_output=True, text=True, check=True).stdout
     return {(r['uf'], r['cd'], r['zona']): (int(r['tot']), int(r['lula'] or 0), int(r['bolso'] or 0))
             for r in csv.DictReader(io.StringIO(out))}
-
-
-def km(a, b):
-    dy = (a[0] - b[0]) * 111.2
-    dx = (a[1] - b[1]) * 111.2 * math.cos(math.radians((a[0] + b[0]) / 2))
-    return math.hypot(dx, dy)
 
 
 def mediana(pares):
@@ -128,6 +122,7 @@ def escreve(mz_cand, info, tse2ibge, cent, v22, zip_locais, turno, out, mun_json
     # ponto: locais de votação do município naquela zona
     secoes = defaultdict(list)  # (uf, cd_tse, zona) -> [(lat, lon, eleitores)]
     descartadas = 0
+    geo = Geo(tse2ibge, cent)
     for r in le_csv(baixa_zip(zip_locais), 'eleitorado_local_votacao_2026_BRASIL.csv'):
         if r['NR_TURNO'] != turno or r['SG_UF'] == 'ZZ':
             continue
@@ -135,8 +130,7 @@ def escreve(mz_cand, info, tse2ibge, cent, v22, zip_locais, turno, out, mun_json
         if lat == -1 or lon == -1:
             continue
         cd = r['CD_MUNICIPIO'].lstrip('0')
-        c = cent[tse2ibge[(r['SG_UF'], cd)]]
-        if km((lat, lon), (float(c['lat']), float(c['lon']))) > MAX_KM:
+        if not geo.ok(r['SG_UF'], cd, lat, lon):
             descartadas += 1
             continue
         secoes[(r['SG_UF'], cd, r['NR_ZONA'].lstrip('0'))].append((lat, lon, int(r['QT_ELEITOR_SECAO']) or 1))
@@ -191,7 +185,7 @@ def escreve(mz_cand, info, tse2ibge, cent, v22, zip_locais, turno, out, mun_json
         f.write('[\n' + ',\n'.join(json.dumps(r, ensure_ascii=False, separators=(',', ':')) for r in recs) + '\n]\n')
 
     print(len(recs), 'pares município × zona ->', os.path.relpath(out))
-    print(f'{descartadas} seções descartadas por estarem a mais de {MAX_KM} km do município; '
+    print(f'{descartadas} seções descartadas por caírem fora do município; '
           f'{sem_coord} pares sem coordenada (centroide do município)')
     print(f'{len(sem22)} pares sem comparação com 2022:')
     for z in sem22:

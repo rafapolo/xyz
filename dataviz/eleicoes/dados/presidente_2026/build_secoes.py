@@ -23,9 +23,10 @@ de fora: candidatura indeferida, os votos não contam como válidos — sem ele 
 seções fecha voto a voto com a divulgação (118.969.906).
 
 - votos: votacao_secao_2026_BR.zip (dados abertos do TSE; o _BR é o de presidente)
-- coordenada e nome do local: eleitorado_local_votacao_2026 (o mesmo de build_zonas.py),
-  com o mesmo descarte de geocodificação a mais de MAX_KM do município; sem coordenada
-  válida o local cai no ponto da sua zona naquele município (data_presidente_2026_zonas.json)
+- coordenada e nome do local: eleitorado_local_votacao_2026 (o mesmo de build_zonas.py); a
+  coordenada tem que cair dentro do município, e quando a do TSE não cai vem do cadastro de anos
+  anteriores ou do CNEFE (geo_local.py); sem nenhuma válida o local cai no ponto da sua zona
+  naquele município (data_presidente_2026_zonas.json)
 
 - 2022: br_tse_eleicoes.resultados_candidato_secao (votos) + perfil_eleitorado_local_votacao
   (local de cada seção) no beelink. O TSE renumera seções e remaneja eleitores entre
@@ -41,7 +42,8 @@ import csv, io, json, os, re, subprocess, unicodedata
 from collections import defaultdict
 
 from build import BASE, CENTROIDE_CORRIGIDO, NOMES, centroides, get
-from build_zonas import MAX_KM, baixa_zip, km, le_csv, ZIPS, CDN
+from build_zonas import baixa_zip, le_csv, ZIPS, CDN
+from geo_local import Geo
 
 ZIPS['secao'] = f'{CDN}/votacao_secao/votacao_secao_2026_BR.zip'
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -138,18 +140,28 @@ def escreve(secao, local_de, nm_local, tse2ibge, cent, zip_locais, turno, zonas_
     ordem = sorted(por_nr, key=lambda nr: -por_nr[nr])
     meta = [[NOMES[CANDIDATOS[nr][0]], CANDIDATOS[nr][1]] for nr in ordem]
 
-    # coordenadas dos locais
-    coord = {}
+    # coordenadas dos locais: a primeira que cai dentro do município (geo_local.py)
+    # o arquivo traz linhas dos dois turnos; vale a do turno, e a do outro só para local que não está nele
+    info, outro = {}, {}
     for r in le_csv(baixa_zip(zip_locais), 'eleitorado_local_votacao_2026_BRASIL.csv'):
-        if r['NR_TURNO'] != turno or r['SG_UF'] == 'ZZ':
+        if r['SG_UF'] == 'ZZ':
             continue
         k = (r['SG_UF'], int(r['NR_ZONA']), r['CD_MUNICIPIO'].lstrip('0'), int(r['NR_LOCAL_VOTACAO']))
-        if k in coord:
-            continue
-        lat, lon = float(r['NR_LATITUDE'].replace(',', '.')), float(r['NR_LONGITUDE'].replace(',', '.'))
-        c = cent[tse2ibge[(r['SG_UF'], r['CD_MUNICIPIO'].lstrip('0'))]]
-        if lat != -1 and lon != -1 and km((lat, lon), (float(c['lat']), float(c['lon']))) <= MAX_KM:
-            coord[k] = (lat, lon)
+        d = info if r['NR_TURNO'] == turno else outro
+        if k not in d:
+            d[k] = dict(nome=r['NM_LOCAL_VOTACAO'].strip(), endereco=r['DS_ENDERECO'].strip(), bairro=r['NM_BAIRRO'].strip(),
+                           cep=r['NR_CEP'].strip(), lat=float(r['NR_LATITUDE'].replace(',', '.')),
+                           lon=float(r['NR_LONGITUDE'].replace(',', '.')))
+    alvo = {(uf, zona) + local_de[(uf, zona, sec)] for (uf, zona, sec) in secao}
+    faltam = alvo - info.keys()
+    for k in faltam:
+        info[k] = outro.get(k) or dict(nome=nm_local[k], endereco='', bairro='', cep='', lat=None, lon=None)
+    print(f'{len(faltam)} locais com voto fora das linhas do turno, {len(faltam - outro.keys())} fora do arquivo todo')
+    coord = Geo(tse2ibge, cent).resolve({k: info[k] for k in alvo}, turno, mesmo_local)
+    origens = defaultdict(int)
+    for _, _, o in coord.values():
+        origens[o] += 1
+    print('coordenada dos locais:', dict(sorted(origens.items(), key=lambda x: -x[1])))
     ponto_zona = {(r[0], r[1], r[19][0]): (r[2], r[3]) for r in zonas}
 
     # 2022: candidata = mesma urna no mesmo local; depois o voto tem que ter variado como o do local
@@ -188,7 +200,7 @@ def escreve(secao, local_de, nm_local, tse2ibge, cent, zip_locais, turno, zonas_
             mi[(uf, nm)] = len(muns)
             muns.append(nm)
         if k in coord:
-            lat, lon = coord[k]
+            lat, lon, _ = coord[k]
         else:
             sem_coord += 1
             lat, lon = ponto_zona[(uf, nm, zona)]
