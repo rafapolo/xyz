@@ -55,6 +55,7 @@ const CARTOES: Record<string, Cartao> = {
   },
   "dataviz/encarceramento_homicidio.html": {
     desc: "Entre 2016 e 2022 o Brasil prendeu 18% mais e viu o homicídio cair 26%. Estado por estado, as duas curvas contam outra história.",
+    img: `${BASE}/dataviz/og-encarceramento.png`,
   },
   "dataviz/polis/index.html": {
     titulo: "polis",
@@ -104,11 +105,11 @@ const CARTOES: Record<string, Cartao> = {
   },
   "dataviz/uf/index.html": {
     titulo: "Brasil: cada ponto é um CNPJ",
-    desc: "Todos os estabelecimentos com CNPJ do Brasil no mapa, um ponto por endereço, pelo cadastro da Receita Federal. Escolha um estado.",
+    desc: "18 milhões de estabelecimentos ativos com CNPJ no mapa, um ponto por endereço geolocalizado, pelo cadastro da Receita Federal. Escolha um estado.",
   },
   "dataviz/uf/br/index.html": {
     titulo: "Brasil: cada ponto é um CNPJ",
-    desc: "Todos os estabelecimentos com CNPJ do Brasil no mapa, um ponto por endereço, pelo cadastro da Receita Federal.",
+    desc: "18 milhões de estabelecimentos ativos com CNPJ no mapa, um ponto por endereço geolocalizado, pelo cadastro da Receita Federal.",
   },
   "malafaia/index.html": {
     titulo: "O império de Silas Malafaia (1971–2025)",
@@ -119,7 +120,7 @@ const CARTOES: Record<string, Cartao> = {
 for (const [uf, nome] of Object.entries(UFS)) {
   CARTOES[`dataviz/uf/${uf}/index.html`] = {
     titulo: `${nome}: cada ponto é um CNPJ`,
-    desc: `Todos os estabelecimentos com CNPJ de ${nome} no mapa, um ponto por endereço, pelo cadastro da Receita Federal.`,
+    desc: `Os estabelecimentos ativos com CNPJ de ${nome} no mapa, um ponto por endereço geolocalizado, pelo cadastro da Receita Federal.`,
   };
 }
 
