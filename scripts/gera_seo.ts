@@ -83,13 +83,12 @@ const CARTOES: Record<string, Cartao> = {
     desc: "Médias, medianas e quartis do salário formal nos 5.570 municípios, por ano e setor, com os extremos e os vínculos por trás de cada número.",
   },
   "dataviz/religioes/igrejas/index.html": {
-    desc: "Os 570 mil templos religiosos do Cadastro Nacional de Endereços (CNEFE, Censo 2022) no mapa, um ponto por templo, coloridos por vertente.",
-    img: "https://rodado.xyz/plataformas/img/teaser-igrejas.webp",
+    desc: "Os 765 mil pontos religiosos do Cadastro Nacional de Endereços (CNEFE, Censo 2022) no mapa, coloridos por vertente: evangélicos, católicos, espíritas, umbanda e candomblé e mais.",
   },
   "dataviz/religioes/notes/relatorio.html": {
     titulo: "Templos religiosos do Brasil por vertente: relatório",
     desc: "765 mil templos geolocalizados: distribuição por UF, série de fundação, formalização por vertente e dez perguntas em aberto.",
-    img: "https://rodado.xyz/plataformas/img/teaser-igrejas.webp",
+    img: "https://xn--2dk.xyz/dataviz/religioes/igrejas/og.png",
   },
   "dataviz/rio/confeccoes.html": {
     titulo: "Confecções no estado do Rio de Janeiro",
@@ -176,7 +175,16 @@ for (const rel of publicas) {
   const limpo = html.replace(sentinela, "");
   const temProprio = /property=["']og:title["']/i.test(limpo);
   const c = CARTOES[rel];
-  if (temProprio) continue;
+  if (temProprio) {
+    // cartão à mão: só confere que tem os três campos que o checa_seo.ts
+    // do rodado exige no ar
+    const faltam = ["og:image", "twitter:card"].filter((p) => !limpo.includes(p));
+    if (faltam.length) {
+      problemas++;
+      console.log(`  ! ${rel}: og:title à mão, mas sem ${faltam.join(", ")}`);
+    }
+    continue;
+  }
   if (!c) {
     problemas++;
     console.log(`  ! ${rel}: sem og:title e sem linha em CARTOES`);
