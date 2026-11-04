@@ -1,8 +1,22 @@
 (function () {
   var root = document.documentElement;
   var btn = document.getElementById('themeToggle');
-  var stored = null;
-  try { stored = localStorage.getItem('rodado-theme'); } catch (e) { /* no-op */ }
+
+  // ?mode=dark or ?mode=light forces the theme for this pageview, overriding
+  // whatever's in localStorage — useful for shared links and screenshots.
+  // It does not overwrite the stored preference; the next toggle click (or a
+  // reload without the param) falls back to it as usual.
+  var fromUrl = null;
+  try {
+    var m = new URLSearchParams(location.search).get('mode');
+    if (m === 'dark' || m === 'light') fromUrl = m;
+  } catch (e) { /* no-op */ }
+
+  // localStorage lança em alguns modos privados (Safari antigo) e com cookies
+  // bloqueados: sem o try, o botão de tema morria junto
+  var saved = null;
+  try { saved = localStorage.getItem('rodado-theme'); } catch (e) { /* no-op */ }
+  var stored = fromUrl || saved;
 
   // sem escolha salva, segue o tema do sistema (e acompanha se ele mudar)
   var sistema = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
@@ -53,4 +67,14 @@
       applyIcon(next);
     });
   }
+})();
+
+// menu fixo: publica a altura em --nav-h (barra de filtros sticky e âncoras)
+(function () {
+  var nav = document.querySelector('.site-nav');
+  if (!nav) return;
+  var set = function () { document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px'); };
+  set();
+  if (window.ResizeObserver) new ResizeObserver(set).observe(nav);
+  else window.addEventListener('resize', set);
 })();
