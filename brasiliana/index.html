@@ -561,23 +561,73 @@
     #card-wrap { grid-template-columns: minmax(240px, 42vw) 1fr; }
     #filters-body { max-height: 58dvh; }
   }
+  /* ─── tour: 2 min de cinema sobre o mural (faixas 2.39:1, legenda, foto da peça) ─── */
+  :root { --lb: clamp(0px, calc((100dvh - 100vw / 2.39) / 2), 16dvh); --t-ocre: #d8b04a; --t-papel: #f4f1e8; --t-ease: cubic-bezier(.4,0,.2,1); }
+  #tour-abrir {
+    position: fixed; z-index: 26; top: calc(48px + env(safe-area-inset-top)); left: 9px;
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 11px;
+    font: 600 12px/1 'Public Sans', system-ui, sans-serif; letter-spacing: .04em; color: var(--t-papel);
+    background: rgba(4,4,5,.88); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; cursor: pointer;
+    transition: opacity .4s, background .2s;
+  }
+  #tour-abrir::before { content: ""; border-left: 7px solid var(--t-ocre); border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; }
+  #tour-abrir:hover { background: #000; border-color: rgba(216,176,74,.5); }
+  body.touring #tour-abrir, body.touring #filters, body.touring #hint, body.touring #wordmark, body.touring #filters-scrim { opacity: 0 !important; pointer-events: none !important; transition: opacity .6s; }
+  body.touring #canvas { cursor: default; }
+  #tour { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  #tour[hidden], #tour-convite[hidden] { display: none; }
+  #tour .bar { position: absolute; left: 0; right: 0; height: var(--lb); background: #000; transform: scaleY(0); transition: transform 900ms var(--t-ease); }
+  #tour .bar.top { top: 0; transform-origin: top; }
+  #tour .bar.bottom { bottom: 0; transform-origin: bottom; }
+  #tour.on .bar { transform: scaleY(1); }
+  #tour-progress { position: absolute; left: 0; right: 0; bottom: var(--lb); height: 2px; background: rgba(244,241,232,.12); }
+  #tour-progress i { display: block; height: 100%; background: var(--t-ocre); transform: scaleX(0); transform-origin: left; }
+  #tour-left { position: absolute; right: 10px; bottom: calc(var(--lb) + 6px); font: 12px ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--t-ocre); }
+  #tour-parar, #tour-som { position: absolute; top: max(8px, calc(var(--lb) - 40px)); pointer-events: auto; padding: 5px 12px;
+    font: 600 12px 'Public Sans', system-ui, sans-serif; background: rgba(0,0,0,.6); color: var(--t-papel);
+    border: 1px solid rgba(244,241,232,.25); border-radius: 999px; cursor: pointer; }
+  #tour-parar { left: 16px; }
+  #tour-som { left: 92px; color: var(--t-ocre); }
+  #tour-som.mudo { color: rgba(244,241,232,.45); text-decoration: line-through; }
+  #tour-progress, #tour-left, #tour-parar, #tour-som { transition: opacity 200ms; }
+  #tour.saindo #tour-progress, #tour.saindo #tour-left, #tour.saindo #tour-parar, #tour.saindo #tour-som, #tour.saindo #tour-cap, #tour.saindo #tour-foto { opacity: 0; pointer-events: none; transition: opacity 200ms; }
+  /* sombra sob a legenda: a parede clara apagava o texto */
+  #tour::after { content: ""; position: absolute; left: 0; right: 0; bottom: var(--lb); height: 34dvh; pointer-events: none;
+    background: linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.5) 45%, transparent); opacity: 0; transition: opacity 900ms; }
+  #tour.on::after { opacity: 1; }
+  #tour.saindo::after { opacity: 0; transition: opacity 200ms; }
+  #tour-cap { z-index: 1; position: absolute; left: 0; right: 0; bottom: calc(var(--lb) + 26px); padding: 0 8vw; text-align: center;
+    opacity: 0; transform: translateY(8px); transition: opacity 600ms, transform 600ms; }
+  #tour-cap.on { opacity: 1; transform: none; }
+  #tour-kicker { display: inline-block; padding: 5px 11px; margin-bottom: 10px; background: rgba(8,8,9,.78); border: 1px solid rgba(244,241,232,.16);
+    font: 600 11px/1.3 'Public Sans', system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--t-ocre); }
+  #tour-kicker:empty { display: none; }
+  #tour-line { display: block; max-width: 980px; margin: 0 auto; font: 400 clamp(18px, 2.2vw, 31px)/1.28 Georgia, 'Times New Roman', serif; color: var(--t-papel);
+    text-shadow: 0 2px 18px rgba(0,0,0,.95), 0 0 3px rgba(0,0,0,.9); text-wrap: balance; }
+  #tour-line q { quotes: "“" "”"; font-style: italic; }
+  /* a peça em destaque: a cópia de acesso, de pé sobre o mural, com a ficha mínima embaixo */
+  #tour-foto { z-index: 1; position: absolute; left: 50%; top: calc(var(--lb) + 3dvh); transform: translate(-50%, 10px); margin: 0;
+    opacity: 0; transition: opacity 900ms, transform 900ms var(--t-ease); text-align: center; }
+  #tour-foto.on { opacity: 1; transform: translate(-50%, 0); }
+  #tour-foto img { display: block; margin: 0 auto; max-width: min(78vw, 980px);
+    max-height: calc(100dvh - 2 * var(--lb) - 3dvh - 270px); min-height: 120px; object-fit: contain;
+    box-shadow: 0 24px 90px rgba(0,0,0,.85), 0 0 0 1px rgba(244,241,232,.14); background: #111; }
+  #tour-foto figcaption { margin-top: 7px; font: 500 11px/1.35 'Public Sans', system-ui, sans-serif; letter-spacing: .03em; color: rgba(244,241,232,.62);
+    max-width: min(78vw, 760px); margin-left: auto; margin-right: auto; text-shadow: 0 1px 8px #000;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #tour-foto figcaption b { font-weight: 600; color: rgba(244,241,232,.88); }
+  #tour-convite { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(6,6,7,.6); backdrop-filter: blur(2px); cursor: pointer; }
+  #tour-convite button { display: inline-flex; align-items: center; gap: 12px; font: 700 19px 'Public Sans', system-ui, sans-serif; color: #141210; background: var(--t-ocre);
+    border: 0; border-radius: 999px; padding: 15px 28px; cursor: pointer; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  #tour-convite button::before { content: ""; border-left: 13px solid #141210; border-top: 8px solid transparent; border-bottom: 8px solid transparent; }
+  #tour-convite small { display: block; font: 500 13px 'Public Sans', system-ui, sans-serif; opacity: .75; margin-top: 2px; text-align: left; }
+  @media (max-width: 640px) {
+    #tour-cap { padding: 0 5vw; bottom: calc(var(--lb) + 20px); }
+    #tour-line { font-size: 17px; }
+    #tour-foto img { max-width: 90vw; max-height: calc(100dvh - 2 * var(--lb) - 3dvh - 300px); }
+    #tour-abrir { top: calc(50px + env(safe-area-inset-top)); left: 6px; }
+  }
 </style>
-<!-- seo:start (gerado por scripts/gera_seo.ts — não editar à mão) -->
-<link rel="canonical" href="https://xn--2dk.xyz/brasiliana/">
-<meta name="description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="ミ.xyz">
-<meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="https://xn--2dk.xyz/brasiliana/">
-<meta property="og:title" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta property="og:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
-<meta property="og:image:alt" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta name="twitter:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta name="twitter:image" content="https://xn--2dk.xyz/images/image1.png">
-<!-- seo:end -->
 </head>
 <body>
 
@@ -682,6 +732,18 @@
     <button id="f-clear" class="disabled">limpar filtros</button>
   </div>
 </div>
+<button type="button" id="tour-abrir" hidden title="um passeio de 2 minutos pelo acervo, com som">tour de 2 min</button>
+<div id="tour-convite" hidden><button type="button"><span><span>Aperte para começar</span><small>tour de 2 minutos pelo acervo, com som</small></span></button></div>
+<div id="tour" hidden aria-live="polite">
+  <div class="bar top"></div><div class="bar bottom"></div>
+  <figure id="tour-foto"><img alt=""><figcaption></figcaption></figure>
+  <div id="tour-cap"><span id="tour-kicker"></span><span id="tour-line"></span></div>
+  <div id="tour-progress"><i></i></div>
+  <span id="tour-left"></span>
+  <button id="tour-parar" type="button" title="parar o tour (Esc)">✕ esc</button>
+  <button id="tour-som" type="button" title="som do tour (liga/desliga)" aria-label="som do tour" aria-pressed="true">♪</button>
+</div>
+
 <p id="hint">
   <span class="desk">arraste para deslocar · scroll para aproximar · clique numa peça · setas navegam com a ficha aberta · <b style="font-weight:600;color:#bbb">f</b> filtros · <b style="font-weight:600;color:#bbb">/</b> busca</span>
   <span class="touch">arraste para deslocar · pinça para aproximar · toque numa peça</span>
@@ -1214,6 +1276,7 @@ window.addEventListener('popstate', e => {
   if (syncUrlHook) syncUrlHook();
 });
 let syncUrlHook = null;   // set by setupFilters
+let reapplyHook = null;   // set by setupFilters: the tour hands the dimming back to the filters
 const filtersEl = document.getElementById('filters');
 const filtersHead = document.getElementById('filters-head');
 const filtersScrim = document.getElementById('filters-scrim');
@@ -2595,6 +2658,7 @@ function setupFilters(mapData) {
     try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch {}
   }
   syncUrlHook = syncUrl;
+  reapplyHook = apply;
   cardFilter = f => {
     Object.assign(state, { estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' }, f);
     if (f.institution !== undefined) { setSelect(selInst, state.institution); fillSeries(); }
@@ -2892,6 +2956,34 @@ async function main() {
   const linked = deepLink && (tileByHandle.get(deepLink) || tileByRef.get(deepLink.trim()));
   if (linked) openTile(linked);
 
+  // ── the tour (script below the module) drives the wall through this, and only this ──
+  // It moves camTarget and the camera's tilt, and lights subsets by targetOpacity
+  // alone: the filter state, the selects and the URL stay the reader's.
+  window.mural = {
+    camTarget, camera, tiles: tileMeshes, tileByHandle, entries: atlasEntries,
+    authorities, instName, shortName, prettyDate, mediumUrl, HALF_FOV_TAN, MIN_Z, MAX_Z,
+    aberto: () => !!selected,
+    wake,
+    destacar(pred, dim = 0.12) {
+      tileMeshes.forEach(t => {
+        const o = pred(t.userData) ? 1 : dim;
+        if (t.userData.targetOpacity !== o) { t.userData.targetOpacity = o; markAnimating(t); }
+      });
+      wake(30);
+    },
+    restaurar() {
+      if (reapplyHook) reapplyHook();
+      else tileMeshes.forEach(t => { t.userData.targetOpacity = 1; markAnimating(t); });
+      wake(30);
+    },
+    limites() {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      tileMeshes.forEach(t => { const p = t.userData.basePos; x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); });
+      return { x0, x1, y0, y1 };
+    },
+  };
+  window.dispatchEvent(new Event('mural-pronto'));
+
   // on a phone the hint sits over the wall itself — it retires once read
   if (isTouch) setTimeout(() => { document.getElementById('hint').style.opacity = '0'; }, 7000);
 }
@@ -2901,6 +2993,710 @@ main().catch(err => {
   loadFinished = true;
   showFailure('O mural não terminou de carregar.', `${err.message} — tentar de novo carrega a versão leve.`);
 });
+</script>
+<script>
+/* ─── som do tour ────────────────────────────────────────────────────────────
+   Música feita na hora com Web Audio, sem arquivo de som, e só no tour. Cada
+   cena toca a partir dos metadados da peça em destaque, de forma determinística:
+   a mesma peça soa sempre igual, duas peças nunca soam iguais.
+     handle    → semente das frases (o sorteio é sempre o mesmo para a mesma peça)
+     ano       → andamento (1833 lento, 1940 mais vivo), instrumento da época
+                 (caixa de música antes de 1860, piano de salão depois, cordas no séc. XX)
+                 e o chiado de disco velho (quanto mais antiga, mais chiado)
+     cor (ck)  → o tom da cópia: sépia quente desafina e escurece (wow de disco),
+                 cópia clara sobe de oitava, escura desce
+     assuntos  → o modo e a densidade: escravidão, prisões e guerra em eólio, sem pulso
+                 e com poucas notas; povos indígenas só com quintas abertas e silêncio
+                 (nenhum pastiche de música indígena); colônias em dórico; obras com
+                 golpes de martelo; fotos aéreas em lídio, com arpejos que sobem
+     lugar     → a nota da cena (UF da cobertura: RJ ré, SP mi, BA lá, ES fá…)
+     câmera    → perto clareia as cordas; voo rápido sopra um vento
+   ?som=debug expõe window.som (som.pico() mede a saída, som.perfil() o da cena). */
+(() => {
+  const CHAVE = 'mural-tour-som';
+  const DO3 = 130.81;
+  const MODOS = {
+    grave:  [0, 2, 3, 5, 7, 8, 10],      // eólio
+    aberto: [0, 7, 12],                  // quintas abertas, quase silêncio
+    colono: [0, 2, 3, 5, 7, 9, 10],      // dórico
+    obra:   [0, 2, 4, 5, 7, 9, 10],      // mixolídio
+    alto:   [0, 2, 4, 6, 7, 9, 11],      // lídio
+    luz:    [0, 2, 4, 7, 9],             // pentatônica maior
+  };
+  const UF = { RJ: 2, SP: 4, BA: 9, ES: 5, AM: 0, PA: 0, MT: 7, TO: 7, GO: 7, MG: 11, PE: 9, RS: 3, SC: 3, PR: 3, CE: 8 };
+  const lim = (v, a, b) => Math.max(a, Math.min(b, v));
+  const deburr = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  // sorteio com semente (mulberry32): a mesma peça dá sempre a mesma música
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  const hash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+
+  // o perfil sonoro de uma peça, lido dos campos do atlas-map.json
+  function perfil(handle, entry) {
+    const meta = entry?.meta || {};
+    const ano = meta.ano || 1900;
+    const txt = deburr([meta.title, ...(meta.subject || []), ...(meta.description || [])].join(' '));
+    const humor =
+      /escrav|condenad|prisioneir|jagunc|canudos|detent/.test(txt) ? 'grave' :
+      /indigen|\bindios?\b|karaja|caraja|bororo|aldeia/.test(txt) ? 'aberto' :
+      /colonia|colono|imigra/.test(txt) ? 'colono' :
+      /demoli|desmonte|obras|em construcao/.test(txt) ? 'obra' :
+      /aere|aviac|aviao|hidroaviao/.test(txt) ? 'alto' : 'luz';
+    const ck = entry?.ck ?? 0x404040;
+    const r = (ck >> 16) & 255, g = (ck >> 8) & 255, b = ck & 255;   // média da imagem, já pela metade
+    const quente = lim((r - b) / 36, 0, 1);
+    const claro = (r + g + b) / (3 * 128);
+    const cob = [...(meta.coverage || []), ...(meta.subject || [])].join(' ');
+    const uf = (cob.match(/\b(RJ|SP|BA|ES|AM|PA|MT|TO|GO|MG|PE|RS|SC|PR|CE)\b/) || [])[1];
+    const semente = hash(handle);
+    const era = ano < 1860 ? 'caixa' : 'piano';
+    let bpm = 56 + lim((ano - 1830) / 110, 0, 1) * 38;
+    if (humor === 'grave') bpm *= 0.8;
+    if (humor === 'aberto') bpm *= 0.7;
+    if (humor === 'obra') bpm *= 1.08;
+    return {
+      handle, ano, humor, era, bpm: Math.round(bpm),
+      raiz: uf != null ? UF[uf] : semente % 12, uf: uf || null,
+      oitava: claro > 0.72 ? 1 : claro < 0.32 ? -1 : 0,
+      quente, wow: 3 + quente * 16,                      // cents de oscilação, como disco empenado
+      corte: 1400 + (1 - quente) * 4200,                  // cópia quente, som abafado
+      chiado: lim((1975 - ano) / 140, 0.08, 1),
+      cordas: ano >= 1900 ? 1 : ano >= 1870 ? 0.55 : 0.25,
+      densidade: lim((meta.subject || []).length / 9, 0.25, 1) * (humor === 'grave' ? 0.45 : humor === 'aberto' ? 0.12 : 1),
+      semente,
+    };
+  }
+
+  let ctx = null, saida, bus, sala, wowG, chiadoG, chiadoF, ventoG, ventoF, ruido, padF, drone;
+  let tocando = false, ligado = true, timer = 0, raf = 0;
+  let P = null, sorte = Math.random, prox = 0, passo = 0, grau = 3, acorde = 0, ultimaFrase = 0;
+  let camAnt = null, vel = 0;
+  try { ligado = localStorage.getItem(CHAVE) !== 'off'; } catch {}
+
+  const hz = (semi, oit = 0) => DO3 * 2 ** ((semi + 12 * oit) / 12);
+  const nota = (g) => { const m = MODOS[P.humor]; const n = m.length; return m[((g % n) + n) % n] + 12 * Math.floor(g / n) + P.raiz; };
+
+  function montar() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (navigator.audioSession) navigator.audioSession.type = 'ambient';
+    const pa = ctx.createBiquadFilter(); pa.type = 'highpass'; pa.frequency.value = 35;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+    const limit = ctx.createDynamicsCompressor(); limit.threshold.value = -3; limit.ratio.value = 20; limit.attack.value = 0.002; limit.release.value = 0.1;
+    saida = ctx.createGain(); saida.gain.value = 0;
+    bus = ctx.createGain(); bus.gain.value = 0.85;
+    bus.connect(pa); pa.connect(comp); comp.connect(limit); limit.connect(saida); saida.connect(ctx.destination);
+
+    // sala: 2,6 s de ruído morrendo
+    const n = Math.floor(ctx.sampleRate * 2.6), ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let lp = 0;
+      for (let i = 0; i < n; i++) { const t = i / n; lp += (Math.random() * 2 - 1 - lp) * (0.9 - 0.75 * t); d[i] = lp * (1 - t) ** 2.6 * 0.6; } }
+    const conv = ctx.createConvolver(); conv.buffer = ir;
+    sala = ctx.createGain(); sala.gain.value = 0.35; sala.connect(conv); conv.connect(bus);
+
+    ruido = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const rr = ruido.getChannelData(0); for (let i = 0; i < rr.length; i++) rr[i] = Math.random() * 2 - 1;
+
+    // wow: uma oscilação lenta de afinação que todos os instrumentos de altura recebem
+    const wow = ctx.createOscillator(); wow.frequency.value = 0.55;
+    wowG = ctx.createGain(); wowG.gain.value = 6; wow.connect(wowG); wow.start();
+
+    // chiado de disco/cópia antiga: ruído agudo constante + estalos sorteados no agendador
+    const cs = ctx.createBufferSource(); cs.buffer = ruido; cs.loop = true;
+    chiadoF = ctx.createBiquadFilter(); chiadoF.type = 'bandpass'; chiadoF.frequency.value = 5200; chiadoF.Q.value = 0.6;
+    chiadoG = ctx.createGain(); chiadoG.gain.value = 0;
+    cs.connect(chiadoF); chiadoF.connect(chiadoG); chiadoG.connect(bus); cs.start();
+
+    // vento dos voos
+    const vs = ctx.createBufferSource(); vs.buffer = ruido; vs.loop = true; vs.playbackRate.value = 0.5;
+    ventoF = ctx.createBiquadFilter(); ventoF.type = 'bandpass'; ventoF.Q.value = 1.1; ventoF.frequency.value = 400;
+    ventoG = ctx.createGain(); ventoG.gain.value = 0;
+    vs.connect(ventoF); ventoF.connect(ventoG); ventoG.connect(bus); ventoG.connect(sala); vs.start();
+
+    // bordão: triângulo grave + quinta, sempre sob tudo
+    const dg = ctx.createGain(); dg.gain.value = 0;
+    const df = ctx.createBiquadFilter(); df.type = 'lowpass'; df.frequency.value = 500;
+    const o1 = ctx.createOscillator(); o1.type = 'triangle';
+    const o2 = ctx.createOscillator(); o2.type = 'sine';
+    const g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o1.connect(dg); o2.connect(g2); g2.connect(dg); dg.connect(df); df.connect(bus); df.connect(sala);
+    [o1, o2].forEach(o => { wowG.connect(o.detune); o.start(); });
+    drone = { g: dg, o1, o2, f: df };
+
+    // as cordas passam por um filtro que a câmera abre quando se aproxima
+    padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.frequency.value = 900; padF.Q.value = 0.5;
+    padF.connect(bus); const ps = ctx.createGain(); ps.gain.value = 0.6; padF.connect(ps); ps.connect(sala);
+  }
+
+  // ── instrumentos ──
+  function osc(type, f, t) { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); wowG.connect(o.detune); return o; }
+
+  // piano de salão: parciais um pouco inarmônicos, ataque duro e decaimento longo
+  function piano(f, t, dur, v = 0.6, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = lim(pan, -1, 1);
+    const tf = ctx.createBiquadFilter(); tf.type = 'lowpass'; tf.frequency.value = Math.min(P.corte, f * 9);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.11 * v, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.03 * v, t + 0.35); g.gain.setTargetAtTime(0.0001, t + Math.max(0.3, dur), 0.35);
+    const fim = t + dur + 1.8;
+    [[1, 1], [2.003, 0.45], [3.01, 0.22], [4.03, 0.1]].forEach(([k, a]) => {
+      const o = osc('sine', f * k, t), og = ctx.createGain(); og.gain.value = a;
+      o.connect(og); og.connect(tf); o.start(t); o.stop(fim);
+    });
+    tf.connect(g); g.connect(p); p.connect(bus); const e = ctx.createGain(); e.gain.value = 0.5; p.connect(e); e.connect(sala);
+  }
+  // caixa de música: lâmina de aço, um seno e um parcial a 2,76× que morre rápido
+  function caixa(f, t, dur, v = 0.6, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = lim(pan, -1, 1);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.09 * v, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0005, t + 1.6);
+    const a = osc('sine', f * 2, t), b = osc('sine', f * 2 * 2.76, t), bg = ctx.createGain();
+    bg.gain.setValueAtTime(0.5, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    a.connect(g); b.connect(bg); bg.connect(g); g.connect(p); p.connect(bus);
+    const e = ctx.createGain(); e.gain.value = 0.7; p.connect(e); e.connect(sala);
+    [a, b].forEach(o => { o.start(t); o.stop(t + 1.7); });
+  }
+  // sopro: seno longo com ar, sem melodia — só para as cenas abertas
+  function sopro(f, t, dur, v = 0.5, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = pan;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.05 * v, t + dur * 0.4); g.gain.linearRampToValueAtTime(0, t + dur);
+    const o = osc('sine', f, t); o.connect(g);
+    const s = ctx.createBufferSource(); s.buffer = ruido; const sf = ctx.createBiquadFilter(); sf.type = 'bandpass'; sf.frequency.value = f * 2; sf.Q.value = 8;
+    const sg = ctx.createGain(); sg.gain.value = 0.3; s.connect(sf); sf.connect(sg); sg.connect(g);
+    g.connect(p); p.connect(sala); const d = ctx.createGain(); d.gain.value = 0.6; p.connect(d); d.connect(bus);
+    o.start(t); o.stop(t + dur + 0.1); s.start(t, Math.random()); s.stop(t + dur + 0.1);
+  }
+  const voz = (f, t, dur, v, pan) => (P.humor === 'aberto' ? sopro : P.era === 'caixa' ? caixa : piano)(f, t, dur, v, pan);
+
+  // cordas: duas serras desafinadas, ataque lento
+  function cordas(semis, t, dur, v = 1) {
+    semis.forEach((s, i) => {
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.028 * v * P.cordas, t + dur * 0.35); g.gain.setTargetAtTime(0, t + dur * 0.85, dur * 0.12);
+      [-6, 6].forEach(dt => { const o = osc('sawtooth', hz(s, -1), t); o.detune.value = dt + (i - 1) * 2; o.connect(g); o.start(t); o.stop(t + dur * 1.4); });
+      g.connect(padF);
+    });
+  }
+  // martelo de obra: estalo metálico + baque
+  function martelo(t, v) {
+    const s = ctx.createBufferSource(); s.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3200; f.Q.value = 9;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.22 * v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    s.connect(f); f.connect(g); g.connect(bus); const e = ctx.createGain(); e.gain.value = 0.4; g.connect(e); e.connect(sala);
+    s.start(t, Math.random()); s.stop(t + 0.12);
+    const o = ctx.createOscillator(); o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
+    const og = ctx.createGain(); og.gain.setValueAtTime(0.3 * v, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.connect(og); og.connect(bus); o.start(t); o.stop(t + 0.45);
+  }
+  // estalo de disco
+  function estalo(t, v) {
+    const s = ctx.createBufferSource(); s.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1500;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.18 * v, t); g.gain.exponentialRampToValueAtTime(0.0005, t + 0.012);
+    const p = ctx.createStereoPanner(); p.pan.value = Math.random() * 1.4 - 0.7;
+    s.connect(f); f.connect(g); g.connect(p); p.connect(bus); s.start(t, Math.random() * 1.8); s.stop(t + 0.02);
+  }
+
+  // ── composição ──
+  // frase: passeio sorteado (com a semente da peça) pelo modo da cena
+  function frase(t0) {
+    if (!P) return;
+    const b = 60 / P.bpm, n = P.humor === 'aberto' ? 2 : 3 + Math.floor(sorte() * 3);
+    let t = t0;
+    for (let i = 0; i < n; i++) {
+      grau = lim(grau + [-2, -1, -1, 1, 1, 2, 0][Math.floor(sorte() * 7)], 0, 11);
+      const ultima = i === n - 1;
+      const d = (P.humor === 'aberto' ? 4 : ultima ? 2 + Math.floor(sorte() * 2) : [0.5, 1, 1, 1.5][Math.floor(sorte() * 4)]) * b;
+      voz(hz(nota(grau), 1 + P.oitava), t, d * 0.95, 0.55 + sorte() * 0.3, (sorte() - 0.5) * 0.6);
+      t += d;
+    }
+    ultimaFrase = performance.now() + (t - t0) * 1000;
+  }
+
+  function agendar() {
+    if (!ctx || !P) return;
+    const colch = 60 / P.bpm / 2;   // colcheia
+    while (prox < ctx.currentTime + 0.15) {
+      const s = passo % 16, t = prox;
+      // acorde novo a cada dois compassos, na mesma ordem sorteada para esta peça
+      if (passo % 32 === 0 && P.humor !== 'aberto') {
+        acorde = [0, 3, 4, 5, 0, 1][Math.floor(sorte() * 6)];
+        cordas([nota(acorde), nota(acorde + 2), nota(acorde + 4)], t, colch * 32, 1);
+      }
+      if (passo % 32 === 0 && P.humor === 'aberto') cordas([P.raiz, P.raiz + 7], t, colch * 32, 0.7);
+      // notas soltas da época, raras nas cenas graves e quase nenhuma nas abertas
+      if (s % 2 === 0 && performance.now() > ultimaFrase && sorte() < 0.22 * P.densidade) {
+        grau = lim(grau + [-1, 1, 2, -2][Math.floor(sorte() * 4)], 0, 11);
+        voz(hz(nota(grau), 1 + P.oitava), t, colch * 2, 0.35 + sorte() * 0.25, (sorte() - 0.5) * 0.8);
+      }
+      // baixo no 1, menos nas cenas graves
+      if (s === 0 && P.humor !== 'aberto' && P.humor !== 'grave') voz(hz(nota(acorde), -1), t, colch * 6, 0.5, -0.1);
+      if (P.humor === 'grave' && passo % 32 === 0) voz(hz(nota(acorde), -1), t, colch * 12, 0.45, 0);
+      if (P.humor === 'obra' && (s === 0 || s === 8)) martelo(t, s === 0 ? 0.7 : 0.45);
+      if (P.humor === 'alto' && s === 0) for (let k = 0; k < 6; k++) voz(hz(nota(acorde + k * 2), k > 2 ? 2 : 1), t + k * colch / 2, colch, 0.32, -0.6 + k * 0.24);
+      // estalos da cópia antiga
+      if (sorte() < P.chiado * 0.5) estalo(t + Math.random() * colch, 0.4 + Math.random() * 0.6);
+      passo++; prox += colch;
+    }
+    if (performance.now() - ultimaFrase > 6500 + (P.semente % 3000) && P.humor !== 'aberto') frase(ctx.currentTime + 0.1);
+  }
+
+  // câmera → som: perto clareia as cordas; voo rápido sopra
+  function seguir() {
+    if (!tocando) return;
+    raf = requestAnimationFrame(seguir);
+    const m = window.mural; if (!m || !ctx) return;
+    const c = m.camera.position, agora = performance.now();
+    if (camAnt) {
+      const dt = Math.max(0.001, (agora - camAnt.t) / 1000);
+      const d = Math.hypot(c.x - camAnt.x, c.y - camAnt.y) / Math.max(1, c.z) + Math.abs(Math.log(c.z / camAnt.z));
+      const alvo = lim(Math.sqrt(d / dt / 1.2), 0, 1);
+      vel += (alvo - vel) * (alvo > vel ? 0.2 : 0.05);
+    }
+    camAnt = { x: c.x, y: c.y, z: c.z, t: agora };
+    const t = ctx.currentTime, perto = lim(1 - Math.log(c.z / 4) / Math.log(60), 0, 1);
+    padF.frequency.setTargetAtTime(500 + perto * 2600, t, 0.3);
+    ventoG.gain.setTargetAtTime(0.07 * vel * vel, t, 0.15);
+    ventoF.frequency.setTargetAtTime(300 + 1400 * vel, t, 0.15);
+  }
+
+  // ── API usada pelo tour ──
+  function iniciar() {
+    if (!ligado) return;
+    if (!ctx) montar();
+    ctx.resume();
+    tocando = true;
+    const t = ctx.currentTime;
+    saida.gain.cancelScheduledValues(t); saida.gain.setValueAtTime(saida.gain.value, t); saida.gain.linearRampToValueAtTime(1, t + 0.6);
+    drone.g.gain.setTargetAtTime(0.07, t, 1);
+    prox = t + 0.1; passo = 0; ultimaFrase = performance.now() + 1500; camAnt = null; vel = 0;
+    clearInterval(timer); timer = setInterval(agendar, 25);
+    cancelAnimationFrame(raf); seguir();
+  }
+  // cena nova: o perfil da peça em destaque assume o som
+  function cena(handle, entry) {
+    P = perfil(handle, entry);
+    sorte = rng(P.semente);
+    grau = 3 + Math.floor(sorte() * 3);
+    if (!tocando || !ctx) return P;
+    const t = ctx.currentTime;
+    drone.o1.frequency.setTargetAtTime(hz(P.raiz, -2), t, 0.9);
+    drone.o2.frequency.setTargetAtTime(hz(P.raiz + 7, -2), t, 0.9);
+    drone.f.frequency.setTargetAtTime(P.corte * 0.15, t, 0.8);
+    wowG.gain.setTargetAtTime(P.wow, t, 0.8);
+    chiadoG.gain.setTargetAtTime(0.012 * P.chiado, t, 0.6);
+    chiadoF.frequency.setTargetAtTime(3000 + (1 - P.quente) * 4000, t, 0.6);
+    passo = 0; prox = Math.max(prox, t + 0.05);
+    return P;
+  }
+  function legenda() {
+    if (!tocando || !P || P.humor === 'aberto') return;
+    if (performance.now() > ultimaFrase - 300) frase(ctx.currentTime + 0.25);
+  }
+  function parar(cadencia = false) {
+    if (!tocando) return;
+    tocando = false;
+    clearInterval(timer); cancelAnimationFrame(raf);
+    const t = ctx.currentTime; let fade = 0.8, pausa = 0;
+    if (cadencia && P) {
+      [4, 3, 1, 0].forEach((g, i) => voz(hz(nota(g), 1 + P.oitava), t + i * 0.45, i === 3 ? 3 : 0.45, 0.6, 0));
+      cordas([P.raiz, P.raiz + 7, P.raiz + 12], t + 1.35, 4, 1);
+      fade = 3.5; pausa = 1.4;
+    }
+    ventoG.gain.setTargetAtTime(0, t, 0.1);
+    saida.gain.cancelScheduledValues(t); saida.gain.setValueAtTime(saida.gain.value, t + pausa); saida.gain.linearRampToValueAtTime(0, t + pausa + fade);
+    drone.g.gain.setTargetAtTime(0, t + pausa, fade / 3);
+    setTimeout(() => { if (!tocando) ctx.suspend(); }, (pausa + fade + 0.5) * 1000);
+  }
+  function alternar() {
+    ligado = !ligado;
+    try { localStorage.setItem(CHAVE, ligado ? 'on' : 'off'); } catch {}
+    if (window.tour?.ativo()) {
+      if (ligado) { iniciar(); if (P) cena(P.handle, window.mural.entries[P.handle]); } else parar(false);
+    }
+    return ligado;
+  }
+  document.addEventListener('visibilitychange', () => { if (ctx && tocando) document.hidden ? ctx.suspend() : ctx.resume(); });
+
+  const api = { iniciar, cena, legenda, parar, alternar, ligado: () => ligado, perfil };
+  window.somTour = api;
+  if (new URLSearchParams(location.search).get('som') === 'debug') {
+    let an = null;
+    window.som = { ...api, ctx: () => ctx, atual: () => P, vel: () => vel, pico() {
+      if (!ctx) return null;
+      if (!an) { an = ctx.createAnalyser(); an.fftSize = 4096; saida.connect(an); }
+      const d = new Float32Array(an.fftSize); an.getFloatTimeDomainData(d);
+      let m = 0, q = 0; for (const x of d) { m = Math.max(m, Math.abs(x)); q += x * x; }
+      return { pico: +m.toFixed(3), rms: +Math.sqrt(q / d.length).toFixed(3) };
+    } };
+  }
+})();
+
+/* ─── tour: ~2 min de cinema pelo acervo ─────────────────────────────────────
+   Abre pelo botão "tour de 2 min" ou por ?tour=1 (um convite pede o clique que
+   libera o som). Esc, "✕ esc", arrastar ou rolar o mural param o tour e deixam
+   a câmera onde estava; a iluminação volta a ser a dos filtros.
+   Tom: frases curtas, números no lugar de adjetivos, títulos do catálogo citados
+   entre aspas com a data. Os números são contados aqui, dos dados carregados,
+   com o mesmo critério que acende os quadrados. Fatos de fora da ficha vêm dos
+   posts do blog da Brasiliana Fotográfica (arquivados em wordpress/). */
+(() => {
+  const $ = id => document.getElementById(id);
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fmt = n => n.toLocaleString('pt-BR');
+  const deburr = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  let M = null, ativo = false, inicio = 0, raf = 0, TOTAL = 120000, t0Cena = 0, anim = 0;
+  const pendentes = new Set();
+  class Parado extends Error {}
+  const espera = ms => new Promise((ok, falha) => {
+    const p = { falha }; p.id = setTimeout(() => { pendentes.delete(p); ok(); }, Math.max(0, ms)); pendentes.add(p);
+  });
+  const em = ms => espera(t0Cena + ms - performance.now());
+
+  // ── a câmera: posição sobre a parede (x, y), distância (z), inclinação (rx) e giro (rz).
+  // Inclinada, a câmera recua em y para o ponto mirado continuar no centro da tela.
+  const vista = { x: 0, y: 0, z: 30, rx: 0, rz: 0 };
+  const suave = t => 0.5 - Math.cos(Math.PI * t) / 2;
+  function aplicar(v) {
+    M.camTarget.set(v.x, v.y - v.z * Math.tan(v.rx), v.z);
+    M.camera.rotation.set(v.rx, 0, v.rz);
+    M.wake(3);
+  }
+  function mover(alvo, ms, arco = 0) {
+    cancelAnimationFrame(anim);
+    const de = { ...vista }, para = { ...vista, ...alvo };
+    if (reduz || ms <= 0) {
+      Object.assign(vista, para); aplicar(vista);
+      M.camera.position.copy(M.camTarget);
+      return;
+    }
+    const t0 = performance.now();
+    const passo = agora => {
+      if (!ativo) return;
+      const t = Math.min(1, (agora - t0) / ms), e = suave(t);
+      for (const k of ['x', 'y', 'rx', 'rz']) vista[k] = de[k] + (para[k] - de[k]) * e;
+      // distância em escala logarítmica, com um arco de grua por cima nos voos longos
+      vista.z = Math.exp(Math.log(de.z) + (Math.log(para.z) - Math.log(de.z)) * e) * (1 + arco * Math.sin(Math.PI * e));
+      aplicar(vista);
+      if (t < 1) anim = requestAnimationFrame(passo);
+    };
+    anim = requestAnimationFrame(passo);
+  }
+  const posDe = h => M.tileByHandle.get(h)?.userData.basePos;
+  // distância que mostra a parede inteira na largura da tela
+  function zInteira() {
+    const L = M.limites(), w = L.x1 - L.x0 + 2, h = L.y1 - L.y0 + 2;
+    const aspect = innerWidth / innerHeight;
+    return Math.min(M.MAX_Z, Math.max(w / (2 * M.HALF_FOV_TAN * aspect), h / (2 * M.HALF_FOV_TAN)) * 0.82);
+  }
+  // voo até uma peça: z perto, com a peça um pouco acima do centro (a legenda fica embaixo)
+  function irPara(h, ms = 3200, { z = 7, rx = 0.18, rz = 0, arco = 0.9 } = {}) {
+    const p = posDe(h); if (!p) return;
+    mover({ x: p.x, y: p.y, z, rx, rz }, ms, arco);
+  }
+  // derivar devagar em volta da peça durante a legenda
+  function derivar(h, ms, { z = 5.2, rx = 0.26, rz = 0.05, dx = 0.6 } = {}) {
+    const p = posDe(h); if (!p) return;
+    mover({ x: p.x + dx, y: p.y, z, rx, rz }, ms, 0);
+  }
+
+  // ── a peça em destaque e as legendas ──
+  const foto = $('tour-foto'), fotoImg = foto.querySelector('img'), fotoCap = foto.querySelector('figcaption');
+  function meta(h) { return M.entries[h]?.meta || {}; }
+  function autor(m) { return m.ai != null ? M.shortName(M.authorities[m.ai]) : ''; }
+  function mostrarFoto(h) {
+    const m = meta(h);
+    fotoImg.src = M.mediumUrl(h);
+    fotoImg.alt = m.title || '';
+    fotoCap.replaceChildren();
+    const b = document.createElement('b'); b.textContent = `“${(m.title || '[sem título]').replace(/^\[|\]$/g, '').replace(/^["“”]+|["“”]+$/g, '')}”`;
+    fotoCap.append(b, ` · ${m.dt || m.date || 's.d.'}${autor(m) ? ' · ' + autor(m) : ''} · ${M.instName(m.community)}`);
+    foto.classList.add('on');
+  }
+  const esconderFoto = () => foto.classList.remove('on');
+  async function legenda(kicker, linha) {
+    const cap = $('tour-cap');
+    cap.classList.remove('on');
+    await espera(420);
+    $('tour-kicker').textContent = kicker || '';
+    // «…» marca o que é citação do catálogo ou de um documento: vira <q>, o resto é texto
+    const l = $('tour-line'); l.replaceChildren();
+    linha.split(/(«[^»]*»)/).forEach(parte => {
+      if (parte.startsWith('«')) { const q = document.createElement('q'); q.textContent = parte.slice(1, -1); l.append(q); }
+      else if (parte) l.append(parte);
+    });
+    cap.classList.add('on');
+    somTour.legenda();
+  }
+
+  // ── os recortes, pelos cabeçalhos de assunto do catálogo (não por palavra solta:
+  // "Pedra do Índio" é uma pedra, "Vila Guarani" é uma usina de gás) ──
+  const assuntos = d => d.meta?.subject || [];
+  const temAssunto = re => d => assuntos(d).some(s => re.test(s));
+  const R = {
+    florence: d => /^Florence, Hercule/.test(M.authorities[d.meta?.ai] || ''),
+    ferrez: d => /^Ferrez, Marc/.test(M.authorities[d.meta?.ai] || ''),
+    escravidao: temAssunto(/^(Escrav|Trabalho escravo)/),
+    condenados: d => /^\[Galeria dos condenados/.test(d.meta?.title || ''),
+    indigenas: d => temAssunto(/^(Índios\b|Povos indígenas|Aldeias indígenas|Crianças indígenas|Habitação indígena)/)(d) || /\bind[íi]genas?\b|Karaj[áa]|Caraj[áa]/.test(d.meta?.title || ''),
+    colonias: d => temAssunto(/Colônias/)(d) || /^\[?Col[ôo]nias? /.test(d.meta?.title || ''),
+    canudos: d => /^Barros, Fl[áa]vio/.test(M.authorities[d.meta?.ai] || '') || assuntos(d).includes('Canudos'),
+    obras: temAssunto(/^Obras e demolições$/),
+    aereo: d => d.meta?.community === 'Museu Aeroespacial',
+  };
+  const conta = pred => M.tiles.reduce((n, t) => n + (pred(t.userData) ? 1 : 0), 0);
+  const acender = pred => M.destacar(pred);
+  const tudo = () => M.destacar(() => true);
+
+  // as peças em destaque (cada uma foi vista antes de entrar no roteiro)
+  const H = n => `20.500.12156.1/${n}`;
+  const PECAS = {
+    florence: H(1777), ferrez: H(10481), ganho: H(6489), condenado: H(6026), caraja: H(2500), vargas: H(13330),
+    dietze: H(100), canudos: H(4798), prisioneiros: H(4860), castelo: H(10442), cristo: H(10702),
+  };
+
+  function cenas() {
+    const N = M.tiles.length;
+    const nInst = new Set(M.tiles.map(t => t.userData.meta?.community).filter(Boolean)).size;
+    const nFerrez = conta(R.ferrez), nEsc = conta(R.escravidao), nCond = conta(R.condenados);
+    const nEscAntes = conta(d => R.escravidao(d) && d.meta?.ano && d.meta.ano < 1888);
+    const nInd = conta(R.indigenas), nCan = conta(R.canudos), nObras = conta(R.obras), nAer = conta(R.aereo);
+    const L = M.limites(), cx = (L.x0 + L.x1) / 2, cy = (L.y0 + L.y1) / 2, zi = zInteira();
+    return [
+      // 0 · abertura: a parede inteira, a grua desce inclinando
+      { dur: 9000, peca: PECAS.florence, run: async () => {
+        tudo(); esconderFoto();
+        mover({ x: cx, y: cy, z: zi * 1.15, rx: 0, rz: -0.03 }, 0);
+        mover({ x: cx - 4, y: cy + 2, z: zi * 0.62, rx: 0.32, rz: 0.04 }, 9000);
+        await legenda('Brasiliana Fotográfica · acervo digital', `${fmt(N)} imagens de ${nInst} instituições. Cada quadrado é uma peça, do século XIX às fotos aéreas do século XX.`);
+      } },
+      // 1 · Florence, Campinas, 1833
+      { dur: 11000, peca: PECAS.florence, run: async () => {
+        acender(R.florence);
+        irPara(PECAS.florence, 3000);
+        await em(2600);
+        mostrarFoto(PECAS.florence);
+        derivar(PECAS.florence, 8400);
+        await legenda('Vila de São Carlos, atual Campinas · 1833', 'Hercule Florence fixou estes rótulos de farmácia com papel, sal de prata e luz do sol. A prova se chama «Epréuve Nº2 (photographie)». É um dos registros fotográficos mais antigos das Américas.');
+      } },
+      // 2 · Marc Ferrez e a Avenida Central
+      { dur: 11000, peca: PECAS.ferrez, run: async () => {
+        esconderFoto();
+        acender(R.ferrez);
+        mover({ x: cx, y: cy, z: zi * 0.7, rx: 0.2, rz: -0.03 }, 3200, 0);
+        await legenda('Marc Ferrez · 1843–1923', `Um só fotógrafo assina ${fmt(nFerrez)} peças: uma em cada ${Math.round(N / nFerrez)}.`);
+        await em(3600);
+        irPara(PECAS.ferrez, 2600, { arco: 0.3 });
+        await em(5600);
+        mostrarFoto(PECAS.ferrez);
+        derivar(PECAS.ferrez, 5400, { rz: -0.04, dx: -0.6 });
+        await legenda('Rio de Janeiro · c. 1904', 'Ferrez acompanhou a abertura da Avenida Central, em que o prefeito Pereira Passos derrubou quarteirões inteiros do centro.');
+      } },
+      // 3 · escravidão: Christiano Junior, c. 1864
+      { dur: 14000, peca: PECAS.ganho, run: async () => {
+        esconderFoto();
+        acender(R.escravidao);
+        irPara(PECAS.ganho, 3200, { rz: 0.02 });
+        await legenda('Escravidão · assuntos do catálogo', `${fmt(nEsc)} peças estão catalogadas sob escravidão; ${fmt(nEscAntes)} são de antes da Abolição, em 1888.`);
+        await em(3400);
+        mostrarFoto(PECAS.ganho);
+        derivar(PECAS.ganho, 10600, { z: 5, rz: -0.02, dx: 0.4 });
+        await em(4200);
+        await legenda('Rio de Janeiro, c. 1864 · Christiano Junior', 'Homens e mulheres escravizados, fotografados em estúdio. O fotógrafo anunciava as cópias como «coisa muito própria para quem se retira para a Europa».');
+        await em(9400);
+        await legenda('O título do catálogo', `O nome do fotógrafo ficou registrado. O das duas pessoas na foto, não: a ficha diz apenas «Escravos de ganho».`);
+      } },
+      // 4 · a Galeria dos condenados
+      { dur: 10000, peca: PECAS.condenado, run: async () => {
+        esconderFoto();
+        acender(R.condenados);
+        irPara(PECAS.condenado, 2800, { arco: 0.4 });
+        await em(2600);
+        mostrarFoto(PECAS.condenado);
+        derivar(PECAS.condenado, 7400, { rz: 0.03 });
+        await legenda('Casa de Correção da Corte · a partir de 1870', `Os presos passaram a ser fotografados. O livro Galeria dos condenados guarda ${fmt(nCond)} retratos, cada um com nome e pena.`);
+      } },
+      // 5 · povos indígenas: o Carajá de 1888 e a visita de Vargas em 1940
+      { dur: 14000, peca: PECAS.caraja, run: async () => {
+        esconderFoto();
+        acender(R.indigenas);
+        irPara(PECAS.caraja, 3000);
+        await legenda('Povos indígenas · assuntos do catálogo', `${fmt(nInd)} peças retratam povos indígenas.`);
+        await em(2800);
+        mostrarFoto(PECAS.caraja);
+        derivar(PECAS.caraja, 4600, { rz: -0.03 });
+        await em(3200);
+        await legenda('Ilha do Bananal · 1888', 'O título: «Homem indígena não identificado do povo Carajá». O fotógrafo aparece como «Anônimo».');
+        await em(7600);
+        esconderFoto();
+        irPara(PECAS.vargas, 1800, { arco: 0.25, rz: 0.03 });
+        await em(8600);
+        mostrarFoto(PECAS.vargas);
+        derivar(PECAS.vargas, 5400, { rz: 0.05 });
+        await legenda('Ilha do Bananal · 1940', '52 anos depois, na mesma ilha: «Getúlio Vargas em visita à Aldeia Karajá». O título nomeia o visitante.');
+      } },
+      // 6 · colônias de imigrantes
+      { dur: 9000, peca: PECAS.dietze, run: async () => {
+        esconderFoto();
+        acender(R.colonias);
+        irPara(PECAS.dietze, 2600, { arco: 0.5 });
+        await em(2400);
+        mostrarFoto(PECAS.dietze);
+        derivar(PECAS.dietze, 6600, { rz: -0.04, dx: -0.5 });
+        await legenda('Espírito Santo, 1869–1878 · Albert Richard Dietze', 'O Império facilitava a compra de terras por colonos europeus. Dietze, imigrante alemão, fotografou as colônias e enviou 53 fotos à imperatriz.');
+      } },
+      // 7 · Canudos, 1897
+      { dur: 12000, peca: PECAS.prisioneiros, run: async () => {
+        esconderFoto();
+        acender(R.canudos);
+        irPara(PECAS.canudos, 2800, { arco: 0.5 });
+        await em(2600);
+        mostrarFoto(PECAS.canudos);
+        derivar(PECAS.canudos, 3600, { rz: 0.02 });
+        await legenda('Canudos, Bahia · 1897 · Flávio de Barros', `Barros seguiu com o Exército nos últimos dias da guerra: ${fmt(nCan)} fotos do arraial e das tropas.`);
+        await em(6200);
+        esconderFoto();
+        irPara(PECAS.prisioneiros, 1400, { arco: 0.15 });
+        await em(7000);
+        mostrarFoto(PECAS.prisioneiros);
+        derivar(PECAS.prisioneiros, 5000, { rz: -0.03 });
+        await legenda('Canudos · 1897', 'O título diz «400 jagunços prisioneiros». Na foto, quase só mulheres e crianças.');
+      } },
+      // 8 · o Morro do Castelo
+      { dur: 10000, peca: PECAS.castelo, run: async () => {
+        esconderFoto();
+        acender(R.obras);
+        irPara(PECAS.castelo, 2800, { arco: 0.5 });
+        await em(2600);
+        mostrarFoto(PECAS.castelo);
+        derivar(PECAS.castelo, 7400, { rz: 0.04 });
+        await legenda('Rio de Janeiro, c. 1920 · Guilherme Santos', `A cidade, mudada para o Morro do Castelo em 1567, desmontou o morro a jatos d’água para a Exposição do Centenário. ${fmt(nObras)} peças estão em «Obras e demolições».`);
+      } },
+      // 9 · do alto
+      { dur: 9000, peca: PECAS.cristo, run: async () => {
+        esconderFoto();
+        acender(R.aereo);
+        irPara(PECAS.cristo, 2600, { arco: 0.6, rz: -0.02 });
+        await em(2400);
+        mostrarFoto(PECAS.cristo);
+        derivar(PECAS.cristo, 6600, { rz: -0.06 });
+        await legenda('Rio de Janeiro · 1936 · Museu Aeroespacial', `Nos anos 1930 a câmera sobe no avião: ${fmt(nAer)} peças. A ficha anota a tomada: «foco 30, 800m e 11:05h».`);
+      } },
+      // 10 · fecho: a parede inteira de novo, a câmera endireita
+      { dur: 11000, peca: PECAS.florence, run: async () => {
+        esconderFoto();
+        tudo();
+        mover({ x: cx, y: cy, z: zi, rx: 0, rz: 0 }, 9500, 0);
+        await legenda('Brasiliana Fotográfica', 'Toda peça tem um código de referência. Muitas das pessoas retratadas ainda não têm nome.');
+        await em(6000);
+        await legenda('', 'Clique em qualquer quadrado para abrir a ficha.');
+      } },
+    ];
+  }
+
+  function progresso() {
+    const t = Math.min(1, (performance.now() - inicio) / TOTAL);
+    document.querySelector('#tour-progress i').style.transform = `scaleX(${t})`;
+    const resta = Math.ceil((TOTAL * (1 - t)) / 1000);
+    $('tour-left').textContent = resta > 60 ? `${String(Math.floor(resta / 60)).padStart(2, '0')}:${String(resta % 60).padStart(2, '0')}` : `${resta} s`;
+    if (ativo) raf = requestAnimationFrame(progresso);
+  }
+
+  async function iniciar() {
+    if (ativo || !M || M.aberto()) return;
+    ativo = true;
+    document.body.classList.add('touring');
+    // o que o tour vai mostrar começa a baixar já
+    Object.values(PECAS).forEach(h => { new Image().src = M.mediumUrl(h); });
+    // parte de onde a câmera está
+    Object.assign(vista, { x: M.camTarget.x, y: M.camTarget.y, z: M.camTarget.z, rx: 0, rz: 0 });
+    $('tour').hidden = false;
+    $('tour').classList.remove('saindo');
+    document.querySelector('#tour-progress i').style.transform = 'scaleX(0)';
+    requestAnimationFrame(() => $('tour').classList.add('on'));
+    inicio = performance.now();
+    progresso();
+    somTour.iniciar();
+    try {
+      const roteiro = cenas();
+      TOTAL = roteiro.reduce((s, c) => s + c.dur, 0);
+      let fim = 0;
+      for (const cena of roteiro) {
+        t0Cena = inicio + fim; fim += cena.dur;
+        somTour.cena(cena.peca, M.entries[cena.peca]);
+        $('tour-cap').classList.remove('on');   // a legenda da cena anterior não atravessa o voo
+        await cena.run();
+        await espera(inicio + fim - performance.now());
+      }
+      cancelAnimationFrame(raf);
+      $('tour').classList.add('saindo');
+      await espera(700);
+      parar(false);
+    } catch (e) {
+      if (!(e instanceof Parado)) { console.error(e); parar(true); }
+    }
+  }
+
+  function parar(noMeio = true) {
+    if (!ativo) return;
+    ativo = false;
+    somTour.parar(!noMeio);
+    cancelAnimationFrame(raf); cancelAnimationFrame(anim);
+    for (const p of pendentes) { clearTimeout(p.id); p.falha(new Parado()); }
+    pendentes.clear();
+    $('tour').classList.add('saindo');
+    $('tour').classList.remove('on');
+    $('tour-cap').classList.remove('on');
+    esconderFoto();
+    M.restaurar();
+    // a câmera endireita sem sair do lugar: o ponto mirado continua no centro
+    const v = { ...vista }, t0 = performance.now();
+    const alvoY = v.y;
+    const endireitar = agora => {
+      if (ativo) return;
+      const t = Math.min(1, (agora - t0) / 700), e = suave(t);
+      const rx = v.rx * (1 - e), rz = v.rz * (1 - e);
+      M.camTarget.set(v.x, alvoY - v.z * Math.tan(rx), v.z);
+      M.camera.rotation.set(rx, 0, rz);
+      M.wake(3);
+      if (t < 1) requestAnimationFrame(endireitar);
+    };
+    requestAnimationFrame(endireitar);
+    document.body.classList.remove('touring');
+    setTimeout(() => { if (!ativo) $('tour').hidden = true; }, 900);
+  }
+
+  // Esc antes do mural (que abriria/fecharia os filtros); arrastar ou rolar devolve a parede a quem lê
+  addEventListener('keydown', e => { if (e.key === 'Escape' && ativo) { e.stopImmediatePropagation(); e.preventDefault(); parar(true); } }, true);
+  const canvas = $('canvas');
+  canvas.addEventListener('pointerdown', () => { if (ativo) parar(true); }, true);
+  canvas.addEventListener('wheel', () => { if (ativo) parar(true); }, { capture: true, passive: true });
+  $('tour-parar').addEventListener('click', () => parar(true));
+  const botaoSom = $('tour-som');
+  const marcarSom = () => { botaoSom.classList.toggle('mudo', !somTour.ligado()); botaoSom.setAttribute('aria-pressed', String(somTour.ligado())); };
+  botaoSom.addEventListener('click', () => { somTour.alternar(); marcarSom(); });
+  marcarSom();
+  $('tour-abrir').addEventListener('click', () => iniciar());
+
+  const pediuTour = new URLSearchParams(location.search).has('tour');
+  addEventListener('mural-pronto', () => {
+    M = window.mural;
+    $('tour-abrir').hidden = false;
+    // ?tour=1 abre um convite: o clique começa o tour e libera o som (o navegador não toca sem gesto)
+    // (lido antes de o mural carregar: o syncUrl dos filtros reescreve a query sem ele)
+    if (pediuTour) {
+      if (M.aberto()) return;
+      const convite = $('tour-convite');
+      convite.hidden = false;
+      const fechar = () => { convite.hidden = true; removeEventListener('keydown', tecla, true); };
+      const tecla = e => { if (e.key === 'Escape') { e.stopImmediatePropagation(); fechar(); } };
+      addEventListener('keydown', tecla, true);
+      // em /tour a pessoa veio para isso: qualquer clique ou toque no convite começa (e libera o som)
+      convite.addEventListener('click', () => { fechar(); iniciar(); });
+      convite.querySelector('button').focus();
+    }
+  }, { once: true });
+
+  window.tour = { iniciar, parar, ativo: () => ativo };
+})();
 </script>
 </body>
 </html>

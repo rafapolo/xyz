@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tour de 2 minutos — Brasiliana Fotográfica</title>
+<meta name="description" content="Um passeio de 2 minutos pelo acervo da Brasiliana Fotográfica, com música feita a partir dos metadados de cada peça.">
+<meta property="og:title" content="Tour de 2 minutos — Brasiliana Fotográfica">
+<meta property="og:description" content="Um passeio de 2 minutos pelo acervo, com som.">
+<!-- /tour abre o mural com o convite do tour; o clique no convite começa o tour e libera o som.
+     Publicado, o mural é ../index.html; aqui no repositório ele é ../wall.html. -->
+<script>
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  location.replace('../' + (local ? 'wall.html' : '') + '?tour=1');
+</script>
+<noscript><meta http-equiv="refresh" content="0; url=../?tour=1"></noscript>
+</head>
+<body style="background:#0b0b0c"></body>
+</html>
