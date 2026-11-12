@@ -15,7 +15,8 @@
      Publicado, o mural é ../index.html; aqui no repositório ele é ../wall.html. -->
 <script>
   const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  location.replace('../' + (local ? 'wall.html' : '') + '?tour=1');
+  const lang = new URLSearchParams(location.search).get('tour') === 'en' ? 'en' : '1';   // /tour/?tour=en segue em inglês
+  location.replace('../' + (local ? 'wall.html' : '') + '?tour=' + lang);
 </script>
 <noscript><meta http-equiv="refresh" content="0; url=../?tour=1"></noscript>
 </head>

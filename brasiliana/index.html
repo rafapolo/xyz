@@ -3348,7 +3348,7 @@ main().catch(err => {
 
 /* ─── tour: ~2 min de cinema pelo acervo ─────────────────────────────────────
    Abre pelo botão "tour de 2 min" ou por ?tour=1 (um convite pede o clique que
-   libera o som). Esc, "✕ esc", arrastar ou rolar o mural param o tour e deixam
+   libera o som); ?tour=en faz o mesmo com a legenda e o convite em inglês. Esc, "✕ esc", arrastar ou rolar o mural param o tour e deixam
    a câmera onde estava; a iluminação volta a ser a dos filtros.
    Tom: frases curtas, números no lugar de adjetivos, títulos do catálogo citados
    entre aspas com a data. Os números são contados aqui, dos dados carregados,
@@ -3357,7 +3357,10 @@ main().catch(err => {
 (() => {
   const $ = id => document.getElementById(id);
   const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fmt = n => n.toLocaleString('pt-BR');
+  // ?tour=en: legenda em inglês na visita inteira (o syncUrl tira o tour da query, mas o botão segue em inglês)
+  const EN = new URLSearchParams(location.search).get('tour') === 'en';
+  const tr = (pt, en) => (EN ? en : pt);
+  const fmt = n => n.toLocaleString(EN ? 'en-US' : 'pt-BR');
   const deburr = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   let M = null, ativo = false, inicio = 0, raf = 0, TOTAL = 120000, t0Cena = 0, anim = 0;
   const pendentes = new Set();
@@ -3423,8 +3426,8 @@ main().catch(err => {
     fotoImg.src = M.mediumUrl(h);
     fotoImg.alt = m.title || '';
     fotoCap.replaceChildren();
-    const b = document.createElement('b'); b.textContent = `“${(m.title || '[sem título]').replace(/^\[|\]$/g, '').replace(/^["“”]+|["“”]+$/g, '')}”`;
-    fotoCap.append(b, ` · ${m.dt || m.date || 's.d.'}${autor(m) ? ' · ' + autor(m) : ''} · ${M.instName(m.community)}`);
+    const b = document.createElement('b'); b.textContent = `“${(m.title || tr('[sem título]', '[untitled]')).replace(/^\[|\]$/g, '').replace(/^["“”]+|["“”]+$/g, '')}”`;
+    fotoCap.append(b, ` · ${m.dt || m.date || tr('s.d.', 'n.d.')}${autor(m) ? ' · ' + autor(m) : ''} · ${M.instName(m.community)}`);
     foto.classList.add('on');
   }
   const esconderFoto = () => foto.classList.remove('on');
@@ -3482,7 +3485,7 @@ main().catch(err => {
         tudo(); esconderFoto();
         mover({ x: cx, y: cy, z: zi * 1.15, rx: 0, rz: -0.03 }, 0);
         mover({ x: cx - 4, y: cy + 2, z: zi * 0.62, rx: 0.32, rz: 0.04 }, 9000);
-        await legenda('Brasiliana Fotográfica · acervo digital', `${fmt(N)} imagens de ${nInst} instituições. Cada quadrado é uma peça, do século XIX às fotos aéreas do século XX.`);
+        await legenda(tr('Brasiliana Fotográfica · acervo digital', 'Brasiliana Fotográfica · digital collection'), tr(`${fmt(N)} imagens de ${nInst} instituições. Cada quadrado é uma peça, do século XIX às fotos aéreas do século XX.`, `${fmt(N)} images from ${nInst} institutions. Each square is one item, from the 19th century to the aerial photos of the 20th.`));
       } },
       // 1 · Florence, Campinas, 1833
       { dur: 11000, peca: PECAS.florence, run: async () => {
@@ -3491,34 +3494,34 @@ main().catch(err => {
         await em(2600);
         mostrarFoto(PECAS.florence);
         derivar(PECAS.florence, 8400);
-        await legenda('Vila de São Carlos, atual Campinas · 1833', 'Hercule Florence fixou estes rótulos de farmácia com papel, sal de prata e luz do sol. A prova se chama «Epréuve Nº2 (photographie)». É um dos registros fotográficos mais antigos das Américas.');
+        await legenda(tr('Vila de São Carlos, atual Campinas · 1833', 'Vila de São Carlos, today Campinas · 1833'), tr('Hercule Florence fixou estes rótulos de farmácia com papel, sal de prata e luz do sol. A prova se chama «Epréuve Nº2 (photographie)». É um dos registros fotográficos mais antigos das Américas.', 'Hercule Florence fixed these pharmacy labels with paper, silver salt and sunlight. The print is called «Epréuve Nº2 (photographie)». It is one of the oldest photographic records in the Americas.'));
       } },
       // 2 · Marc Ferrez e a Avenida Central
       { dur: 11000, peca: PECAS.ferrez, run: async () => {
         esconderFoto();
         acender(R.ferrez);
         mover({ x: cx, y: cy, z: zi * 0.7, rx: 0.2, rz: -0.03 }, 3200, 0);
-        await legenda('Marc Ferrez · 1843–1923', `Um só fotógrafo assina ${fmt(nFerrez)} peças: uma em cada ${Math.round(N / nFerrez)}.`);
+        await legenda('Marc Ferrez · 1843–1923', tr(`Um só fotógrafo assina ${fmt(nFerrez)} peças: uma em cada ${Math.round(N / nFerrez)}.`, `A single photographer signs ${fmt(nFerrez)} items: one in every ${Math.round(N / nFerrez)}.`));
         await em(3600);
         irPara(PECAS.ferrez, 2600, { arco: 0.3 });
         await em(5600);
         mostrarFoto(PECAS.ferrez);
         derivar(PECAS.ferrez, 5400, { rz: -0.04, dx: -0.6 });
-        await legenda('Rio de Janeiro · c. 1904', 'Ferrez acompanhou a abertura da Avenida Central, em que o prefeito Pereira Passos derrubou quarteirões inteiros do centro.');
+        await legenda('Rio de Janeiro · c. 1904', tr('Ferrez acompanhou a abertura da Avenida Central, em que o prefeito Pereira Passos derrubou quarteirões inteiros do centro.', 'Ferrez followed the opening of Avenida Central, for which mayor Pereira Passos tore down whole blocks of downtown.'));
       } },
       // 3 · escravidão: Christiano Junior, c. 1864
       { dur: 14000, peca: PECAS.ganho, run: async () => {
         esconderFoto();
         acender(R.escravidao);
         irPara(PECAS.ganho, 3200, { rz: 0.02 });
-        await legenda('Escravidão · assuntos do catálogo', `${fmt(nEsc)} peças estão catalogadas sob escravidão; ${fmt(nEscAntes)} são de antes da Abolição, em 1888.`);
+        await legenda(tr('Escravidão · assuntos do catálogo', 'Slavery · catalog subjects'), tr(`${fmt(nEsc)} peças estão catalogadas sob escravidão; ${fmt(nEscAntes)} são de antes da Abolição, em 1888.`, `${fmt(nEsc)} items are cataloged under slavery; ${fmt(nEscAntes)} predate Abolition, in 1888.`));
         await em(3400);
         mostrarFoto(PECAS.ganho);
         derivar(PECAS.ganho, 10600, { z: 5, rz: -0.02, dx: 0.4 });
         await em(4200);
-        await legenda('Rio de Janeiro, c. 1864 · Christiano Junior', 'Homens e mulheres escravizados, fotografados em estúdio. O fotógrafo anunciava as cópias como «coisa muito própria para quem se retira para a Europa».');
+        await legenda('Rio de Janeiro, c. 1864 · Christiano Junior', tr('Homens e mulheres escravizados, fotografados em estúdio. O fotógrafo anunciava as cópias como «coisa muito própria para quem se retira para a Europa».', 'Enslaved men and women, photographed in a studio. The photographer advertised the prints as «just the thing for those leaving for Europe».'));
         await em(9400);
-        await legenda('O título do catálogo', `O nome do fotógrafo ficou registrado. O das duas pessoas na foto, não: a ficha diz apenas «Escravos de ganho».`);
+        await legenda(tr('O título do catálogo', 'The catalog title'), tr(`O nome do fotógrafo ficou registrado. O das duas pessoas na foto, não: a ficha diz apenas «Escravos de ganho».`, `The photographer’s name was recorded. The names of the two people in the photo were not: the record only says «Escravos de ganho» (slaves for hire).`));
       } },
       // 4 · a Galeria dos condenados
       { dur: 10000, peca: PECAS.condenado, run: async () => {
@@ -3528,26 +3531,26 @@ main().catch(err => {
         await em(2600);
         mostrarFoto(PECAS.condenado);
         derivar(PECAS.condenado, 7400, { rz: 0.03 });
-        await legenda('Casa de Correção da Corte · a partir de 1870', `Os presos passaram a ser fotografados. O livro Galeria dos condenados guarda ${fmt(nCond)} retratos, cada um com nome e pena.`);
+        await legenda(tr('Casa de Correção da Corte · a partir de 1870', 'Casa de Correção da Corte · from 1870'), tr(`Os presos passaram a ser fotografados. O livro Galeria dos condenados guarda ${fmt(nCond)} retratos, cada um com nome e pena.`, `Prisoners began to be photographed. The book Galeria dos condenados (Gallery of the convicted) holds ${fmt(nCond)} portraits, each with a name and a sentence.`));
       } },
       // 5 · povos indígenas: o Carajá de 1888 e a visita de Vargas em 1940
       { dur: 14000, peca: PECAS.caraja, run: async () => {
         esconderFoto();
         acender(R.indigenas);
         irPara(PECAS.caraja, 3000);
-        await legenda('Povos indígenas · assuntos do catálogo', `${fmt(nInd)} peças retratam povos indígenas.`);
+        await legenda(tr('Povos indígenas · assuntos do catálogo', 'Indigenous peoples · catalog subjects'), tr(`${fmt(nInd)} peças retratam povos indígenas.`, `${fmt(nInd)} items portray Indigenous peoples.`));
         await em(2800);
         mostrarFoto(PECAS.caraja);
         derivar(PECAS.caraja, 4600, { rz: -0.03 });
         await em(3200);
-        await legenda('Ilha do Bananal · 1888', 'O título: «Homem indígena não identificado do povo Carajá». O fotógrafo aparece como «Anônimo».');
+        await legenda('Ilha do Bananal · 1888', tr('O título: «Homem indígena não identificado do povo Carajá». O fotógrafo aparece como «Anônimo».', 'The title: «Unidentified Indigenous man of the Carajá people». The photographer is listed as «Anonymous».'));
         await em(7600);
         esconderFoto();
         irPara(PECAS.vargas, 1800, { arco: 0.25, rz: 0.03 });
         await em(8600);
         mostrarFoto(PECAS.vargas);
         derivar(PECAS.vargas, 5400, { rz: 0.05 });
-        await legenda('Ilha do Bananal · 1940', '52 anos depois, na mesma ilha: «Getúlio Vargas em visita à Aldeia Karajá». O título nomeia o visitante.');
+        await legenda('Ilha do Bananal · 1940', tr('52 anos depois, na mesma ilha: «Getúlio Vargas em visita à Aldeia Karajá». O título nomeia o visitante.', '52 years later, on the same island: «Getúlio Vargas visiting the Karajá village». The title names the visitor.'));
       } },
       // 6 · colônias de imigrantes
       { dur: 9000, peca: PECAS.dietze, run: async () => {
@@ -3557,7 +3560,7 @@ main().catch(err => {
         await em(2400);
         mostrarFoto(PECAS.dietze);
         derivar(PECAS.dietze, 6600, { rz: -0.04, dx: -0.5 });
-        await legenda('Espírito Santo, 1869–1878 · Albert Richard Dietze', 'O Império facilitava a compra de terras por colonos europeus. Dietze, imigrante alemão, fotografou as colônias e enviou 53 fotos à imperatriz.');
+        await legenda('Espírito Santo, 1869–1878 · Albert Richard Dietze', tr('O Império facilitava a compra de terras por colonos europeus. Dietze, imigrante alemão, fotografou as colônias e enviou 53 fotos à imperatriz.', 'The Empire made it easy for European settlers to buy land. Dietze, a German immigrant, photographed the colonies and sent 53 photos to the empress.'));
       } },
       // 7 · Canudos, 1897
       { dur: 12000, peca: PECAS.prisioneiros, run: async () => {
@@ -3567,14 +3570,14 @@ main().catch(err => {
         await em(2600);
         mostrarFoto(PECAS.canudos);
         derivar(PECAS.canudos, 3600, { rz: 0.02 });
-        await legenda('Canudos, Bahia · 1897 · Flávio de Barros', `Barros seguiu com o Exército nos últimos dias da guerra: ${fmt(nCan)} fotos do arraial e das tropas.`);
+        await legenda('Canudos, Bahia · 1897 · Flávio de Barros', tr(`Barros seguiu com o Exército nos últimos dias da guerra: ${fmt(nCan)} fotos do arraial e das tropas.`, `Barros went with the Army in the last days of the war: ${fmt(nCan)} photos of the settlement and the troops.`));
         await em(6200);
         esconderFoto();
         irPara(PECAS.prisioneiros, 1400, { arco: 0.15 });
         await em(7000);
         mostrarFoto(PECAS.prisioneiros);
         derivar(PECAS.prisioneiros, 5000, { rz: -0.03 });
-        await legenda('Canudos · 1897', 'O título diz «400 jagunços prisioneiros». Na foto, quase só mulheres e crianças.');
+        await legenda('Canudos · 1897', tr('O título diz «400 jagunços prisioneiros». Na foto, quase só mulheres e crianças.', 'The title says «400 jagunço prisoners». In the photo, almost only women and children.'));
       } },
       // 8 · o Morro do Castelo
       { dur: 10000, peca: PECAS.castelo, run: async () => {
@@ -3584,7 +3587,7 @@ main().catch(err => {
         await em(2600);
         mostrarFoto(PECAS.castelo);
         derivar(PECAS.castelo, 7400, { rz: 0.04 });
-        await legenda('Rio de Janeiro, c. 1920 · Guilherme Santos', `A cidade, mudada para o Morro do Castelo em 1567, desmontou o morro a jatos d’água para a Exposição do Centenário. ${fmt(nObras)} peças estão em «Obras e demolições».`);
+        await legenda('Rio de Janeiro, c. 1920 · Guilherme Santos', tr(`A cidade, mudada para o Morro do Castelo em 1567, desmontou o morro a jatos d’água para a Exposição do Centenário. ${fmt(nObras)} peças estão em «Obras e demolições».`, `The city, moved onto Morro do Castelo in 1567, washed the hill away with water jets for the Centennial Exhibition. ${fmt(nObras)} items are under «Works and demolitions».`));
       } },
       // 9 · do alto
       { dur: 9000, peca: PECAS.cristo, run: async () => {
@@ -3594,16 +3597,16 @@ main().catch(err => {
         await em(2400);
         mostrarFoto(PECAS.cristo);
         derivar(PECAS.cristo, 6600, { rz: -0.06 });
-        await legenda('Rio de Janeiro · 1936 · Museu Aeroespacial', `Nos anos 1930 a câmera sobe no avião: ${fmt(nAer)} peças. A ficha anota a tomada: «foco 30, 800m e 11:05h».`);
+        await legenda('Rio de Janeiro · 1936 · Museu Aeroespacial', tr(`Nos anos 1930 a câmera sobe no avião: ${fmt(nAer)} peças. A ficha anota a tomada: «foco 30, 800m e 11:05h».`, `In the 1930s the camera goes up in the plane: ${fmt(nAer)} items. The record notes the shot: «focus 30, 800 m, 11:05».`));
       } },
       // 10 · fecho: a parede inteira de novo, a câmera endireita
       { dur: 11000, peca: PECAS.florence, run: async () => {
         esconderFoto();
         tudo();
         mover({ x: cx, y: cy, z: zi, rx: 0, rz: 0 }, 9500, 0);
-        await legenda('Brasiliana Fotográfica', 'Toda peça tem um código de referência. Muitas das pessoas retratadas ainda não têm nome.');
+        await legenda('Brasiliana Fotográfica', tr('Toda peça tem um código de referência. Muitas das pessoas retratadas ainda não têm nome.', 'Every item has a reference code. Many of the people portrayed still have no name.'));
         await em(6000);
-        await legenda('', 'Clique em qualquer quadrado para abrir a ficha.');
+        await legenda('', tr('Clique em qualquer quadrado para abrir a ficha.', 'Click any square to open its record.'));
       } },
     ];
   }
@@ -3696,11 +3699,16 @@ main().catch(err => {
   addEventListener('mural-pronto', () => {
     M = window.mural;
     $('tour-abrir').hidden = false;
-    // ?tour=1 abre um convite: o clique começa o tour e libera o som (o navegador não toca sem gesto)
+    // ?tour=1 (ou =en) abre um convite: o clique começa o tour e libera o som (o navegador não toca sem gesto)
     // (lido antes de o mural carregar: o syncUrl dos filtros reescreve a query sem ele)
     if (pediuTour) {
       if (M.aberto()) return;
       const convite = $('tour-convite');
+      if (EN) {
+        const [t, sub] = convite.querySelectorAll('button span span, button small');
+        t.textContent = 'Press to start'; sub.textContent = '2-minute tour of the collection, with sound';
+        convite.lang = $('tour-cap').lang = 'en';
+      }
       convite.hidden = false;
       const fechar = () => { convite.hidden = true; removeEventListener('keydown', tecla, true); };
       const tecla = e => { if (e.key === 'Escape') { e.stopImmediatePropagation(); fechar(); } };

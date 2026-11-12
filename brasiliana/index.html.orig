@@ -1,0 +1,3718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Brasiliana Fotográfica — Mural do Acervo</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"
+  }
+}
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #0b0b0c;
+    font-family: Georgia, 'Times New Roman', serif; color: #eee;
+    overscroll-behavior: none; /* no rubber-banding the page behind the wall */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  #canvas { display: block; width: 100vw; height: 100vh; height: 100dvh; touch-action: none; }
+
+  #loading {
+    position: fixed; inset: 0; background: #0b0b0c;
+    display: flex; align-items: center; justify-content: center; z-index: 100;
+    /* linear, not ease: an eased fade is perceptually over in half its time */
+    transition: opacity .9s linear, background-color 1.4s ease;
+  }
+  #loading.ready { background: rgba(11,11,12,.78); } /* the wall renders live behind the title card */
+  /* scoped to the id, not to every <p> under the cover — the title screen's
+     own subtitle is a <p> too, and it is not an uppercase tracking-out line */
+  #loading-msg { font-size: .8rem; letter-spacing: .15em; text-transform: uppercase; color: #999; }
+
+  /* ── opening title screen (shown once data is ready, before entering) ────
+       It overlays the cover rather than sitting beside the loading line: as a
+       flex sibling it still claimed its share of the row while invisible, which
+       squeezed "carregando mural…" into a narrow column down one side — the
+       first thing anyone saw, and it read as a page with no stylesheet. */
+  #title-screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    text-align: center;
+    padding: 0 24px;
+    padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+    opacity: 0; filter: blur(0px); transform: scale(1);
+    transition: opacity .9s ease;
+  }
+  #title-screen.show { opacity: 1; }
+  /* the words go before the dark does: they blur out and drift open, the way a
+     memory clears — and the veil only lifts once they're gone */
+  #title-screen.dissolve {
+    opacity: 0; filter: blur(8px); transform: scale(1.04);
+    transition: opacity .85s linear, filter .85s ease-in, transform 1.1s ease-out;
+  }
+  #title-screen .eyebrow {
+    font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .28em;
+    text-transform: uppercase; color: #d8b04a; margin-bottom: 22px;
+  }
+  #title-screen h1 {
+    font-family: Georgia, 'Times New Roman', serif; font-weight: 400;
+    font-size: clamp(2rem, 6vw, 3.6rem); letter-spacing: .01em; color: #f4f1e8;
+    line-height: 1.15;
+  }
+  #title-screen .sub {
+    margin-top: 16px; font-family: Georgia, serif; font-style: italic;
+    font-size: clamp(.95rem, 2vw, 1.15rem); color: #b9b9b0;
+  }
+  #title-screen .stats {
+    margin-top: 34px; display: flex; gap: 28px; justify-content: center; flex-wrap: wrap;
+    font-family: system-ui, sans-serif;
+  }
+  #title-screen .stat { text-align: center; }
+  #title-screen .stat b {
+    display: block; font-size: 1.3rem; color: #f4f1e8; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  #title-screen .stat span {
+    display: block; margin-top: 3px; font-size: .62rem; letter-spacing: .1em;
+    text-transform: uppercase; color: #888;
+  }
+  #title-screen .enter {
+    margin-top: 46px; font-family: system-ui, sans-serif; font-size: .68rem;
+    letter-spacing: .12em; text-transform: uppercase; color: #7fa8c9;
+  }
+  #title-screen .enter.ready { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  #progress-track {
+    margin: 14px auto 0; width: 180px; height: 2px; background: rgba(255,255,255,.12);
+    border-radius: 2px; overflow: hidden;
+  }
+  #progress-bar { height: 100%; width: 0%; background: #7fa8c9; transition: width .2s ease; }
+
+  [hidden] { display: none !important; }
+
+  /* shown instead of a frozen bar: a load that dies or stalls says so, and the
+     retry is the reader's call — never an automatic reload, which on a phone
+     that just ran out of memory is exactly how the loop starts */
+  #falha {
+    position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; padding: 0 24px;
+    background: rgba(11,11,12,.94); color: #ddd; text-align: center;
+    font-family: system-ui, sans-serif; font-size: .9rem; line-height: 1.5;
+  }
+  #falha small { color: #888; font-size: .72rem; max-width: 34em; }
+  #falha button, #lento button {
+    font: inherit; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    color: #0b0b0c; background: #7fa8c9; border: 0; border-radius: 3px; padding: 10px 16px;
+  }
+  #lento { margin-top: 18px; font-family: system-ui, sans-serif; font-size: .7rem; color: #999; }
+  #lento button { margin-top: 8px; font-size: .64rem; padding: 7px 12px; }
+  #aviso-leve { margin-top: 10px; font-family: system-ui, sans-serif; font-size: .62rem; color: #777; }
+
+  /* ── compact filter panel, top-left — dark chrome, so it reads as part of
+       the wall's own darkness instead of a lit slab thrown on top of it.
+       Every colour below comes from these tokens: retheme by editing them. ─── */
+  #filters {
+    --f-surface: rgba(13,13,15,.9);
+    --f-border: rgba(255,255,255,.14);
+    --f-line: rgba(255,255,255,.09);
+    --f-text: #eae7e0;
+    --f-muted: #8e8e87;
+    --f-faint: #6e6e68;
+    --f-field: rgba(255,255,255,.055);
+    --f-field-border: rgba(255,255,255,.16);
+    --f-accent: #7fa8c9;
+    --f-accent-soft: rgba(127,168,201,.15);
+    --f-accent-line: rgba(127,168,201,.34);
+    --f-gold: #d8b04a;
+    --f-danger: #d98a72;
+
+    /* right side on a desktop: the left corner is the wordmark's, and the
+       panel above the open card (z 20) so filtering never needs it closed */
+    position: fixed; top: 14px; right: 14px; z-index: 25;
+    width: 262px; max-width: calc(100vw - 28px);
+    font-family: 'Public Sans', system-ui, sans-serif;
+    background: var(--f-surface); border: 1px solid var(--f-border);
+    border-radius: 8px; color: var(--f-text);
+    box-shadow: 0 16px 40px rgba(0,0,0,.55);
+    backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+    color-scheme: dark; /* native select popups, caret and scrollbars follow suit */
+    accent-color: var(--f-accent);
+  }
+  #filters-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 9px 11px; cursor: pointer; user-select: none; border-radius: 8px;
+  }
+  #filters-head:focus-visible { outline: 2px solid var(--f-accent); outline-offset: -2px; }
+  #filters-head .label {
+    font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--f-muted); font-weight: 700;
+  }
+  #filters-head .right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+  #filters-head .chevron { font-size: .82rem; line-height: 1; color: var(--f-gold); transition: transform .2s ease; }
+  #filters.open #filters-head .chevron { transform: rotate(180deg); }
+  /* live count of matching pieces — the panel stays informative while collapsed */
+  #filters-count {
+    font-variant-numeric: tabular-nums; background: var(--f-accent-soft); color: var(--f-accent);
+    border: 1px solid var(--f-accent-line);
+    border-radius: 3px; padding: 0 6px; font-size: .62rem; font-weight: 600;
+  }
+  #filters-count.none {
+    background: rgba(217,138,114,.15); color: var(--f-danger);
+    border-color: rgba(217,138,114,.34);
+  }
+  /* it appears the moment the first filter bites — as `hidden` it did so by
+     growing the header, nudging everything under it down mid-drag. It keeps
+     its box instead, so the panel's geometry never depends on its state. */
+  #filters-count.empty { visibility: hidden; }
+
+  /* ── active-filter chips: the panel's state while it is *closed*, each one
+       removable. Open, they are redundant (every filter is visible in its own
+       control) and actively harmful: a chip appearing on the first drag frame
+       inserted a whole row above the body and slid the slider out from under
+       the finger. An open panel is a fixed layout, top to bottom. ─────────── */
+  #filters-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 11px 9px; }
+  #filters.open #filters-chips { display: none; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 3px; max-width: 100%;
+    font-size: .62rem; line-height: 1.7; background: var(--f-accent-soft); color: var(--f-accent);
+    border: 1px solid var(--f-accent-line); border-radius: 999px; padding: 0 3px 0 8px;
+  }
+  .chip .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip button {
+    all: unset; cursor: pointer; flex-shrink: 0;
+    width: 14px; height: 14px; border-radius: 50%;
+    text-align: center; line-height: 13px; font-size: .72rem; color: var(--f-accent);
+  }
+  .chip button:hover { background: rgba(127,168,201,.28); color: #dcebf6; }
+
+  #filters-body { display: none; padding: 2px 11px 11px; border-top: 1px solid var(--f-line); }
+  #filters.open #filters-body { display: block; }
+  .f-note {
+    margin-top: 8px; font-size: .6rem; line-height: 1.45; color: var(--f-faint);
+  }
+  .f-row { margin-top: 11px; }
+  .f-sec { margin: 18px 0 -2px; font: 600 .6rem system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--f-faint); border-top: 1px solid var(--f-line); padding-top: 12px; }
+  .f-row label {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+    font-size: .6rem; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--f-muted); margin-bottom: 4px; font-weight: 600;
+  }
+  .f-row label .val {
+    text-transform: none; letter-spacing: 0; font-size: .66rem; font-weight: 600;
+    color: var(--f-text); font-variant-numeric: tabular-nums;
+  }
+  .f-row select, .f-row input[type="text"], .f-row input[type="search"] {
+    width: 100%; -webkit-appearance: none; appearance: none; font-family: 'Public Sans', system-ui, sans-serif; font-size: .76rem;
+    background: var(--f-field); color: var(--f-text); border: 1px solid var(--f-field-border);
+    border-radius: 5px; padding: 5px 7px; outline: none;
+  }
+  /* the popup list is painted by the OS — give it a real ground, not the
+     panel's translucent one, or it inherits the wall behind the field */
+  .f-row select:disabled { opacity: .45; }
+  .f-row select { text-overflow: ellipsis; } /* long author names on a narrow phone */
+  .f-row option { background: #15151a; color: var(--f-text); }
+  .f-row input::placeholder { color: var(--f-faint); }
+  .f-row input[type="search"]::-webkit-search-decoration,
+  .f-row input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .f-row select:focus, .f-row input:focus { border-color: var(--f-accent); }
+
+  /* text field with an inline clear button */
+  .f-field { position: relative; }
+  .f-field input { padding-right: 25px; }
+  .f-field .f-x {
+    all: unset; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 17px; height: 17px; border-radius: 50%; cursor: pointer;
+    text-align: center; line-height: 16px; font-size: .8rem; color: var(--f-muted);
+  }
+  .f-field .f-x:hover { background: rgba(255,255,255,.12); color: var(--f-text); }
+
+  /* ── decade histogram: distribution of the *currently* filtered set, so the
+       slider is aimed at something instead of guessed at. Bars are clickable. ─ */
+  .f-hist { display: flex; align-items: flex-end; gap: 1px; height: 28px; margin-bottom: 4px; }
+  .f-hist .bar {
+    flex: 1 1 0; min-width: 0; min-height: 2px; cursor: pointer;
+    background: rgba(255,255,255,.16); border-radius: 1px 1px 0 0;
+    transition: background .15s ease, height .2s ease;
+  }
+  .f-hist .bar.in { background: var(--f-accent); }
+  .f-hist .bar:hover { background: var(--f-gold); }
+
+  /* dual-handle range: two overlaid inputs, only the thumbs take pointer events */
+  .f-range { position: relative; height: 20px; }
+  .f-range-track {
+    position: absolute; left: 7px; right: 7px; top: 50%; transform: translateY(-50%);
+    height: 4px; background: rgba(255,255,255,.13); border-radius: 2px;
+  }
+  .f-range-fill { position: absolute; top: 0; bottom: 0; background: var(--f-accent); border-radius: 2px; }
+  .f-range input[type="range"] {
+    position: absolute; left: 0; top: 0; width: 100%; height: 20px; margin: 0;
+    -webkit-appearance: none; appearance: none; background: transparent;
+    pointer-events: none; outline: none; z-index: 2;
+  }
+  /* when the handles meet, the one with room to move has to be the grabbable one */
+  .f-range input[type="range"].top { z-index: 3; }
+  .f-range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; pointer-events: auto; cursor: grab;
+    width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
+    background: #dfeaf2; border: 2px solid #38536b; box-shadow: 0 1px 4px rgba(0,0,0,.6);
+  }
+  .f-range input[type="range"]::-webkit-slider-thumb:active { cursor: grabbing; }
+  .f-range input[type="range"]::-moz-range-thumb {
+    pointer-events: auto; cursor: grab;
+    width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box;
+    background: #dfeaf2; border: 2px solid #38536b; box-shadow: 0 1px 4px rgba(0,0,0,.6);
+  }
+  .f-range input[type="range"]::-moz-range-track { background: transparent; border: 0; }
+  .f-range input[type="range"]:focus-visible::-webkit-slider-thumb { border-color: var(--f-gold); }
+  .f-range input[type="range"]:focus-visible::-moz-range-thumb { border-color: var(--f-gold); }
+
+  #f-result {
+    margin-top: 12px; font-size: .66rem; color: var(--f-muted); text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  #f-result.none { color: var(--f-danger); }
+  #f-clear {
+    all: unset; display: block; margin-top: 7px; cursor: pointer;
+    font-size: .66rem; letter-spacing: .04em; color: var(--f-danger); text-align: center;
+    padding: 5px; border-radius: 5px; border: 1px dashed var(--f-field-border);
+  }
+  #f-clear:hover { border-color: var(--f-danger); background: rgba(217,138,114,.12); }
+  #f-clear.disabled { opacity: .35; pointer-events: none; }
+  /* ── the wordmark: the one fixed thing on the wall. Same serif the title
+       card opens with, so the page keeps its voice after the cover lifts, and
+       the gold/cream pairing is the one from the eyebrow and the h1. It is
+       chrome, not content: it never takes a click away from the wall. ─────── */
+  #wordmark {
+    position: fixed; z-index: 26; pointer-events: none; user-select: none;
+    top: calc(7px + env(safe-area-inset-top)); left: 9px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.06rem; line-height: 1.2; letter-spacing: .015em; color: #f4f1e8;
+    /* a sombra sozinha sumia sobre peça clara -- e peça clara é metade do
+       acervo (papel, álbum, anotação em nanquim). O fundo é o mesmo preto da
+       dica lá embaixo, e o padding recua a posição no mesmo tanto pra letra
+       continuar caindo onde caía. */
+    background: rgba(4,4,5,.92); border-radius: 4px; padding: 8px 10px 9px;
+    text-shadow: 0 2px 16px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.8);
+  }
+  #wordmark .a {
+    display: block; font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: .56rem; letter-spacing: .26em; text-transform: uppercase;
+    color: #d8b04a; margin-bottom: 3px;
+  }
+
+  /* the sheet's backdrop: mobile only, and only while the sheet is up */
+  #filters-scrim {
+    display: none; position: fixed; inset: 0; z-index: 24;
+    background: rgba(0,0,0,.45); opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+  }
+
+  #hint {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 10;
+    font-family: system-ui, sans-serif; font-size: .68rem; letter-spacing: .06em; color: #999;
+    background: rgba(4,4,5,.92); border-radius: 4px; padding: 6px 10px; white-space: nowrap;
+    pointer-events: none; transition: opacity 1s ease;
+  }
+  #hint .touch { display: none; }
+  @media (pointer: coarse) {
+    #hint .desk { display: none; }
+    #hint .touch { display: inline; }
+  }
+
+  /* ── the piece viewer ─────────────────────────────────────────────── */
+  /* Opening a piece hands it the screen: the text in a panel on the left (the
+     filters live on the right, the wordmark steps aside), the image on a stage
+     that takes the rest and zooms for real — wheel, pinch, drag, double click.
+     The wall stays behind, dimmed, and comes back as it was on close. */
+  #card-wrap {
+    position: fixed; inset: 0; z-index: 30;
+    display: grid; grid-template-columns: minmax(300px, 380px) 1fr;
+    opacity: 0; pointer-events: none;
+    background: rgba(6,6,8,.97);
+    transition: opacity .3s ease;
+  }
+  #card-wrap.open { opacity: 1; pointer-events: auto; }
+  #card-wrap.full { grid-template-columns: 0 1fr; }
+  #card-wrap.full #card { visibility: hidden; }
+
+  #card {
+    position: relative; min-width: 0; height: 100dvh; overflow-y: auto; overscroll-behavior: contain;
+    background: #0e0e11; border-right: 1px solid rgba(255,255,255,.08);
+    padding: 22px 26px 30px; text-align: left;
+    transform: translateX(-14px); transition: transform .3s ease;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.14) transparent;
+  }
+  #card-wrap.open #card { transform: none; }
+  /* the way back to the 3D wall, and to the filters, is always the first thing in the panel */
+  #card-bar { display: flex; gap: 8px; margin-bottom: 18px; }
+  #card-bar button {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: 18px; font: .74rem system-ui, sans-serif; letter-spacing: .04em;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); color: #e6e6e0;
+  }
+  #card-bar button:hover { background: rgba(255,255,255,.15); }
+  #card-back { font-weight: 600; }
+  #card-filters-n:not(:empty) { background: #d8b04a; color: #111; border-radius: 9px; padding: 0 6px; font-size: .66rem; font-weight: 700; }
+  /* filters opened from the viewer sit above it; choosing one returns to the wall, filtered */
+  body.filters-over #filters { z-index: 40; }
+  body.filters-over #filters-scrim { z-index: 39; }
+  #card-back:focus-visible, #card button:focus-visible, #card a:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #card-kicker {
+    font: .64rem/1.5 system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #8e8e87;
+  }
+  #card-title { font-size: 1.6rem; line-height: 1.2; font-weight: 400; color: #f5f5f0; margin: 6px 0 8px; overflow-wrap: anywhere; }
+  #card-byline { font-size: .95rem; color: #b9b9b0; }
+  #card-byline .sep { color: #55554f; padding: 0 6px; }
+  #card-date .arq { font: .62rem system-ui, sans-serif; letter-spacing: .06em; color: #8e8e87; border: 1px solid rgba(255,255,255,.14); border-radius: 4px; padding: 0 4px; margin-left: 6px; vertical-align: 2px; cursor: help; }
+  #card-contrib { all: unset; cursor: pointer; color: #cdd8e0; text-decoration: underline; text-decoration-color: rgba(127,168,201,.4); text-underline-offset: 3px; }
+  #card-contrib:hover { color: #fff; text-decoration-color: #7fa8c9; }
+  #card-contrib:empty { display: none; }
+
+  #card-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
+  #card-nav button, #card-nav a {
+    all: unset; box-sizing: border-box; cursor: pointer; text-align: center;
+    font: .72rem system-ui, sans-serif; letter-spacing: .04em; color: #cdd8e0;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 6px; padding: 8px 11px;
+  }
+  #card-nav a { color: #d8b04a; border-color: rgba(216,176,74,.35); flex: 1 1 100%; }
+  #card-nav button:hover, #card-nav a:hover { background: rgba(255,255,255,.12); }
+
+  /* tags: places as one-line trails, everything else as chips — every piece a filter */
+  #card-tags { font: .8rem/1.5 system-ui, sans-serif; color: #b8c6d1; }
+  #card-tags:empty { display: none; }
+  #card .sec { margin: 18px 0 6px; font: 600 .62rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; }
+  #card-tags .trail { margin: 2px 0; color: #e6eef5; font-weight: 600; overflow-wrap: anywhere; }
+  #card-tags .trail .sep { color: #55554f; font-weight: 400; padding: 0 5px; }
+  #card-tags .trail .topic { font-weight: 400; color: #b8c6d1; }
+  #card-tags .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  #card-tags .chip2 { background: rgba(127,168,201,.12); color: #cfdbe4; border-radius: 12px; padding: 3px 10px; max-width: 100%; overflow-wrap: anywhere; }
+  #card-tags [role="button"] { cursor: pointer; }
+  #card-tags .trail [role="button"]:hover { color: #fff; text-decoration: underline; text-decoration-color: rgba(127,168,201,.6); }
+  #card-tags .chip2[role="button"]:hover { background: rgba(127,168,201,.26); color: #fff; }
+  #card-tags [role="button"]:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #card-tags .tm { margin-top: 12px; font-size: .7rem; color: #7d8a94; }
+  #card-tags .more { all: unset; cursor: pointer; font-size: .72rem; color: #7fa8c9; padding: 3px 4px; }
+  #card-tags .more:hover { text-decoration: underline; }
+
+  #card-related h4 { margin: 18px 0 6px; font: 600 .62rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; }
+  #card-related .rel { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
+  #card-related .rel button { all: unset; flex: 0 0 auto; cursor: pointer; border-radius: 3px; overflow: hidden; line-height: 0; }
+  #card-related .rel canvas { width: 60px; height: 60px; display: block; opacity: .85; }
+  #card-related .rel button:hover canvas, #card-related .rel button:focus-visible canvas { opacity: 1; }
+
+  /* the archival record (NOBRADE): what the piece is, where it sits, where the original is */
+  #card-ficha { margin-top: 20px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 12px; font: .78rem/1.45 system-ui, sans-serif; }
+  #card-ficha summary { cursor: pointer; font-weight: 600; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: #7fa8c9; list-style: none; }
+  #card-ficha summary::-webkit-details-marker { display: none; }
+  #card-ficha summary::before { content: '▸'; display: inline-block; width: 1.1em; transition: transform .2s; }
+  #card-ficha[open] summary::before { transform: rotate(90deg); }
+  #card-ficha dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; margin: 12px 0 0; }
+  #card-ficha dt { color: #6e6e68; }
+  #card-ficha dd { margin: 0; color: #cfcfc8; min-width: 0; overflow-wrap: anywhere; }
+  #card-ficha .act.code, #card-ficha .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem; }
+  #card-ficha .act { all: unset; cursor: pointer; color: #cdd8e0; text-decoration: underline; text-decoration-color: rgba(127,168,201,.4); text-underline-offset: 3px; }
+  #card-ficha .act:hover { color: #fff; }
+  #card-ficha .crumb .sep { color: #55554f; padding: 0 4px; }
+  #card-ficha a { color: #d8b04a; text-decoration: none; }
+  #card-ficha a:hover { text-decoration: underline; }
+  #card-ficha .copied { color: #9fd49a; }
+
+  /* ── stage ── */
+  #stage { position: relative; overflow: hidden; min-width: 0; touch-action: none; cursor: default; user-select: none; -webkit-user-select: none; }
+  #stage.can-pan { cursor: grab; }
+  #stage.panning { cursor: grabbing; }
+  #card-img {
+    position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6); image-rendering: auto; -webkit-user-drag: none;
+    opacity: 0; transition: opacity .2s ease;
+  }
+  #card-img.ready { opacity: 1; }
+  #stage.anim #card-img { transition: transform .22s ease, opacity .2s ease; }
+  #stage .sbtn {
+    all: unset; box-sizing: border-box; position: absolute; display: grid; place-items: center; cursor: pointer;
+    background: rgba(12,12,14,.62); border: 1px solid rgba(255,255,255,.16); color: #e6e6e0;
+    font: 1rem/1 system-ui, sans-serif; border-radius: 8px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    transition: background .15s, opacity .2s;
+  }
+  #stage .sbtn:hover { background: rgba(40,40,44,.85); }
+  #stage .sbtn:focus-visible { outline: 1px solid #7fa8c9; outline-offset: 2px; }
+  #stage #stage-close { top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; }
+  #stage #stage-prev, #stage #stage-next { top: 50%; width: 40px; height: 56px; margin-top: -28px; font-size: 1.5rem; }
+  #stage #stage-prev { left: 14px; } #stage #stage-next { right: 14px; }
+  #stage-tools { position: absolute; right: 14px; bottom: 14px; display: flex; gap: 6px; }
+  #stage #stage-tools .sbtn { position: static; width: 36px; height: 36px; font-size: .95rem; }
+  #stage #stage-tools #z-fit { width: auto; padding: 0 10px; font-size: .7rem; letter-spacing: .04em; }
+  #stage-hint { position: absolute; left: 16px; bottom: 20px; font: .68rem system-ui, sans-serif; color: #77776f; pointer-events: none; transition: opacity .4s; }
+  #stage.touched #stage-hint { opacity: 0; }
+  #stage-pct { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); font: .7rem system-ui, sans-serif; color: #ddd; background: rgba(0,0,0,.5); padding: 3px 8px; border-radius: 10px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #stage-pct.on { opacity: 1; }
+
+  /* ── small screens / fingers ─────────────────────────────────────────────
+       Two things change shape here: the filter panel spans the width instead
+       of crowding a corner, and the card becomes a bottom sheet so the piece
+       you just tapped stays visible on the strip of wall above it. Every hit
+       target is grown to something a thumb can actually land on. ─────────── */
+  @media (max-width: 640px) {
+    #title-screen .stats { gap: 18px; }
+    #title-screen .enter { margin-top: 34px; }
+
+    /* The panel becomes what a phone expects at the bottom of the screen: a
+       sheet parked on the edge showing only its handle, its title and whatever
+       filters are active, which rises when you pull it up. It also puts the
+       controls where the thumb already is, instead of at the top of the screen.
+       --sheet-peek (measured in JS: the body's offset inside the panel) is how
+       much of it stays visible while it is down. */
+    #filters {
+      left: 0; right: 0; width: auto; max-width: none;
+      top: auto; bottom: 0;
+      border-radius: 16px 16px 0 0;
+      border-left: 0; border-right: 0; border-bottom: 0;
+      box-shadow: 0 -14px 44px rgba(0,0,0,.6);
+      padding-bottom: env(safe-area-inset-bottom);
+      transform: translateY(var(--sheet-hide, 340px));
+      transition: transform .34s cubic-bezier(.32, .72, 0, 1);
+      touch-action: none; /* dragging the sheet is never a page scroll */
+    }
+    #filters.open { transform: translateY(0); }
+    #filters::before { /* grab handle — the sheet reads as draggable before it is touched */
+      content: ''; display: block; width: 40px; height: 4px; margin: 9px auto 1px;
+      border-radius: 2px; background: rgba(255,255,255,.24);
+    }
+    #filters-scrim { display: block; }
+    #filters-scrim.on { opacity: 1; pointer-events: auto; }
+
+    #filters-head { padding: 11px 14px 12px; }
+    #filters-head .label { font-size: .72rem; }
+    /* the chevron means "this way": up while the sheet is parked, down once
+       it is up. Anchored at the bottom, the desktop sense of it is backwards. */
+    #filters-head .chevron { transform: rotate(180deg); }
+    #filters.open #filters-head .chevron { transform: rotate(0deg); }
+    #filters-count { font-size: .66rem; padding: 2px 7px; }
+    /* the transform does the hiding, so the body is always laid out — that is
+       what makes the peek measurable and the slide animate */
+    #filters-body {
+      display: block; padding-left: 14px; padding-right: 14px;
+      max-height: min(64dvh, 540px); overflow-y: auto; overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch; padding-bottom: 14px;
+      touch-action: pan-y;
+    }
+    .f-row select, .f-row input { font-size: 16px; padding: 8px 9px; } /* 16px: no iOS focus-zoom */
+    .f-field input { padding-right: 34px; }
+    .f-field .f-x { width: 26px; height: 26px; line-height: 25px; right: 4px; font-size: 1rem; }
+    #filters-chips { gap: 6px; padding-bottom: 11px; }
+    .chip { font-size: .7rem; line-height: 2; padding: 0 4px 0 10px; }
+    .chip button { width: 19px; height: 19px; line-height: 18px; font-size: .82rem; }
+    .f-hist { height: 34px; gap: 2px; }
+    .f-range { height: 32px; }
+    .f-range input[type="range"] { height: 32px; }
+    .f-range input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; }
+    .f-range input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+    .f-range-track { left: 11px; right: 11px; }
+    #f-result { font-size: .72rem; }
+    #f-clear { width: 100%; padding: 9px; font-size: .72rem; }
+
+    #hint {
+      left: 8px; right: 8px; transform: none; text-align: center; white-space: normal;
+      bottom: calc(var(--sheet-peek, 56px) + 12px + env(safe-area-inset-bottom));
+      font-size: .66rem; line-height: 1.5;
+    }
+
+    #wordmark { font-size: .96rem; left: 6px; }
+
+    /* phone: the image on top, the text as a sheet under it; tapping the image
+       gives it the whole screen, and scrolling the text shrinks the image to a
+       strip so the piece never leaves view */
+    #card-wrap { display: flex; flex-direction: column; }
+    #stage { order: -1; flex: 0 0 auto; height: 44dvh; transition: height .28s ease; }
+    #card-wrap.compact #stage { height: 22dvh; }
+    #card-wrap.full #stage { height: 100dvh; }
+    #card-wrap.full #card { display: none; }
+    #card {
+      flex: 1 1 auto; height: auto; min-height: 0; border-right: 0; transform: translateY(20px);
+      border-radius: 16px 16px 0 0; margin-top: -14px; z-index: 1;
+      padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+    }
+    #card::before { /* grab handle — says "sheet" */
+      content: ''; display: block; width: 40px; height: 4px; margin: 0 auto 10px;
+      border-radius: 2px; background: rgba(255,255,255,.24);
+    }
+    #card-bar { margin-bottom: 12px; }
+    #card-bar button { padding: 9px 14px; font-size: .78rem; }
+    #card-title { font-size: 1.35rem; }
+    #card-nav button, #card-nav a { padding: 11px 12px; font-size: .76rem; }
+    #card-nav button { flex: 1 1 0; }
+    #stage #stage-prev, #stage #stage-next, #stage-tools, #stage-hint { display: none; }
+    #card-wrap.full #stage-tools { display: flex; }
+    #stage #stage-close { display: none; }
+    #card-wrap.full #stage #stage-close { display: grid; }
+  }
+
+  @media (max-width: 380px) {
+    #card { padding-left: 14px; padding-right: 14px; }
+  }
+
+  /* a phone held sideways: a full-height sheet would swallow the screen */
+  @media (max-height: 460px) and (max-width: 900px) {
+    #card-wrap { grid-template-columns: minmax(240px, 42vw) 1fr; }
+    #filters-body { max-height: 58dvh; }
+  }
+  /* ─── tour: 2 min de cinema sobre o mural (faixas 2.39:1, legenda, foto da peça) ─── */
+  :root { --lb: clamp(0px, calc((100dvh - 100vw / 2.39) / 2), 16dvh); --t-ocre: #d8b04a; --t-papel: #f4f1e8; --t-ease: cubic-bezier(.4,0,.2,1); }
+  #tour-abrir {
+    position: fixed; z-index: 26; top: calc(48px + env(safe-area-inset-top)); left: 9px;
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 11px;
+    font: 600 12px/1 'Public Sans', system-ui, sans-serif; letter-spacing: .04em; color: var(--t-papel);
+    background: rgba(4,4,5,.88); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; cursor: pointer;
+    transition: opacity .4s, background .2s;
+  }
+  #tour-abrir::before { content: ""; border-left: 7px solid var(--t-ocre); border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; }
+  #tour-abrir:hover { background: #000; border-color: rgba(216,176,74,.5); }
+  body.touring #tour-abrir, body.touring #filters, body.touring #hint, body.touring #wordmark, body.touring #filters-scrim { opacity: 0 !important; pointer-events: none !important; transition: opacity .6s; }
+  body.touring #canvas { cursor: default; }
+  #tour { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  #tour[hidden], #tour-convite[hidden] { display: none; }
+  #tour .bar { position: absolute; left: 0; right: 0; height: var(--lb); background: #000; transform: scaleY(0); transition: transform 900ms var(--t-ease); }
+  #tour .bar.top { top: 0; transform-origin: top; }
+  #tour .bar.bottom { bottom: 0; transform-origin: bottom; }
+  #tour.on .bar { transform: scaleY(1); }
+  #tour-progress { position: absolute; left: 0; right: 0; bottom: var(--lb); height: 2px; background: rgba(244,241,232,.12); }
+  #tour-progress i { display: block; height: 100%; background: var(--t-ocre); transform: scaleX(0); transform-origin: left; }
+  #tour-left { position: absolute; right: 10px; bottom: calc(var(--lb) + 6px); font: 12px ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--t-ocre); }
+  #tour-parar, #tour-som { position: absolute; top: max(8px, calc(var(--lb) - 40px)); pointer-events: auto; padding: 5px 12px;
+    font: 600 12px 'Public Sans', system-ui, sans-serif; background: rgba(0,0,0,.6); color: var(--t-papel);
+    border: 1px solid rgba(244,241,232,.25); border-radius: 999px; cursor: pointer; }
+  #tour-parar { left: 16px; }
+  #tour-som { left: 92px; color: var(--t-ocre); }
+  #tour-som.mudo { color: rgba(244,241,232,.45); text-decoration: line-through; }
+  #tour-progress, #tour-left, #tour-parar, #tour-som { transition: opacity 200ms; }
+  #tour.saindo #tour-progress, #tour.saindo #tour-left, #tour.saindo #tour-parar, #tour.saindo #tour-som, #tour.saindo #tour-cap, #tour.saindo #tour-foto { opacity: 0; pointer-events: none; transition: opacity 200ms; }
+  /* sombra sob a legenda: a parede clara apagava o texto */
+  #tour::after { content: ""; position: absolute; left: 0; right: 0; bottom: var(--lb); height: 34dvh; pointer-events: none;
+    background: linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,.5) 45%, transparent); opacity: 0; transition: opacity 900ms; }
+  #tour.on::after { opacity: 1; }
+  #tour.saindo::after { opacity: 0; transition: opacity 200ms; }
+  #tour-cap { z-index: 1; position: absolute; left: 0; right: 0; bottom: calc(var(--lb) + 26px); padding: 0 8vw; text-align: center;
+    opacity: 0; transform: translateY(8px); transition: opacity 600ms, transform 600ms; }
+  #tour-cap.on { opacity: 1; transform: none; }
+  #tour-kicker { display: inline-block; padding: 5px 11px; margin-bottom: 10px; background: rgba(8,8,9,.78); border: 1px solid rgba(244,241,232,.16);
+    font: 600 11px/1.3 'Public Sans', system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--t-ocre); }
+  #tour-kicker:empty { display: none; }
+  #tour-line { display: block; max-width: 980px; margin: 0 auto; font: 400 clamp(18px, 2.2vw, 31px)/1.28 Georgia, 'Times New Roman', serif; color: var(--t-papel);
+    text-shadow: 0 2px 18px rgba(0,0,0,.95), 0 0 3px rgba(0,0,0,.9); text-wrap: balance; }
+  #tour-line q { quotes: "“" "”"; font-style: italic; }
+  /* a peça em destaque: a cópia de acesso, de pé sobre o mural, com a ficha mínima embaixo */
+  #tour-foto { z-index: 1; position: absolute; left: 50%; top: calc(var(--lb) + 3dvh); transform: translate(-50%, 10px); margin: 0;
+    opacity: 0; transition: opacity 900ms, transform 900ms var(--t-ease); text-align: center; }
+  #tour-foto.on { opacity: 1; transform: translate(-50%, 0); }
+  #tour-foto img { display: block; margin: 0 auto; max-width: min(78vw, 980px);
+    max-height: calc(100dvh - 2 * var(--lb) - 3dvh - 270px); min-height: 120px; object-fit: contain;
+    box-shadow: 0 24px 90px rgba(0,0,0,.85), 0 0 0 1px rgba(244,241,232,.14); background: #111; }
+  #tour-foto figcaption { margin-top: 7px; font: 500 11px/1.35 'Public Sans', system-ui, sans-serif; letter-spacing: .03em; color: rgba(244,241,232,.62);
+    max-width: min(78vw, 760px); margin-left: auto; margin-right: auto; text-shadow: 0 1px 8px #000;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #tour-foto figcaption b { font-weight: 600; color: rgba(244,241,232,.88); }
+  #tour-convite { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; background: rgba(6,6,7,.6); backdrop-filter: blur(2px); cursor: pointer; }
+  #tour-convite button { display: inline-flex; align-items: center; gap: 12px; font: 700 19px 'Public Sans', system-ui, sans-serif; color: #141210; background: var(--t-ocre);
+    border: 0; border-radius: 999px; padding: 15px 28px; cursor: pointer; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  #tour-convite button::before { content: ""; border-left: 13px solid #141210; border-top: 8px solid transparent; border-bottom: 8px solid transparent; }
+  #tour-convite small { display: block; font: 500 13px 'Public Sans', system-ui, sans-serif; opacity: .75; margin-top: 2px; text-align: left; }
+  @media (max-width: 640px) {
+    #tour-cap { padding: 0 5vw; bottom: calc(var(--lb) + 20px); }
+    #tour-line { font-size: 17px; }
+    #tour-foto img { max-width: 90vw; max-height: calc(100dvh - 2 * var(--lb) - 3dvh - 300px); }
+    #tour-abrir { top: calc(50px + env(safe-area-inset-top)); left: 6px; }
+  }
+</style>
+<!-- seo:start (gerado por scripts/gera_seo.ts — não editar à mão) -->
+<link rel="canonical" href="https://xn--2dk.xyz/brasiliana/">
+<meta name="description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ミ.xyz">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="https://xn--2dk.xyz/brasiliana/">
+<meta property="og:title" content="Brasiliana Fotográfica — Mural do Acervo">
+<meta property="og:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
+<meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
+<meta property="og:image:alt" content="Brasiliana Fotográfica — Mural do Acervo">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brasiliana Fotográfica — Mural do Acervo">
+<meta name="twitter:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
+<meta name="twitter:image" content="https://xn--2dk.xyz/images/image1.png">
+<!-- seo:end -->
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="loading">
+  <p id="loading-msg">carregando mural…</p>
+  <div id="title-screen">
+    <div class="eyebrow">Biblioteca Nacional · Acervo Digital</div>
+    <h1>Brasiliana Fotográfica</h1>
+    <p class="sub">um mural do acervo fotográfico brasileiro</p>
+    <div class="stats">
+      <div class="stat"><b id="stat-pecas">—</b><span>peças</span></div>
+      <div class="stat"><b id="stat-periodo">—</b><span>período</span></div>
+      <div class="stat"><b id="stat-instituicoes">—</b><span>instituições</span></div>
+    </div>
+    <div class="enter" id="enter-label">carregando imagens… 0%</div>
+    <div id="progress-track"><div id="progress-bar"></div></div>
+    <div id="aviso-leve" hidden>modo leve — a tentativa anterior não terminou de carregar</div>
+  </div>
+</div>
+
+<div id="wordmark"><span class="a">Acervo</span>Brasiliana</div>
+
+<div id="filters-scrim" aria-hidden="true"></div>
+<div id="filters">
+  <div id="filters-head" role="button" tabindex="0" aria-expanded="false" aria-controls="filters-body">
+    <span class="label">filtros</span>
+    <span class="right">
+      <span id="filters-count" class="empty"></span>
+      <span class="chevron" aria-hidden="true">▾</span>
+    </span>
+  </div>
+  <div id="filters-chips" hidden></div>
+  <div id="filters-body">
+    <p class="f-note" id="filters-label">carregando…</p>
+    <div class="f-row">
+      <label for="f-search">Busca livre</label>
+      <div class="f-field">
+        <input type="search" id="f-search" autocomplete="off" placeholder="qualquer palavra dos metadados…">
+        <button type="button" class="f-x" id="f-search-x" aria-label="limpar busca" hidden>×</button>
+      </div>
+    </div>
+    <p class="f-sec">Arranjo</p>
+    <div class="f-row">
+      <label for="f-institution">Instituição de origem</label>
+      <select id="f-institution"><option value="">todas</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-serie">Série (coleção ou fundo)</label>
+      <select id="f-serie"><option value="">todas</option></select>
+    </div>
+    <p class="f-sec">Data</p>
+    <div class="f-row">
+      <label for="f-year-lo"><span>Década de produção</span><span class="val" id="f-year-readout">—</span></label>
+      <div class="f-hist" id="f-hist"></div>
+      <div class="f-range">
+        <div class="f-range-track"><div class="f-range-fill" id="f-year-fill"></div></div>
+        <input type="range" id="f-year-lo" aria-label="década inicial">
+        <input type="range" id="f-year-hi" aria-label="década final">
+      </div>
+    </div>
+    <p class="f-sec">Pontos de acesso</p>
+    <div class="f-row">
+      <label for="f-author">Autor / fotógrafo</label>
+      <select id="f-author"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-estado">Estado / país</label>
+      <select id="f-estado"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-cidade">Cidade</label>
+      <select id="f-cidade" disabled><option value="">escolha um estado</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-bairro">Bairro / local</label>
+      <select id="f-bairro" disabled><option value="">escolha uma cidade</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-topico">Assunto</label>
+      <select id="f-topico"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-pessoa">Pessoa retratada</label>
+      <select id="f-pessoa"><option value="">todas</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-colecao">Coleção citada nos assuntos</label>
+      <select id="f-colecao"><option value="">todas</option></select>
+    </div>
+    <p class="f-sec">Suporte e uso</p>
+    <div class="f-row">
+      <label for="f-type">Espécie e suporte</label>
+      <select id="f-type"><option value="">todos</option></select>
+    </div>
+    <div class="f-row">
+      <label for="f-rep">Condição de reprodução</label>
+      <select id="f-rep"><option value="">todas</option></select>
+    </div>
+    <div id="f-result">—</div>
+    <button id="f-clear" class="disabled">limpar filtros</button>
+  </div>
+</div>
+<button type="button" id="tour-abrir" hidden title="um passeio de 2 minutos pelo acervo, com som">tour de 2 min</button>
+<div id="tour-convite" hidden><button type="button"><span><span>Aperte para começar</span><small>tour de 2 minutos pelo acervo, com som</small></span></button></div>
+<div id="tour" hidden aria-live="polite">
+  <div class="bar top"></div><div class="bar bottom"></div>
+  <figure id="tour-foto"><img alt=""><figcaption></figcaption></figure>
+  <div id="tour-cap"><span id="tour-kicker"></span><span id="tour-line"></span></div>
+  <div id="tour-progress"><i></i></div>
+  <span id="tour-left"></span>
+  <button id="tour-parar" type="button" title="parar o tour (Esc)">✕ esc</button>
+  <button id="tour-som" type="button" title="som do tour (liga/desliga)" aria-label="som do tour" aria-pressed="true">♪</button>
+</div>
+
+<p id="hint">
+  <span class="desk">arraste para deslocar · scroll para aproximar · clique numa peça · setas navegam com a ficha aberta · <b style="font-weight:600;color:#bbb">f</b> filtros · <b style="font-weight:600;color:#bbb">/</b> busca</span>
+  <span class="touch">arraste para deslocar · pinça para aproximar · toque numa peça</span>
+</p>
+
+<div id="card-wrap" role="dialog" aria-modal="true" aria-labelledby="card-title">
+  <aside id="card">
+    <div id="card-bar">
+      <button type="button" id="card-back" title="voltar ao mural 3D (Esc)">← mural</button>
+      <button type="button" id="card-filters" title="filtrar o mural">filtros<span id="card-filters-n"></span></button>
+    </div>
+    <div id="card-kicker"></div>
+    <h2 id="card-title">—</h2>
+    <div id="card-byline"><span id="card-date"></span><span class="sep" id="card-by-sep">·</span><button type="button" id="card-contrib" title="filtrar o mural por este autor"></button></div>
+    <div id="card-nav">
+      <button type="button" id="card-prev" aria-label="peça anterior">‹ anterior</button>
+      <button type="button" id="card-next" aria-label="próxima peça">próxima ›</button>
+      <a id="card-link" href="#" target="_blank" rel="noopener">original ↗</a>
+    </div>
+    <div id="card-tags"></div>
+    <div id="card-related" hidden></div>
+    <details id="card-ficha">
+      <summary>Ficha arquivística <span style="font-weight:400;letter-spacing:.04em;text-transform:none;color:#6e6e68">· NOBRADE</span></summary>
+      <dl id="card-ficha-dl"></dl>
+    </details>
+  </aside>
+  <div id="stage">
+    <img id="card-img" alt="" draggable="false">
+    <div id="stage-pct"></div>
+    <button type="button" class="sbtn" id="stage-prev" aria-label="peça anterior">‹</button>
+    <button type="button" class="sbtn" id="stage-next" aria-label="próxima peça">›</button>
+    <button type="button" class="sbtn" id="stage-close" aria-label="voltar ao mural" title="voltar ao mural 3D (Esc)">×</button>
+    <div id="stage-tools">
+      <button type="button" class="sbtn" id="z-out" aria-label="afastar (−)">−</button>
+      <button type="button" class="sbtn" id="z-in" aria-label="aproximar (+)">+</button>
+      <button type="button" class="sbtn" id="z-fit" aria-label="encaixar a imagem (0)">encaixar</button>
+      <button type="button" class="sbtn" id="z-full" aria-label="só a imagem (F)">⤢</button>
+    </div>
+    <div id="stage-hint">roda aproxima · arraste move · duplo clique amplia · F só a imagem</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const isMobile = window.matchMedia('(max-width: 640px)').matches;
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
+// ─── renderer / scene / camera ─────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isTouch ? 1.75 : 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ─── light mode and the crash-loop guard ──────────────────────────────────
+// On an iPhone, running out of memory throws nothing: the system kills the tab
+// and reloads it by itself, the page starts the very same load, dies again — a
+// loop. A mark in sessionStorage survives that automatic reload, so the next
+// attempt knows the last one never finished and goes straight to the light
+// atlas instead of repeating the crash.
+const LOAD_MARK = 'mural_carregando';
+const store = (kind, fn) => { try { return fn(window[kind]); } catch (e) { return null; } };
+const previousLoadDied = !!store('sessionStorage', s => s.getItem(LOAD_MARK));
+const lightMode = isTouch || previousLoadDied
+  || store('localStorage', s => s.getItem('mural_leve')) === '1'
+  || renderer.capabilities.maxTextureSize < 8192
+  || (navigator.deviceMemory !== undefined && navigator.deviceMemory <= 4);
+
+function showFailure(title, detail) {
+  if (document.getElementById('falha')) return;
+  const box = document.createElement('div');
+  box.id = 'falha';
+  const h = document.createElement('div'); h.textContent = title;
+  const small = document.createElement('small');
+  small.textContent = detail || 'Tentar de novo carrega a versão leve do mural, feita para celular.';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'tentar de novo';
+  btn.addEventListener('click', () => {
+    store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now()))); // retry in light mode
+    location.reload();
+  });
+  box.append(h, small, btn);
+  document.body.appendChild(box);
+}
+
+// the GPU dropping the wall's textures is a memory signal too — say so, and let
+// the reader decide; preventDefault keeps the browser from giving up silently
+canvas.addEventListener('webglcontextlost', e => {
+  e.preventDefault();
+  store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+  showFailure('O navegador liberou a memória do mural.');
+}, false);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0b0c);
+
+const START_Z = isMobile ? 17 : 26;
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 0, START_Z);
+
+function resize() {
+  wake(4);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+new ResizeObserver(resize).observe(document.documentElement);
+// iOS collapses/expands its URL bar without resizing the documentElement
+window.visualViewport?.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 250));
+
+// ─── pan / zoom over the flat wall (no orbit — it's a wall, not a globe) ───
+// the camera itself never moves on selection — only the tiles do (see selectTile below)
+// one pointer pans, two pinch to zoom; the wheel keeps doing the desktop job.
+// upper bound generous enough to fit the whole wall (thousands of tiles,
+// ~180 units wide) in view at once, well under the camera's far plane (500)
+const MIN_Z = 4, MAX_Z = 400;
+const camTarget = new THREE.Vector3(0, 0, START_Z); // camera eases toward this each frame
+
+// world units per screen pixel at a given distance — panning then tracks the
+// finger exactly at every zoom level instead of racing away when zoomed in
+// (at the default distance this works out to the old fixed 0.03 factor)
+const HALF_FOV_TAN = Math.tan(THREE.MathUtils.degToRad(50 / 2));
+const worldPerPx = (z = camTarget.z) => (2 * z * HALF_FOV_TAN) / window.innerHeight;
+const visibleHeight = (z = camTarget.z) => 2 * z * HALF_FOV_TAN;
+
+renderer.domElement.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (selected) return; // navigation is frozen while a card is open
+  // multiplicative, not additive: a notch of the wheel covers the same *share*
+  // of the distance at every zoom, instead of crawling far out and lurching close
+  camTarget.z = THREE.MathUtils.clamp(camTarget.z * Math.exp(e.deltaY * 0.0011), MIN_Z, MAX_Z);
+}, { passive: false });
+
+const pointers = new Map(); // live pointers on the canvas, by pointerId
+let gesture = null;         // camera + finger state sampled when the set changed
+let multi = false;          // this gesture was ever a pinch → the last lift isn't a tap
+
+function centroid() {
+  let x = 0, y = 0;
+  for (const p of pointers.values()) { x += p.x; y += p.y; }
+  return { x: x / pointers.size, y: y / pointers.size };
+}
+function spread() {
+  const [a, b] = [...pointers.values()];
+  return Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
+}
+// re-baselined whenever a finger lands or lifts, so the view never jumps
+function rebase() {
+  const c = centroid();
+  gesture = {
+    cx: c.x, cy: c.y,
+    camX: camTarget.x, camY: camTarget.y, camZ: camTarget.z,
+    spread: pointers.size > 1 ? spread() : 0,
+    k: worldPerPx(),
+  };
+}
+
+/* ─── the throw ──────────────────────────────────────────────────────────────
+   A drag that ends while still moving keeps going and slows like something with
+   weight, instead of stopping dead the instant the finger leaves the glass.
+   `vel` is the live speed of the drag, smoothed; `glide` is what it was thrown
+   with, decaying every frame after the release. Both are world units a second,
+   so a throw covers the same amount of wall at any zoom. */
+const glide = new THREE.Vector2();
+const vel = new THREE.Vector2();
+let lastMoveAt = 0;
+const GLIDE_TAU = 0.42; // how long the coast lasts
+const GLIDE_MAX = 90;   // ceiling on a flick, in world units a second
+
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (selected) return; // navigation is frozen while a card is open
+  renderer.domElement.setPointerCapture?.(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, ox: e.clientX, oy: e.clientY, moved: false });
+  if (pointers.size > 1) multi = true;
+  glide.set(0, 0); vel.set(0, 0); // a finger on the glass stops the wall dead
+  lastMoveAt = performance.now();
+  rebase();
+});
+
+renderer.domElement.addEventListener('pointermove', e => {
+  const p = pointers.get(e.pointerId);
+  if (!p || !gesture) return;
+  p.x = e.clientX; p.y = e.clientY;
+  // a finger wobbles far more than a mouse does on a click
+  if (Math.hypot(p.x - p.ox, p.y - p.oy) > (e.pointerType === 'mouse' ? 4 : 12)) p.moved = true;
+
+  if (pointers.size > 1) camTarget.z = THREE.MathUtils.clamp(gesture.camZ * (gesture.spread / spread()), MIN_Z, MAX_Z);
+  const c = centroid();
+  const k = pointers.size > 1 ? worldPerPx() : gesture.k; // pinching also drags the midpoint
+  const px = camTarget.x, py = camTarget.y;
+  camTarget.x = gesture.camX - (c.x - gesture.cx) * k;
+  camTarget.y = gesture.camY + (c.y - gesture.cy) * k;
+
+  // speed of the drag itself, smoothed — one jittery sample must not decide
+  // where the wall gets thrown, and a stale one must not survive a pause
+  const t = performance.now();
+  const dt = (t - lastMoveAt) / 1000;
+  lastMoveAt = t;
+  if (dt > 0 && dt < 0.1) {
+    vel.x += ((camTarget.x - px) / dt - vel.x) * 0.35;
+    vel.y += ((camTarget.y - py) / dt - vel.y) * 0.35;
+  } else vel.set(0, 0);
+});
+
+function endPointer(e) {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  pointers.delete(e.pointerId);
+  if (pointers.size) { rebase(); return; } // other fingers still down
+  if (!p.moved && !multi && e.type === 'pointerup') handleTap(e.clientX, e.clientY, e.pointerType !== 'mouse');
+  // a finger that came to rest before lifting is holding the wall, not throwing it
+  else if (e.type === 'pointerup' && performance.now() - lastMoveAt < 90) {
+    glide.copy(vel).clampLength(0, GLIDE_MAX);
+  }
+  vel.set(0, 0);
+  multi = false;
+  gesture = null;
+}
+window.addEventListener('pointerup', endPointer);
+window.addEventListener('pointercancel', endPointer);
+
+// on a phone the open panel covers most of the wall — a tap on the wall means
+// "let me see it", so the first tap puts the panel away rather than selecting
+function handleTap(x, y, touch) {
+  if (isMobile && filtersEl.classList.contains('open')) { toggleFilters(false); return; }
+  doRaycast(x, y, touch);
+}
+
+// ─── grid of tiles ──────────────────────────────────────────────────────────
+// A mesh per piece meant 12.552 draw calls a frame, every one of them a
+// transparent object the renderer had to depth-sort first — which is what made
+// zooming out stutter: the further you pull back, the more of them are on
+// screen. Instead there is one InstancedMesh per atlas page (four in all), and
+// a tile is a plain object holding its own animation state. Draw calls no
+// longer depend on the zoom level.
+const tileMeshes = [];     // Tile[], in grid order — arrow navigation walks this
+const pages = [];          // one per atlas page: { mesh, tiles, dims, dimAttr, dirty }
+const pageMeshes = [];     // the raycast targets, kept as a stable array
+const animating = new Set(); // tiles still easing toward their target
+const tileGroup = new THREE.Group();
+scene.add(tileGroup);
+
+const GUTTER = 1.12; // spacing multiplier so tiles don't touch
+let GRID_COLS = 1; // set by buildGrid, used by arrow-key navigation to move by row/col
+
+// every tile is the same quad — only its instance matrix, atlas offset and
+// dimming differ, so the geometry is built once and shared
+const tileGeo = new THREE.PlaneGeometry(1, 1);
+const placeholderMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
+
+// MeshBasicMaterial knows nothing about per-instance atlas windows or dimming,
+// so both are fed in as instanced attributes and patched into its shader
+function tileMaterial(tex, tpr) {
+  const mat = new THREE.MeshBasicMaterial({ map: tex });
+  mat.onBeforeCompile = shader => {
+    shader.uniforms.uUvScale = { value: 1 / tpr };
+    shader.vertexShader = `
+      attribute vec2 aUv;
+      attribute float aDim;
+      uniform float uUvScale;
+      varying float vDim;
+    ` + shader.vertexShader.replace(
+      '#include <uv_vertex>',
+      'vMapUv = uv * uUvScale + aUv;\n vDim = aDim;'
+    );
+    // the dim factor is a perceptual one (0.07 reads as "nearly gone"), but it
+    // lands in linear space — decode it or a dimmed wall comes out four times
+    // brighter than the old alpha blend did
+    shader.fragmentShader = 'varying float vDim;\n' + shader.fragmentShader.replace(
+      '#include <map_fragment>',
+      '#include <map_fragment>\n diffuseColor.rgb *= pow( vDim, 2.2 );'
+    );
+  };
+  return mat;
+}
+
+function buildGrid(handles, mapEntries, tpr, nPages) {
+  const n = handles.length;
+  const cols = Math.max(1, Math.round(Math.sqrt(n * (window.innerWidth / window.innerHeight) * 1.4)));
+  const rows = Math.ceil(n / cols);
+  GRID_COLS = cols;
+
+  const counts = new Array(nPages).fill(0);
+  handles.forEach(h => counts[mapEntries[h].atlas || 0]++);
+
+  for (let i = 0; i < nPages; i++) {
+    const count = Math.max(1, counts[i]);
+    const geo = tileGeo.clone(); // the quad is shared; the per-instance attributes are not
+    const uvAttr = new THREE.InstancedBufferAttribute(new Float32Array(count * 2), 2);
+    const dims = new Float32Array(count).fill(1);
+    const dimAttr = new THREE.InstancedBufferAttribute(dims, 1);
+    dimAttr.setUsage(THREE.DynamicDrawUsage);
+    geo.setAttribute('aUv', uvAttr);
+    geo.setAttribute('aDim', dimAttr);
+
+    const mesh = new THREE.InstancedMesh(geo, placeholderMat, count);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.frustumCulled = false; // the wall's bounds shift as tiles animate, and four objects cost nothing
+    mesh.userData.page = i;
+    tileGroup.add(mesh);
+    pages.push({ mesh, tiles: [], dims, dimAttr, dirty: false });
+    pageMeshes.push(mesh);
+  }
+
+  const m4 = new THREE.Matrix4();
+  handles.forEach((handle, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const entry = mapEntries[handle];
+    const page = pages[entry.atlas || 0];
+    const iid = page.tiles.length;
+
+    const pos = new THREE.Vector3(
+      (col - cols / 2) * GUTTER,
+      (rows / 2 - row) * GUTTER,
+      (Math.random() - 0.5) * 0.6 // slight depth jitter, like the reference photo
+    );
+    const tile = {
+      page: entry.atlas || 0, iid,
+      pos: pos.clone(), scl: 1, dim: 1,
+      userData: {
+        handle, meta: entry.meta,
+        basePos: pos.clone(),
+        targetPos: pos.clone(),
+        targetScale: 1,
+        targetOpacity: 1, // dimmed (not hidden) by the filter panel — keeps the grid layout intact
+      },
+    };
+
+    // the tile's window into the atlas, as a uv offset off the shared quad
+    page.mesh.geometry.attributes.aUv.setXY(iid, entry.col / tpr, 1 - (entry.row + 1) / tpr);
+    m4.makeScale(1, 1, 1).setPosition(pos);
+    page.mesh.setMatrixAt(iid, m4);
+
+    page.tiles.push(tile);
+    tileMeshes.push(tile);
+    tileByHandle.set(handle, tile);
+  });
+
+  pages.forEach(p => { p.mesh.instanceMatrix.needsUpdate = true; p.mesh.geometry.attributes.aUv.needsUpdate = true; });
+  return { cols, rows };
+}
+
+// a tile only costs anything on the frames where it is actually moving
+function markAnimating(tile) { animating.add(tile); }
+
+const _m4 = new THREE.Matrix4();
+// the tiles ease on the same clock the camera does: 0.16 a frame *was* the
+// right weight at 60 Hz, and twice that on a 120 Hz phone
+const TAU_TILE = 0.096;
+function updateTileAnimation(dt) {
+  if (!animating.size) return;
+  const k = ease(dt, TAU_TILE);
+  for (const t of animating) {
+    const d = t.userData;
+    let settled = true;
+    if (t.pos.distanceToSquared(d.targetPos) > 1e-6) { t.pos.lerp(d.targetPos, k); settled = false; }
+    else t.pos.copy(d.targetPos);
+    if (Math.abs(t.scl - d.targetScale) > 1e-4) { t.scl += (d.targetScale - t.scl) * k; settled = false; }
+    else t.scl = d.targetScale;
+    if (Math.abs(t.dim - d.targetOpacity) > 1e-4) { t.dim += (d.targetOpacity - t.dim) * k; settled = false; }
+    else t.dim = d.targetOpacity;
+
+    const page = pages[t.page];
+    _m4.makeScale(t.scl, t.scl, 1).setPosition(t.pos);
+    page.mesh.setMatrixAt(t.iid, _m4);
+    page.dims[t.iid] = t.dim;
+    page.dirty = true;
+    if (settled) animating.delete(t);
+  }
+  for (const page of pages) {
+    if (!page.dirty) continue;
+    page.mesh.instanceMatrix.needsUpdate = true;
+    page.dimAttr.needsUpdate = true;
+    page.dirty = false;
+  }
+}
+
+// ─── raycasting ─────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let hovered = null;
+
+// dimmed-out tiles are inert: they can't be hovered, clicked or stepped onto,
+// so an active filter behaves like a real subset and not just a paint job
+function firstLiveHit() {
+  const hits = raycaster.intersectObjects(pageMeshes, false);
+  for (const h of hits) {
+    const tile = pages[h.object.userData.page].tiles[h.instanceId];
+    if (tile && !tile.userData.filteredOut) return tile;
+  }
+  return null;
+}
+
+// the canvas' own box, not the window: on iOS the two drift apart whenever the
+// URL bar slides and the picked point lands a tile or two off the finger
+function pickAt(cx, cy) {
+  const r = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((cx - r.left) / r.width) * 2 - 1;
+  pointer.y = -((cy - r.top) / r.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  return firstLiveHit();
+}
+
+// A fingertip covers far more wall than a tile does at the opening zoom (a tile
+// is ~50 px there), so a tap that looks dead-on often lands in a gutter. On
+// touch, sweep a small ring around the point before calling it a miss.
+const TAP_RING = [[0, 0], [0, -11], [11, 0], [0, 11], [-11, 0], [-8, -8], [8, -8], [8, 8], [-8, 8]];
+function doRaycast(cx, cy, touch) {
+  for (const [ox, oy] of (touch ? TAP_RING : [[0, 0]])) {
+    const m = pickAt(cx + ox, cy + oy);
+    if (m) { openTile(m); return; }
+  }
+}
+
+renderer.domElement.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || pointers.size || selected) return; // no hover state on a finger
+  const m = pickAt(e.clientX, e.clientY);
+  if (m !== hovered) {
+    if (hovered) { hovered.userData.targetScale = 1; markAnimating(hovered); }
+    hovered = m;
+    if (hovered) { hovered.userData.targetScale = 1.08; markAnimating(hovered); }
+    renderer.domElement.style.cursor = m ? 'pointer' : '';
+  }
+});
+
+// ─── selection / card ─────────────────────────────────────────────────────
+// Opening a piece hands the screen to the viewer, which covers the wall: the
+// wall itself does not move (it used to part around the piece, but that is now
+// out of sight and only cost a frame of work over thousands of tiles).
+let atlasSources = []; // { source, size } per atlas page — used to crop the tile into the card canvas
+let atlasEntries = null, TPR = 1;
+let seriesTitles = [];   // títulos das séries NOBRADE (nível 3); meta.si indexa aqui
+let authorities = [];    // formas autorizadas ISAAR(CPF) dos autores; meta.ai indexa aqui
+let instituicoes = {};   // community do DSpace → nome autorizado da instituição
+let colecaoInfo = {};    // código e título do nível 1
+const tileByRef = new Map(); // código de referência → peça, para links #BR RJXYZ…
+let selected = null;
+let selectedAt = 0;
+
+function selectTile(mesh) {
+  closing = false;
+  selected = mesh;
+  selectedAt = performance.now();
+  if (hovered) { hovered.userData.targetScale = 1; markAnimating(hovered); }
+  hovered = null;
+  showCard(mesh.userData);
+}
+
+// a tile only joins the animation set when it has somewhere to go
+function aim(m, pos, scale) {
+  m.userData.targetPos = pos;
+  m.userData.targetScale = scale;
+  if (m.pos.distanceToSquared(pos) > 1e-6 || Math.abs(m.scl - scale) > 1e-4) markAnimating(m);
+}
+function rest(m) { aim(m, m.userData.basePos, 1); }
+
+function deselect() {
+  closing = false;
+  tileMeshes.forEach(rest);
+  document.getElementById('card-wrap').classList.remove('open', 'full', 'compact');
+  document.body.classList.remove('filters-over');
+  wake(30);
+  selected = null;
+}
+document.getElementById('card-back').addEventListener('click', () => closeCard());
+// A tap is pointerup *then* a compatibility click. The card opens on the
+// pointerup, so that click lands on whatever the card just put under the
+// finger — the backdrop (closing it again) or a button on the sheet. Swallow
+// anything that arrives within a moment of the card opening.
+// stopImmediatePropagation, not stopPropagation: when the click lands on the
+// backdrop itself the closing listener below is on that same element, and
+// plain stopPropagation does not reach listeners on the target node — so every
+// tap that opened a card in the upper half of a phone screen closed it again.
+document.getElementById('card-wrap').addEventListener('click', e => {
+  if (performance.now() - selectedAt < 400) { e.stopImmediatePropagation(); e.preventDefault(); }
+}, true);
+document.getElementById('card-wrap').addEventListener('click', e => {
+  if (e.target.id === 'card-wrap') closeCard();
+});
+
+/* ─── browser history ────────────────────────────────────────────────────────
+   Opening a piece is an event worth going back from: each one becomes a history
+   entry carrying its handle, so the phone's back gesture (and the browser's own
+   back button) closes the card instead of leaving the wall, and back/forward
+   retrace the pieces you opened — including the ones you stepped to with
+   ‹ anterior / próxima ›. The handle also lands in the URL, so a piece can be
+   linked to and re-opened straight from the address bar.
+   Everything that changes the view goes through openTile/closeCard; selectTile
+   and deselect are the raw moves, used as-is when *history* is the one asking. */
+const tileByHandle = new Map(); // filled in buildGrid
+let historyReady = false;       // no entries before the wall can answer for them
+
+function openTile(tile) {
+  selectTile(tile);
+  if (!historyReady) return;
+  const h = tile.userData.handle;
+  // holding an arrow key walks the wall faster than Safari allows entries to be
+  // pushed (100 per 30s); the wall keeps working, it just stops recording
+  // d counts the pieces stacked since the wall, so closing can unwind them all
+  const d = (history.state && history.state.h && history.state.d || 0) + 1;
+  try { history.pushState({ h, d }, '', `#${encodeURIComponent(h)}`); } catch {}
+}
+
+let closing = false; // a history.back() already asked for; popstate clears it
+
+function closeCard() {
+  if (closing) return; // dragging a filter fires apply() per frame — one back, not twelve
+  // closing goes back to the wall, not to the previous piece: unwind every entry
+  // the pieces stacked (‹ anterior / próxima › each pushed one) in a single step
+  if (historyReady && history.state && history.state.h) {
+    closing = true;
+    history.go(-(history.state.d || 1));
+    return;
+  }
+  deselect();
+}
+
+const handleFromHash = () => {
+  try { return decodeURIComponent(location.hash.slice(1)); } catch { return ''; }
+};
+
+window.addEventListener('popstate', e => {
+  if (!historyReady) return;
+  const h = (e.state && e.state.h) || handleFromHash();
+  const tile = h ? (tileByHandle.get(h) || tileByRef.get(h)) : null;
+  if (tile) { if (tile !== selected) selectTile(tile); }
+  else if (selected) deselect();
+  // back out of a card lands on an entry whose query predates the filter that closed it
+  if (syncUrlHook) syncUrlHook();
+});
+let syncUrlHook = null;   // set by setupFilters
+let reapplyHook = null;   // set by setupFilters: the tour hands the dimming back to the filters
+const filtersEl = document.getElementById('filters');
+const filtersHead = document.getElementById('filters-head');
+const filtersScrim = document.getElementById('filters-scrim');
+const filtersBodyEl = document.getElementById('filters-body');
+
+function toggleFilters(force) {
+  const open = force !== undefined ? force : !filtersEl.classList.contains('open');
+  filtersEl.classList.toggle('open', open);
+  if (!open) document.body.classList.remove('filters-over');
+  filtersHead.setAttribute('aria-expanded', String(open));
+  filtersScrim.classList.toggle('on', open && isMobile);
+}
+filtersScrim.addEventListener('click', () => toggleFilters(false));
+
+// ── the mobile sheet ──────────────────────────────────────────────────────
+// Parked on the bottom edge it shows only its handle, title and active chips;
+// everything below that is translated off-screen. Both distances are measured
+// rather than guessed, because the chips change the panel's height as filters
+// come and go.
+let sheetHide = 340; // px of panel hanging below the screen while it is down
+function measureSheet() {
+  const peek = filtersBodyEl.offsetTop;              // handle + head + chips
+  sheetHide = Math.max(0, filtersEl.offsetHeight - peek);
+  const root = document.documentElement.style;
+  root.setProperty('--sheet-peek', `${peek}px`);     // the hint clears this
+  root.setProperty('--sheet-hide', `${sheetHide}px`);
+}
+if (isMobile) {
+  measureSheet();
+  // the chips row appears and disappears with the filters, changing the peek
+  new ResizeObserver(measureSheet).observe(filtersEl);
+  window.addEventListener('orientationchange', () => setTimeout(measureSheet, 260));
+}
+
+// drag the handle to raise or drop it, following the finger the whole way
+let sheetDrag = null;
+filtersEl.addEventListener('touchstart', e => {
+  if (!isMobile || e.touches.length !== 1) return;
+  if (e.target.closest('#filters-body')) return; // that area scrolls and holds controls
+  sheetDrag = {
+    y: e.touches[0].clientY, moved: 0,
+    base: filtersEl.classList.contains('open') ? 0 : sheetHide,
+  };
+  filtersEl.style.transition = 'none';
+}, { passive: true });
+window.addEventListener('touchmove', e => {
+  if (!sheetDrag || !e.touches.length) return;
+  sheetDrag.moved = e.touches[0].clientY - sheetDrag.y;
+  const y = Math.min(sheetHide, Math.max(0, sheetDrag.base + sheetDrag.moved));
+  filtersEl.style.transform = `translateY(${y}px)`;
+}, { passive: true });
+function endSheetDrag() {
+  if (!sheetDrag) return;
+  const { moved } = sheetDrag;
+  sheetDrag = null;
+  filtersEl.style.transition = '';
+  filtersEl.style.transform = ''; // back to whatever the open/closed class says
+  if (Math.abs(moved) > 40) toggleFilters(moved < 0); // up opens, down closes
+}
+window.addEventListener('touchend', endSheetDrag);
+window.addEventListener('touchcancel', endSheetDrag);
+
+window.addEventListener('keydown', e => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if (e.key === 'Escape') {
+    if (document.body.classList.contains('filters-over') && filtersEl.classList.contains('open')) toggleFilters(false);
+    else if (selected && wrapEl.classList.contains('full')) setFull(false);
+    else if (selected) closeCard();
+    else if (typing) e.target.blur();
+    else toggleFilters(false);
+    return;
+  }
+  if (selected && !typing && !e.metaKey && !e.ctrlKey) {
+    if (e.key === 'f' || e.key === 'F') { setFull(!wrapEl.classList.contains('full')); return; }
+    if (e.key === '+' || e.key === '=') { zoomCenter(1.5); return; }
+    if (e.key === '-' || e.key === '_') { zoomCenter(1 / 1.5); return; }
+    if (e.key === '0') { fitZ(true); return; }
+  }
+  if (e.key === 'f' && !typing) { toggleFilters(); return; }
+  if (e.key === '/' && !typing) { // straight into the search box
+    e.preventDefault();
+    toggleFilters(true);
+    document.getElementById('f-search').focus();
+    return;
+  }
+  if (!selected || typing) return; // arrow navigation only makes sense with a card open
+  // move by actual row/col in the grid, not raw array index — Up/Down jump
+  // a full row (GRID_COLS), Left/Right move one column, both wrap at the ends.
+  const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: GRID_COLS, ArrowUp: -GRID_COLS }[e.key];
+  if (!step) return;
+  e.preventDefault();
+  stepSelection(step);
+});
+
+// filtered-out tiles are skipped over, so stepping stays inside the subset
+function stepSelection(step) {
+  if (!selected) return;
+  const n = tileMeshes.length;
+  let i = tileMeshes.indexOf(selected);
+  for (let k = 0; k < n; k++) {
+    i = (i + step + n) % n;
+    if (!tileMeshes[i].userData.filteredOut) { openTile(tileMeshes[i]); return; }
+  }
+}
+
+// the same step, reachable without a keyboard
+document.getElementById('card-prev').addEventListener('click', () => stepSelection(-1));
+document.getElementById('card-next').addEventListener('click', () => stepSelection(1));
+
+// ...and by swiping the card sideways. Vertical stays free for scrolling the
+// card's own body, and a downward flick on the sheet closes it.
+const cardEl = document.getElementById('card');
+let swipe = null;
+cardEl.addEventListener('touchstart', e => {
+  swipe = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, top: cardEl.scrollTop } : null;
+}, { passive: true });
+cardEl.addEventListener('touchend', e => {
+  if (!swipe || !e.changedTouches.length) return;
+  const dx = e.changedTouches[0].clientX - swipe.x;
+  const dy = e.changedTouches[0].clientY - swipe.y;
+  swipe = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) stepSelection(dx < 0 ? 1 : -1);
+  else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && cardEl.scrollTop <= 0) closeCard();
+}, { passive: true });
+
+// Every item's page is the same address with its handle in it, so the map used
+// to spend 1,2 MB repeating that prefix 12.552 times — and meta.handle another
+// 0,4 MB repeating the key it was already filed under. Both are derived here.
+const mediumUrl = h => `https://hel1.your-objectstorage.com/brasiliana/derivados/medio/${h.replace(/\//g, '_')}.webp`;
+const sourceUrl = h => `https://brasilianafotografica.bn.gov.br/brasiliana/handle/${h}?show=full`;
+
+// "[entre 1907 e 1912]" → "1907–1912"; a bracketed single year is a catalogued estimate → "c. 1860"
+function prettyDate(d) {
+  if (!d) return '';
+  const s = String(d).trim();
+  const range = s.match(/^\[?\s*entre\s+(\d{4})\s+e\s+(\d{4})\s*\]?$/i);
+  if (range) return `${range[1]}–${range[2]}`;
+  const est = s.match(/^\[\s*(?:ca?\.?\s*)?(\d{4})\s*\??\]$/i);
+  if (est) return `c. ${est[1]}`;
+  return s.replace(/^\[|\]$/g, '').replace(/^ca?\.\s*/i, 'c. ');
+}
+
+// the handles the card can step to next (respecting the filter), to warm their images
+function neighbours(handle) {
+  const cur = tileByHandle.get(handle);
+  if (!cur) return [];
+  const n = tileMeshes.length, i0 = tileMeshes.indexOf(cur), out = [];
+  [1, -1].forEach(dir => {
+    let i = i0;
+    for (let k = 0, found = 0; k < n && found < 1; k++) {
+      i = (i + dir + n) % n;
+      if (!tileMeshes[i].userData.filteredOut) { out.push(tileMeshes[i].userData.handle); found++; }
+    }
+  });
+  return out;
+}
+
+// "da mesma série": same author first, then the same year, then shared tags
+function renderRelated(data) {
+  const box = document.getElementById('card-related');
+  box.replaceChildren();
+  const me = tileByHandle.get(data.handle);
+  if (!me || !me.userData._author) { box.hidden = true; return; }
+  const mu = me.userData, scored = [];
+  tileMeshes.forEach(t => {
+    const u = t.userData;
+    if (t === me || u._author !== mu._author) return;
+    let sc = 1 + (u._year != null && u._year === mu._year ? 2 : 0);
+    for (const k of u._tp) { if (mu._tp.has(k)) { sc += 1; break; } }
+    scored.push([sc, t]);
+  });
+  scored.sort((a, b) => b[0] - a[0]);
+  const top = scored.slice(0, 12);
+  if (!top.length) { box.hidden = true; return; }
+  const h = document.createElement('h4'); h.textContent = 'Do mesmo autor';
+  const row = document.createElement('div'); row.className = 'rel';
+  top.forEach(([, t]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.title = (t.userData.meta || {}).title || '';
+    b.setAttribute('aria-label', b.title);
+    b.appendChild(tileThumbCanvas(t.userData.handle, 60));
+    b.addEventListener('click', () => openTile(t));
+    row.appendChild(b);
+  });
+  box.append(h, row);
+  box.hidden = false;
+}
+function tileThumbCanvas(handle, px) {
+  const c = document.createElement('canvas'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.width = c.height = Math.round(px * dpr);
+  const entry = atlasEntries[handle], page = atlasSources[entry?.atlas || 0];
+  if (page && entry) {
+    const S = page.size / TPR;
+    c.getContext('2d').drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, c.width, c.height);
+  }
+  return c;
+}
+
+function showCard(data) {
+  const meta = data.meta || {};
+  const inst = instName(meta.community);
+  const aut = meta.ai != null ? authorities[meta.ai] : '';
+  const u = tileByHandle.get(data.handle)?.userData || {};
+  document.getElementById('card-kicker').textContent =
+    [meta.sup || cleanType(meta.type).replace('/', ',').toLowerCase() || 'fotografia', inst].filter(Boolean).join(' · ');
+  document.getElementById('card-title').textContent = meta.title || '[sem título]';
+  // 1.3: the date as NOBRADE writes it — brackets and "?" say "attributed", so they stay
+  const dateEl = document.getElementById('card-date');
+  dateEl.textContent = meta.dt || meta.date || '[s.d.]';
+  if (meta.dq) {
+    const q = document.createElement('span');
+    q.className = 'arq'; q.textContent = 'atribuída';
+    q.title = 'Data atribuída pelo arquivista (NOBRADE 1.3.3.2): a origem não informa; estimada pelo período de atividade do autor ou pelas datas-limite da série.';
+    dateEl.appendChild(q);
+  }
+  // 2.1 / 8.1: the author is an access point — a name that filters the wall
+  const who = shortName(aut || cleanAuthor(meta.contributor));
+  const contrib = document.getElementById('card-contrib');
+  contrib.textContent = who;
+  contrib.onclick = u._author ? () => cardFilter && cardFilter({ author: u._author }) : null;
+  document.getElementById('card-by-sep').hidden = !who;
+  // 5.1: this is a collection of copies — the original's whereabouts is the headline link
+  const link = document.getElementById('card-link');
+  link.href = data.handle ? sourceUrl(data.handle) : '#';
+  link.textContent = `original: ${inst || 'Brasiliana Fotográfica'} ↗`;
+  renderSubjectTree(document.getElementById('card-tags'), meta);
+  renderRelated(data);
+  renderFicha(data, meta, inst, aut, u);
+  const nAct = document.querySelectorAll('#filters-chips .chip').length;
+  document.getElementById('card-filters-n').textContent = nAct ? String(nAct) : '';
+  document.getElementById('card').scrollTop = 0;
+  wrapEl.classList.remove('compact');
+  stageLoad(data);
+  document.getElementById('card-wrap').classList.add('open');
+}
+
+// "Ferrez, Marc, 1843-1923" → "Marc Ferrez": the byline reads as a name; the ficha keeps the authorized form
+function shortName(form) {
+  if (!form) return '';
+  const base = form.replace(/,\s*(?:ca\.\s*|fl\.\s*|m\.\s*|n\.\s*)?\d{4}.*$/, '').trim();
+  const m = base.match(/^([^,]+),\s*([^,]+)$/);
+  return m && !/\b(escola|oficina|officina|photographia|casa|companhia|museu|instituto)\b/i.test(base) ? `${m[2]} ${m[1]}` : base;
+}
+const instName = c => (c && instituicoes[c]) || c || '';
+
+// ── the archival record: the seven NOBRADE mandatory elements a piece carries,
+// plus where the original is and how it may be reproduced ──
+function renderFicha(data, meta, inst, aut, u) {
+  const dl = document.getElementById('card-ficha-dl');
+  dl.replaceChildren();
+  const row = (dt, ...kids) => {
+    const a = document.createElement('dt'); a.textContent = dt;
+    const b = document.createElement('dd');
+    kids.flat().forEach(k => b.append(k));
+    dl.append(a, b);
+    return b;
+  };
+  const act = (label, fn, cls = '') => {
+    const x = document.createElement('button');
+    x.type = 'button'; x.className = 'act ' + cls; x.textContent = label; x.addEventListener('click', fn);
+    return x;
+  };
+  const copy = (btn, text) => {
+    const done = () => { const t = btn.textContent; btn.textContent = 'copiado ✓'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = t; btn.classList.remove('copied'); }, 1400); };
+    try { navigator.clipboard.writeText(text).then(done, () => {}); } catch {}
+  };
+  const sep = () => Object.assign(document.createElement('span'), { className: 'sep', textContent: '›' });
+  if (meta.ref) { const b = act(meta.ref, () => copy(b, meta.ref), 'code'); b.title = 'copiar o código de referência'; row('Código', b); }
+  row('Nível', 'dossiê');
+  const serie = u._serie;
+  const crumb = row('Arranjo');
+  crumb.className = 'crumb';
+  crumb.append(colecaoInfo.titulo ? colecaoInfo.titulo.replace(/\s*\(.*\)$/, '').replace(/^Coleção\s+/, '') : 'Brasiliana', sep(),
+    act(inst || '—', () => cardFilter && cardFilter({ institution: meta.community })));
+  if (serie) crumb.append(sep(), act(serie, () => cardFilter && cardFilter({ institution: meta.community, serie })));
+  const d = row('Data', meta.dt || meta.date || '[s.d.]');
+  if (meta.dq) d.append(' — atribuída pelo arquivista');
+  if (meta.date && meta.dt && meta.date.trim() !== meta.dt) d.append(Object.assign(document.createElement('div'), { textContent: `na origem: ${meta.date}`, style: 'color:#6e6e68' }));
+  row('Produtor', aut || cleanAuthor(meta.contributor) || 'autoria não identificada');
+  row('Dimensão e suporte', `1 ${meta.sup || cleanType(meta.type).replace('/', ',').toLowerCase() || 'fotografia'}`);
+  const orig = row('Original', `${inst || '—'} · `);
+  orig.append(Object.assign(document.createElement('a'), { href: sourceUrl(data.handle), target: '_blank', rel: 'noopener', textContent: 'Brasiliana Fotográfica ↗' }));
+  if (meta.rep || meta.rights) row('Reprodução', (meta.rep ? meta.rep[0].toUpperCase() + meta.rep.slice(1) : 'Consultar o detentor') + (meta.rights ? ` (${meta.rights})` : ''));
+  row('Handle', data.handle || '—');
+  const cite = act('copiar referência', () => copy(cite, citation(data, meta, inst, aut)));
+  cite.title = citation(data, meta, inst, aut);
+  row('Citar', cite);
+}
+
+function citation(data, meta, inst, aut) {
+  const base = (aut || '').replace(/,\s*(?:ca\.\s*|fl\.\s*|m\.\s*|n\.\s*)?\d{4}.*$/, '');
+  const m = base.match(/^([^,]+),\s*(.+)$/);
+  const who = m ? `${m[1].toUpperCase()}, ${m[2]}. ` : base ? `${base.toUpperCase()}. ` : '';
+  const hoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).replace(/ de /g, ' ');
+  return `${who}${meta.title || '[sem título]'}. ${meta.dt || '[s.d.]'}. 1 ${meta.sup || 'fotografia'}. ` +
+    `Original: ${inst}. Código de referência: ${meta.ref || data.handle}. ` +
+    `Disponível em: ${sourceUrl(data.handle)}. Acesso em: ${hoje}.`;
+}
+
+
+// ─── the stage: fit, zoom and pan over the piece's image ────────────────────
+// The image sits at its natural size and one transform places it:
+// translate(x, y) scale(s). "fit" is the scale that shows it whole; zoom is
+// anchored under the cursor / between the fingers, and panning is clamped so
+// the image never leaves the stage. A sharper copy (derivados/grande) is
+// swapped in once the zoom passes what the medium copy can show, keeping the
+// on-screen size exactly where it was. Sizes: medio 1.200 px, grande 2.000 px
+// (CONARQ derivadas de acesso; NARA 2004 "Access – Recommended" / "Larger Alternative").
+const wrapEl = document.getElementById('card-wrap');
+const stage = document.getElementById('stage');
+const stImg = document.getElementById('card-img');
+const stPct = document.getElementById('stage-pct');
+const Z = { s: 1, x: 0, y: 0, fit: 1, nw: 0, nh: 0, touched: false, handle: null, grande: false };
+const MAXZ = 6;              // × the fitted size
+let hasGrande = false;       // set from the map once the grande derivative exists
+const grandeUrl = h => `https://hel1.your-objectstorage.com/brasiliana/derivados/grande/${h.replace(/\//g, '_')}.webp`;
+const narrow = () => window.matchMedia('(max-width: 640px)').matches;
+
+function fitScale() {
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const pad = narrow() && !wrapEl.classList.contains('full') ? 1 : 0.92;
+  return Z.nw && W && H ? Math.min(W * pad / Z.nw, H * pad / Z.nh) : 1;
+}
+function clampZ() {
+  const W = stage.clientWidth, H = stage.clientHeight, w = Z.nw * Z.s, h = Z.nh * Z.s;
+  Z.x = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, Z.x));
+  Z.y = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, Z.y));
+}
+function applyZ(anim) {
+  stage.classList.toggle('anim', !!anim);
+  clampZ();
+  stImg.style.transform = `translate(${Z.x}px, ${Z.y}px) scale(${Z.s})`;
+  stage.classList.toggle('can-pan', Z.s > Z.fit * 1.01);
+  if (hasGrande && !Z.grande && Z.s > 1.1 && Z.handle) loadGrande(Z.handle);
+}
+function fitZ(anim) {
+  if (!Z.nw) return;
+  Z.fit = fitScale(); Z.s = Z.fit; Z.touched = false;
+  applyZ(anim);
+}
+let pctTimer = null;
+function zoomAt(k, cx, cy, anim) {
+  if (!Z.nw) return;
+  const ns = Math.min(Z.fit * MAXZ, Math.max(Z.fit, Z.s * k));
+  Z.x = cx - (cx - Z.x) * (ns / Z.s);
+  Z.y = cy - (cy - Z.y) * (ns / Z.s);
+  Z.s = ns; Z.touched = ns > Z.fit * 1.001;
+  applyZ(anim);
+  stage.classList.add('touched');
+  stPct.textContent = `${Math.round(Z.s / Z.fit * 100)}%`;
+  stPct.classList.add('on');
+  clearTimeout(pctTimer); pctTimer = setTimeout(() => stPct.classList.remove('on'), 700);
+}
+const zoomCenter = k => zoomAt(k, stage.clientWidth / 2, stage.clientHeight / 2, true);
+
+// swap the picture under the same view: a sharper copy of the same image keeps its on-screen size
+function showSrc(src, w, h) {
+  const prev = Z.nw;
+  stImg.src = src;
+  stImg.style.width = `${w}px`; stImg.style.height = `${h}px`;
+  Z.nw = w; Z.nh = h;
+  if (Z.touched && prev) { Z.s *= prev / w; Z.x = Z.x; Z.fit = fitScale(); applyZ(false); }
+  else fitZ(false);
+  stImg.classList.add('ready');
+}
+function stageLoad(data) {
+  const h = data.handle;
+  Z.handle = h; Z.touched = false; Z.grande = false; Z.nw = 0;
+  stImg.classList.remove('ready');
+  stImg.alt = (data.meta || {}).title || '';
+  // the atlas tile first (instant, blurry), then the medium copy (1.200 px, NARA "access")
+  const entry = atlasEntries[h], page = atlasSources[entry?.atlas || 0];
+  let got = false;
+  const big = new Image();
+  big.onload = () => { if (Z.handle === h) { got = true; showSrc(big.src, big.naturalWidth, big.naturalHeight); } };
+  big.src = mediumUrl(h);
+  setTimeout(() => {
+    if (got || Z.handle !== h || !page || !entry) return;
+    const S = page.size / TPR, out = Math.min(512, Math.round(S * 4)), c = document.createElement('canvas');
+    c.width = c.height = out;
+    const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(page.source, entry.col * S, entry.row * S, S, S, 0, 0, out, out);
+    showSrc(c.toDataURL('image/jpeg', 0.9), out, out);
+  }, 120);
+  neighbours(h).forEach(n => { new Image().src = mediumUrl(n); });   // ‹ › should not flash the blurry tile
+}
+function loadGrande(h) {
+  Z.grande = true;
+  const g = new Image();
+  g.onload = () => { if (Z.handle === h) { Z.touched = true; showSrc(g.src, g.naturalWidth, g.naturalHeight); } };
+  g.src = grandeUrl(h);
+}
+new ResizeObserver(() => { if (!Z.nw) return; if (Z.touched) { Z.fit = fitScale(); applyZ(false); } else fitZ(false); }).observe(stage);
+
+function setFull(on) {
+  wrapEl.classList.toggle('full', on);
+  document.getElementById('z-full').textContent = on ? '⤡' : '⤢';
+}
+
+// wheel: zoom under the cursor (a trackpad pinch arrives as ctrl+wheel with small deltas)
+stage.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = stage.getBoundingClientRect();
+  zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+
+// pointers: one drags (pan when zoomed, swipe when not), two pinch
+const stPts = new Map();
+let gest = null, lastTap = 0, lastPointerType = 'mouse';
+stage.addEventListener('pointerdown', e => {
+  if (e.target.closest('.sbtn')) return;
+  lastPointerType = e.pointerType;
+  stage.setPointerCapture(e.pointerId);
+  stPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (stPts.size === 1) gest = { type: 'one', x0: e.clientX, y0: e.clientY, ox: Z.x, oy: Z.y, moved: 0, onImg: e.target === stImg };
+  else if (stPts.size === 2) {
+    const [a, b] = [...stPts.values()];
+    gest = { type: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: Z.s };
+  }
+});
+stage.addEventListener('pointermove', e => {
+  if (!stPts.has(e.pointerId) || !gest) return;
+  stPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gest.type === 'one') {
+    const dx = e.clientX - gest.x0, dy = e.clientY - gest.y0;
+    gest.moved = Math.max(gest.moved, Math.hypot(dx, dy));
+    if (Z.s > Z.fit * 1.01) { Z.x = gest.ox + dx; Z.y = gest.oy + dy; applyZ(false); stage.classList.add('panning'); }
+  } else if (gest.type === 'pinch' && stPts.size >= 2) {
+    const [a, b] = [...stPts.values()], r = stage.getBoundingClientRect();
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    zoomAt((gest.s0 * d / gest.d0) / Z.s, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+  }
+});
+function stEnd(e) {
+  if (!stPts.has(e.pointerId)) return;
+  stPts.delete(e.pointerId);
+  stage.classList.remove('panning');
+  const g = gest;
+  if (g && g.type === 'pinch') { gest = null; return; }   // the finger left behind does not start a drag
+  gest = null;
+  if (!g || e.type === 'pointercancel') return;
+  const dx = e.clientX - g.x0, dy = e.clientY - g.y0, atFit = Z.s <= Z.fit * 1.01;
+  const full = wrapEl.classList.contains('full');
+  if (g.moved < 8) {
+    const r = stage.getBoundingClientRect(), now = performance.now();
+    if (e.pointerType !== 'mouse' && now - lastTap < 300) {       // double tap
+      lastTap = 0;
+      if (atFit) zoomAt(2.5, e.clientX - r.left, e.clientY - r.top, true); else fitZ(true);
+      return;
+    }
+    lastTap = now;
+    if (narrow() && !full && g.onImg) { setFull(true); return; }  // phone: the image asks for the screen
+    if (!narrow() && !g.onImg && e.pointerType === 'mouse') closeCard(); // desktop: a click beside the picture
+    return;
+  }
+  if (e.pointerType !== 'mouse' && atFit) {
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) stepSelection(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6) { if (full) setFull(false); else closeCard(); }
+  }
+}
+stage.addEventListener('pointerup', stEnd);
+stage.addEventListener('pointercancel', stEnd);
+stage.addEventListener('dblclick', e => {
+  if (lastPointerType !== 'mouse' || e.target.closest('.sbtn')) return;
+  const r = stage.getBoundingClientRect();
+  if (Z.s > Z.fit * 1.05) fitZ(true); else zoomAt(2.5, e.clientX - r.left, e.clientY - r.top, true);
+});
+document.getElementById('z-in').addEventListener('click', () => zoomCenter(1.5));
+document.getElementById('z-out').addEventListener('click', () => zoomCenter(1 / 1.5));
+document.getElementById('z-fit').addEventListener('click', () => fitZ(true));
+document.getElementById('z-full').addEventListener('click', () => setFull(!wrapEl.classList.contains('full')));
+document.getElementById('card-filters').addEventListener('click', () => {
+  document.body.classList.add('filters-over');
+  toggleFilters(true);
+});
+document.getElementById('stage-prev').addEventListener('click', () => stepSelection(-1));
+document.getElementById('stage-next').addEventListener('click', () => stepSelection(1));
+document.getElementById('stage-close').addEventListener('click', () => closeCard());
+// phone: reading the text shrinks the picture to a strip, and it grows back at the top
+document.getElementById('card').addEventListener('scroll', e => {
+  if (narrow()) wrapEl.classList.toggle('compact', e.target.scrollTop > 40);
+}, { passive: true });
+
+// ─── render loop ────────────────────────────────────────────────────────────
+// Easing is a time constant here, never a per-frame fraction: a fixed fraction
+// converges twice as fast at 120 Hz as at 60, so the wall had a different weight
+// on every screen. `tau` is roughly how long it takes to cover most of the gap.
+const ease = (dt, tau) => 1 - Math.exp(-dt / tau);
+const TAU_GRAB = 0.035; // finger down — the wall stays under the finger
+const TAU_FREE = 0.10;  // let go — it settles
+const TAU_ZOOM = 0.12;
+let lastFrame = performance.now();
+
+// The wall is drawn only when something on it changes: the camera is moving,
+// tiles are easing, or an input/resize/load just happened (wake). Idle — and
+// behind the opaque piece viewer — it costs nothing, instead of redrawing
+// thirteen thousand tiles sixty times a second.
+var kick = 120;                                  // frames to draw regardless (the opening load)
+function wake(n = 2) { kick = Math.max(kick || 0, n); }   // hoisted: resize() may call it first
+const _lastCam = new THREE.Vector3(Infinity, 0, 0);
+['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart', 'touchmove'].forEach(ev =>
+  window.addEventListener(ev, () => wake(2), { passive: true, capture: true }));
+document.addEventListener('visibilitychange', () => wake(4));
+
+function tick(now = lastFrame) {
+  requestAnimationFrame(tick);
+  // a backgrounded tab comes back with a gap of seconds: clamp it, or the wall
+  // teleports on the first frame after the user returns
+  const dt = Math.min(0.05, Math.max(0, (now - lastFrame) / 1000));
+  lastFrame = now;
+
+  // the coast, before the camera reads its target
+  if (!pointers.size && !selected && glide.lengthSq() > 0.04) {
+    camTarget.x += glide.x * dt;
+    camTarget.y += glide.y * dt;
+    glide.multiplyScalar(Math.exp(-dt / GLIDE_TAU));
+  } else if (!pointers.size) glide.set(0, 0);
+
+  // pure user pan/zoom — never touched by selection
+  const kxy = ease(dt, pointers.size ? TAU_GRAB : TAU_FREE);
+  camera.position.x += (camTarget.x - camera.position.x) * kxy;
+  camera.position.y += (camTarget.y - camera.position.y) * kxy;
+  camera.position.z += (camTarget.z - camera.position.z) * ease(dt, TAU_ZOOM);
+  // no lookAt: the camera stays square to the wall. Aiming it at the *target*
+  // while it trailed behind tilted the whole view a little on every drag —
+  // which is what made a fast pan swim instead of slide.
+
+  const busy = animating.size > 0;
+  updateTileAnimation(dt);
+  // the viewer is up and opaque: nothing of the wall is on screen
+  if (selected && historyReady && performance.now() - selectedAt > 400) { _lastCam.set(Infinity, 0, 0); return; }
+  const moved = _lastCam.distanceToSquared(camera.position) > 1e-8;
+  if (!historyReady || moved || busy || kick > 0) {
+    renderer.render(scene, camera);
+    _lastCam.copy(camera.position);
+    if (kick > 0) kick--;
+  }
+}
+
+// ─── filter panel: instituição / década / autor / tipo ─────────────────────
+// tiles that don't match are dimmed (targetOpacity), never removed — the
+// grid layout stays intact so navigation and the atlas UVs never shift.
+filtersHead.addEventListener('click', () => toggleFilters());
+filtersHead.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFilters(); }
+});
+
+// pt-BR catalogue text is full of accents and nobody types them into a filter
+const deburr = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// everything a record carries, flattened into one string — naming the fields
+// would quietly drop whatever the catalogue gains later
+function flattenMeta(value) {
+  if (value == null) return '';
+  if (Array.isArray(value)) return value.map(flattenMeta).join(' ');
+  if (typeof value === 'object') return Object.values(value).map(flattenMeta).join(' ');
+  return String(value);
+}
+
+function yearOf(meta) {
+  if (meta && Number.isInteger(meta.ano)) return meta.ano;
+  const m = String((meta || {}).date || '').match(/(1[5-9]\d{2}|20\d{2})/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// ─── filter-value cleanup: the catalogue's type / author strings are messy ───
+// (OCR debris, case variants, life dates glued on, "Nome Sobrenome" vs "Sobrenome, Nome").
+// Only the filter lists and matching use these; the card still shows the raw record.
+const KNOWN_TYPES = ['Fotografia/ Papel', 'Negativo/ Vidro', 'Diapositivo/ Vidro', 'Reprodução Fotomecânica/ Papel', 'Negativo flexível'];
+function cleanType(raw) {
+  const s = String(raw || '').replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  const fold = deburr(s);
+  const known = KNOWN_TYPES.find(k => deburr(k) === fold);
+  if (known) return known;
+  // OCR debris: rebuild from the tail that survived ("…afia/ Papel", "…gativo/ Vidro")
+  if (/(?:rafia|FOa)\/ Papel$/.test(s)) return 'Fotografia/ Papel';
+  if (/gativo\/ Vidro$/.test(s)) return 'Negativo/ Vidro';
+  if (/Fotomec/.test(s)) return 'Reprodução Fotomecânica/ Papel';
+  if (/[<>{}\d]/.test(s)) return '';          // unrecoverable garbage — leave it out of the list
+  return /[A-ZÀ-Ý]{3,}/.test(s) ? s.charAt(0) + s.slice(1).toLowerCase() : s;  // "NEGATIVO flexível" → "Negativo flexível"
+}
+
+const NO_AUTHOR = /^(s\/autor|s\/nome|s\/a|\[?s\.?n\.?\]?|sem autor|\[sem autor\]|autoria n[aã]o identificada|autor n[aã]o identificado|n[aã]o identificado|an[oô]nimo)$/i;
+function cleanAuthor(raw) {
+  let s = String(raw || '').replace(/\s+/g, ' ').trim();
+  s = s.replace(/^Fot[óo]grafo:\s*/i, '')
+       .replace(/\s*[-–]?\s*\((?:autoria|fot[óo]grafo|firma)\)/gi, '')
+       .replace(/\s+-\s+(?:Fot[óo]grafo|Est[úu]dio\/Ag[eê]ncia)$/i, '');
+  // life dates / floruit glued to the end: ", 1864-1957", "(1893 - 1961)", "[? -1908]", "18- -19-"
+  const tail = /[,\s]*[\[(]?\s*(?:(?:ca\.|fl\.|m\.|n\.)\s*)?(?:\?|\d{2,4}-?)\s*(?:[-–]\s*(?:ca\.\s*)?\d{0,4})?\s*[\])]?[.,\s]*$/i;
+  for (let i = 0; i < 3 && tail.test(s) && s.replace(tail, '').length > 2; i++) s = s.replace(tail, '');
+  s = s.replace(/[.,\s]+$/, '').replace(/^\[(.*)\]$/, '$1').trim();
+  if (!s || NO_AUTHOR.test(s) || /[<>]|\d{3}/.test(s)) return '';
+  return s;
+}
+// 1.5: the NOBRADE species and support ("negativo fotográfico, vidro"); colour is left to the card
+function typeOf(meta) {
+  if (meta.sup) return meta.sup.replace(/\s(?:p&b|cor)(?=,|$)/, '');
+  const t = cleanType(meta.type);
+  return t ? t.replace('/', ',').toLowerCase() : '';
+}
+// 2.1: the authority record when the piece has one, the cleaned spelling otherwise
+function authorOf(meta) {
+  if (meta.ai != null) return `a${meta.ai}`;
+  const a = cleanAuthor(meta.contributor);
+  return a ? authorKey(a) : '';
+}
+// same person, different word order or accents → same key
+const authorKey = name => deburr(name).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+
+// dc.subject folds accents and case; the select shows only tags that recur, since
+// ~8000 distinct values (57% used once) would be an unusable list
+const subjectKey = t => deburr(String(t)).replace(/\s+/g, ' ').trim();
+const SUBJECT_MIN = 20;
+
+// the catalogue repeats most subjects in English ("Railroads - Buildings and
+// structures - Porto Velho (Rondônia, Brazil)" beside "Ferrovias - …"); keep the
+// Portuguese side. The English side is still read for a place when the Portuguese
+// one names none. Proper names that merely contain "and"/"hospital" stay.
+const EN_WORD = new RegExp('\\b(?:brazil|state|buildings?|structures|railroads?|rivers?|bridges|streets|church(?:es)?|photographs?|public|dwellings|portraits?|stations?|construction|region|waterfalls|plazas|mountains|women|history|life|views?|colon(?:y|ies)|slaves|panoramic|aerial|harbors?|ports?|forts?|islands?|beaches|houses|schools?|squares?|paraguay|amazon|falls|lakes?|people|children|boats|ships|trains?|roads?|cities|city|towns?|landscapes?|factories|industry|exhibitions?|gardens?|indians?|politicians|carnival|military|interiors?|men|hospitals)\\b', 'i');
+
+// Brasil › estado › cidade › tópico, derived from the tag text: "Tópico - Cidade (UF)"
+// carries the whole path. Tags without a recognisable place stay out of the tree.
+const UF = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal',
+  ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais',
+  PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte',
+  RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins' };
+const STATE_BY_KEY = new Map(Object.values(UF).map(n => [deburr(n), n]));
+const UF_CODE = /^[A-Z]{2}$/;
+const stateOf = x => UF_CODE.test(x) ? UF[x] : STATE_BY_KEY.get(deburr(x));
+
+// learned from the whole catalogue (learnCities)
+const CITY_UF = new Map();   // deburred city → UF, from explicit "Cidade (UF)" forms
+const CANON = new Map();     // deburred city → its commonest spelling ("Rio de janeiro" → "Rio de Janeiro")
+const HOOD = new Map();      // deburred bairro → {state, city}, from "Bairro (Cidade, UF)"
+const THEME_CANON = new Map(); // deburred theme → its commonest spelling
+
+// a place-shaped word that is not a town: it hangs under the piece's real city
+const FEATURE = /^(?:ba[ií]a|morro|ilha|serra\s+d|lago|lagoa|floresta|estrada|avenida|rua|pra[cç]a|largo|parque|jardim|campo\s+d|cais|rio\s+(?!de janeiro|branco|grande|claro)|igreja|esta[cç][aã]o|forte|pal[aá]cio|bairro|edif[ií]cios?)\b/i;
+// never learned as a city from a bare mention ("Cachoeira" here is a waterfall)
+const COMMON_NOUN = /^(?:cachoeiras?|praias?|igrejas?|rios?|ilhas?|serras?|morros?|lagos?|lagoas?|fortes?|pontes?|ruas?|avenidas?|centro|porto|campo|vila|fazenda)$/;
+
+const COUNTRIES = new Map(['Alemanha', 'França', 'Paraguai', 'Argentina', 'Uruguai', 'Bolívia', 'Peru', 'Chile', 'Colômbia', 'Venezuela',
+  'Portugal', 'Espanha', 'Itália', 'Inglaterra', 'Reino Unido', 'Estados Unidos', 'Suíça', 'Bélgica', 'Holanda', 'Países Baixos',
+  'Áustria', 'Rússia', 'Japão', 'China', 'Índia', 'Egito', 'África do Sul', 'Angola', 'Moçambique', 'Cabo Verde', 'Canadá', 'México',
+  'Cuba', 'Equador', 'Suriname', 'Guiana', 'Guiana Francesa', 'Dinamarca', 'Suécia', 'Noruega', 'Polônia', 'Grécia', 'Turquia',
+  'Escócia', 'Irlanda'].map(n => [deburr(n), n]));
+
+// ── one place tag, in the many ways the catalogue writes it ──────────────────
+//   "Porto Velho (RO)" · "Recife, PE" · "Rio de Janeiro - RJ" · "Recife, Pernambuco, Brasil"
+//   "Bahia (Estado)" · "RJ" · "Centro (Rio de Janeiro, RJ)" · "Petrópolis [RJ]" · bare "Recife"
+function normTag(raw) {
+  let t = String(raw).replace(/\s+/g, ' ').trim().replace(/;+$/, '').trim().replace(/[–—]/g, '-').replace(/^-\s*/, '');
+  t = t.replace(/\(\s*(?:brazil|brasil)\s*:\s*(?:state|estado)\s*\)/i, '(Estado)')
+       .replace(/,\s*(?:brazil|brasil)\s*\)/i, ')').replace(/\s*\((?:brazil|brasil)\)/i, '')
+       .replace(/\[\s*([A-Za-z]{2})\s*\]/, '($1)')
+       .replace(/\(\s*([A-Za-z]{2})\s*\)/, (m, a) => UF[a.toUpperCase()] ? `(${a.toUpperCase()})` : m)
+       .replace(/,\s*([A-Za-z]{2})$/, (m, a) => UF[a.toUpperCase()] ? `, ${a.toUpperCase()}` : m);
+  if ((t.match(/\(/g) || []).length > (t.match(/\)/g) || []).length) t += ')';
+  // "Guanabara, Baía de" → "Baía de Guanabara"
+  t = t.replace(/^(.+?),\s*((?:Ba[ií]a|Ilha|Lagoa|Lago|Rio|Serra|Morro|Ponta|Praia|Cabo|Enseada|Floresta|Campo)\s+d[aeo]s?)(\s*\([^)]*\))?$/i, '$2 $1$3');
+  let m;
+  if ((m = t.match(/^estado\s+d[eao]s?\s+(.+)$/i)) && stateOf(m[1].trim())) t = stateOf(m[1].trim());
+  else if ((m = t.match(/^(.+?),\s*(?:estado|territ[oó]rio)$/i)) && stateOf(m[1].trim())) t = stateOf(m[1].trim());
+  return t;
+}
+
+function parsePlaceExplicit(raw) {
+  const t = normTag(raw).replace(/\.$/, '').replace(/,\s*(?:brasil|brazil)$/i, '').replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '');
+  let m;
+  if ((m = t.match(/^(.+?)\s*\((?:estado)\)$/i)) && stateOf(m[1].trim())) return { state: stateOf(m[1].trim()) };
+  if (UF_CODE.test(t) && UF[t]) return { state: UF[t] };
+  if (STATE_BY_KEY.has(deburr(t))) return { state: STATE_BY_KEY.get(deburr(t)), city: /^(rio de janeiro|sao paulo)$/.test(deburr(t)) ? t : null };
+  // "Bairro (Cidade, UF)" · "Cidade (Estado, UF)"
+  if ((m = t.match(/^(.+?)\s*\(([^(),]+),\s*([A-Za-z]{2})\)$/)) && UF[m[3].toUpperCase()] && !/\s-\s/.test(m[1])) {
+    const st = UF[m[3].toUpperCase()], inner = m[2].replace(/^\d{4}(?:-\d{4})?\s*:\s*/, '').trim();
+    if (deburr(inner) === deburr(st) && !/^(rio de janeiro|sao paulo)$/.test(deburr(st))) return { state: st, city: m[1].trim() };   // "Fortaleza (Ceará, CE)"
+    if (deburr(inner) === 'brasil') return { state: st };
+    return { state: st, city: inner, sub: m[1].trim() };
+  }
+  if (/\s-\s/.test(t.replace(/\s+-\s+(?=[A-Z]{2}$)/, ''))) return null;   // a topic path, handled by the caller
+  // "Cidade (UF)" · "Cidade, UF" · "Cidade - UF" · "Cidade(UF)"
+  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*|\s-\s*)([A-Z]{2})\)?$/)) && UF[m[2]]) {
+    return deburr(m[1]) === 'brasil' ? { state: UF[m[2]] } : { state: UF[m[2]], city: m[1].trim() };
+  }
+  // "Cidade (Estado por extenso)" · "Cidade, Estado por extenso"
+  if ((m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/)) && STATE_BY_KEY.has(deburr(m[2]))) return { state: STATE_BY_KEY.get(deburr(m[2])), city: m[1].trim() };
+  return null;
+}
+function parsePlace(raw) {
+  const p = parsePlaceExplicit(raw);
+  if (p) {
+    if (p.city) p.city = CANON.get(deburr(p.city)) || p.city;
+    // "Ceará, CE": the state written twice is no city (Rio de Janeiro and São Paulo are both)
+    if (p.city && deburr(p.city) === deburr(p.state) && !/^(rio de janeiro|sao paulo)$/.test(deburr(p.state))) p.city = null;
+    return p;
+  }
+  const k = deburr(normTag(raw).replace(/\.$/, ''));
+  const uf = CITY_UF.get(k);
+  return uf ? { state: UF[uf], city: CANON.get(k) || normTag(raw).replace(/\.$/, '') } : null;
+}
+// places outside Brazil hang from their country instead of "Brasil"
+function parseForeign(raw) {
+  const t = String(raw).trim().replace(/\.$/, '');
+  if (COUNTRIES.has(deburr(t))) return { country: COUNTRIES.get(deburr(t)) };
+  const m = t.match(/^(.+?)\s*(?:\(|,\s*)([^(),]+)\)?$/);
+  if (m && COUNTRIES.has(deburr(m[2]))) return { country: COUNTRIES.get(deburr(m[2])), city: m[1].trim() };
+  return null;
+}
+const NO_PLACE = /^\[?s\.?\s?l\.?\]?$|^\[?s\.?\s?n\.?\]?$/i;
+
+// every tag of a piece: Portuguese side (subject + coverage) and, apart, the English side
+function geoTags(meta) {
+  const seen = new Set(), pt = [], en = [];
+  const add = t => {
+    const s = String(t).trim(), k = subjectKey(s);
+    if (!k || seen.has(k) || NO_PLACE.test(s)) return;
+    seen.add(k);
+    (EN_WORD.test(s) ? en : pt).push(s);
+  };
+  [].concat((meta || {}).subject || []).forEach(add);
+  [].concat((meta || {}).coverage || []).forEach(add);
+  // an English-only record keeps what it has rather than none
+  return { pt: pt.length ? pt : en, en: pt.length ? en : [] };
+}
+
+// ── what a non-place tag is ──────────────────────────────────────────────────
+const TOMADA = /^(?:externa|interna|diurna|noturna|horizontal|vertical|fotografia)$/i;
+const CAPS_THEME = /^(?:revolta da armada|cangaco|musica|personalidades|aspectos)$/;
+const isCaps = t => t === t.toUpperCase() && /[A-ZÀ-Ý]{3}/.test(t);
+function classifyTag(tag) {
+  const t = tag.trim();
+  if (TOMADA.test(t)) return 'tomada';
+  if (/^cole[cç][aã]o\b|^cole[cç][oõ]es\b/i.test(t)) return 'colecao';
+  if (isCaps(t) && !CAPS_THEME.test(deburr(t))) return 'colecao';
+  // "Sobrenome, Nome[, 1867-1924]": a person, not a subject
+  if (/^[A-ZÀ-Ý][^,()-]+,\s*[A-ZÀ-Ý][^,()]*(?:,\s*[\d\[c].*)?$/.test(t) && !/\s-\s/.test(t) && !/,\s*(?:guerra|rio|ba[ií]a|ilha|lagoa|estado|cidade|vila|serra|morro)\b/i.test(t)) return 'pessoa';
+  return 'tema';
+}
+// "Brasil - História - Revolta da Armada, 1893-1895" and "REVOLTA DA ARMADA" are one theme
+const THEME_SYN = { igrejas: 'Igrejas e capelas', 'baia da guanabara': 'Baía de Guanabara' };
+function themeNorm(tag) {
+  const t = String(tag).replace(/^Brasil\s+-\s+Hist[óo]ria\s+-\s+/i, '').replace(/,?\s*\d{4}\s*-\s*\d{4}$/, '')
+    .replace(/\s*\(Edif[ií]cios\)/i, '').replace(/\s+/g, ' ').trim();
+  const k = deburr(t);
+  return THEME_SYN[k] || THEME_CANON.get(k) || t;
+}
+
+function subjectTree(meta) {
+  const root = { kids: new Map() };
+  const put = path => path.reduce((n, label) => {
+    if (!n.kids.has(label)) n.kids.set(label, { kids: new Map(), place: false });
+    return n.kids.get(label);
+  }, root);
+  const place = path => path.forEach((_, i) => { put(path.slice(0, i + 1)).place = true; });
+  const out = { root, themes: [], colecao: [], pessoa: [], tomada: [] };
+  let hasPlace = false;
+  const { pt, en } = geoTags(meta);
+  const authorK = meta && meta.contributor ? authorKey(cleanAuthor(meta.contributor)) : '';
+
+  // a bairro / feature ("Centro", "Baía de Guanabara") is not a city: it hangs under the
+  // piece's real city, or under the city it was learned to belong to
+  const cities = new Set();
+  pt.forEach(tag => { const p = parsePlace(tag); if (p && p.city && !FEATURE.test(p.city) && !HOOD.has(deburr(p.city))) cities.add(p.state + '|' + p.city); });
+  const attach = p => {
+    if (!p || !p.city || p.sub || !(FEATURE.test(p.city) || HOOD.has(deburr(p.city)))) return p;
+    const h = HOOD.get(deburr(p.city));
+    const real = h ? { state: h.state, city: h.city } : [...cities].map(c => c.split('|')).filter(c => c[0] === p.state).map(c => ({ state: c[0], city: c[1] }))[0];
+    return real ? { state: real.state, city: real.city, sub: p.city } : { state: p.state, city: null, sub: p.city };
+  };
+  const addPlace = p => {
+    const path = ['Brasil', p.state].concat(p.city ? [p.city] : []);
+    place(path);
+    if (p.sub) put(path.concat(p.sub)).place = true;
+    hasPlace = true;
+    return path;
+  };
+
+  pt.forEach(tag => {
+    const nt = normTag(tag), key = deburr(nt).replace(/\.$/, '');
+    if (key === 'brasil' || key === 'brazil') { place(['Brasil']); hasPlace = true; return; }
+    const p = attach(parsePlace(tag));
+    if (p) { addPlace(p); return; }
+    const fp = parseForeign(nt);
+    if (fp) { place([fp.country].concat(fp.city ? [fp.city] : [])); hasPlace = true; return; }
+    // "Espírito Santo (Estado) - Colônias": a state carrying a topic
+    // "Vales - Nova Friburgo (RJ) - Brasil", "Ferrovias - Brasil - Minas Gerais": the country adds nothing
+    const parts = nt.split(/\s+-\s+/).filter(x => !/^(brasil|brazil)$/.test(deburr(x)));
+    const sm = parts[0].match(/^(.+?)\s*\(Estado\)$/i);
+    if (parts.length > 1 && sm && STATE_BY_KEY.has(deburr(sm[1]))) {
+      const path = ['Brasil', STATE_BY_KEY.get(deburr(sm[1]))];
+      place(path); hasPlace = true;
+      parts.slice(1).forEach((_, i) => put(path.concat(parts.slice(1, i + 2))));
+      return;
+    }
+    // "Tópico - Cidade (UF)": the last segment carries the place; or one in the middle, when it
+    // says its UF ("Estruturas hidráulicas - Rio de Janeiro (RJ) - Projetos e construção")
+    const at = parts.length < 2 ? -1 : parsePlace(parts[parts.length - 1]) ? parts.length - 1
+      : parts.findIndex((x, i) => i && /\((?:[A-Z]{2}|Estado)\)$/.test(x) && parsePlace(x));
+    const lp = at > 0 ? attach(parsePlace(parts[at])) : null;
+    if (lp && lp.state) {
+      const path = addPlace(lp), topic = parts.filter((_, i) => i !== at);
+      const base = lp.sub ? path.concat(lp.sub) : path;
+      topic.forEach((_, i) => put(base.concat(topic.slice(0, i + 1))));
+      return;
+    }
+    // a bare bairro ("Centro") the catalogue elsewhere places in a city
+    const hood = HOOD.get(deburr(nt));
+    if (hood) { addPlace({ state: hood.state, city: hood.city, sub: nt }); return; }
+    if (authorK && authorKey(cleanAuthor(tag)) === authorK) return;   // the piece's own author, already on the card
+    const cls = classifyTag(tag);
+    (out[cls === 'tema' ? 'themes' : cls] || out.themes).push(cls === 'tema' ? themeNorm(tag) : tag.trim());
+  });
+  // English-only place ("Salvador (Brazil)") when the Portuguese side named none
+  if (!hasPlace) en.forEach(tag => { const p = attach(parsePlace(tag)); if (p && !hasPlace) addPlace(p); });
+  out.themes = [...new Set(out.themes)];
+  return out;
+}
+
+// estado / cidade / bairro / tópico / coleção / pessoa facets of one piece, as sets of plain keys:
+//   st "S"   ct "S|C"   bh "S|C|B"   tp "S|C|T" · "S||T" · "||T"  (a topic is findable at
+//   any level of the cascade; a theme with no place only at the top one)
+// countries count as a "state" of their own
+function subjectFacets(meta) {
+  const st = new Set(), ct = new Set(), bh = new Set(), tp = new Set(), col = new Set(), pes = new Set();
+  const t = subjectTree(meta);
+  const topics = (node, path, add) => node.kids.forEach((kid, name) => {
+    const p = path.concat(name);
+    add(p.join(' - '));
+    topics(kid, p, add);
+  });
+  const walkState = (sName, stNode) => {
+    st.add(sName);
+    const addTopic = x => { tp.add(`${sName}||${x}`); tp.add(`||${x}`); };
+    stNode.kids.forEach((kid, name) => {
+      if (!kid.place) { addTopic(name); topics(kid, [name], addTopic); return; }
+      ct.add(`${sName}|${name}`);
+      kid.kids.forEach((k2, n2) => {
+        if (k2.place) { bh.add(`${sName}|${name}|${n2}`); return; }
+        const add = x => { tp.add(`${sName}|${name}|${x}`); addTopic(x); };
+        add(n2); topics(k2, [n2], add);
+      });
+    });
+  };
+  t.root.kids.forEach((node, name) => {
+    if (name === 'Brasil') node.kids.forEach((stNode, sName) => walkState(sName, stNode));
+    else walkState(name, node);
+  });
+  t.themes.forEach(x => x.split(/\s+-\s+/).reduce((acc, seg) => { const p = acc ? `${acc} - ${seg}` : seg; tp.add(`||${p}`); return p; }, ''));
+  t.colecao.forEach(x => col.add(x));
+  t.pessoa.forEach(x => pes.add(x));
+  return { st, ct, bh, tp, col, pes };
+}
+
+function learnCities(entries) {
+  const votes = new Map(), spell = new Map(), tspell = new Map();
+  const count = (map, k, v) => { const m = map.get(k) || new Map(); m.set(v, (m.get(v) || 0) + 1); map.set(k, m); };
+  const best = m => [...m].sort((a, b) => b[1] - a[1] || (a[0] === a[0].toUpperCase()) - (b[0] === b[0].toUpperCase()))[0];
+  entries.forEach(e => {
+    const g = geoTags(e.meta);
+    g.pt.concat(g.en).forEach(t => {
+      count(tspell, deburr(themeNorm(t)), themeNormRaw(t));
+      const p = parsePlaceExplicit(t);
+      if (!p || !p.city) return;
+      count(spell, deburr(p.city), p.city);
+      if (p.sub) HOOD.set(deburr(p.sub), { state: p.state, city: p.city });
+      count(votes, deburr(p.city), Object.keys(UF).find(k => UF[k] === p.state));
+    });
+  });
+  spell.forEach((v, k) => CANON.set(k, best(v)[0]));
+  tspell.forEach((v, k) => THEME_CANON.set(k, best(v)[0]));
+  votes.forEach((v, k) => {
+    const [uf, n] = best(v), total = [...v.values()].reduce((a, b) => a + b, 0);
+    if (n >= 2 && n / total >= 0.8 && !STATE_BY_KEY.has(k) && !COMMON_NOUN.test(k)) CITY_UF.set(k, uf);
+  });
+}
+// the cleaned string before the canonical-spelling lookup
+const themeNormRaw = tag => String(tag).replace(/^Brasil\s+-\s+Hist[óo]ria\s+-\s+/i, '').replace(/,?\s*\d{4}\s*-\s*\d{4}$/, '')
+  .replace(/\s*\(Edif[ií]cios\)/i, '').replace(/\s+/g, ' ').trim();
+
+// ── the card's tag block: places as a tree, then Assuntos / Coleção / Pessoas, then the
+// shooting conditions as one quiet line. Every node is a button that applies that filter.
+let cardFilter = null;   // set by setupFilters: ({estado, cidade, bairro, topico, colecao, pessoa}) → filter + close card
+function renderSubjectTree(el, meta) {
+  el.replaceChildren();
+  const t = subjectTree(meta);
+  const clickable = (node, filter, label) => {
+    if (!filter) return node;
+    node.tabIndex = 0; node.setAttribute('role', 'button'); node.title = `filtrar o mural: ${label}`;
+    const go = () => cardFilter && cardFilter(filter);
+    node.addEventListener('click', go);
+    node.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    return node;
+  };
+  const sec = title => { const h = document.createElement('div'); h.className = 'sec'; h.textContent = title; el.appendChild(h); };
+  const capped = (items, n, into) => {
+    items.forEach((x, i) => { if (i >= n) x.hidden = true; into.appendChild(x); });
+    if (items.length > n) {
+      const more = document.createElement('button');
+      more.type = 'button'; more.className = 'more'; more.textContent = `+${items.length - n}`;
+      more.addEventListener('click', () => { items.forEach(x => { x.hidden = false; }); more.remove(); });
+      into.appendChild(more);
+    }
+  };
+  // Onde: every branch of the place tree becomes one trail, Brasil › estado › cidade › local
+  const trails = [];
+  const walk = (n, label, ctx, trail) => {
+    const c = Object.assign({}, ctx);
+    if (n.place) {
+      if (ctx.level === 0) { if (label !== 'Brasil') c.estado = label; }
+      else if (ctx.level === 1 && ctx.estado == null) c.estado = label;
+      else if (!c.cidade) c.cidade = label;
+      else c.bairro = label;
+    } else c.topico = (ctx.topico ? ctx.topico + ' - ' : '') + label;
+    c.level = ctx.level + 1;
+    const f = Object.assign({}, c); delete f.level;
+    const seg = { label, place: !!n.place, filter: (f.estado || f.cidade || f.bairro || f.topico) ? f : null };
+    const tr = trail.concat(seg);
+    if (!n.kids.size) trails.push(tr); else n.kids.forEach((kid, name) => walk(kid, name, c, tr));
+  };
+  t.root.kids.forEach((kid, name) => walk(kid, name, { level: 0, estado: name === 'Brasil' ? null : name }, []));
+  // a topic already shown under a deeper place drops its shallower copy (… › RJ › Ferrovias beside … › RJ › Nova Friburgo › Ferrovias)
+  const key = tr => ({ at: tr.filter(s => s.place).map(s => s.label), what: tr.filter(s => !s.place).map(s => s.label).join('\u0000') });
+  const keys = trails.map(key);
+  const kept = trails.map((tr, i) => [tr, keys[i]]).filter(([, k], i) => !keys.some((b, j) => j !== i && k.what && b.what === k.what
+    && b.at.length > k.at.length && k.at.every((l, n) => b.at[n] === l)));
+  // the same topic under several places is one trail: the shared places, then the others side
+  // by side, then the topic once (Brasil › Minas Gerais · Rio de Janeiro › Estradas)
+  const lines = [];
+  kept.forEach(([tr, k]) => {
+    const twin = k.what && lines.find(l => l.what === k.what);
+    if (twin) twin.trs.push(tr); else lines.push({ what: k.what, trs: [tr] });
+  });
+  const items = lines.map(({ trs }) => {
+    if (trs.length === 1) return trs[0];
+    const ats = trs.map(tr => tr.filter(s => s.place));
+    let common = 0;
+    while (ats.every(at => at.length > common + 1 && at[common].label === ats[0][common].label)) common++;
+    const topic = trs[0].filter(s => !s.place).map(s => Object.assign({}, s, { filter: { topico: s.filter.topico } }));
+    const alts = ats.map(at => Object.assign({}, at[at.length - 1], { full: at.map(s => s.label).join(' › ') }));
+    return ats[0].slice(0, common).concat([alts], topic);
+  });
+  if (items.length) {
+    sec('Onde');
+    const seg = sg => {
+      const x = document.createElement('span');
+      if (!sg.place) x.className = 'topic';
+      x.textContent = sg.label;
+      clickable(x, sg.filter, sg.full || sg.label);
+      if (sg.full && sg.full !== sg.label) x.title = `filtrar o mural: ${sg.full}`;
+      return x;
+    };
+    const sep = text => Object.assign(document.createElement('span'), { className: 'sep', textContent: text });
+    capped(items.map(tr => {
+      const line = document.createElement('div'); line.className = 'trail';
+      tr.forEach((sg, i) => {
+        if (i) line.appendChild(sep('›'));
+        if (Array.isArray(sg)) sg.forEach((alt, n) => { if (n) line.appendChild(sep('·')); line.appendChild(seg(alt)); });
+        else line.appendChild(seg(sg));
+      });
+      return line;
+    }), 4, el);
+  }
+  const chips = (title, list) => {
+    if (!list.length) return;
+    sec(title);
+    const box = document.createElement('div'); box.className = 'chips';
+    capped(list.map(([label, filter, full]) => {
+      const c = document.createElement('span'); c.className = 'chip2'; c.textContent = label;
+      clickable(c, filter, full || label);
+      if (full && full !== label) c.title = full;
+      return c;
+    }), 10, box);
+    el.appendChild(box);
+  };
+  // a chip shows a theme's last two segments, or more when that would read the same as another's
+  const tail = (parts, n) => parts.filter((x, i) => !i || !/^(brasil|brazil)$/.test(deburr(x))).slice(-n).join(' › ');
+  // "Escravidão" and "Escravidão - Brasil" are one theme
+  const themes = [], seen = new Set();
+  t.themes.map(tag => tag.split(/\s+-\s+/)).forEach(parts => { const k = deburr(tail(parts, Infinity)); if (!seen.has(k)) { seen.add(k); themes.push(parts); } });
+  chips('Assuntos', themes.map(parts => {
+    let n = 2;
+    while (n < parts.length && themes.some(o => o !== parts && tail(o, n) === tail(parts, n))) n++;
+    return [tail(parts, n), { topico: parts.join(' - ') }, parts.join(' › ')];
+  }));
+  chips('Pessoas', t.pessoa.map(x => [x, { pessoa: x }]));
+  chips('Coleção citada', t.colecao.map(x => [x, { colecao: x }]));
+  if (t.tomada.length) {
+    const m = document.createElement('div');
+    m.className = 'tm'; m.textContent = [...new Set(t.tomada.map(x => x.replace(/^fotografia$/i, 'Fotografia')))].join(' · ');
+    el.appendChild(m);
+  }
+}
+
+
+function setupFilters(mapData) {
+  const entries = Object.values(mapData.map);
+  learnCities(entries);
+  const instCounts = new Map(), typeCounts = new Map(), authorGroups = new Map(), repCounts = new Map();
+  let minYear = Infinity, maxYear = -Infinity;
+
+  entries.forEach(e => {
+    const meta = e.meta || {};
+    if (meta.community) instCounts.set(meta.community, (instCounts.get(meta.community) || 0) + 1);
+    const t = typeOf(meta);
+    if (t) typeCounts.set(t, (typeCounts.get(t) || 0) + 1);
+    // 2.1: one entry per authority record — its authorized form names the group
+    const k = authorOf(meta);
+    if (k) {
+      const a = meta.ai != null ? authorities[meta.ai] : cleanAuthor(meta.contributor);
+      const g = authorGroups.get(k) || { n: 0, forms: new Map() };
+      g.n++; g.forms.set(a, (g.forms.get(a) || 0) + 1);
+      authorGroups.set(k, g);
+    }
+    if (meta.rep) repCounts.set(meta.rep, (repCounts.get(meta.rep) || 0) + 1);
+    const y = yearOf(meta);
+    if (y != null) { if (y < minYear) minYear = y; if (y > maxYear) maxYear = y; }
+  });
+  if (minYear > maxYear) { minYear = 1860; maxYear = 1930; } // no dated items — shouldn't happen, but stay safe
+
+  const selInst = document.getElementById('f-institution');
+  [...instCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${instName(name)} (${n.toLocaleString('pt-BR')})`;
+    selInst.appendChild(opt);
+  });
+
+  const selType = document.getElementById('f-type');
+  [...typeCounts.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt')).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${name} (${n.toLocaleString('pt-BR')})`;
+    selType.appendChild(opt);
+  });
+  const selRep = document.getElementById('f-rep');
+  [...repCounts.entries()].sort((a, b) => b[1] - a[1]).forEach(([name, n]) => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = `${name[0].toUpperCase() + name.slice(1)} (${n.toLocaleString('pt-BR')})`;
+    selRep.appendChild(opt);
+  });
+
+  // one entry per person: the most common spelling names the group, and
+  // "Sobrenome, Nome" wins a tie over "Nome Sobrenome"
+  const authorNames = new Map();
+  const selAuthor = document.getElementById('f-author');
+  [...authorGroups.entries()].sort((a, b) => b[1].n - a[1].n).forEach(([key, g]) => {
+    const name = [...g.forms.entries()].sort((a, b) => b[1] - a[1] || b[0].includes(',') - a[0].includes(','))[0][0];
+    authorNames.set(key, name);
+    const opt = document.createElement('option');
+    opt.value = key; opt.textContent = `${name} (${g.n.toLocaleString('pt-BR')})`;
+    selAuthor.appendChild(opt);
+  });
+
+  const decadeMin = Math.floor(minYear / 10) * 10;
+  const decadeMax = Math.floor(maxYear / 10) * 10;
+  const nDecades = (decadeMax - decadeMin) / 10 + 1;
+  const span = Math.max(1, decadeMax - decadeMin); // guards the single-decade case
+
+  const loSlider = document.getElementById('f-year-lo');
+  const hiSlider = document.getElementById('f-year-hi');
+  loSlider.min = hiSlider.min = decadeMin;
+  loSlider.max = hiSlider.max = decadeMax;
+  loSlider.step = hiSlider.step = 10;
+  loSlider.value = decadeMin;
+  hiSlider.value = decadeMax;
+
+  const yearReadout = document.getElementById('f-year-readout');
+  const yearFill = document.getElementById('f-year-fill');
+  const histEl = document.getElementById('f-hist');
+  const searchInput = document.getElementById('f-search');
+  const searchX = document.getElementById('f-search-x');
+  const clearBtn = document.getElementById('f-clear');
+  const countBadge = document.getElementById('filters-count');
+  const chipsEl = document.getElementById('filters-chips');
+  const resultEl = document.getElementById('f-result');
+
+  // parse each tile's year and fold its text once — apply() runs on every
+  // keystroke and drag frame, so it must stay free of string work
+  tileMeshes.forEach(m => {
+    const meta = m.userData.meta || {};
+    m.userData._year = yearOf(meta);
+    m.userData._author = authorOf(meta);
+    m.userData._type = typeOf(meta);
+    m.userData._rep = meta.rep || '';
+    if (meta.ref) tileByRef.set(meta.ref, m);
+    m.userData._serie = meta.si != null ? seriesTitles[meta.si] || '' : '';
+    Object.assign(m.userData, (({ st, ct, bh, tp, col, pes }) => ({ _st: st, _ct: ct, _bh: bh, _tp: tp, _col: col, _pes: pes }))(subjectFacets(meta)));
+    // one haystack per piece: every metadata field, not a chosen few
+    // the handle is the map's key, not a field of meta — it still has to be
+    // searchable (people paste a handle or its number straight into the box)
+    m.userData._hay = deburr(m.userData.handle + ' ' + flattenMeta(meta));
+  });
+
+  const bars = [];
+  for (let i = 0; i < nDecades; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const dec = decadeMin + i * 10;
+    // click a bar to isolate that decade; click it again to release the range
+    bar.addEventListener('click', () => {
+      const alone = state.yearTouched && state.yearLo === dec && state.yearHi === dec;
+      if (alone) { resetYear(); } else {
+        loSlider.value = hiSlider.value = dec;
+        state.yearLo = state.yearHi = dec; state.yearTouched = true;
+      }
+      apply();
+    });
+    histEl.appendChild(bar);
+    bars.push(bar);
+  }
+
+  const selEstado = document.getElementById('f-estado');
+  const selCidade = document.getElementById('f-cidade');
+  const selBairro = document.getElementById('f-bairro');
+  const selTopico = document.getElementById('f-topico');
+  const selColecao = document.getElementById('f-colecao');
+  const selPessoa = document.getElementById('f-pessoa');
+  const selSerie = document.getElementById('f-serie');
+  const fillSelect = (sel, rows, first) => {
+    sel.replaceChildren(Object.assign(document.createElement('option'), { value: '', textContent: first }));
+    rows.forEach(([value, n]) => {
+      const opt = document.createElement('option');
+      opt.value = value; opt.textContent = `${value} (${n.toLocaleString('pt-BR')})`;
+      sel.appendChild(opt);
+    });
+  };
+  const tally = (prefix, keyOf, min) => {
+    const c = new Map();
+    tileMeshes.forEach(m => keyOf(m.userData).forEach(k => {
+      if (k.startsWith(prefix)) { const v = k.slice(prefix.length); c.set(v, (c.get(v) || 0) + 1); }
+    }));
+    return [...c].filter(([, n]) => n >= min).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt'));
+  };
+  // topics under the current place: the whole catalogue is thousands, so the top
+  // level lists only recurring ones; inside a state or city every topic is shown
+  function topicPrefix() { return state.estado ? (state.cidade ? `${state.estado}|${state.cidade}|` : `${state.estado}||`) : '||'; }
+  function rebuildPlace() {
+    fillSelect(selCidade, state.estado ? tally(`${state.estado}|`, d => d._ct, 1) : [], state.estado ? 'todas' : 'escolha um estado');
+    selCidade.disabled = !state.estado;
+    selCidade.value = state.cidade;
+    const hoods = state.cidade ? tally(`${state.estado}|${state.cidade}|`, d => d._bh, 1) : [];
+    fillSelect(selBairro, hoods, state.cidade ? (hoods.length ? 'todos' : 'nenhum registrado') : 'escolha uma cidade');
+    selBairro.disabled = !hoods.length;
+    selBairro.value = state.bairro;
+    fillSelect(selTopico, tally(topicPrefix(), d => d._tp, state.estado ? 1 : SUBJECT_MIN), 'todos');
+    setSelect(selTopico, state.topico);
+  }
+  // changing a level empties the ones below it, whose lists just changed
+  function resetPlace(level, rebuild) {
+    if (level === 'estado') { if (!rebuild) { state.estado = ''; selEstado.value = ''; } state.cidade = ''; state.bairro = ''; }
+    if (level === 'cidade') { if (!rebuild) { state.cidade = ''; selCidade.value = ''; } state.bairro = ''; }
+    state.topico = '';
+    rebuildPlace();
+  }
+  // a select that may not list a value (a topic below the top-level threshold): add it
+  function setSelect(sel, value) {
+    if (value && ![...sel.options].some(o => o.value === value)) {
+      const opt = document.createElement('option'); opt.value = value; opt.textContent = value; sel.appendChild(opt);
+    }
+    sel.value = value;
+  }
+
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '', serie: '', rep: '' };
+
+  function resetYear() {
+    state.yearTouched = false;
+    state.yearLo = decadeMin; state.yearHi = decadeMax;
+    loSlider.value = decadeMin; hiSlider.value = decadeMax;
+  }
+
+  function apply() {
+    // free text is AND across terms, so "rio 1900" narrows instead of widening
+    const terms = deburr(state.search.trim()).split(/\s+/).filter(Boolean);
+    const decCounts = new Array(nDecades).fill(0);
+    let shown = 0;
+
+    tileMeshes.forEach(m => {
+      const d = m.userData, meta = d.meta || {};
+      // everything except the decade — this is what the histogram counts, so the
+      // bars show what each decade *would* give under the other filters
+      const okRest =
+        (!state.institution || meta.community === state.institution) &&
+        (!state.type || d._type === state.type) &&
+        (!state.author || d._author === state.author) &&
+        (!state.estado || d._st.has(state.estado)) &&
+        (!state.cidade || d._ct.has(`${state.estado}|${state.cidade}`)) &&
+        (!state.bairro || d._bh.has(`${state.estado}|${state.cidade}|${state.bairro}`)) &&
+        (!state.topico || d._tp.has(topicPrefix() + state.topico)) &&
+        (!state.colecao || d._col.has(state.colecao)) &&
+        (!state.pessoa || d._pes.has(state.pessoa)) &&
+        (!state.serie || d._serie === state.serie) &&
+        (!state.rep || d._rep === state.rep) &&
+        terms.every(t => d._hay.includes(t));
+      if (okRest && d._year != null) {
+        const i = Math.floor((d._year - decadeMin) / 10);
+        if (i >= 0 && i < nDecades) decCounts[i]++;
+      }
+      const okYear = !state.yearTouched ||
+        (d._year != null && d._year >= state.yearLo && d._year <= state.yearHi + 9);
+      const ok = okRest && okYear;
+      d.filteredOut = !ok;
+      if (d.targetOpacity !== (ok ? 1 : 0.07)) { d.targetOpacity = ok ? 1 : 0.07; markAnimating(m); }
+      if (ok) shown++;
+    });
+
+    const peak = Math.max(1, ...decCounts);
+    bars.forEach((bar, i) => {
+      const dec = decadeMin + i * 10;
+      // sqrt scale — a linear one flattens every decade next to the 1900s peak
+      bar.style.height = `${2 + 26 * Math.sqrt(decCounts[i] / peak)}px`;
+      bar.classList.toggle('in', !state.yearTouched || (dec >= state.yearLo && dec <= state.yearHi));
+      bar.title = `${dec}s · ${decCounts[i].toLocaleString('pt-BR')} peças`;
+    });
+
+    const lo = state.yearTouched ? state.yearLo : decadeMin;
+    const hi = state.yearTouched ? state.yearHi : decadeMax;
+    yearFill.style.left = `${((lo - decadeMin) / span) * 100}%`;
+    yearFill.style.right = `${((decadeMax - hi) / span) * 100}%`;
+    yearReadout.textContent = yearLabel(lo, hi);
+    loSlider.classList.toggle('top', lo > (decadeMin + decadeMax) / 2);
+
+    const active = activeFilters();
+    renderChips(active);
+    syncUrl();
+    searchX.hidden = !state.search;
+    clearBtn.classList.toggle('disabled', active.length === 0);
+
+    countBadge.classList.toggle('empty', active.length === 0);
+    countBadge.textContent = shown.toLocaleString('pt-BR');
+    countBadge.classList.toggle('none', shown === 0);
+    resultEl.classList.toggle('none', shown === 0);
+    resultEl.textContent = shown === 0
+      ? 'nenhuma peça corresponde'
+      : active.length === 0
+        ? `${shown.toLocaleString('pt-BR')} peças com imagem`
+        : `${shown.toLocaleString('pt-BR')} de ${tileMeshes.length.toLocaleString('pt-BR')} peças`;
+
+    // the subset just changed under the open piece — fold the card away so the
+    // new wall is the thing being looked at (and so a piece that no longer
+    // matches is not left sitting on top of a wall that excludes it)
+    if (selected) closeCard();
+  }
+
+  // the last decade is usually a stub (the wall ends in 2022, not 2029), so the
+  // range label stops at the newest year actually in the acervo
+  function yearLabel(lo, hi) { return `${lo}–${Math.min(hi + 9, maxYear)}`; }
+
+  function activeFilters() {
+    const out = [];
+    if (state.search.trim()) out.push({ key: 'search', text: `“${state.search.trim()}”` });
+    if (state.institution) out.push({ key: 'institution', text: instName(state.institution) });
+    if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
+    if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
+    if (state.estado) out.push({ key: 'estado', text: state.estado });
+    if (state.cidade) out.push({ key: 'cidade', text: state.cidade });
+    if (state.bairro) out.push({ key: 'bairro', text: state.bairro });
+    if (state.topico) out.push({ key: 'topico', text: state.topico });
+    if (state.colecao) out.push({ key: 'colecao', text: state.colecao });
+    if (state.pessoa) out.push({ key: 'pessoa', text: state.pessoa });
+    if (state.serie) out.push({ key: 'serie', text: state.serie });
+    if (state.rep) out.push({ key: 'rep', text: state.rep });
+    if (state.type) out.push({ key: 'type', text: state.type });
+    return out;
+  }
+
+  function clearOne(key) {
+    if (key === 'search') { state.search = ''; searchInput.value = ''; }
+    if (key === 'institution') { state.institution = ''; selInst.value = ''; fillSeries(); }
+    if (key === 'type') { state.type = ''; selType.value = ''; }
+    if (key === 'estado') resetPlace('estado');
+    if (key === 'cidade') resetPlace('cidade');
+    if (key === 'bairro') { state.bairro = ''; selBairro.value = ''; }
+    if (key === 'topico') { state.topico = ''; selTopico.value = ''; }
+    if (key === 'colecao') { state.colecao = ''; selColecao.value = ''; }
+    if (key === 'pessoa') { state.pessoa = ''; selPessoa.value = ''; }
+    if (key === 'serie') { state.serie = ''; selSerie.value = ''; }
+    if (key === 'rep') { state.rep = ''; selRep.value = ''; }
+    if (key === 'author') { state.author = ''; selAuthor.value = ''; }
+    if (key === 'year') resetYear();
+    apply();
+  }
+
+  function renderChips(active) {
+    chipsEl.hidden = active.length === 0;
+    chipsEl.textContent = '';
+    active.forEach(({ key, text }) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      const label = document.createElement('span');
+      label.className = 'txt';
+      label.textContent = text;          // catalogue metadata — never as markup
+      chip.title = text;
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.textContent = '×';
+      x.setAttribute('aria-label', `remover filtro ${text}`);
+      x.addEventListener('click', e => { e.stopPropagation(); clearOne(key); });
+      chip.append(label, x);
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  selInst.addEventListener('change', () => {
+    state.institution = selInst.value;
+    fillSeries();
+    if (state.serie && ![...selSerie.options].some(o => o.value === state.serie)) state.serie = '';
+    apply();
+  });
+  selRep.addEventListener('change', () => { state.rep = selRep.value; apply(); });
+  selType.addEventListener('change', () => { state.type = selType.value; apply(); });
+
+  // typing re-tests every tile, so hold off until the burst settles
+  let searchTimer = null;
+  searchInput.addEventListener('input', () => {
+    searchX.hidden = !searchInput.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { state.search = searchInput.value; apply(); }, 160);
+  });
+  searchInput.addEventListener('search', () => { // the field's own clear affordance
+    clearTimeout(searchTimer);
+    state.search = searchInput.value; apply();
+  });
+  searchX.addEventListener('click', () => { clearTimeout(searchTimer); clearOne('search'); searchInput.focus(); });
+
+  selEstado.addEventListener('change', () => { state.estado = selEstado.value; resetPlace('estado', true); apply(); });
+  selCidade.addEventListener('change', () => { state.cidade = selCidade.value; resetPlace('cidade', true); apply(); });
+  selBairro.addEventListener('change', () => { state.bairro = selBairro.value; apply(); });
+  selTopico.addEventListener('change', () => { state.topico = selTopico.value; apply(); });
+  selColecao.addEventListener('change', () => { state.colecao = selColecao.value; apply(); });
+  selPessoa.addEventListener('change', () => { state.pessoa = selPessoa.value; apply(); });
+  selSerie.addEventListener('change', () => { state.serie = selSerie.value; apply(); });
+  selAuthor.addEventListener('change', () => { state.author = selAuthor.value; apply(); });
+
+  function onYear(e) {
+    let lo = parseInt(loSlider.value, 10), hi = parseInt(hiSlider.value, 10);
+    if (lo > hi) {
+      // the handles crossed: push the *other* one along instead of swapping,
+      // so the thumb under the finger stays the one being dragged
+      if (e.target === loSlider) hi = lo; else lo = hi;
+      loSlider.value = lo; hiSlider.value = hi;
+    }
+    state.yearLo = lo; state.yearHi = hi;
+    state.yearTouched = !(lo === decadeMin && hi === decadeMax);
+    apply();
+  }
+  loSlider.addEventListener('input', onYear);
+  hiSlider.addEventListener('input', onYear);
+
+  clearBtn.addEventListener('click', () => {
+    clearTimeout(searchTimer);
+    state.search = ''; state.institution = ''; state.type = ''; state.author = ''; state.estado = state.cidade = state.bairro = state.topico = state.colecao = state.pessoa = state.serie = state.rep = '';
+    searchInput.value = ''; selInst.value = ''; selType.value = ''; selAuthor.value = ''; selEstado.value = ''; selColecao.value = ''; selPessoa.value = ''; selSerie.value = ''; selRep.value = ''; fillSeries(); rebuildPlace();
+    resetYear();
+    apply();
+  });
+
+  fillSelect(selEstado, tally('', d => d._st, 1), 'todos');
+  fillSelect(selColecao, tally('', d => d._col, 1), 'todas');
+  fillSelect(selPessoa, tally('', d => d._pes, 5), 'todas');
+  // the arrangement reads top-down: with an institution chosen, only its series
+  function fillSeries() {
+    const keep = state.serie;
+    fillSelect(selSerie, tally('', d => d._serie && (!state.institution || d.meta?.community === state.institution) ? [d._serie] : [], 1), 'todas');
+    if (keep) setSelect(selSerie, keep);
+  }
+  fillSeries();
+
+  // a tag on the card applies itself as a filter; the URL carries the filters
+  // (?estado=…&topico=…) so a filtered wall can be shared and survives a reload
+  const URL_KEYS = { q: 'search', inst: 'institution', autor: 'author', tipo: 'type', estado: 'estado', cidade: 'cidade',
+    bairro: 'bairro', topico: 'topico', colecao: 'colecao', pessoa: 'pessoa', serie: 'serie', rep: 'rep' };
+  const SELECTS = { institution: selInst, author: selAuthor, type: selType, estado: selEstado, cidade: selCidade,
+    bairro: selBairro, topico: selTopico, colecao: selColecao, pessoa: selPessoa, serie: selSerie, rep: selRep };
+  function syncUrl() {
+    const p = new URLSearchParams();
+    Object.entries(URL_KEYS).forEach(([k, f]) => { if (state[f]) p.set(k, state[f]); });
+    if (state.yearTouched) p.set('ano', `${state.yearLo}-${state.yearHi}`);
+    const q = p.toString();
+    try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch {}
+  }
+  syncUrlHook = syncUrl;
+  reapplyHook = apply;
+  cardFilter = f => {
+    Object.assign(state, { estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '' }, f);
+    if (f.institution !== undefined) { setSelect(selInst, state.institution); fillSeries(); }
+    if (f.serie !== undefined) setSelect(selSerie, state.serie);
+    if (f.author !== undefined) setSelect(selAuthor, state.author);
+    if (state.cidade && !state.estado) state.cidade = '';
+    setSelect(selEstado, state.estado); rebuildPlace();
+    setSelect(selCidade, state.cidade); rebuildPlace();
+    setSelect(selBairro, state.bairro); setSelect(selTopico, state.topico);
+    setSelect(selColecao, state.colecao); setSelect(selPessoa, state.pessoa);
+    apply();
+  };
+  (() => {
+    const p = new URLSearchParams(location.search);
+    Object.entries(URL_KEYS).forEach(([k, f]) => {
+      const v = p.get(k);
+      if (!v) return;
+      if (f === 'search') { state.search = v; searchInput.value = v; return; }
+      state[f] = v; setSelect(SELECTS[f], v);
+      if (f === 'estado' || f === 'cidade') rebuildPlace();
+    });
+    const y = (p.get('ano') || '').match(/^(\d{4})-(\d{4})$/);
+    if (y) { state.yearLo = +y[1]; state.yearHi = +y[2]; state.yearTouched = true; loSlider.value = y[1]; hiSlider.value = y[2]; }
+    setSelect(selCidade, state.cidade); setSelect(selBairro, state.bairro); setSelect(selTopico, state.topico);
+  })();
+  rebuildPlace();
+  apply();
+  toggleFilters(!isMobile); // on a phone the wall matters more than the panel
+}
+
+// ─── load atlas + map, build scene ───────────────────────────────────────────
+// content-length is the *compressed* size when a server gzips, while the
+// reader hands back inflated bytes — so a raw ratio can sail past 100%
+const pctOf = (loaded, total) => (total ? Math.min(100, Math.round((loaded / total) * 100)) : 0);
+const asMB = bytes => `${(bytes / 1048576).toFixed(1)} MB`;
+
+// read a body in chunks so the wait is legible instead of a frozen line
+async function fetchWithProgress(url, onProgress) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
+  const total = parseInt(res.headers.get('content-length') || '0', 10);
+  const reader = res.body.getReader();
+  const chunks = [];
+  let loaded = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.length;
+    onProgress(loaded, total);
+  }
+  return { blob: new Blob(chunks), total };
+}
+
+let lastActivity = performance.now();
+let loadFinished = false;
+const touchActivity = () => { lastActivity = performance.now(); };
+
+// a bar that stops moving for half a minute is not "almost there": offer a way
+// out without tearing down the load that may still be alive
+const stallWatch = setInterval(() => {
+  if (loadFinished) { clearInterval(stallWatch); return; }
+  if (performance.now() - lastActivity < 30000 || document.getElementById('lento')) return;
+  const box = document.createElement('div');
+  box.id = 'lento';
+  box.textContent = 'o carregamento parou de avançar';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'tentar de novo';
+  btn.addEventListener('click', () => {
+    store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+    location.reload();
+  });
+  box.append(document.createElement('br'), btn);
+  (document.getElementById('title-screen')?.classList.contains('show')
+    ? document.getElementById('title-screen') : document.getElementById('loading')).appendChild(box);
+}, 3000);
+
+async function main() {
+  // set before anything heavy: if this tab is killed mid-load, the automatic
+  // reload finds the mark and takes the light path
+  store('sessionStorage', s => s.setItem(LOAD_MARK, String(Date.now())));
+  if (previousLoadDied) document.getElementById('aviso-leve').hidden = false;
+
+  // the catalogue is megabytes of its own, and until now nothing said so
+  const loadingMsg = document.getElementById('loading-msg');
+  const catalogue = await fetchWithProgress('atlas/atlas-map.json', (loaded, total) => {
+    touchActivity();
+    // a gzipped response often carries no content-length: count bytes instead
+    loadingMsg.textContent = total
+      ? `carregando catálogo… ${pctOf(loaded, total)}%`
+      : `carregando catálogo… ${asMB(loaded)}`;
+  });
+  const mapData = JSON.parse(await catalogue.blob.text());
+  TPR = mapData.size / mapData.tile;
+  atlasEntries = mapData.map;
+  seriesTitles = mapData.series || [];
+  authorities = mapData.autoridades || [];
+  instituicoes = mapData.instituicoes || {};
+  colecaoInfo = mapData.colecao || {};
+  hasGrande = !!mapData.grande;
+  const handles = Object.keys(mapData.map);
+
+  // the note only earns its space in placeholder mode — the piece count already
+  // lives in the panel's own result line
+  const note = document.getElementById('filters-label');
+  note.hidden = !mapData.placeholder;
+  note.textContent = 'protótipo — as fotos ainda são um placeholder (uma única imagem de teste, tonalizada por item); os metadados são reais, do catalogo.jsonl';
+
+  buildGrid(handles, mapData.map, TPR, mapData.atlases.length);
+
+  // ── stats for the title screen: item count, year span, institution count ──
+  let minYear = Infinity, maxYear = -Infinity;
+  const institutions = new Set();
+  for (const entry of Object.values(mapData.map)) {
+    const meta = entry.meta || {};
+    if (meta.community) institutions.add(meta.community);
+    const y = yearOf(meta);
+    if (y != null) {
+      if (y < minYear) minYear = y;
+      if (y > maxYear) maxYear = y;
+    }
+  }
+  document.getElementById('stat-pecas').textContent = handles.length.toLocaleString('pt-BR');
+  document.getElementById('stat-periodo').textContent =
+    minYear <= maxYear ? `${minYear}–${maxYear}` : 's.d.';
+  document.getElementById('stat-instituicoes').textContent = institutions.size || '—';
+
+  // ── show the title screen right away — the heavy atlas images load behind it ──
+  document.getElementById('loading-msg').remove();
+  const titleScreen = document.getElementById('title-screen');
+  titleScreen.classList.add('show');
+  const coverShownAt = performance.now();
+  const enterLabel = document.getElementById('enter-label');
+  const progressBar = document.getElementById('progress-bar');
+
+  // ── fetch each atlas with byte-level progress, build both the GPU texture
+  //    and the plain <img> (for the card crop) from the same downloaded blob ──
+  // Decoding four 8192² pages takes about as long as fetching them does, so the
+  // bar covers both: parked at 100% for the whole decode, it read as stuck.
+  // phones get the light pages: same layout at 3072², so tiles keep their
+  // atlas/col/row and the uv math is unchanged
+  const pageSet = (lightMode && mapData.mobile) ? mapData.mobile : { size: mapData.size, atlases: mapData.atlases };
+  const nAtlases = pageSet.atlases.length;
+  const fileBytes = new Array(nAtlases).fill(0);
+  const fileTotals = new Array(nAtlases).fill(0);
+  let pagesReady = 0;
+  let shownPct = 0;   // a progress bar that retreats is worse than a coarse one
+  let painting = false;
+  // the readers hand over thousands of chunks; repainting on each one is a few
+  // thousand pointless style invalidations, so coalesce to one write per frame
+  function reportProgress() {
+    if (painting) return;
+    painting = true;
+    requestAnimationFrame(() => { painting = false; paintProgress(); });
+  }
+  function paintProgress() {
+    const loaded = fileBytes.reduce((a, b) => a + b, 0);
+    const total = fileTotals.reduce((a, b) => a + b, 0);
+    const down = total ? Math.min(1, loaded / total) : 0;
+    // download 70%, decoding 20%, the first render's texture upload the last 10%
+    const pct = shownPct = Math.max(shownPct, Math.round((down * 0.7 + (pagesReady / nAtlases) * 0.2) * 100));
+    enterLabel.textContent = total
+      ? `${down < 1 ? 'carregando' : 'preparando'} imagens… ${pct}%`
+      : `carregando imagens… ${asMB(loaded)}`;
+    progressBar.style.width = `${pct}%`;
+    touchActivity();
+  }
+
+  // every response's headers first, bodies second: reading as they arrived meant
+  // the last file's size landed mid-download and the percentage fell backwards
+  const responses = await Promise.all(pageSet.atlases.map(async name => {
+    const res = await fetch(`atlas/${name}`);
+    if (!res.ok) throw new Error(`atlas/${name}: HTTP ${res.status}`);
+    return res;
+  }));
+  responses.forEach((res, idx) => {
+    fileTotals[idx] = parseInt(res.headers.get('content-length') || '0', 10);
+  });
+  reportProgress();
+
+  const blobs = await Promise.all(responses.map(async (res, idx) => {
+    const reader = res.body.getReader();
+    const chunks = [];
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      fileBytes[idx] += value.length;
+      reportProgress();
+    }
+    return new Blob(chunks, { type: 'image/webp' });
+  }));
+
+  // Each page is 8192² — ~268 MB of RGBA once it's a texture, and over
+  // maxTextureSize on plenty of phones (where the upload silently fails, or
+  // the tab is killed for holding four of them). Cap the page at what the
+  // device will actually take; at this zoom a tile is ~50 px on screen either
+  // way. Pages are decoded one at a time and released as we go, so the peak
+  // is one bitmap rather than the whole set.
+  const maxTex = Math.min(renderer.capabilities.maxTextureSize, isTouch ? 4096 : 8192);
+
+  const atlasMats = [];
+  atlasSources = [];
+  for (let b = 0; b < blobs.length; b++) {
+    const blob = blobs[b];
+    blobs[b] = null; // the compressed page is not needed once it is a bitmap
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.src = url;
+    await img.decode().catch(() => {});
+    // a refused decode used to fall through as a blank page and a bar that
+    // never finished; say which page failed instead
+    if (!img.naturalWidth) throw new Error(`não foi possível decodificar ${pageSet.atlases[b]}`);
+
+    let source = img, size = img.naturalWidth;
+    if (size > maxTex) {
+      const c = document.createElement('canvas');
+      c.width = c.height = maxTex;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, maxTex, maxTex);
+      source = c; size = maxTex;
+      img.src = ''; // drop the full-size bitmap before decoding the next page
+    }
+    URL.revokeObjectURL(url);
+    atlasSources.push({ source, size });
+
+    const tex = new THREE.Texture(source);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    atlasMats.push(tileMaterial(tex, TPR));
+
+    // upload this page now rather than letting all four land on the first
+    // render; the cost then falls inside the bar instead of after it
+    renderer.initTexture(tex);
+    pagesReady++;
+    reportProgress();
+    // let the bar actually repaint between pages
+    await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+  }
+  // dimming rides on a per-instance attribute, so one material per page is
+  // enough — and an opaque one, which spares the renderer a depth sort of the
+  // whole wall on every frame
+  pages.forEach((p, i) => { p.mesh.material = atlasMats[i]; });
+
+  setupFilters(mapData);
+
+  // The first render hands every atlas to the GPU — on a phone that is seconds
+  // of frozen main thread, and it used to happen with the bar already at 100%,
+  // which is what made the loader look permanently finished. Name the step, and
+  // let the browser actually paint that frame before the freeze begins.
+  enterLabel.textContent = 'montando o mural… 90%';
+  progressBar.style.width = '90%';
+  touchActivity();
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
+  // ── ready — start rendering the wall right away, behind a translucent
+  //    title card, so the wall is already alive when the cover lifts ──
+  tick();
+  // two painted frames with every texture on the GPU: the heavy part is over,
+  // so the next visit — or a reload — takes the normal path again
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+  loadFinished = true;
+  store('sessionStorage', s => s.removeItem(LOAD_MARK));
+  progressBar.style.width = '100%';
+  enterLabel.textContent = 'entrando…';
+  enterLabel.classList.add('ready');
+  document.getElementById('progress-track').style.display = 'none';
+  document.getElementById('loading').classList.add('ready');
+
+  // the cover is a title card, not a gate: it lifts on its own. A short floor
+  // keeps it from flashing past on a warm cache before anyone can read it.
+  const MIN_COVER_MS = 1100;
+  await new Promise(res => setTimeout(res, Math.max(0, MIN_COVER_MS - (performance.now() - coverShownAt))));
+
+  const cover = document.getElementById('loading');
+  cover.style.pointerEvents = 'none'; // the wall is usable from here on, not after the fade
+  titleScreen.classList.add('dissolve');
+
+  // the black waits for the words — a slight overlap so the two readings
+  // blend into one gesture instead of reading as two separate steps
+  await new Promise(res => setTimeout(res, 620));
+  cover.style.opacity = '0';
+  setTimeout(() => cover.remove(), 1000); // matches the .9s fade in the stylesheet
+
+  // ── history opens for business only now that every handle can be resolved ──
+  // The entry the wall starts from carries no piece and no hash, so the first
+  // back out of a card always lands on the bare wall and never off the site.
+  const deepLink = handleFromHash();
+  history.replaceState({ h: null }, '', location.pathname + location.search);
+  historyReady = true;
+  // a link straight to a piece: open it *as* a step, so back returns to the wall
+  const linked = deepLink && (tileByHandle.get(deepLink) || tileByRef.get(deepLink.trim()));
+  if (linked) openTile(linked);
+
+  // ── the tour (script below the module) drives the wall through this, and only this ──
+  // It moves camTarget and the camera's tilt, and lights subsets by targetOpacity
+  // alone: the filter state, the selects and the URL stay the reader's.
+  window.mural = {
+    camTarget, camera, tiles: tileMeshes, tileByHandle, entries: atlasEntries,
+    authorities, instName, shortName, prettyDate, mediumUrl, HALF_FOV_TAN, MIN_Z, MAX_Z,
+    aberto: () => !!selected,
+    wake,
+    destacar(pred, dim = 0.12) {
+      tileMeshes.forEach(t => {
+        const o = pred(t.userData) ? 1 : dim;
+        if (t.userData.targetOpacity !== o) { t.userData.targetOpacity = o; markAnimating(t); }
+      });
+      wake(30);
+    },
+    restaurar() {
+      if (reapplyHook) reapplyHook();
+      else tileMeshes.forEach(t => { t.userData.targetOpacity = 1; markAnimating(t); });
+      wake(30);
+    },
+    limites() {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      tileMeshes.forEach(t => { const p = t.userData.basePos; x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); });
+      return { x0, x1, y0, y1 };
+    },
+  };
+  window.dispatchEvent(new Event('mural-pronto'));
+
+  // on a phone the hint sits over the wall itself — it retires once read
+  if (isTouch) setTimeout(() => { document.getElementById('hint').style.opacity = '0'; }, 7000);
+}
+
+main().catch(err => {
+  console.error(err);
+  loadFinished = true;
+  showFailure('O mural não terminou de carregar.', `${err.message} — tentar de novo carrega a versão leve.`);
+});
+</script>
+<script>
+/* ─── som do tour ────────────────────────────────────────────────────────────
+   Música feita na hora com Web Audio, sem arquivo de som, e só no tour. Cada
+   cena toca a partir dos metadados da peça em destaque, de forma determinística:
+   a mesma peça soa sempre igual, duas peças nunca soam iguais.
+     handle    → semente das frases (o sorteio é sempre o mesmo para a mesma peça)
+     ano       → andamento (1833 lento, 1940 mais vivo), instrumento da época
+                 (caixa de música antes de 1860, piano de salão depois, cordas no séc. XX)
+                 e o chiado de disco velho (quanto mais antiga, mais chiado)
+     cor (ck)  → o tom da cópia: sépia quente desafina e escurece (wow de disco),
+                 cópia clara sobe de oitava, escura desce
+     assuntos  → o modo e a densidade: escravidão, prisões e guerra em eólio, sem pulso
+                 e com poucas notas; povos indígenas só com quintas abertas e silêncio
+                 (nenhum pastiche de música indígena); colônias em dórico; obras com
+                 golpes de martelo; fotos aéreas em lídio, com arpejos que sobem
+     lugar     → a nota da cena (UF da cobertura: RJ ré, SP mi, BA lá, ES fá…)
+     câmera    → perto clareia as cordas; voo rápido sopra um vento
+   ?som=debug expõe window.som (som.pico() mede a saída, som.perfil() o da cena). */
+(() => {
+  const CHAVE = 'mural-tour-som';
+  const DO3 = 130.81;
+  const MODOS = {
+    grave:  [0, 2, 3, 5, 7, 8, 10],      // eólio
+    aberto: [0, 7, 12],                  // quintas abertas, quase silêncio
+    colono: [0, 2, 3, 5, 7, 9, 10],      // dórico
+    obra:   [0, 2, 4, 5, 7, 9, 10],      // mixolídio
+    alto:   [0, 2, 4, 6, 7, 9, 11],      // lídio
+    luz:    [0, 2, 4, 7, 9],             // pentatônica maior
+  };
+  const UF = { RJ: 2, SP: 4, BA: 9, ES: 5, AM: 0, PA: 0, MT: 7, TO: 7, GO: 7, MG: 11, PE: 9, RS: 3, SC: 3, PR: 3, CE: 8 };
+  const lim = (v, a, b) => Math.max(a, Math.min(b, v));
+  const deburr = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  // sorteio com semente (mulberry32): a mesma peça dá sempre a mesma música
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  const hash = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+
+  // o perfil sonoro de uma peça, lido dos campos do atlas-map.json
+  function perfil(handle, entry) {
+    const meta = entry?.meta || {};
+    const ano = meta.ano || 1900;
+    const txt = deburr([meta.title, ...(meta.subject || []), ...(meta.description || [])].join(' '));
+    const humor =
+      /escrav|condenad|prisioneir|jagunc|canudos|detent/.test(txt) ? 'grave' :
+      /indigen|\bindios?\b|karaja|caraja|bororo|aldeia/.test(txt) ? 'aberto' :
+      /colonia|colono|imigra/.test(txt) ? 'colono' :
+      /demoli|desmonte|obras|em construcao/.test(txt) ? 'obra' :
+      /aere|aviac|aviao|hidroaviao/.test(txt) ? 'alto' : 'luz';
+    const ck = entry?.ck ?? 0x404040;
+    const r = (ck >> 16) & 255, g = (ck >> 8) & 255, b = ck & 255;   // média da imagem, já pela metade
+    const quente = lim((r - b) / 36, 0, 1);
+    const claro = (r + g + b) / (3 * 128);
+    const cob = [...(meta.coverage || []), ...(meta.subject || [])].join(' ');
+    const uf = (cob.match(/\b(RJ|SP|BA|ES|AM|PA|MT|TO|GO|MG|PE|RS|SC|PR|CE)\b/) || [])[1];
+    const semente = hash(handle);
+    const era = ano < 1860 ? 'caixa' : 'piano';
+    let bpm = 56 + lim((ano - 1830) / 110, 0, 1) * 38;
+    if (humor === 'grave') bpm *= 0.8;
+    if (humor === 'aberto') bpm *= 0.7;
+    if (humor === 'obra') bpm *= 1.08;
+    return {
+      handle, ano, humor, era, bpm: Math.round(bpm),
+      raiz: uf != null ? UF[uf] : semente % 12, uf: uf || null,
+      oitava: claro > 0.72 ? 1 : claro < 0.32 ? -1 : 0,
+      quente, wow: 3 + quente * 16,                      // cents de oscilação, como disco empenado
+      corte: 1400 + (1 - quente) * 4200,                  // cópia quente, som abafado
+      chiado: lim((1975 - ano) / 140, 0.08, 1),
+      cordas: ano >= 1900 ? 1 : ano >= 1870 ? 0.55 : 0.25,
+      densidade: lim((meta.subject || []).length / 9, 0.25, 1) * (humor === 'grave' ? 0.45 : humor === 'aberto' ? 0.12 : 1),
+      semente,
+    };
+  }
+
+  let ctx = null, saida, bus, sala, wowG, chiadoG, chiadoF, ventoG, ventoF, ruido, padF, drone;
+  let tocando = false, ligado = true, timer = 0, raf = 0;
+  let P = null, sorte = Math.random, prox = 0, passo = 0, grau = 3, acorde = 0, ultimaFrase = 0;
+  let camAnt = null, vel = 0;
+  try { ligado = localStorage.getItem(CHAVE) !== 'off'; } catch {}
+
+  const hz = (semi, oit = 0) => DO3 * 2 ** ((semi + 12 * oit) / 12);
+  const nota = (g) => { const m = MODOS[P.humor]; const n = m.length; return m[((g % n) + n) % n] + 12 * Math.floor(g / n) + P.raiz; };
+
+  function montar() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (navigator.audioSession) navigator.audioSession.type = 'ambient';
+    const pa = ctx.createBiquadFilter(); pa.type = 'highpass'; pa.frequency.value = 35;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+    const limit = ctx.createDynamicsCompressor(); limit.threshold.value = -3; limit.ratio.value = 20; limit.attack.value = 0.002; limit.release.value = 0.1;
+    saida = ctx.createGain(); saida.gain.value = 0;
+    bus = ctx.createGain(); bus.gain.value = 0.85;
+    bus.connect(pa); pa.connect(comp); comp.connect(limit); limit.connect(saida); saida.connect(ctx.destination);
+
+    // sala: 2,6 s de ruído morrendo
+    const n = Math.floor(ctx.sampleRate * 2.6), ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let lp = 0;
+      for (let i = 0; i < n; i++) { const t = i / n; lp += (Math.random() * 2 - 1 - lp) * (0.9 - 0.75 * t); d[i] = lp * (1 - t) ** 2.6 * 0.6; } }
+    const conv = ctx.createConvolver(); conv.buffer = ir;
+    sala = ctx.createGain(); sala.gain.value = 0.35; sala.connect(conv); conv.connect(bus);
+
+    ruido = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const rr = ruido.getChannelData(0); for (let i = 0; i < rr.length; i++) rr[i] = Math.random() * 2 - 1;
+
+    // wow: uma oscilação lenta de afinação que todos os instrumentos de altura recebem
+    const wow = ctx.createOscillator(); wow.frequency.value = 0.55;
+    wowG = ctx.createGain(); wowG.gain.value = 6; wow.connect(wowG); wow.start();
+
+    // chiado de disco/cópia antiga: ruído agudo constante + estalos sorteados no agendador
+    const cs = ctx.createBufferSource(); cs.buffer = ruido; cs.loop = true;
+    chiadoF = ctx.createBiquadFilter(); chiadoF.type = 'bandpass'; chiadoF.frequency.value = 5200; chiadoF.Q.value = 0.6;
+    chiadoG = ctx.createGain(); chiadoG.gain.value = 0;
+    cs.connect(chiadoF); chiadoF.connect(chiadoG); chiadoG.connect(bus); cs.start();
+
+    // vento dos voos
+    const vs = ctx.createBufferSource(); vs.buffer = ruido; vs.loop = true; vs.playbackRate.value = 0.5;
+    ventoF = ctx.createBiquadFilter(); ventoF.type = 'bandpass'; ventoF.Q.value = 1.1; ventoF.frequency.value = 400;
+    ventoG = ctx.createGain(); ventoG.gain.value = 0;
+    vs.connect(ventoF); ventoF.connect(ventoG); ventoG.connect(bus); ventoG.connect(sala); vs.start();
+
+    // bordão: triângulo grave + quinta, sempre sob tudo
+    const dg = ctx.createGain(); dg.gain.value = 0;
+    const df = ctx.createBiquadFilter(); df.type = 'lowpass'; df.frequency.value = 500;
+    const o1 = ctx.createOscillator(); o1.type = 'triangle';
+    const o2 = ctx.createOscillator(); o2.type = 'sine';
+    const g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o1.connect(dg); o2.connect(g2); g2.connect(dg); dg.connect(df); df.connect(bus); df.connect(sala);
+    [o1, o2].forEach(o => { wowG.connect(o.detune); o.start(); });
+    drone = { g: dg, o1, o2, f: df };
+
+    // as cordas passam por um filtro que a câmera abre quando se aproxima
+    padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.frequency.value = 900; padF.Q.value = 0.5;
+    padF.connect(bus); const ps = ctx.createGain(); ps.gain.value = 0.6; padF.connect(ps); ps.connect(sala);
+  }
+
+  // ── instrumentos ──
+  function osc(type, f, t) { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); wowG.connect(o.detune); return o; }
+
+  // piano de salão: parciais um pouco inarmônicos, ataque duro e decaimento longo
+  function piano(f, t, dur, v = 0.6, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = lim(pan, -1, 1);
+    const tf = ctx.createBiquadFilter(); tf.type = 'lowpass'; tf.frequency.value = Math.min(P.corte, f * 9);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.11 * v, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.03 * v, t + 0.35); g.gain.setTargetAtTime(0.0001, t + Math.max(0.3, dur), 0.35);
+    const fim = t + dur + 1.8;
+    [[1, 1], [2.003, 0.45], [3.01, 0.22], [4.03, 0.1]].forEach(([k, a]) => {
+      const o = osc('sine', f * k, t), og = ctx.createGain(); og.gain.value = a;
+      o.connect(og); og.connect(tf); o.start(t); o.stop(fim);
+    });
+    tf.connect(g); g.connect(p); p.connect(bus); const e = ctx.createGain(); e.gain.value = 0.5; p.connect(e); e.connect(sala);
+  }
+  // caixa de música: lâmina de aço, um seno e um parcial a 2,76× que morre rápido
+  function caixa(f, t, dur, v = 0.6, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = lim(pan, -1, 1);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.09 * v, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0005, t + 1.6);
+    const a = osc('sine', f * 2, t), b = osc('sine', f * 2 * 2.76, t), bg = ctx.createGain();
+    bg.gain.setValueAtTime(0.5, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    a.connect(g); b.connect(bg); bg.connect(g); g.connect(p); p.connect(bus);
+    const e = ctx.createGain(); e.gain.value = 0.7; p.connect(e); e.connect(sala);
+    [a, b].forEach(o => { o.start(t); o.stop(t + 1.7); });
+  }
+  // sopro: seno longo com ar, sem melodia — só para as cenas abertas
+  function sopro(f, t, dur, v = 0.5, pan = 0) {
+    const g = ctx.createGain(), p = ctx.createStereoPanner(); p.pan.value = pan;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.05 * v, t + dur * 0.4); g.gain.linearRampToValueAtTime(0, t + dur);
+    const o = osc('sine', f, t); o.connect(g);
+    const s = ctx.createBufferSource(); s.buffer = ruido; const sf = ctx.createBiquadFilter(); sf.type = 'bandpass'; sf.frequency.value = f * 2; sf.Q.value = 8;
+    const sg = ctx.createGain(); sg.gain.value = 0.3; s.connect(sf); sf.connect(sg); sg.connect(g);
+    g.connect(p); p.connect(sala); const d = ctx.createGain(); d.gain.value = 0.6; p.connect(d); d.connect(bus);
+    o.start(t); o.stop(t + dur + 0.1); s.start(t, Math.random()); s.stop(t + dur + 0.1);
+  }
+  const voz = (f, t, dur, v, pan) => (P.humor === 'aberto' ? sopro : P.era === 'caixa' ? caixa : piano)(f, t, dur, v, pan);
+
+  // cordas: duas serras desafinadas, ataque lento
+  function cordas(semis, t, dur, v = 1) {
+    semis.forEach((s, i) => {
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.028 * v * P.cordas, t + dur * 0.35); g.gain.setTargetAtTime(0, t + dur * 0.85, dur * 0.12);
+      [-6, 6].forEach(dt => { const o = osc('sawtooth', hz(s, -1), t); o.detune.value = dt + (i - 1) * 2; o.connect(g); o.start(t); o.stop(t + dur * 1.4); });
+      g.connect(padF);
+    });
+  }
+  // martelo de obra: estalo metálico + baque
+  function martelo(t, v) {
+    const s = ctx.createBufferSource(); s.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3200; f.Q.value = 9;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.22 * v, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    s.connect(f); f.connect(g); g.connect(bus); const e = ctx.createGain(); e.gain.value = 0.4; g.connect(e); e.connect(sala);
+    s.start(t, Math.random()); s.stop(t + 0.12);
+    const o = ctx.createOscillator(); o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
+    const og = ctx.createGain(); og.gain.setValueAtTime(0.3 * v, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.connect(og); og.connect(bus); o.start(t); o.stop(t + 0.45);
+  }
+  // estalo de disco
+  function estalo(t, v) {
+    const s = ctx.createBufferSource(); s.buffer = ruido; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1500;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.18 * v, t); g.gain.exponentialRampToValueAtTime(0.0005, t + 0.012);
+    const p = ctx.createStereoPanner(); p.pan.value = Math.random() * 1.4 - 0.7;
+    s.connect(f); f.connect(g); g.connect(p); p.connect(bus); s.start(t, Math.random() * 1.8); s.stop(t + 0.02);
+  }
+
+  // ── composição ──
+  // frase: passeio sorteado (com a semente da peça) pelo modo da cena
+  function frase(t0) {
+    if (!P) return;
+    const b = 60 / P.bpm, n = P.humor === 'aberto' ? 2 : 3 + Math.floor(sorte() * 3);
+    let t = t0;
+    for (let i = 0; i < n; i++) {
+      grau = lim(grau + [-2, -1, -1, 1, 1, 2, 0][Math.floor(sorte() * 7)], 0, 11);
+      const ultima = i === n - 1;
+      const d = (P.humor === 'aberto' ? 4 : ultima ? 2 + Math.floor(sorte() * 2) : [0.5, 1, 1, 1.5][Math.floor(sorte() * 4)]) * b;
+      voz(hz(nota(grau), 1 + P.oitava), t, d * 0.95, 0.55 + sorte() * 0.3, (sorte() - 0.5) * 0.6);
+      t += d;
+    }
+    ultimaFrase = performance.now() + (t - t0) * 1000;
+  }
+
+  function agendar() {
+    if (!ctx || !P) return;
+    const colch = 60 / P.bpm / 2;   // colcheia
+    while (prox < ctx.currentTime + 0.15) {
+      const s = passo % 16, t = prox;
+      // acorde novo a cada dois compassos, na mesma ordem sorteada para esta peça
+      if (passo % 32 === 0 && P.humor !== 'aberto') {
+        acorde = [0, 3, 4, 5, 0, 1][Math.floor(sorte() * 6)];
+        cordas([nota(acorde), nota(acorde + 2), nota(acorde + 4)], t, colch * 32, 1);
+      }
+      if (passo % 32 === 0 && P.humor === 'aberto') cordas([P.raiz, P.raiz + 7], t, colch * 32, 0.7);
+      // notas soltas da época, raras nas cenas graves e quase nenhuma nas abertas
+      if (s % 2 === 0 && performance.now() > ultimaFrase && sorte() < 0.22 * P.densidade) {
+        grau = lim(grau + [-1, 1, 2, -2][Math.floor(sorte() * 4)], 0, 11);
+        voz(hz(nota(grau), 1 + P.oitava), t, colch * 2, 0.35 + sorte() * 0.25, (sorte() - 0.5) * 0.8);
+      }
+      // baixo no 1, menos nas cenas graves
+      if (s === 0 && P.humor !== 'aberto' && P.humor !== 'grave') voz(hz(nota(acorde), -1), t, colch * 6, 0.5, -0.1);
+      if (P.humor === 'grave' && passo % 32 === 0) voz(hz(nota(acorde), -1), t, colch * 12, 0.45, 0);
+      if (P.humor === 'obra' && (s === 0 || s === 8)) martelo(t, s === 0 ? 0.7 : 0.45);
+      if (P.humor === 'alto' && s === 0) for (let k = 0; k < 6; k++) voz(hz(nota(acorde + k * 2), k > 2 ? 2 : 1), t + k * colch / 2, colch, 0.32, -0.6 + k * 0.24);
+      // estalos da cópia antiga
+      if (sorte() < P.chiado * 0.5) estalo(t + Math.random() * colch, 0.4 + Math.random() * 0.6);
+      passo++; prox += colch;
+    }
+    if (performance.now() - ultimaFrase > 6500 + (P.semente % 3000) && P.humor !== 'aberto') frase(ctx.currentTime + 0.1);
+  }
+
+  // câmera → som: perto clareia as cordas; voo rápido sopra
+  function seguir() {
+    if (!tocando) return;
+    raf = requestAnimationFrame(seguir);
+    const m = window.mural; if (!m || !ctx) return;
+    const c = m.camera.position, agora = performance.now();
+    if (camAnt) {
+      const dt = Math.max(0.001, (agora - camAnt.t) / 1000);
+      const d = Math.hypot(c.x - camAnt.x, c.y - camAnt.y) / Math.max(1, c.z) + Math.abs(Math.log(c.z / camAnt.z));
+      const alvo = lim(Math.sqrt(d / dt / 1.2), 0, 1);
+      vel += (alvo - vel) * (alvo > vel ? 0.2 : 0.05);
+    }
+    camAnt = { x: c.x, y: c.y, z: c.z, t: agora };
+    const t = ctx.currentTime, perto = lim(1 - Math.log(c.z / 4) / Math.log(60), 0, 1);
+    padF.frequency.setTargetAtTime(500 + perto * 2600, t, 0.3);
+    ventoG.gain.setTargetAtTime(0.07 * vel * vel, t, 0.15);
+    ventoF.frequency.setTargetAtTime(300 + 1400 * vel, t, 0.15);
+  }
+
+  // ── API usada pelo tour ──
+  function iniciar() {
+    if (!ligado) return;
+    if (!ctx) montar();
+    ctx.resume();
+    tocando = true;
+    const t = ctx.currentTime;
+    saida.gain.cancelScheduledValues(t); saida.gain.setValueAtTime(saida.gain.value, t); saida.gain.linearRampToValueAtTime(1, t + 0.6);
+    drone.g.gain.setTargetAtTime(0.07, t, 1);
+    prox = t + 0.1; passo = 0; ultimaFrase = performance.now() + 1500; camAnt = null; vel = 0;
+    clearInterval(timer); timer = setInterval(agendar, 25);
+    cancelAnimationFrame(raf); seguir();
+  }
+  // cena nova: o perfil da peça em destaque assume o som
+  function cena(handle, entry) {
+    P = perfil(handle, entry);
+    sorte = rng(P.semente);
+    grau = 3 + Math.floor(sorte() * 3);
+    if (!tocando || !ctx) return P;
+    const t = ctx.currentTime;
+    drone.o1.frequency.setTargetAtTime(hz(P.raiz, -2), t, 0.9);
+    drone.o2.frequency.setTargetAtTime(hz(P.raiz + 7, -2), t, 0.9);
+    drone.f.frequency.setTargetAtTime(P.corte * 0.15, t, 0.8);
+    wowG.gain.setTargetAtTime(P.wow, t, 0.8);
+    chiadoG.gain.setTargetAtTime(0.012 * P.chiado, t, 0.6);
+    chiadoF.frequency.setTargetAtTime(3000 + (1 - P.quente) * 4000, t, 0.6);
+    passo = 0; prox = Math.max(prox, t + 0.05);
+    return P;
+  }
+  function legenda() {
+    if (!tocando || !P || P.humor === 'aberto') return;
+    if (performance.now() > ultimaFrase - 300) frase(ctx.currentTime + 0.25);
+  }
+  function parar(cadencia = false) {
+    if (!tocando) return;
+    tocando = false;
+    clearInterval(timer); cancelAnimationFrame(raf);
+    const t = ctx.currentTime; let fade = 0.8, pausa = 0;
+    if (cadencia && P) {
+      [4, 3, 1, 0].forEach((g, i) => voz(hz(nota(g), 1 + P.oitava), t + i * 0.45, i === 3 ? 3 : 0.45, 0.6, 0));
+      cordas([P.raiz, P.raiz + 7, P.raiz + 12], t + 1.35, 4, 1);
+      fade = 3.5; pausa = 1.4;
+    }
+    ventoG.gain.setTargetAtTime(0, t, 0.1);
+    saida.gain.cancelScheduledValues(t); saida.gain.setValueAtTime(saida.gain.value, t + pausa); saida.gain.linearRampToValueAtTime(0, t + pausa + fade);
+    drone.g.gain.setTargetAtTime(0, t + pausa, fade / 3);
+    setTimeout(() => { if (!tocando) ctx.suspend(); }, (pausa + fade + 0.5) * 1000);
+  }
+  function alternar() {
+    ligado = !ligado;
+    try { localStorage.setItem(CHAVE, ligado ? 'on' : 'off'); } catch {}
+    if (window.tour?.ativo()) {
+      if (ligado) { iniciar(); if (P) cena(P.handle, window.mural.entries[P.handle]); } else parar(false);
+    }
+    return ligado;
+  }
+  document.addEventListener('visibilitychange', () => { if (ctx && tocando) document.hidden ? ctx.suspend() : ctx.resume(); });
+
+  const api = { iniciar, cena, legenda, parar, alternar, ligado: () => ligado, perfil };
+  window.somTour = api;
+  if (new URLSearchParams(location.search).get('som') === 'debug') {
+    let an = null;
+    window.som = { ...api, ctx: () => ctx, atual: () => P, vel: () => vel, pico() {
+      if (!ctx) return null;
+      if (!an) { an = ctx.createAnalyser(); an.fftSize = 4096; saida.connect(an); }
+      const d = new Float32Array(an.fftSize); an.getFloatTimeDomainData(d);
+      let m = 0, q = 0; for (const x of d) { m = Math.max(m, Math.abs(x)); q += x * x; }
+      return { pico: +m.toFixed(3), rms: +Math.sqrt(q / d.length).toFixed(3) };
+    } };
+  }
+})();
+
+/* ─── tour: ~2 min de cinema pelo acervo ─────────────────────────────────────
+   Abre pelo botão "tour de 2 min" ou por ?tour=1 (um convite pede o clique que
+   libera o som). Esc, "✕ esc", arrastar ou rolar o mural param o tour e deixam
+   a câmera onde estava; a iluminação volta a ser a dos filtros.
+   Tom: frases curtas, números no lugar de adjetivos, títulos do catálogo citados
+   entre aspas com a data. Os números são contados aqui, dos dados carregados,
+   com o mesmo critério que acende os quadrados. Fatos de fora da ficha vêm dos
+   posts do blog da Brasiliana Fotográfica (arquivados em wordpress/). */
+(() => {
+  const $ = id => document.getElementById(id);
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fmt = n => n.toLocaleString('pt-BR');
+  const deburr = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  let M = null, ativo = false, inicio = 0, raf = 0, TOTAL = 120000, t0Cena = 0, anim = 0;
+  const pendentes = new Set();
+  class Parado extends Error {}
+  const espera = ms => new Promise((ok, falha) => {
+    const p = { falha }; p.id = setTimeout(() => { pendentes.delete(p); ok(); }, Math.max(0, ms)); pendentes.add(p);
+  });
+  const em = ms => espera(t0Cena + ms - performance.now());
+
+  // ── a câmera: posição sobre a parede (x, y), distância (z), inclinação (rx) e giro (rz).
+  // Inclinada, a câmera recua em y para o ponto mirado continuar no centro da tela.
+  const vista = { x: 0, y: 0, z: 30, rx: 0, rz: 0 };
+  const suave = t => 0.5 - Math.cos(Math.PI * t) / 2;
+  function aplicar(v) {
+    M.camTarget.set(v.x, v.y - v.z * Math.tan(v.rx), v.z);
+    M.camera.rotation.set(v.rx, 0, v.rz);
+    M.wake(3);
+  }
+  function mover(alvo, ms, arco = 0) {
+    cancelAnimationFrame(anim);
+    const de = { ...vista }, para = { ...vista, ...alvo };
+    if (reduz || ms <= 0) {
+      Object.assign(vista, para); aplicar(vista);
+      M.camera.position.copy(M.camTarget);
+      return;
+    }
+    const t0 = performance.now();
+    const passo = agora => {
+      if (!ativo) return;
+      const t = Math.min(1, (agora - t0) / ms), e = suave(t);
+      for (const k of ['x', 'y', 'rx', 'rz']) vista[k] = de[k] + (para[k] - de[k]) * e;
+      // distância em escala logarítmica, com um arco de grua por cima nos voos longos
+      vista.z = Math.exp(Math.log(de.z) + (Math.log(para.z) - Math.log(de.z)) * e) * (1 + arco * Math.sin(Math.PI * e));
+      aplicar(vista);
+      if (t < 1) anim = requestAnimationFrame(passo);
+    };
+    anim = requestAnimationFrame(passo);
+  }
+  const posDe = h => M.tileByHandle.get(h)?.userData.basePos;
+  // distância que mostra a parede inteira na largura da tela
+  function zInteira() {
+    const L = M.limites(), w = L.x1 - L.x0 + 2, h = L.y1 - L.y0 + 2;
+    const aspect = innerWidth / innerHeight;
+    return Math.min(M.MAX_Z, Math.max(w / (2 * M.HALF_FOV_TAN * aspect), h / (2 * M.HALF_FOV_TAN)) * 0.82);
+  }
+  // voo até uma peça: z perto, com a peça um pouco acima do centro (a legenda fica embaixo)
+  function irPara(h, ms = 3200, { z = 7, rx = 0.18, rz = 0, arco = 0.9 } = {}) {
+    const p = posDe(h); if (!p) return;
+    mover({ x: p.x, y: p.y, z, rx, rz }, ms, arco);
+  }
+  // derivar devagar em volta da peça durante a legenda
+  function derivar(h, ms, { z = 5.2, rx = 0.26, rz = 0.05, dx = 0.6 } = {}) {
+    const p = posDe(h); if (!p) return;
+    mover({ x: p.x + dx, y: p.y, z, rx, rz }, ms, 0);
+  }
+
+  // ── a peça em destaque e as legendas ──
+  const foto = $('tour-foto'), fotoImg = foto.querySelector('img'), fotoCap = foto.querySelector('figcaption');
+  function meta(h) { return M.entries[h]?.meta || {}; }
+  function autor(m) { return m.ai != null ? M.shortName(M.authorities[m.ai]) : ''; }
+  function mostrarFoto(h) {
+    const m = meta(h);
+    fotoImg.src = M.mediumUrl(h);
+    fotoImg.alt = m.title || '';
+    fotoCap.replaceChildren();
+    const b = document.createElement('b'); b.textContent = `“${(m.title || '[sem título]').replace(/^\[|\]$/g, '').replace(/^["“”]+|["“”]+$/g, '')}”`;
+    fotoCap.append(b, ` · ${m.dt || m.date || 's.d.'}${autor(m) ? ' · ' + autor(m) : ''} · ${M.instName(m.community)}`);
+    foto.classList.add('on');
+  }
+  const esconderFoto = () => foto.classList.remove('on');
+  async function legenda(kicker, linha) {
+    const cap = $('tour-cap');
+    cap.classList.remove('on');
+    await espera(420);
+    $('tour-kicker').textContent = kicker || '';
+    // «…» marca o que é citação do catálogo ou de um documento: vira <q>, o resto é texto
+    const l = $('tour-line'); l.replaceChildren();
+    linha.split(/(«[^»]*»)/).forEach(parte => {
+      if (parte.startsWith('«')) { const q = document.createElement('q'); q.textContent = parte.slice(1, -1); l.append(q); }
+      else if (parte) l.append(parte);
+    });
+    cap.classList.add('on');
+    somTour.legenda();
+  }
+
+  // ── os recortes, pelos cabeçalhos de assunto do catálogo (não por palavra solta:
+  // "Pedra do Índio" é uma pedra, "Vila Guarani" é uma usina de gás) ──
+  const assuntos = d => d.meta?.subject || [];
+  const temAssunto = re => d => assuntos(d).some(s => re.test(s));
+  const R = {
+    florence: d => /^Florence, Hercule/.test(M.authorities[d.meta?.ai] || ''),
+    ferrez: d => /^Ferrez, Marc/.test(M.authorities[d.meta?.ai] || ''),
+    escravidao: temAssunto(/^(Escrav|Trabalho escravo)/),
+    condenados: d => /^\[Galeria dos condenados/.test(d.meta?.title || ''),
+    indigenas: d => temAssunto(/^(Índios\b|Povos indígenas|Aldeias indígenas|Crianças indígenas|Habitação indígena)/)(d) || /\bind[íi]genas?\b|Karaj[áa]|Caraj[áa]/.test(d.meta?.title || ''),
+    colonias: d => temAssunto(/Colônias/)(d) || /^\[?Col[ôo]nias? /.test(d.meta?.title || ''),
+    canudos: d => /^Barros, Fl[áa]vio/.test(M.authorities[d.meta?.ai] || '') || assuntos(d).includes('Canudos'),
+    obras: temAssunto(/^Obras e demolições$/),
+    aereo: d => d.meta?.community === 'Museu Aeroespacial',
+  };
+  const conta = pred => M.tiles.reduce((n, t) => n + (pred(t.userData) ? 1 : 0), 0);
+  const acender = pred => M.destacar(pred);
+  const tudo = () => M.destacar(() => true);
+
+  // as peças em destaque (cada uma foi vista antes de entrar no roteiro)
+  const H = n => `20.500.12156.1/${n}`;
+  const PECAS = {
+    florence: H(1777), ferrez: H(10481), ganho: H(6489), condenado: H(6026), caraja: H(2500), vargas: H(13330),
+    dietze: H(100), canudos: H(4798), prisioneiros: H(4860), castelo: H(10442), cristo: H(10702),
+  };
+
+  function cenas() {
+    const N = M.tiles.length;
+    const nInst = new Set(M.tiles.map(t => t.userData.meta?.community).filter(Boolean)).size;
+    const nFerrez = conta(R.ferrez), nEsc = conta(R.escravidao), nCond = conta(R.condenados);
+    const nEscAntes = conta(d => R.escravidao(d) && d.meta?.ano && d.meta.ano < 1888);
+    const nInd = conta(R.indigenas), nCan = conta(R.canudos), nObras = conta(R.obras), nAer = conta(R.aereo);
+    const L = M.limites(), cx = (L.x0 + L.x1) / 2, cy = (L.y0 + L.y1) / 2, zi = zInteira();
+    return [
+      // 0 · abertura: a parede inteira, a grua desce inclinando
+      { dur: 9000, peca: PECAS.florence, run: async () => {
+        tudo(); esconderFoto();
+        mover({ x: cx, y: cy, z: zi * 1.15, rx: 0, rz: -0.03 }, 0);
+        mover({ x: cx - 4, y: cy + 2, z: zi * 0.62, rx: 0.32, rz: 0.04 }, 9000);
+        await legenda('Brasiliana Fotográfica · acervo digital', `${fmt(N)} imagens de ${nInst} instituições. Cada quadrado é uma peça, do século XIX às fotos aéreas do século XX.`);
+      } },
+      // 1 · Florence, Campinas, 1833
+      { dur: 11000, peca: PECAS.florence, run: async () => {
+        acender(R.florence);
+        irPara(PECAS.florence, 3000);
+        await em(2600);
+        mostrarFoto(PECAS.florence);
+        derivar(PECAS.florence, 8400);
+        await legenda('Vila de São Carlos, atual Campinas · 1833', 'Hercule Florence fixou estes rótulos de farmácia com papel, sal de prata e luz do sol. A prova se chama «Epréuve Nº2 (photographie)». É um dos registros fotográficos mais antigos das Américas.');
+      } },
+      // 2 · Marc Ferrez e a Avenida Central
+      { dur: 11000, peca: PECAS.ferrez, run: async () => {
+        esconderFoto();
+        acender(R.ferrez);
+        mover({ x: cx, y: cy, z: zi * 0.7, rx: 0.2, rz: -0.03 }, 3200, 0);
+        await legenda('Marc Ferrez · 1843–1923', `Um só fotógrafo assina ${fmt(nFerrez)} peças: uma em cada ${Math.round(N / nFerrez)}.`);
+        await em(3600);
+        irPara(PECAS.ferrez, 2600, { arco: 0.3 });
+        await em(5600);
+        mostrarFoto(PECAS.ferrez);
+        derivar(PECAS.ferrez, 5400, { rz: -0.04, dx: -0.6 });
+        await legenda('Rio de Janeiro · c. 1904', 'Ferrez acompanhou a abertura da Avenida Central, em que o prefeito Pereira Passos derrubou quarteirões inteiros do centro.');
+      } },
+      // 3 · escravidão: Christiano Junior, c. 1864
+      { dur: 14000, peca: PECAS.ganho, run: async () => {
+        esconderFoto();
+        acender(R.escravidao);
+        irPara(PECAS.ganho, 3200, { rz: 0.02 });
+        await legenda('Escravidão · assuntos do catálogo', `${fmt(nEsc)} peças estão catalogadas sob escravidão; ${fmt(nEscAntes)} são de antes da Abolição, em 1888.`);
+        await em(3400);
+        mostrarFoto(PECAS.ganho);
+        derivar(PECAS.ganho, 10600, { z: 5, rz: -0.02, dx: 0.4 });
+        await em(4200);
+        await legenda('Rio de Janeiro, c. 1864 · Christiano Junior', 'Homens e mulheres escravizados, fotografados em estúdio. O fotógrafo anunciava as cópias como «coisa muito própria para quem se retira para a Europa».');
+        await em(9400);
+        await legenda('O título do catálogo', `O nome do fotógrafo ficou registrado. O das duas pessoas na foto, não: a ficha diz apenas «Escravos de ganho».`);
+      } },
+      // 4 · a Galeria dos condenados
+      { dur: 10000, peca: PECAS.condenado, run: async () => {
+        esconderFoto();
+        acender(R.condenados);
+        irPara(PECAS.condenado, 2800, { arco: 0.4 });
+        await em(2600);
+        mostrarFoto(PECAS.condenado);
+        derivar(PECAS.condenado, 7400, { rz: 0.03 });
+        await legenda('Casa de Correção da Corte · a partir de 1870', `Os presos passaram a ser fotografados. O livro Galeria dos condenados guarda ${fmt(nCond)} retratos, cada um com nome e pena.`);
+      } },
+      // 5 · povos indígenas: o Carajá de 1888 e a visita de Vargas em 1940
+      { dur: 14000, peca: PECAS.caraja, run: async () => {
+        esconderFoto();
+        acender(R.indigenas);
+        irPara(PECAS.caraja, 3000);
+        await legenda('Povos indígenas · assuntos do catálogo', `${fmt(nInd)} peças retratam povos indígenas.`);
+        await em(2800);
+        mostrarFoto(PECAS.caraja);
+        derivar(PECAS.caraja, 4600, { rz: -0.03 });
+        await em(3200);
+        await legenda('Ilha do Bananal · 1888', 'O título: «Homem indígena não identificado do povo Carajá». O fotógrafo aparece como «Anônimo».');
+        await em(7600);
+        esconderFoto();
+        irPara(PECAS.vargas, 1800, { arco: 0.25, rz: 0.03 });
+        await em(8600);
+        mostrarFoto(PECAS.vargas);
+        derivar(PECAS.vargas, 5400, { rz: 0.05 });
+        await legenda('Ilha do Bananal · 1940', '52 anos depois, na mesma ilha: «Getúlio Vargas em visita à Aldeia Karajá». O título nomeia o visitante.');
+      } },
+      // 6 · colônias de imigrantes
+      { dur: 9000, peca: PECAS.dietze, run: async () => {
+        esconderFoto();
+        acender(R.colonias);
+        irPara(PECAS.dietze, 2600, { arco: 0.5 });
+        await em(2400);
+        mostrarFoto(PECAS.dietze);
+        derivar(PECAS.dietze, 6600, { rz: -0.04, dx: -0.5 });
+        await legenda('Espírito Santo, 1869–1878 · Albert Richard Dietze', 'O Império facilitava a compra de terras por colonos europeus. Dietze, imigrante alemão, fotografou as colônias e enviou 53 fotos à imperatriz.');
+      } },
+      // 7 · Canudos, 1897
+      { dur: 12000, peca: PECAS.prisioneiros, run: async () => {
+        esconderFoto();
+        acender(R.canudos);
+        irPara(PECAS.canudos, 2800, { arco: 0.5 });
+        await em(2600);
+        mostrarFoto(PECAS.canudos);
+        derivar(PECAS.canudos, 3600, { rz: 0.02 });
+        await legenda('Canudos, Bahia · 1897 · Flávio de Barros', `Barros seguiu com o Exército nos últimos dias da guerra: ${fmt(nCan)} fotos do arraial e das tropas.`);
+        await em(6200);
+        esconderFoto();
+        irPara(PECAS.prisioneiros, 1400, { arco: 0.15 });
+        await em(7000);
+        mostrarFoto(PECAS.prisioneiros);
+        derivar(PECAS.prisioneiros, 5000, { rz: -0.03 });
+        await legenda('Canudos · 1897', 'O título diz «400 jagunços prisioneiros». Na foto, quase só mulheres e crianças.');
+      } },
+      // 8 · o Morro do Castelo
+      { dur: 10000, peca: PECAS.castelo, run: async () => {
+        esconderFoto();
+        acender(R.obras);
+        irPara(PECAS.castelo, 2800, { arco: 0.5 });
+        await em(2600);
+        mostrarFoto(PECAS.castelo);
+        derivar(PECAS.castelo, 7400, { rz: 0.04 });
+        await legenda('Rio de Janeiro, c. 1920 · Guilherme Santos', `A cidade, mudada para o Morro do Castelo em 1567, desmontou o morro a jatos d’água para a Exposição do Centenário. ${fmt(nObras)} peças estão em «Obras e demolições».`);
+      } },
+      // 9 · do alto
+      { dur: 9000, peca: PECAS.cristo, run: async () => {
+        esconderFoto();
+        acender(R.aereo);
+        irPara(PECAS.cristo, 2600, { arco: 0.6, rz: -0.02 });
+        await em(2400);
+        mostrarFoto(PECAS.cristo);
+        derivar(PECAS.cristo, 6600, { rz: -0.06 });
+        await legenda('Rio de Janeiro · 1936 · Museu Aeroespacial', `Nos anos 1930 a câmera sobe no avião: ${fmt(nAer)} peças. A ficha anota a tomada: «foco 30, 800m e 11:05h».`);
+      } },
+      // 10 · fecho: a parede inteira de novo, a câmera endireita
+      { dur: 11000, peca: PECAS.florence, run: async () => {
+        esconderFoto();
+        tudo();
+        mover({ x: cx, y: cy, z: zi, rx: 0, rz: 0 }, 9500, 0);
+        await legenda('Brasiliana Fotográfica', 'Toda peça tem um código de referência. Muitas das pessoas retratadas ainda não têm nome.');
+        await em(6000);
+        await legenda('', 'Clique em qualquer quadrado para abrir a ficha.');
+      } },
+    ];
+  }
+
+  function progresso() {
+    const t = Math.min(1, (performance.now() - inicio) / TOTAL);
+    document.querySelector('#tour-progress i').style.transform = `scaleX(${t})`;
+    const resta = Math.ceil((TOTAL * (1 - t)) / 1000);
+    $('tour-left').textContent = resta > 60 ? `${String(Math.floor(resta / 60)).padStart(2, '0')}:${String(resta % 60).padStart(2, '0')}` : `${resta} s`;
+    if (ativo) raf = requestAnimationFrame(progresso);
+  }
+
+  async function iniciar() {
+    if (ativo || !M || M.aberto()) return;
+    ativo = true;
+    document.body.classList.add('touring');
+    // o que o tour vai mostrar começa a baixar já
+    Object.values(PECAS).forEach(h => { new Image().src = M.mediumUrl(h); });
+    // parte de onde a câmera está
+    Object.assign(vista, { x: M.camTarget.x, y: M.camTarget.y, z: M.camTarget.z, rx: 0, rz: 0 });
+    $('tour').hidden = false;
+    $('tour').classList.remove('saindo');
+    document.querySelector('#tour-progress i').style.transform = 'scaleX(0)';
+    requestAnimationFrame(() => $('tour').classList.add('on'));
+    inicio = performance.now();
+    progresso();
+    somTour.iniciar();
+    try {
+      const roteiro = cenas();
+      TOTAL = roteiro.reduce((s, c) => s + c.dur, 0);
+      let fim = 0;
+      for (const cena of roteiro) {
+        t0Cena = inicio + fim; fim += cena.dur;
+        somTour.cena(cena.peca, M.entries[cena.peca]);
+        $('tour-cap').classList.remove('on');   // a legenda da cena anterior não atravessa o voo
+        await cena.run();
+        await espera(inicio + fim - performance.now());
+      }
+      cancelAnimationFrame(raf);
+      $('tour').classList.add('saindo');
+      await espera(700);
+      parar(false);
+    } catch (e) {
+      if (!(e instanceof Parado)) { console.error(e); parar(true); }
+    }
+  }
+
+  function parar(noMeio = true) {
+    if (!ativo) return;
+    ativo = false;
+    somTour.parar(!noMeio);
+    cancelAnimationFrame(raf); cancelAnimationFrame(anim);
+    for (const p of pendentes) { clearTimeout(p.id); p.falha(new Parado()); }
+    pendentes.clear();
+    $('tour').classList.add('saindo');
+    $('tour').classList.remove('on');
+    $('tour-cap').classList.remove('on');
+    esconderFoto();
+    M.restaurar();
+    // a câmera endireita sem sair do lugar: o ponto mirado continua no centro
+    const v = { ...vista }, t0 = performance.now();
+    const alvoY = v.y;
+    const endireitar = agora => {
+      if (ativo) return;
+      const t = Math.min(1, (agora - t0) / 700), e = suave(t);
+      const rx = v.rx * (1 - e), rz = v.rz * (1 - e);
+      M.camTarget.set(v.x, alvoY - v.z * Math.tan(rx), v.z);
+      M.camera.rotation.set(rx, 0, rz);
+      M.wake(3);
+      if (t < 1) requestAnimationFrame(endireitar);
+    };
+    requestAnimationFrame(endireitar);
+    document.body.classList.remove('touring');
+    setTimeout(() => { if (!ativo) $('tour').hidden = true; }, 900);
+  }
+
+  // Esc antes do mural (que abriria/fecharia os filtros); arrastar ou rolar devolve a parede a quem lê
+  addEventListener('keydown', e => { if (e.key === 'Escape' && ativo) { e.stopImmediatePropagation(); e.preventDefault(); parar(true); } }, true);
+  const canvas = $('canvas');
+  canvas.addEventListener('pointerdown', () => { if (ativo) parar(true); }, true);
+  canvas.addEventListener('wheel', () => { if (ativo) parar(true); }, { capture: true, passive: true });
+  $('tour-parar').addEventListener('click', () => parar(true));
+  const botaoSom = $('tour-som');
+  const marcarSom = () => { botaoSom.classList.toggle('mudo', !somTour.ligado()); botaoSom.setAttribute('aria-pressed', String(somTour.ligado())); };
+  botaoSom.addEventListener('click', () => { somTour.alternar(); marcarSom(); });
+  marcarSom();
+  $('tour-abrir').addEventListener('click', () => iniciar());
+
+  const pediuTour = new URLSearchParams(location.search).has('tour');
+  addEventListener('mural-pronto', () => {
+    M = window.mural;
+    $('tour-abrir').hidden = false;
+    // ?tour=1 abre um convite: o clique começa o tour e libera o som (o navegador não toca sem gesto)
+    // (lido antes de o mural carregar: o syncUrl dos filtros reescreve a query sem ele)
+    if (pediuTour) {
+      if (M.aberto()) return;
+      const convite = $('tour-convite');
+      convite.hidden = false;
+      const fechar = () => { convite.hidden = true; removeEventListener('keydown', tecla, true); };
+      const tecla = e => { if (e.key === 'Escape') { e.stopImmediatePropagation(); fechar(); } };
+      addEventListener('keydown', tecla, true);
+      // em /tour a pessoa veio para isso: qualquer clique ou toque no convite começa (e libera o som)
+      convite.addEventListener('click', () => { fechar(); iniciar(); });
+      convite.querySelector('button').focus();
+    }
+  }, { once: true });
+
+  window.tour = { iniciar, parar, ativo: () => ativo };
+})();
+</script>
+</body>
+</html>
