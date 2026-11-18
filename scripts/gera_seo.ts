@@ -36,6 +36,7 @@ const FORA = new Set([
   "dataviz/municipios/painel.html", // servido em dataviz/municipios/?id=, já está no sitemap-municipios.xml
 ]);
 const FORA_PREFIXO = ["tasks/", ".claude/", "docs/"];
+const FORA_REGEX = [/^google[0-9a-f]+\.html$/]; // arquivo de verificação do Search Console
 
 type Cartao = { titulo?: string; desc: string; img?: string };
 
@@ -167,7 +168,7 @@ function injeta(html: string, b: string): string | null {
 const versionados = (await Bun.$`git -C ${RAIZ} ls-files '*.html'`.text())
   .split("\n").filter(Boolean);
 const publicas = versionados.filter(
-  (r) => !FORA.has(r) && !FORA_PREFIXO.some((p) => r.startsWith(p)),
+  (r) => !FORA.has(r) && !FORA_PREFIXO.some((p) => r.startsWith(p)) && !FORA_REGEX.some((x) => x.test(r)),
 );
 
 let problemas = 0;
