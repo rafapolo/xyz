@@ -2449,7 +2449,7 @@ async function init() {
     setHtml('qdList',
       liRow('Edições coletadas', fNum(qd.total_edicoes)) +
       liRow('Última edição', qd.ultima_edicao ? qd.ultima_edicao.split('-').reverse().join('/') : '—') +
-      serieQd.slice().reverse().map(r => liRow(r.ano, fNum(r.edicoes) + ' edições <span style="color:var(--text3)">(' + fNum(r.extras) + ' extras)</span>')).join(''));
+      serieQd.slice().reverse().map(r => liRow(r.ano + (r.parcial ? ' (em curso)' : ''), fNum(r.edicoes) + ' edições <span style="color:var(--text3)">(' + fNum(r.extras) + ' extras)</span>')).join(''));
   } else {
     vazioLista('qdList', 'Município ainda não coberto pelo Querido Diário');
   }
@@ -2508,9 +2508,9 @@ async function init() {
     setTxt('consAno2', String(cons.ano || ''));
     criaGrafico(el_('consChart'), {
       type: 'bar', data: {
-        labels: serieCons.map(r => r.ano),
+        labels: serieCons.map(r => r.ano + (r.parcial ? '*' : '')),
         datasets: [
-          { label: 'Reclamações', data: serieCons.map(r => r.reclamacoes), backgroundColor: C.s1, maxBarThickness: 18, borderRadius: 3, yAxisID: 'y', order: 2 },
+          { label: 'Reclamações', data: serieCons.map(r => r.reclamacoes), backgroundColor: serieCons.map(r => r.parcial ? C.s1 + '66' : C.s1), maxBarThickness: 18, borderRadius: 3, yAxisID: 'y', order: 2 },
           { label: 'Nota média (0–5)', type: 'line', data: serieCons.map(r => r.nota_media), borderColor: C.s4, backgroundColor: C.s4, pointBackgroundColor: C.s4, ...lineStyle, pointRadius: 3, fill: false, yAxisID: 'y1', order: 1 },
         ]
       },
@@ -2527,7 +2527,7 @@ async function init() {
     });
     const ultCons = serieCons.find(r => r.ano === cons.ano) || serieCons[serieCons.length - 1];
     setTxt('consSub', ultCons.ano + ': ' + fNum(ultCons.reclamacoes) + ' reclamações, ' + fNum1(ultCons.pct_respondida) +
-      '% respondidas pelas empresas, nota média ' + fmt2(ultCons.nota_media) + ' de 5. O ano corrente pode estar parcial.');
+      '% respondidas pelas empresas, nota média ' + fmt2(ultCons.nota_media) + ' de 5.' + (serieCons.some(r => r.parcial) ? ' * ano em curso, ainda parcial.' : ''));
   } else { vazioGrafico('consChart'); }
 
   const segms = (cons && cons.top_segmentos) || [];
@@ -2855,10 +2855,10 @@ async function init() {
       gd.potencia_mw * 1000, C.s4, { fmtValor: v => fNum(Math.round(v)) + ' kW' });
     const anos = gd.por_ano_cadastro || [];
     if (anos.length) {
-      setTxt('gdSerieAno', anos[0].ano + '–' + anos[anos.length - 1].ano);
+      setTxt('gdSerieAno', anos[0].ano + '–' + anos[anos.length - 1].ano + (anos.some(a => a.parcial) ? ' (último ano em curso)' : ''));
       criaGrafico(el_('gdChart'), {
         type: 'bar', data: { labels: anos.map(a => String(a.ano)),
-          datasets: [{ data: anos.map(a => a.instalacoes), backgroundColor: C.s4, maxBarThickness: 22, borderRadius: 4 }] },
+          datasets: [{ data: anos.map(a => a.instalacoes), backgroundColor: anos.map(a => a.parcial ? C.s4 + '66' : C.s4), maxBarThickness: 22, borderRadius: 4 }] },
         options: { ...chartOpts, plugins: noLegend }
       });
     } else vazioGrafico('gdChart');
@@ -3163,7 +3163,7 @@ async function init() {
       cartaoExtra('infra', { titulo: 'Obras registradas na Receita (CNO)', vintage: mesAno((o.data_extracao || '').slice(0, 7)), valor: fNum(o.obras),
         barras: { linhas: (o.por_situacao || []).map(r => ({ k: r.situacao, v: r.obras })), total: o.obras, cor: C.s3 } });
       if ((o.iniciadas_por_ano || []).length) cartaoExtra('infra', { titulo: 'Obras iniciadas por ano',
-        barras: { linhas: o.iniciadas_por_ano.map(r => ({ k: String(r.ano), v: r.obras })), total: 0, cor: C.s3 } });
+        barras: { linhas: o.iniciadas_por_ano.map(r => ({ k: String(r.ano) + (r.parcial ? ' (em curso)' : ''), v: r.obras })), total: 0, cor: C.s3 } });
     }
     const w = X('secoes.infraestrutura.outorgas_agua');
     if (w) cartaoExtra('infra', { titulo: 'Outorgas de captação de água', valor: fNum(w.outorgas), sub: 'Vazão média somada: ' + fNum1(w.vazao_total) + ' m³/h',

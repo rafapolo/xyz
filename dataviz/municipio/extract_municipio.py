@@ -101,6 +101,18 @@ def demojibake(txt):
 SECOES = {}
 
 
+def _motivo(e, secao=""):
+    """Texto do `erro` de uma seção. Consulta com `ano=None` (o município não tem
+    linha na fonte) vira uma frase própria em vez da mensagem do DuckDB; o resto
+    segue como veio, para um bug de verdade não passar por falta de dado."""
+    msg = str(e)
+    if 'Binder Error: Referenced column "None"' in msg:
+        fonte = re.search(r"rodado/(\w+)/(\w+)/", msg)
+        return f"sem dados em {fonte.group(1)}.{fonte.group(2)} para o município" if fonte \
+            else f"sem dados em {secao or 'esta fonte'} para o município"
+    return msg[:300]
+
+
 def section(fn):
     """Decora seções: captura exceção como {'erro': ...} e registra em SECOES."""
     @functools.wraps(fn)
@@ -109,7 +121,7 @@ def section(fn):
         try:
             return fn(*a, **k)
         except Exception as e:  # noqa: BLE001
-            return {"erro": str(e)[:300]}
+            return {"erro": _motivo(e, fn.__name__)}
         finally:
             if PERFIL:
                 print(json.dumps({"secao": fn.__name__, "s": round(time.time() - t0, 2),
@@ -165,7 +177,7 @@ def geografia(mid):
         por_cat[k] = por_cat.get(k, 0) + 1
     resumo_ucs = sorted(
         [{"categoria": k[0], "esfera": k[1], "quantidade": v} for k, v in por_cat.items()],
-        key=lambda r: -r["quantidade"])
+        key=lambda r: (-r["quantidade"], r["categoria"] or "", r["esfera"] or ""))
 
     return {
         "fonte": "br_geobr_mapas (sede_municipal, arranjo_populacional, semiarido, regiao_metropolitana_2017, bioma, unidade_conservacao)",
@@ -483,7 +495,7 @@ def saude_sinasc(mid):
     return {"fonte": "br_ms_sinasc.microdados (residência)", "ano": ano, "nascidos_vivos": total,
             "pct_cesareo": ces / total * 100 if total else None,
             "pct_baixo_peso": baixo / total * 100 if total else None,
-            "pre_natal_distribuicao": {str(d["pre_natal_agr"]): d["n"] for d in pre}}
+            "pre_natal_distribuicao": {str(d["pre_natal_agr"]): d["n"] for d in sorted(pre, key=lambda d: str(d["pre_natal_agr"]))}}
 
 
 @section
@@ -589,6 +601,8 @@ def infra_ana(mid):
             indice_atendimento_com_coleta_sem_tratamento, indice_atendimento_com_coleta_com_tratamento,
             investimento_coleta, investimento_tratamento, investimento_coleta_tratatamento
         FROM {p('br_ana_atlas_esgotos','municipio')} WHERE id_municipio='{mid}'""")
+    if r is None:
+        raise RuntimeError("sem Atlas Esgotos (ANA) para o município")
     return {"fonte": "br_ana_atlas_esgotos.municipio", "ano_referencia": 2013, **{k: num(v) for k, v in r.items()}}
 
 
@@ -704,6 +718,8 @@ def ambiente_seeg(mid):
 def conectividade(mid):
     t = p("br_anatel_banda_larga_fixa", "densidade_municipio")
     am = one(f"SELECT max(ano*100+mes) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem banda larga fixa (Anatel) no município")
     dens = one(f"SELECT densidade FROM {t} WHERE id_municipio='{mid}' AND ano={am//100} AND mes={am%100}")
     dens_br = one(f"""SELECT densidade FROM {p('br_anatel_banda_larga_fixa','densidade_brasil')}
         WHERE ano={am//100} AND mes={am%100}""")
@@ -799,9 +815,9 @@ def comex(mid):
             WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
         pais = q(f"""SELECT sigla_pais_iso3, sum(valor_fob_dolar) v FROM {t}
             WHERE id_municipio='{mid}' AND ano={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
-        out[flow] = {"ano": ano, "total_fob_usd": total and total["v"], "ano_anterior_fob_usd": prev and prev["v"],
-                     "top_sh4": [{"id_sh4": r["id_sh4"], "valor_fob_usd": r["v"]} for r in sh4],
-                     "top_paises": [{"pais_iso3": r["sigla_pais_iso3"], "valor_fob_usd": r["v"]} for r in pais]}
+        out[flow] = {"ano": ano, "total_fob_usd": total and num(total["v"]), "ano_anterior_fob_usd": prev and num(prev["v"]),
+                     "top_sh4": [{"id_sh4": r["id_sh4"], "valor_fob_usd": num(r["v"])} for r in sh4],
+                     "top_paises": [{"pais_iso3": r["sigla_pais_iso3"], "valor_fob_usd": num(r["v"])} for r in pais]}
     return out
 
 
@@ -907,15 +923,15 @@ def agropecuaria(mid):
         rows = q(f"""SELECT produto, area_colhida, quantidade_produzida, valor_producao FROM {t}
             WHERE id_municipio='{mid}' AND ano={ano['a']} AND valor_producao>0 ORDER BY valor_producao DESC, produto LIMIT 6""")
         lav += [{"tipo": tipo, "ano": ano["a"], **{k: num(v) for k, v in r.items()}} for r in rows]
-    lav.sort(key=lambda r: -(r.get("valor_producao") or 0))
+    lav.sort(key=lambda r: (-(r.get("valor_producao") or 0), r.get("produto") or ""))
     out["lavouras_top"] = lav[:8]
     t = p("br_ibge_ppm", "efetivo_rebanhos")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
-    out["rebanhos"] = {"ano": ano, "efetivos": q(f"""SELECT tipo_rebanho, quantidade FROM {t}
+    out["rebanhos"] = None if ano is None else {"ano": ano, "efetivos": q(f"""SELECT tipo_rebanho, quantidade FROM {t}
         WHERE id_municipio='{mid}' AND ano={ano} ORDER BY quantidade DESC, tipo_rebanho LIMIT 8""")}
     t = p("br_ibge_ppm", "producao_origem_animal")
     ano = one(f"SELECT max(ano) a FROM {t} WHERE id_municipio='{mid}'")["a"]
-    out["origem_animal"] = {"ano": ano, "produtos": q(f"""SELECT produto, unidade, quantidade, valor FROM {t}
+    out["origem_animal"] = None if ano is None else {"ano": ano, "produtos": q(f"""SELECT produto, unidade, quantidade, valor FROM {t}
         WHERE id_municipio='{mid}' AND ano={ano} AND quantidade IS NOT NULL ORDER BY valor DESC NULLS LAST, produto LIMIT 6""")}
     return out
 
@@ -926,12 +942,16 @@ def beneficios(mid):
     out = {"fonte": "br_cgu_beneficios_cidadao"}
     t = p("br_cgu_beneficios_cidadao", "novo_bolsa_familia")
     am = one(f"SELECT max(ano_competencia*100+mes_competencia) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem Bolsa Família no município")
     bf = one(f"""SELECT count(DISTINCT nis_favorecido) familias, sum(valor_parcela) repasse, avg(valor_parcela) valor_medio
         FROM {t} WHERE id_municipio='{mid}' AND ano_competencia={am//100} AND mes_competencia={am%100}""")
     out["bolsa_familia"] = {"competencia": f"{am//100}-{am%100:02d}", "familias": num(bf["familias"]),
                             "repasse_mensal": bf["repasse"], "valor_medio": bf["valor_medio"]}
     t = p("br_cgu_beneficios_cidadao", "bpc")
     am = one(f"SELECT max(ano_competencia*100+mes_competencia) am FROM {t} WHERE id_municipio='{mid}'")["am"]
+    if am is None:
+        raise RuntimeError("sem BPC no município")
     bpc = one(f"""SELECT count(DISTINCT coalesce(nis_favorecido, numero_beneficio)) beneficiarios, sum(valor_parcela) repasse
         FROM {t} WHERE id_municipio='{mid}' AND ano_competencia={am//100} AND mes_competencia={am%100}""")
     out["bpc"] = {"competencia": f"{am//100}-{am%100:02d}", "beneficiarios": num(bpc["beneficiarios"]), "repasse_mensal": bpc["repasse"]}
@@ -1228,7 +1248,7 @@ def transp_compras_federais(mid, rf):
         FROM {t_lic} WHERE id_municipio='{mid}' GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1 LIMIT 5""")
     out = {"fonte": "br_cgu_licitacao_contrato (licitação por município · contrato por CNPJ local) · br_me_cnpj",
            "licitacoes_no_municipio": {
-               "serie": [{k: num(v) for k, v in r.items()} for r in reversed(lic)],
+               "serie": parcial([{k: num(v) for k, v in r.items()} for r in reversed(lic)]),
                "por_orgao": [{"orgao": o["orgao"], "licitacoes": num(o["n"]), "valor": o["valor"]} for o in orgaos]}}
     if not rf:
         out["fornecedores_locais"] = None
@@ -1244,7 +1264,7 @@ def transp_compras_federais(mid, rf):
         GROUP BY 1 ORDER BY 3 DESC NULLS LAST, 1 LIMIT 8""")
     out["fornecedores_locais"] = {
         "snapshot_cnpj": f"{am // 100}-{am % 100:02d}",
-        "serie": [{k: num(v) for k, v in r.items()} for r in reversed(serie)],
+        "serie": parcial([{k: num(v) for k, v in r.items()} for r in reversed(serie)]),
         "top": [{"empresa": r["empresa"], "contratos": num(r["contratos"]), "valor": r["valor"]} for r in top]}
     return out
 
@@ -1260,7 +1280,7 @@ def transp_diarios(mid):
     ult = one(f"SELECT max(date) d, count(*) n FROM {t} WHERE CAST(territory_id AS VARCHAR)='{mid}'")
     return {"fonte": "br_ok_queridodiario.diarios (territory_id)",
             "total_edicoes": ult and num(ult["n"]), "ultima_edicao": ult and str(ult["d"]),
-            "serie": [{"ano": num(s["ano"]), "edicoes": num(s["edicoes"]), "extras": num(s["extras"])} for s in serie]}
+            "serie": parcial([{"ano": num(s["ano"]), "edicoes": num(s["edicoes"]), "extras": num(s["extras"])} for s in serie])}
 
 
 @section
@@ -1303,7 +1323,7 @@ def transp_consumidor(mid, nome, uf):
         GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 6""")
     return {"fonte": "br_mj_consumidorgovbr.reclamacoes (nome da cidade + UF)",
             "ano": ano,
-            "serie": [{k: num(v) for k, v in s.items()} for s in serie],
+            "serie": parcial([{k: num(v) for k, v in s.items()} for s in serie]),
             "top_segmentos": [{"segmento": s["segmento"], "reclamacoes": num(s["n"])} for s in seg],
             "top_empresas": [{"empresa": e["empresa"], "reclamacoes": num(e["n"])} for e in emp]}
 
@@ -1701,7 +1721,7 @@ def beneficios_cadunico_mds(mid):
         n = val("gpte", trecho)
         if n:
             grupos.append({"grupo": rot, "familias": n})
-    grupos.sort(key=lambda g: -g["familias"])
+    grupos.sort(key=lambda g: (-g["familias"], g["grupo"]))
 
     esgoto = [{"forma": rot, "familias": val("esgoto", trecho)} for rot, trecho in [
         ("Rede coletora", "rede coletora"), ("Fossa séptica", "fossa séptica"),
@@ -1808,7 +1828,7 @@ def energia_gd(mid):
             "w_por_habitante": (r["kw"] * 1000 / pop["populacao"]) if pop and pop["populacao"] else None,
             "por_classe": [{"classe": c["classe"], "instalacoes": num(c["n"]), "kw": c["kw"]} for c in classes],
             "por_fonte": [{"fonte": f["fonte"], "instalacoes": num(f["n"]), "kw": f["kw"]} for f in fontes],
-            "por_ano_cadastro": [{"ano": a["ano"], "instalacoes": num(a["n"]), "kw": a["kw"]} for a in anos]}
+            "por_ano_cadastro": parcial([{"ano": a["ano"], "instalacoes": num(a["n"]), "kw": a["kw"]} for a in anos])}
 
 
 # --------------------------------------------- ANEEL — continuidade (DEC/FEC)
@@ -1846,7 +1866,7 @@ def energia_continuidade(nome):
         FROM c WHERE ucs > 0 GROUP BY 1 ORDER BY 1""")
     anual = [a for a in anual if a["meses"] == 12]
     limites = q(f"""SELECT AnoLimiteQualidade::int ano, SigIndicador ind,
-            sum(replace(VlrLimite, ',', '.')::double * u.ucs) / sum(u.ucs) v
+            sum(replace(CAST(VlrLimite AS VARCHAR), ',', '.')::double * u.ucs) / sum(u.ucs) v
         FROM {lim} l JOIN (
             SELECT IdeConjUndConsumidoras id, AnoIndice ano, avg(VlrIndiceEnviado) ucs FROM {t}
             WHERE IdeConjUndConsumidoras IN ({ids}) AND SigIndicador='NumCon' GROUP BY ALL) u
@@ -1948,7 +1968,7 @@ def vizinhanca(mid):
 
     municipios = [{"id_municipio": r["id_municipio"], "nome": r["nome"], "sigla_uf": r["sigla_uf"],
                    "populacao": pop_map.get(r["id_municipio"]), "pib_per_capita": pib_pc(r["id_municipio"])} for r in rows]
-    municipios.sort(key=lambda m: -(m["populacao"] or 0))
+    municipios.sort(key=lambda m: (-(m["populacao"] or 0), m["nome"] or "", m["id_municipio"]))
 
     return {"fonte": "br_bd_vizinhanca.municipio · br_ibge_populacao · br_ibge_pib",
             "municipios": municipios,
@@ -2161,8 +2181,9 @@ def pr(dataset, table):
 
 def _brl(col):
     """Valor em texto no formato '1302,00' (CGU, ANM, IBAMA) para DOUBLE."""
-    return (f"TRY_CAST(CASE WHEN {col} LIKE '%,%' THEN replace(replace({col}, '.', ''), ',', '.') "
-            f"ELSE {col} END AS DOUBLE)")
+    # CAST para VARCHAR: o espelho já trouxe essas colunas como texto e como DOUBLE
+    return (f"TRY_CAST(CASE WHEN CAST({col} AS VARCHAR) LIKE '%,%' THEN replace(replace(CAST({col} AS VARCHAR), '.', ''), ',', '.') "
+            f"ELSE CAST({col} AS VARCHAR) END AS DOUBLE)")
 
 
 def _ultimo_mes(t, col_mes, filtro):
@@ -2186,7 +2207,7 @@ def mineracao_cfem(mid):
         WHERE codigomunicipio='{mid}' AND ano::INT={ano} GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8""")
     return {"fonte": "br_anm.cfem_cfem_arrecadacao", "ano": ano,
             "valor_ano": next(r["valor"] for r in serie if r["ano"] == ano),
-            "serie": [{"ano": r["ano"], "valor": r["valor"], "pagadores": num(r["pagadores"])} for r in serie[-12:]],
+            "serie": parcial([{"ano": r["ano"], "valor": r["valor"], "pagadores": num(r["pagadores"])} for r in serie[-12:]]),
             "substancias": subs}
 
 
@@ -2380,6 +2401,16 @@ def agro_imoveis_rurais(mid):
     return out
 
 
+def _tabela_programa(ds, tb):
+    """Desde 2026-10-22 Pé-de-Meia e Seguro Defeso são normalizados: `pagamento` guarda o
+    valor e um id, e o NIS mora em `beneficiario` / `favorecido`. LEFT JOIN, porque o valor
+    soma todas as parcelas e só a contagem de pessoas usa o NIS (count DISTINCT ignora nulo)."""
+    if ds == "br_cgu_gas_do_povo":
+        return pr(ds, tb)
+    ficha, chave = ("beneficiario", "beneficiario_id") if ds == "br_cgu_pe_de_meia" else ("favorecido", "favorecido_id")
+    return f"(SELECT x.*, f.nis_{ficha} FROM {pr(ds, tb)} x LEFT JOIN {pr(ds, ficha)} f USING ({chave})) AS pg"
+
+
 def _cgu_programa(t, mid_rf, col_mes, col_valor, col_pessoa):
     m = _ultimo_mes(t, col_mes, f"codigo_municipio_siafi='{mid_rf}'")
     if not m:
@@ -2418,14 +2449,16 @@ def agro_credito_rural(mid):
 def beneficios_programas_cgu(mid, rf):
     """Gás do Povo, Pé-de-Meia e Seguro Defeso, do Portal da Transparência. O código
     SIAFI do município é o mesmo da Receita (id_municipio_rf)."""
+    if rf is None:
+        raise RuntimeError("município sem código da Receita Federal")
     rf = str(int(rf))
     out = {"fonte": "br_cgu_gas_do_povo · br_cgu_pe_de_meia · br_cgu_seguro_defeso"}
     for k, ds, tb, col_mes, col_val, col_p in [
             ("gas_do_povo", "br_cgu_gas_do_povo", "gas_do_povo", "mes_referencia", "valor_beneficio", "cpf_beneficiario"),
-            ("pe_de_meia", "br_cgu_pe_de_meia", "pe_de_meia", "mes_referencia", "valor_parcela", "cpf_beneficiario"),
-            ("seguro_defeso", "br_cgu_seguro_defeso", "seguro_defeso", "mes_referencia", "valor_parcela", "nis_favorecido")]:
+            ("pe_de_meia", "br_cgu_pe_de_meia", "pagamento", "mes_referencia", "valor_parcela", "nis_beneficiario"),
+            ("seguro_defeso", "br_cgu_seguro_defeso", "pagamento", "mes_referencia", "valor_parcela", "nis_favorecido")]:
         try:
-            out[k] = _cgu_programa(pr(ds, tb), rf, col_mes, col_val, col_p)
+            out[k] = _cgu_programa(_tabela_programa(ds, tb), rf, col_mes, col_val, col_p)
         except Exception as e:  # noqa: BLE001
             out[k] = {"erro": str(e)[:200]}
     return out
@@ -2609,7 +2642,7 @@ def infra_obras_cno(mid):
             "obras": sum(num(r["obras"]) for r in sit),
             "por_situacao": [{"situacao": SITUACAO_CNO.get(str(int(r["s"])) if (r["s"] or "").isdigit() else r["s"], r["s"]),
                               "obras": num(r["obras"])} for r in sit],
-            "iniciadas_por_ano": [{"ano": r["ano"], "obras": num(r["obras"]), "area_m2": r["area"]} for r in serie]}
+            "iniciadas_por_ano": parcial([{"ano": r["ano"], "obras": num(r["obras"]), "area_m2": r["area"]} for r in serie])}
 
 
 @section
@@ -2668,7 +2701,7 @@ def cultura_rouanet(nome, nome_uf):
             "valor_projetos": sum(float(r["valor_projetos"] or 0) for r in rows),
             "top_proponentes": sorted(({"nome": r["nome"], "projetos": num(r["projetos"]),
                                         "valor": float(r["valor_projetos"] or 0)} for r in prop),
-                                      key=lambda x: -x["valor"])[:8]}
+                                      key=lambda x: (-x["valor"], x["nome"] or ""))[:8]}
 
 
 # Programas do painel ComunicaBR (Presidência) que o painel não tem por fonte primária.
@@ -2823,6 +2856,29 @@ def args_secao(nome, ctx):
     return {k: ctx[k] for k in inspect.signature(SECOES[nome]).parameters}
 
 
+def parcial(serie, col="ano"):
+    """Marca com `parcial: true` o ponto do ano em curso: a série anual termina em
+    ano aberto e a barra sai baixa. O front desenha esse ponto à parte."""
+    ano = date.today().year
+    for r in serie:
+        try:
+            if r.get(col) is not None and int(r[col]) == ano:
+                r["parcial"] = True
+        except (TypeError, ValueError):
+            pass
+    return serie
+
+
+def base(S, nome):
+    """Bloco-base de um agrupamento `{**base(S, "x"), "outro": ...}`. Se a seção-base
+    falha, o `erro` não sobe para o pai (o front esconderia o bloco inteiro, com as
+    seções irmãs que deram certo): fica em `erro_base`."""
+    b = S(nome)
+    if isinstance(b, dict) and "erro" in b:
+        return {"erro_base": b["erro"]}
+    return b
+
+
 def monta(prof, S):
     """Documento do município. `S(nome)` devolve o bloco da seção: no modo de um
     município chama a função; no lote (extract_lote.py) lê o bloco já calculado."""
@@ -2833,7 +2889,7 @@ def monta(prof, S):
         "municipio": prof,
         "secoes": {
             "geografia": S("geografia"),
-            "demografia": {**S("demografia"), "censo_extra": S("demografia_censo_extra"),
+            "demografia": {**base(S, "demografia"), "censo_extra": S("demografia_censo_extra"),
                            "nomes": S("demografia_nomes")},
             "economia": {
                 "pib": S("economia_pib"),
@@ -2893,12 +2949,12 @@ def monta(prof, S):
                 "desastres": S("desastres_reconhecimentos"), "estacoes_inmet": S("clima_estacoes"),
             },
             "conectividade": S("conectividade"),
-            "politica": {**S("politica"),
+            "politica": {**base(S, "politica"),
                          "camara_municipal": S("politica_camara"),
                          "deputados_nascidos": S("politica_deputados_nascidos"),
                          "filiados": S("politica_filiados"),
                          "financas_campanha": S("politica_financas_campanha")},
-            "transparencia": {**S("transparencia"),
+            "transparencia": {**base(S, "transparencia"),
                               "emendas": S("transp_emendas"),
                               "compras_federais": S("transp_compras_federais"),
                               "diarios_oficiais": S("transp_diarios"),
@@ -2907,19 +2963,19 @@ def monta(prof, S):
                               "servidores": S("transp_servidores"),
                               "cauc": S("transp_cauc"),
                               "fiscalizacao_cgu": S("transp_fiscalizacao_cgu")},
-            "social": {**S("social"), "sinpatinhas": S("social_sinpatinhas"),
+            "social": {**base(S, "social"), "sinpatinhas": S("social_sinpatinhas"),
                        "rouanet": S("cultura_rouanet")},
             "comercio_exterior": S("comex"),
             "trabalho": {"rais": S("trabalho_rais"), "caged": S("trabalho_caged"),
                          "top_empregadores": S("trabalho_top_empregadores"),
                          "top_empregadores_publicos": S("trabalho_top_empregadores_publicos"),
                          "lista_suja": S("trabalho_lista_suja")},
-            "agropecuaria": {**S("agropecuaria"), "assentamentos": S("agro_assentamentos"),
+            "agropecuaria": {**base(S, "agropecuaria"), "assentamentos": S("agro_assentamentos"),
                              "aquicultura": S("agro_aquicultura"),
                              "extracao_silvicultura": S("agro_extracao_silvicultura"),
                              "imoveis_rurais": S("agro_imoveis_rurais"),
                              "credito_rural": S("agro_credito_rural")},
-            "beneficios": {**S("beneficios"), "cadastro_unico": S("beneficios_cadunico"),
+            "beneficios": {**base(S, "beneficios"), "cadastro_unico": S("beneficios_cadunico"),
                            "cadunico_mds": S("beneficios_cadunico_mds"),
                            "inss": S("beneficios_inss"),
                            "programas_cgu": S("beneficios_programas_cgu")},
