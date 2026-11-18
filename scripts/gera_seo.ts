@@ -218,7 +218,9 @@ const sitemap = [
   "</urlset>",
   "",
 ].join("\n");
-const robots = `User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`;
+// as 5.571 URLs do painel municipal vêm de dataviz/municipio/gera_indice.py
+const sitemapMunicipios = existsSync(join(RAIZ, "sitemap-municipios.xml")) ? `Sitemap: ${BASE}/sitemap-municipios.xml\n` : "";
+const robots = `User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n${sitemapMunicipios}`;
 
 if (checa) {
   const atual = existsSync(join(RAIZ, "sitemap.xml")) ? readFileSync(join(RAIZ, "sitemap.xml"), "utf8") : "";

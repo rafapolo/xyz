@@ -15,3 +15,7 @@ tasks/
 # painel municipal: JSON gerados em lote (um por código IBGE) ficam fora do git
 dataviz/municipio/data/[0-9][0-9][0-9][0-9][0-9][0-9][0-9].json
 dataviz/municipio/data/municipios.json
+
+# credenciais do bucket do painel municipal (dataviz/municipio/sobe_dados.py)
+.env
+dataviz/municipio/data/cobertura.json

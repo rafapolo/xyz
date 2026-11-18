@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Raio-x de um município brasileiro em 690 indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
+<meta name="description" content="Raio-x de um município brasileiro em centenas de indicadores: demografia, economia, saúde, educação, segurança, meio ambiente, política e contas públicas, de dados públicos oficiais.">
 <link rel="canonical" href="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rodado">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:title" content="O município inteiro em um painel">
-<meta property="og:description" content="690 indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
+<meta property="og:description" content="Centenas de indicadores de mais de 80 fontes públicas — IBGE, DATASUS, INEP, TSE, CGU, Receita — num só painel municipal.">
 <meta property="og:url" content="https://xn--2dk.xyz/dataviz/municipio/">
 <meta property="og:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Painel municipal do Rodado: Nova Friburgo (RJ) com população, empregos, IDEB e leitos SUS, e o total de 606 indicadores">
+<meta property="og:image:alt" content="Painel municipal do Rodado: cartão genérico com o texto O município inteiro em um painel, para os 5.571 municípios do Brasil">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="O município inteiro em um painel">
-<meta name="twitter:description" content="690 indicadores de mais de 80 fontes públicas num só painel municipal.">
+<meta name="twitter:description" content="Centenas de indicadores de mais de 80 fontes públicas num só painel municipal.">
 <meta name="twitter:image" content="https://xn--2dk.xyz/dataviz/municipio/og.png">
 <script>
 (function () {
@@ -28,15 +28,39 @@
 <title id="pageTitle">Painel municipal — Rodado</title>
 <script defer src="vendor/chart-4.4.7.umd.min.js"></script>
 <script defer src="app.js?v=2"></script>
+<script defer src="busca.js"></script>
 <script>
-const JSON_PATH = new URLSearchParams(location.search).get('id')
-  ? `data/${new URLSearchParams(location.search).get('id')}.json`
-  : 'data/nova_friburgo.json';
+// Os JSON dos 5.571 municípios ficam num bucket público (Hetzner, hel1), fora do git:
+// um por código IBGE, gzip, com CORS aberto para este domínio. `?dados=local` lê data/
+// (desenvolvimento). Sem `?id=`, abre Nova Friburgo (3303401).
+const DADOS_BUCKET = 'https://xyz-municipio.hel1.your-objectstorage.com/';
+const PARAMS = new URLSearchParams(location.search);
+const ID_MUN = (PARAMS.get('id') || '').trim();
+const DADOS_LOCAL = PARAMS.get('dados') === 'local' || ID_MUN.startsWith('_');
+const ID_VALIDO = /^\d{7}$/.test(ID_MUN) || ID_MUN === '' || ID_MUN === 'nova_friburgo' || ID_MUN.startsWith('_');
+const ID_EFETIVO = (ID_MUN === '' || ID_MUN === 'nova_friburgo') ? '3303401' : ID_MUN;
+const DADOS_BASE = DADOS_LOCAL ? 'data/' : DADOS_BUCKET;
+const JSON_PATH = DADOS_BASE + ID_EFETIVO + '.json';
 
-const DADOS_REQ = fetch(JSON_PATH);
+if (/^\d{7}$/.test(ID_EFETIVO)) {
+  const can = document.querySelector('link[rel="canonical"]');
+  if (can) can.href = 'https://xn--2dk.xyz/dataviz/municipio/?id=' + ID_EFETIVO;
+}
+const DADOS_REQ = ID_VALIDO ? fetch(JSON_PATH) : Promise.resolve({ ok: false, status: 'código inválido' });
+function erroCarga(msg) {
+  const el = document.createElement('p');
+  el.style.cssText = 'color:#d03b3b;padding:2rem;font-family:sans-serif';
+  el.textContent = msg;
+  document.body.replaceChildren(el);
+}
 async function loadData() {
-  const r = await DADOS_REQ;
-  if (!r.ok) { document.body.innerHTML = `<p style="color:#d03b3b;padding:2rem;font-family:sans-serif">Erro ao carregar ${JSON_PATH}: ${r.status}</p>`; return null; }
+  let r;
+  try { r = await DADOS_REQ; } catch (e) { r = { ok: false, status: 'sem conexão' }; }
+  if (!r.ok) {
+    erroCarga(!ID_VALIDO ? `Código de município inválido (${ID_MUN}). Use o código IBGE de 7 dígitos, ex.: ?id=3303401.` : r.status === 404 || r.status === 403 ? `Município não encontrado (${ID_MUN || ID_EFETIVO}). Use o código IBGE de 7 dígitos, ex.: ?id=3303401.`
+      : `Erro ao carregar ${JSON_PATH}: ${r.status}`);
+    return null;
+  }
   return r.json();
 }
 
@@ -213,6 +237,22 @@ a { color: inherit; text-decoration: none; }
 .hero-row { display: flex; align-items: center; gap: 1rem; }
 .hero-row h1 { min-width: 0; }
 .hero-side { display: flex; align-items: center; gap: .5rem; margin-left: auto; flex-shrink: 0; }
+.busca { position: relative; }
+.busca input { width: 15rem; max-width: 100%; box-sizing: border-box; padding: .32rem .65rem; font: inherit; font-size: .8rem;
+  color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.busca input::placeholder { color: var(--text3); }
+.busca input:focus { outline: none; border-color: var(--accent); }
+.busca ul { position: absolute; right: 0; top: calc(100% + 4px); z-index: 60; width: 18rem; max-width: 92vw; max-height: 16rem; overflow-y: auto;
+  margin: 0; padding: .25rem; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+.busca li { display: flex; justify-content: space-between; gap: .75rem; padding: .4rem .55rem; font-size: .8rem; color: var(--text); cursor: pointer; border-radius: 4px; }
+.busca li small { color: var(--text2); font-size: .7rem; align-self: center; }
+.busca li[aria-selected="true"], .busca li:hover { background: rgba(var(--accent-rgb), .14); }
+.busca li.vazio { color: var(--text2); cursor: default; }
+@media (max-width: 768px) {
+  .hero-side { flex-wrap: wrap; justify-content: flex-end; }
+  .busca { order: -1; width: 100%; } .busca input { width: 100%; }
+  .busca ul { left: 0; right: auto; width: 100%; }
+}
 .hero-theme { display: none; }
 /* seção atual: só aparece com o cabeçalho preso */
 .hero-sec {
@@ -670,7 +710,7 @@ details.more > .more-body { margin-top: .4rem; }
     <a class="sidebar-item" href="#programas"><span class="s-icon">🧾</span> Programas Federais</a>
     <a class="sidebar-item" href="#vizi"><span class="s-icon">📍</span> Vizinhança</a>
   </nav>
-  <div class="sidebar-footer"><a href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="sf-num" id="nIndicadores">—</span> indicadores</a> · <span id="nTemas">21</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
+  <div class="sidebar-footer"><a href="todos/" title="Índice dos 5.571 municípios">Todos os municípios</a> · <a href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="sf-num" id="nIndicadores">—</span> indicadores</a> · <span id="nTemas">21</span> temas · <a href="https://rodado.xyz" target="_blank" rel="noopener">rodado.xyz</a></div>
 </div>
 
 <!-- MAIN -->
@@ -683,6 +723,11 @@ details.more > .more-body { margin-top: .4rem; }
     <h1><span data-path="municipio.nome"></span> <span style="font-weight:400;color:var(--text2)">/</span> <span data-path="municipio.sigla_uf"></span></h1>
     <span class="hero-sec" id="heroSec" aria-hidden="true"></span>
     <div class="hero-side">
+      <div class="busca" role="search">
+        <input id="buscaMun" type="search" placeholder="Buscar município…" aria-label="Buscar município" autocomplete="off" spellcheck="false"
+          role="combobox" aria-expanded="false" aria-controls="buscaLista" aria-autocomplete="list">
+        <ul id="buscaLista" role="listbox" aria-label="Municípios encontrados" hidden></ul>
+      </div>
       <a class="hero-badge" href="https://gist.rodado.xyz/rafapolo/0dbba5d47d6a4724b4c8976251182162" target="_blank" rel="noopener" title="Ver a lista de indicadores"><span class="dot"></span><span class="marca">Rodado <span class="sep">·</span></span> <strong id="nIndicadoresHero">—</strong> <span class="lbl">indicadores</span></a>
       <button class="theme-toggle hero-theme" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
     </div>

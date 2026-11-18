@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://xn--2dk.xyz/sitemap.xml
+Sitemap: https://xn--2dk.xyz/sitemap-municipios.xml
