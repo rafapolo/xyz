@@ -17,13 +17,15 @@ from googleapiclient.discovery import build
 
 DIR = Path.home() / ".config/gsc"
 TOKEN = DIR / "token.json"
-ESCOPO = ["https://www.googleapis.com/auth/webmasters"]
+ESCOPO = ["https://www.googleapis.com/auth/webmasters", "https://www.googleapis.com/auth/siteverification"]
 SITEMAPS = ["https://xn--2dk.xyz/sitemap.xml", "https://xn--2dk.xyz/sitemap-municipios.xml"]
-CANDIDATOS = ["sc-domain:xn--2dk.xyz", "https://xn--2dk.xyz/"]
+CANDIDATOS = ["sc-domain:xn--2dk.xyz", "https://xn--2dk.xyz/"]  # sem DNS: scripts/gsc_verifica.py verifica o prefixo por arquivo
 
 
 def credenciais():
-    cred = Credentials.from_authorized_user_file(TOKEN, ESCOPO) if TOKEN.exists() else None
+    cred = Credentials.from_authorized_user_file(TOKEN) if TOKEN.exists() else None
+    if cred and not set(ESCOPO) <= set(cred.scopes or []):  # token antigo, com menos permissões
+        cred = None
     if cred and cred.expired and cred.refresh_token:
         cred.refresh(Request())
     if not cred or not cred.valid:
