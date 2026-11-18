@@ -35,7 +35,7 @@
   {"@type":"ListItem","position":2,"name":"Municípios","item":"https://xn--2dk.xyz/dataviz/municipios/"}]}}
 </script>
 <script defer src="vendor/chart-4.4.7.umd.min.js"></script>
-<script defer src="app.js?v=3"></script>
+<script defer src="app.js?v=4"></script>
 <script defer src="busca.js"></script>
 <script>
 // Os JSON dos 5.571 municípios ficam num bucket público (Hetzner, hel1), fora do git:
@@ -54,7 +54,7 @@ if (/^\d{7}$/.test(ID_EFETIVO)) {
   const can = document.querySelector('link[rel="canonical"]');
   if (can) can.href = 'https://xn--2dk.xyz/dataviz/municipios/?id=' + ID_EFETIVO;
 }
-const DADOS_REQ = ID_VALIDO ? fetch(JSON_PATH) : Promise.resolve({ ok: false, status: 'código inválido' });
+const DADOS_REQ = (window.DADOS_PREFETCH && !DADOS_LOCAL) ? window.DADOS_PREFETCH : ID_VALIDO ? fetch(JSON_PATH) : Promise.resolve({ ok: false, status: 'código inválido' });
 function erroCarga(msg) {
   const el = document.createElement('p');
   el.style.cssText = 'color:#d03b3b;padding:2rem;font-family:sans-serif';
@@ -549,6 +549,20 @@ body.carregando .chart-container { border-radius: var(--radius-sm); background: 
 @media (prefers-reduced-motion: reduce) {
   body.carregando .card .value:empty::before, body.carregando .hero-top h1 [data-path]:empty::before, body.carregando .chart-container { animation: none; }
 }
+/* carregador: o painel inteiro aparece de uma vez, com fade, quando tudo está pronto */
+body > *:not(#carregador) { transition: opacity .45s ease; }
+body.carregando > *:not(#carregador) { opacity: 0; }
+#carregador { position: fixed; inset: 0; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; background: var(--bg); color: var(--text2); font: 500 .95rem/1.4 system-ui, sans-serif; pointer-events: none;
+  opacity: 0; transition: opacity .35s ease; }
+body.carregando #carregador { opacity: 1; pointer-events: auto; }
+#carregador .roda { width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 3px solid var(--border, #282d3f);
+  border-top-color: var(--accent, #7b9bff); animation: gira .8s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  body > *:not(#carregador), #carregador { transition: none; }
+  #carregador .roda { animation-duration: 2.4s; }
+}
 
 /* RANK-BAR — barra proporcional dentro da rank-table */
 .rank-table td.area .rank-bar { display: flex; align-items: center; gap: .45rem; }
@@ -674,6 +688,7 @@ details.more > .more-body { margin-top: .4rem; }
 <script defer src="https://cloud.umami.is/script.js" data-website-id="d2597bf7-73e0-4e7e-b353-1202d9f72b7d"></script>
 </head>
 <body class="carregando">
+<div id="carregador" role="status" aria-live="polite"><div class="roda" aria-hidden="true"></div><span>Carregando o município…</span></div>
 <noscript><p style="padding:2rem">O painel precisa de JavaScript. Veja a <a href="./">lista de todos os municípios</a>.</p></noscript>
 
 <!-- SIDEBAR -->

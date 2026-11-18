@@ -56,6 +56,12 @@ def main():
 // /dataviz/municipios/?id=<código IBGE> é o painel: troca este documento pelo painel.html sem mudar o endereço.
 (function () {{
   if (!new URLSearchParams(location.search).get('id')) return;
+  var q = new URLSearchParams(location.search), id = q.get('id').trim();
+  // o JSON do município sai já agora, junto com o painel, em vez de esperar o painel.html chegar
+  if (/^\\d{{7}}$/.test(id) && q.get('dados') !== 'local') window.DADOS_PREFETCH = fetch('https://xyz-municipio.hel1.your-objectstorage.com/' + id + '.json');
+  ['vendor/chart-4.4.7.umd.min.js', 'app.js?v=4'].forEach(function (u) {{
+    var l = document.createElement('link'); l.rel = 'preload'; l.as = 'script'; l.href = u; document.head.appendChild(l);
+  }});
   document.documentElement.style.visibility = 'hidden';
   fetch('painel.html', {{ cache: 'no-cache' }}).then(function (r) {{ return r.text(); }}).then(function (t) {{
     document.open(); document.write(t); document.close();
