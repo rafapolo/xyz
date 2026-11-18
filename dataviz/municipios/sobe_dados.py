@@ -11,7 +11,7 @@ compara o MD5 do gzip com o ETag do objeto (upload simples, então ETag = MD5).
 Credenciais: variáveis de ambiente ou `.env` na raiz do repo (fora do git):
 S3_ENDPOINT, S3_REGION, S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY. Nunca são impressas.
 
-Uso: python3 dataviz/municipio/sobe_dados.py [--seco] [--apaga] [--cors] [--cria] [pasta]
+Uso: python3 dataviz/municipios/sobe_dados.py [--seco] [--apaga] [--cors] [--cria] [pasta]
   --seco   só lista o que mudaria
   --apaga  remove do bucket o que não existe mais na pasta
   --cors   reaplica a política de CORS

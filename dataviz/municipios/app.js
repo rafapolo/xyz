@@ -1,3 +1,4 @@
+let UF_SIGLA = 'UF';
 let THEME = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
 const PALETTES = {
   dark: {
@@ -278,6 +279,7 @@ async function init() {
   MES_EXTRACAO = mesGer ? ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][mesGer - 1] + '/' + ger.slice(0, 4) : '';
 
   // Page title
+  UF_SIGLA = g(D, 'municipio.sigla_uf') || 'UF'; // comparações estaduais usam a UF do município (o ISP de segurança é só do RJ)
   document.getElementById('pageTitle').textContent = g(D, 'municipio.nome') + ', ' + g(D, 'municipio.sigla_uf') + ' — Dashboard Municipal';
 
   // data-path elements
@@ -711,7 +713,7 @@ async function init() {
   // PIB per capita ranking
   const ranking = g(D, 'secoes.economia.pib.ranking_uf');
   if (ranking) {
-    document.getElementById('pibRank').textContent = ranking.posicao + 'º entre ' + ranking.total + ' municípios do RJ';
+    document.getElementById('pibRank').textContent = ranking.posicao + 'º entre ' + ranking.total + ' municípios do ' + UF_SIGLA;
   }
 
   // PIB per capita bars
@@ -819,7 +821,7 @@ async function init() {
   const ideb2021Fin = find(idebFin, 'ano', 2021);
 
   // As metas do PNE pararam em 2019 (2021 e 2023 vêm nulas) — não afirmar
-  // "acima da meta" quando não há meta pactuada; comparar com Brasil e RJ.
+  // "acima da meta" quando não há meta pactuada; comparar com Brasil e a UF.
   function pintaCartaoIdeb(cardEl, valor, refBrasil) {
     if (!cardEl || valor == null || refBrasil == null) return;
     cardEl.classList.remove('st-good-b', 'st-warn-b', 'st-serious-b');
@@ -828,7 +830,7 @@ async function init() {
   function benchIdeb(id, br, uf, ultimaMeta) {
     document.getElementById(id).innerHTML =
       '<span><b>Brasil:</b> ' + fNum1(br || 0) + '</span>' +
-      '<span><b>RJ:</b> ' + fNum1(uf || 0) + '</span>' +
+      '<span><b>' + UF_SIGLA + ':</b> ' + fNum1(uf || 0) + '</span>' +
       (ultimaMeta ? '<span><b>Última meta PNE (' + ultimaMeta.ano + '):</b> ' + fNum1(ultimaMeta.meta) + '</span>' : '');
   }
   const ultMetaIni = [...idebIni].reverse().find(d => d.meta != null) || null;
@@ -1592,7 +1594,7 @@ async function init() {
     pill('stPop', cresce ? 'st-good' : 'st-warn', cresce ? '✓ crescendo' : '! encolhendo');
   } else { pill('stPop', null); }
 
-  pillVs('stPibPc', pibPc && pibPc.valor, pibPc && pibPc.uf, ['acima do RJ', 'abaixo do RJ']);
+  pillVs('stPibPc', pibPc && pibPc.valor, pibPc && pibPc.uf, ['acima do ' + UF_SIGLA, 'abaixo do ' + UF_SIGLA]);
   setTxt('resPibPcAno', pibPc && pibPc.ano ? String(pibPc.ano) : '');
   setTxt('resPopAno', pop2024item && pop2024item.ano ? String(pop2024item.ano) : '');
   setTxt('resCagedAno', caged && caged.ano ? String(caged.ano) : '');
@@ -2466,14 +2468,14 @@ async function init() {
       options: { ...chartOpts, plugins: { ...noLegend, tooltip: { ...chartOpts.plugins.tooltip,
         callbacks: { label: ctx => {
           const r = ifgf[ctx.dataIndex];
-          return 'IFGF ' + fmt2(r.indice) + ' · ' + r.ranking_estadual + 'º no RJ, ' + fNum(r.ranking_nacional) + 'º no país';
+          return 'IFGF ' + fmt2(r.indice) + ' · ' + r.ranking_estadual + 'º no ' + UF_SIGLA + ', ' + fNum(r.ranking_nacional) + 'º no país';
         } } } },
         scales: { x: { ticks: { color: C.muted }, grid: { color: C.grid } },
                   y: { min: 0, max: 1, ticks: { color: C.muted, callback: v => fmt2(v) }, grid: { color: C.grid } } } }
     });
     const ultIfgf = ifgf[ifgf.length - 1];
     setTxt('ifgfSub', 'Escala 0–1 · ' + ultIfgf.ano + ': ' + fmt2(ultIfgf.indice) + ' — ' + ultIfgf.ranking_estadual +
-      'º entre os municípios do RJ e ' + fNum(ultIfgf.ranking_nacional) + 'º no país. Acima de 0,8 é gestão de excelência; abaixo de 0,4, crítica.');
+      'º entre os municípios do ' + UF_SIGLA + ' e ' + fNum(ultIfgf.ranking_nacional) + 'º no país. Acima de 0,8 é gestão de excelência; abaixo de 0,4, crítica.');
   } else { vazioGrafico('ifgfChart'); }
 
   const capag = (fiscal && fiscal.capag) || null;

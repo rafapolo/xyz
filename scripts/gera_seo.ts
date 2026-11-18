@@ -30,7 +30,10 @@ const CLOSE = "<!-- seo:end -->";
 const FORA = new Set([
   "_layouts/default.html",
   "dataviz/eleicoes/src/index.html", // fonte do build; o publicado é dataviz/eleicoes/
-  "municipio.html", // redireciona para dataviz/municipio/
+  "municipio.html", // redireciona para dataviz/municipios/
+  "dataviz/municipio/index.html", // endereço antigo: redireciona para dataviz/municipios/
+  "dataviz/municipio/todos/index.html", // endereço antigo do índice: idem
+  "dataviz/municipios/painel.html", // servido em dataviz/municipios/?id=, já está no sitemap-municipios.xml
 ]);
 const FORA_PREFIXO = ["tasks/", ".claude/", "docs/"];
 
@@ -218,7 +221,7 @@ const sitemap = [
   "</urlset>",
   "",
 ].join("\n");
-// as 5.571 URLs do painel municipal vêm de dataviz/municipio/gera_indice.py
+// as 5.571 URLs do painel municipal vêm de dataviz/municipios/gera_indice.py
 const sitemapMunicipios = existsSync(join(RAIZ, "sitemap-municipios.xml")) ? `Sitemap: ${BASE}/sitemap-municipios.xml\n` : "";
 const robots = `User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n${sitemapMunicipios}`;
 
