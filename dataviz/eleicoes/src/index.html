@@ -597,6 +597,12 @@ function fitBrasil(){
   map.fitBounds(BR_BOUNDS, { padding: [8, 8], animate: false });
 }
 fitBrasil();
+// posição e zoom vêm na URL (?mapa=lat,lng,zoom): um link para um município abre no lugar certo
+(function(){
+  const m = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)$/.exec(new URLSearchParams(location.search).get('mapa') || '');
+  if (!m || !MAX_BOUNDS.contains([+m[1], +m[2]])) return;
+  map.setView([+m[1], +m[2]], Math.min(18, Math.max(map.getMinZoom(), +m[3])), { animate: false });
+})();
 let resizeT;
 window.addEventListener('resize', function(){
   clearTimeout(resizeT);
@@ -1119,8 +1125,13 @@ function syncUrl(){
   FLIP === 'lost' ? url.searchParams.set('filtro', 'vira-casacas') : url.searchParams.delete('filtro');
   const rec = recorteAtivo();
   rec !== (EL().secoes ? 'secoes' : 'municipios') ? url.searchParams.set('recorte', rec) : url.searchParams.delete('recorte'); // o padrão não vai na URL
+  // o mapa inteiro (zoom mínimo) é o padrão e não vai na URL
+  const c = map.getCenter(), z = map.getZoom();
+  z > map.getMinZoom() + 0.3 ? url.searchParams.set('mapa', c.lat.toFixed(4) + ',' + c.lng.toFixed(4) + ',' + z.toFixed(2)) : url.searchParams.delete('mapa');
   history.replaceState(null, '', url);
 }
+let urlT = 0;
+map.on('moveend', () => { clearTimeout(urlT); urlT = setTimeout(syncUrl, 250); });
 
 // ---- placar: soma só o que está na tela (e que o filtro não apagou). Registro: r[4] votos válidos,
 // r[15] e r[16] % de Lula e de Flávio — o voto sai de tot × %, com erro de arredondamento desprezível
@@ -1330,7 +1341,7 @@ let fechaFolhas = () => {}; // setupMobilePanels troca pela versão que fecha #i
       return out;
     }).catch(() => { delete IDX[key]; return []; });
   }
-  let hits = [], ativo = -1, seq = 0, timer = 0, marker = null, markerT = 0;
+  let pouso = 0, hits = [], ativo = -1, seq = 0, timer = 0, marker = null, markerT = 0;
   const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function destaca(nome, q){
     const nn = norm(nome), i = nn.length === nome.length ? nn.indexOf(q) : -1; // sem acento o comprimento não muda; com pontuação, não marca
@@ -1387,6 +1398,17 @@ let fechaFolhas = () => {}; // setupMobilePanels troca pela versão que fecha #i
     if (h.loc && recorteAtivo() !== 'secoes'){ RECORTE = 'secoes'; setEleicao(ELEICAO); }
     // no celular: fecha as folhas e voa só depois que o teclado baixa (a área do mapa muda de tamanho)
     if (isSheet()) fechaFolhas();
+    // ao pousar, abre o tooltip do ponto (no celular o showTip também sobe o mapa para tirar o ponto de trás da folha)
+    const meu = ++pouso;
+    map.once('moveend', function(){
+      if (meu !== pouso || !DATA.length) return;
+      const lp = map.latLngToLayerPoint([h.lat, h.lon]);
+      let i = nearest(h.lat, h.lon, lp);
+      if (i < 0 && !h.loc) i = DATA.findIndex(r => r[0] === h.uf && r[1] === h.n && flipMatch(r)); // o ponto pode estar deslocado na espiral: acha pelo nome
+      if (i < 0) return;
+      const c = map.layerPointToContainerPoint(lp);
+      showTip(i, c.x, c.y);
+    });
     const voa = () => map.flyTo(centroLivre(h), h.z, { duration: 1.2 });
     const vv = window.visualViewport;
     if (isSheet() && vv && vv.height < innerHeight * 0.8) setTimeout(voa, 300); else voa();
