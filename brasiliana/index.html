@@ -7,7 +7,7 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js"
   }
 }
 </script>
@@ -628,22 +628,6 @@
     #tour-abrir { top: calc(50px + env(safe-area-inset-top)); left: 6px; }
   }
 </style>
-<!-- seo:start (gerado por scripts/gera_seo.ts — não editar à mão) -->
-<link rel="canonical" href="https://xn--2dk.xyz/brasiliana/">
-<meta name="description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="ミ.xyz">
-<meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="https://xn--2dk.xyz/brasiliana/">
-<meta property="og:title" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta property="og:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta property="og:image" content="https://xn--2dk.xyz/images/image1.png">
-<meta property="og:image:alt" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Brasiliana Fotográfica — Mural do Acervo">
-<meta name="twitter:description" content="Um mural navegável do acervo da Brasiliana Fotográfica (Biblioteca Nacional): milhares de fotografias históricas do Brasil, com filtro por período, instituição e busca livre.">
-<meta name="twitter:image" content="https://xn--2dk.xyz/images/image1.png">
-<!-- seo:end -->
 </head>
 <body>
 
@@ -2396,7 +2380,7 @@ function setupFilters(mapData) {
       const alone = state.yearTouched && state.yearLo === dec && state.yearHi === dec;
       if (alone) { resetYear(); } else {
         loSlider.value = hiSlider.value = dec;
-        state.yearLo = state.yearHi = dec; state.yearTouched = true;
+        state.yearLo = state.yearHi = dec; state.yearTouched = true; state.yearExact = null;
       }
       apply();
     });
@@ -2455,10 +2439,10 @@ function setupFilters(mapData) {
     sel.value = value;
   }
 
-  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '', serie: '', rep: '' };
+  const state = { search: '', institution: '', yearLo: decadeMin, yearHi: decadeMax, yearTouched: false, yearExact: null, author: '', type: '', estado: '', cidade: '', bairro: '', topico: '', colecao: '', pessoa: '', serie: '', rep: '' };
 
   function resetYear() {
-    state.yearTouched = false;
+    state.yearTouched = false; state.yearExact = null;
     state.yearLo = decadeMin; state.yearHi = decadeMax;
     loSlider.value = decadeMin; hiSlider.value = decadeMax;
   }
@@ -2490,8 +2474,10 @@ function setupFilters(mapData) {
         const i = Math.floor((d._year - decadeMin) / 10);
         if (i >= 0 && i < nDecades) decCounts[i]++;
       }
-      const okYear = !state.yearTouched ||
-        (d._year != null && d._year >= state.yearLo && d._year <= state.yearHi + 9);
+      // ?ano=1927 pins one exact year; otherwise the range is whole decades
+      const okYear = !state.yearTouched || (d._year != null && (state.yearExact != null
+        ? d._year === state.yearExact
+        : d._year >= state.yearLo && d._year <= state.yearHi + 9));
       const ok = okRest && okYear;
       d.filteredOut = !ok;
       if (d.targetOpacity !== (ok ? 1 : 0.07)) { d.targetOpacity = ok ? 1 : 0.07; markAnimating(m); }
@@ -2511,7 +2497,7 @@ function setupFilters(mapData) {
     const hi = state.yearTouched ? state.yearHi : decadeMax;
     yearFill.style.left = `${((lo - decadeMin) / span) * 100}%`;
     yearFill.style.right = `${((decadeMax - hi) / span) * 100}%`;
-    yearReadout.textContent = yearLabel(lo, hi);
+    yearReadout.textContent = state.yearExact != null ? String(state.yearExact) : yearLabel(lo, hi);
     loSlider.classList.toggle('top', lo > (decadeMin + decadeMax) / 2);
 
     const active = activeFilters();
@@ -2544,7 +2530,7 @@ function setupFilters(mapData) {
     const out = [];
     if (state.search.trim()) out.push({ key: 'search', text: `“${state.search.trim()}”` });
     if (state.institution) out.push({ key: 'institution', text: instName(state.institution) });
-    if (state.yearTouched) out.push({ key: 'year', text: yearLabel(state.yearLo, state.yearHi) });
+    if (state.yearTouched) out.push({ key: 'year', text: state.yearExact != null ? String(state.yearExact) : yearLabel(state.yearLo, state.yearHi) });
     if (state.author) out.push({ key: 'author', text: authorNames.get(state.author) });
     if (state.estado) out.push({ key: 'estado', text: state.estado });
     if (state.cidade) out.push({ key: 'cidade', text: state.cidade });
@@ -2634,7 +2620,7 @@ function setupFilters(mapData) {
       if (e.target === loSlider) hi = lo; else lo = hi;
       loSlider.value = lo; hiSlider.value = hi;
     }
-    state.yearLo = lo; state.yearHi = hi;
+    state.yearLo = lo; state.yearHi = hi; state.yearExact = null;
     state.yearTouched = !(lo === decadeMin && hi === decadeMax);
     apply();
   }
@@ -2669,7 +2655,7 @@ function setupFilters(mapData) {
   function syncUrl() {
     const p = new URLSearchParams();
     Object.entries(URL_KEYS).forEach(([k, f]) => { if (state[f]) p.set(k, state[f]); });
-    if (state.yearTouched) p.set('ano', `${state.yearLo}-${state.yearHi}`);
+    if (state.yearTouched) p.set('ano', state.yearExact != null ? String(state.yearExact) : `${state.yearLo}-${state.yearHi}`);
     const q = p.toString();
     try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch {}
   }
@@ -2696,8 +2682,15 @@ function setupFilters(mapData) {
       state[f] = v; setSelect(SELECTS[f], v);
       if (f === 'estado' || f === 'cidade') rebuildPlace();
     });
-    const y = (p.get('ano') || '').match(/^(\d{4})-(\d{4})$/);
+    // ?ano=1920-1940 is a decade range; ?ano=1927 is that one year alone
+    const ano = p.get('ano') || '';
+    const y = ano.match(/^(\d{4})-(\d{4})$/);
     if (y) { state.yearLo = +y[1]; state.yearHi = +y[2]; state.yearTouched = true; loSlider.value = y[1]; hiSlider.value = y[2]; }
+    else if (/^\d{4}$/.test(ano)) {
+      const dec = Math.min(decadeMax, Math.max(decadeMin, Math.floor(+ano / 10) * 10));
+      state.yearExact = +ano; state.yearLo = state.yearHi = dec; state.yearTouched = true;
+      loSlider.value = hiSlider.value = dec;
+    }
     setSelect(selCidade, state.cidade); setSelect(selBairro, state.bairro); setSelect(selTopico, state.topico);
   })();
   rebuildPlace();
