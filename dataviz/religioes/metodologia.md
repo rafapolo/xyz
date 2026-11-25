@@ -81,7 +81,7 @@ Nada é aplicado automaticamente. A saída é `candidatos_padroes.csv` (com ganh
 
 ### 4.1 Agrupamento pra exibição (rollup)
 
-A taxonomia oficial tem até 30+ subcategorias só dentro de "Evangélicas" (denominações nomeadas). Pra virar uma legenda de mapa utilizável, o script que gera `igrejas/data.json` agrupa (rollup) cada `vertente_id` até:
+A taxonomia oficial tem até 30+ subcategorias só dentro de "Evangélicas" (denominações nomeadas). Pra virar uma legenda de mapa utilizável, o script que gera os dados do mapa (`igrejas/meta.json` + `pontos.bin.gz` + `nomes.bin.gz`) agrupa (rollup) cada `vertente_id` até:
 - o nível 2 mais próximo, se o pai for "Evangélicas" (id 95277) — preserva a distinção Missão / Pentecostal / não determinada, que é o eixo mais importante da análise;
 - o nível 1 mais próximo, pra qualquer outra árvore (ex. Umbanda e Candomblé agrega suas subcategorias Umbanda/Candomblé/outras).
 
@@ -159,21 +159,23 @@ dataviz/religioes/
 │   ├── gerar_igrejas_geolocalizadas.py  pipeline de extração (roda via ssh beelink + DuckDB)
 │   ├── minerar_padroes.py               minera padrões novos do que ficou sem classificação (§4.2)
 │   ├── reclassificar.py                 reaplica o dicionário no parquet local, sem reconsultar o CNEFE
-│   ├── gerar_data_json.py               rollup + paleta + legenda → igrejas/data.json
+│   ├── gerar_data_json.py               rollup + paleta + legenda → igrejas/meta.json + *.bin.gz
 │   ├── candidatos_padroes.csv           saída de auditoria: cada padrão minerado com ganho/pureza/exemplos
 │   ├── residuo_sem_classificacao.csv    saída de curadoria: o que sobrou sem proposta, por volume
 │   ├── igrejas_geolocalizadas.parquet   dataset final (765.591 linhas), cópia local do output remoto
 │   └── readme.md                        índice de todas as fontes de dados do projeto (não só templos)
 └── igrejas/
     ├── index.html                       mapa Leaflet (camada canvas customizada, ~570k pontos)
-    └── data.json                        extrato leve do parquet pro mapa (legenda + pontos + com_cnae)
+    ├── meta.json                        legendas, totais e versão (hash) dos binários
+    ├── pontos.bin.gz                    posição + vertente + flags, o que o mapa precisa pra desenhar (~2,8 MB)
+    └── nomes.bin.gz                     texto anotado em campo, só pro tooltip — baixado depois do desenho (~2,5 MB)
 ```
 
 **Para reproduzir do zero:**
 1. `python3 dados/gerar_igrejas_geolocalizadas.py` (sem argumento = nacional; passe uma sigla de UF, ex. `SP`, pra rodar num recorte de teste primeiro) — requer acesso SSH ao host `beelink` com o mirror local da basedosdados em `~/rodado` e DuckDB com a extensão `spatial`.
 2. `scp beelink:/tmp/igrejas_geolocalizadas.parquet dados/igrejas_geolocalizadas.parquet`
-3. `python3 dados/gerar_data_json.py` (rollup + paleta + legenda → `igrejas/data.json`).
-4. Abrir `igrejas/index.html` (servido por qualquer HTTP server estático — não funciona em `file://` por causa do `fetch('data.json')`).
+3. `python3 dados/gerar_data_json.py` (rollup + paleta + legenda → `igrejas/meta.json`, `pontos.bin.gz` e `nomes.bin.gz`; formato descrito em `escrever_binarios()`).
+4. Abrir `igrejas/index.html` (servido por qualquer HTTP server estático — não funciona em `file://` por causa do `fetch`).
 
 **Para alterar a classificação de vertente**: editar `dados/cnefe-descricao-vertente.csv` diretamente (é um CSV comum, git-diffável), depois `python3 dados/reclassificar.py && python3 dados/gerar_data_json.py` — não precisa refazer o passo 1, que é caro e depende do beelink. `reclassificar.py --dry-run` mostra o diff (quantos entram, quantos trocam de vertente) antes de gravar. Regra de ouro: toda linha nova deve citar `fonte` real (não adicionar padrão sem saber de onde veio a certeza) e, se a denominação não for autoexplicativa pelo nome, pesquisar antes de classificar.
 

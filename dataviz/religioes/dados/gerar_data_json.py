@@ -1,13 +1,20 @@
 import colorsys
+import gzip
+import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).parent
 PARQUET = HERE / "igrejas_geolocalizadas.parquet"
 VERTENTES_CSV = HERE / "vertentes-religiosas.csv"
-JSON_OUT = HERE.parent / "igrejas" / "data.json"
+OUT_DIR = HERE.parent / "igrejas"
+# o mapa baixa 3 arquivos: meta.json (legendas, totais, versões), pontos.bin.gz
+# (posição + categorias, o necessário pra desenhar) e nomes.bin.gz (texto anotado
+# em campo, só usado no tooltip — baixado depois que o mapa já está desenhado).
+# Formato binário descrito em escrever_binarios().
 
 # categorias "ancora" do legend grosso (nivel exibido por padrao no mapa) -
 # mantidas identicas ao data.json ja publicado, pra nao regredir nada
@@ -182,47 +189,92 @@ def main():
 
     df["fina_idx"] = df["fina_key"].map(fina_index)
 
-    # --- texto anotado em campo, deduplicado ---
-    desc_index = {}
-    desc_list = []
-
-    def desc_idx(s):
-        if s not in desc_index:
-            desc_index[s] = len(desc_list)
-            desc_list.append(s)
-        return desc_index[s]
-
-    df["desc_idx_col"] = df["descricao_estabelecimento"].fillna("").map(desc_idx)
-
-    points = []
-    for row in df.itertuples(index=False):
-        points.append([
-            round(float(row.lat), 5), round(float(row.lon), 5),
-            int(row.coarse_idx),
-            1 if row.com_cnae else 0,
-            1 if row.presenca == "oficial" else 0,
-            int(row.desc_idx_col),
-            int(row.fina_idx),
-        ])
-
-    out = {
-        "legend": legend_coarse,
-        "legendFina": legend_fina,
-        "points": points,
-        "desc": desc_list,
+    totais = {
         "comCnaeTotal": int(df["com_cnae"].sum()),
         "oficialTotal": int((df["presenca"] == "oficial").sum()),
         "textoLivreTotal": int((df["presenca"] == "texto_livre").sum()),
     }
-
-    with open(JSON_OUT, "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+    escrever_binarios(df, legend_coarse, legend_fina, totais)
 
     print("coarse:", [(l["nome"], l["n"]) for l in legend_coarse])
     print()
     print("fina (top 15):", [(l["nome"], l["n"]) for l in legend_fina[:15]])
     print()
-    print("total pontos:", len(points), "| desc unicos:", len(desc_list))
+    print("total pontos:", len(df))
+
+
+def _morton(x, y):
+    """Intercala os bits de x e y: pontos vizinhos no mapa ficam vizinhos no
+    arquivo, o que deixa os deltas pequenos e o gzip eficiente."""
+    def spread(v):
+        v = v.astype(np.uint64) & np.uint64(0xFFFFFFFF)
+        for sh, m in ((16, 0x0000FFFF0000FFFF), (8, 0x00FF00FF00FF00FF), (4, 0x0F0F0F0F0F0F0F0F),
+                      (2, 0x3333333333333333), (1, 0x5555555555555555)):
+            v = (v | (v << np.uint64(sh))) & np.uint64(m)
+        return v
+    return spread(x) | (spread(y) << np.uint64(1))
+
+
+def _zigzag_delta(a):
+    d = np.diff(a.astype(np.int64), prepend=0).astype(np.int32)
+    return ((d << 1) ^ (d >> 31)).view(np.uint32)
+
+
+def _planos(a):
+    """Byte-shuffle: todos os bytes 0, depois todos os bytes 1... — os bytes
+    altos dos deltas são quase sempre zero e o gzip os comprime a quase nada."""
+    return a.view(np.uint8).reshape(-1, a.itemsize).T.tobytes()
+
+
+def _gz(b):
+    return gzip.compress(b, compresslevel=9, mtime=0)
+
+
+def escrever_binarios(df, legend_coarse, legend_fina, totais):
+    """pontos.bin.gz (n = meta.n), tudo little-endian:
+         dlat  4n bytes  delta zigzag de round(lat*1e5), em planos de byte
+         dlon  4n bytes  idem para lon
+         coarse n bytes, fina n bytes, flags n bytes (bit0 = com_cnae, bit1 = oficial)
+       nomes.bin.gz:
+         idx   4n bytes  índice em `nomes` (uint32, em planos de byte), mesma ordem
+         texto utf-8 com os nomes únicos (ordem alfabética) separados por \\n
+       Ordem dos pontos = ordem de desenho: categoria grossa da maior pra menor
+       (as menores ficam por cima) e Morton dentro de cada categoria."""
+    lat = np.round(df["lat"].to_numpy(dtype=np.float64) * 1e5).astype(np.int64)
+    lon = np.round(df["lon"].to_numpy(dtype=np.float64) * 1e5).astype(np.int64)
+    coarse = df["coarse_idx"].to_numpy().astype(np.uint8)
+    fina = df["fina_idx"].to_numpy().astype(np.uint8)
+    flags = (df["com_cnae"].eq(True).to_numpy().astype(np.uint8)
+             | ((df["presenca"] == "oficial").to_numpy().astype(np.uint8) << 1))
+
+    rank = np.empty(len(legend_coarse), dtype=np.int64)
+    for r, l in enumerate(sorted(legend_coarse, key=lambda l: -l["n"])):
+        rank[l["idx"]] = r
+    ordem = np.lexsort((_morton(lon - lon.min(), lat - lat.min()), rank[coarse]))
+
+    nomes_brutos = df["descricao_estabelecimento"].fillna("").to_numpy()
+    nomes = sorted(set(nomes_brutos.tolist()))
+    assert not any("\n" in s for s in nomes)
+    pos_nome = {s: i for i, s in enumerate(nomes)}
+    idx_nome = np.fromiter((pos_nome[s] for s in nomes_brutos), dtype=np.uint32, count=len(nomes_brutos))
+
+    pontos = _gz(_planos(_zigzag_delta(lat[ordem])) + _planos(_zigzag_delta(lon[ordem]))
+                 + coarse[ordem].tobytes() + fina[ordem].tobytes() + flags[ordem].tobytes())
+    nomes_gz = _gz(_planos(idx_nome[ordem]) + "\n".join(nomes).encode("utf-8"))
+
+    versao = lambda b: hashlib.sha1(b).hexdigest()[:10]
+    (OUT_DIR / "pontos.bin.gz").write_bytes(pontos)
+    (OUT_DIR / "nomes.bin.gz").write_bytes(nomes_gz)
+    meta = {
+        "n": int(len(df)),
+        "legend": legend_coarse,
+        "legendFina": legend_fina,
+        **totais,
+        "v": {"pontos": versao(pontos), "nomes": versao(nomes_gz)},
+    }
+    with open(OUT_DIR / "meta.json", "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"pontos.bin.gz {len(pontos):,} B | nomes.bin.gz {len(nomes_gz):,} B | nomes únicos {len(nomes):,}")
 
 
 if __name__ == "__main__":

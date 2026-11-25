@@ -118,6 +118,7 @@
   }
   .tt-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
   .tt-name { font-weight:600; font-size:14px; color:#fff; }
+  .tt-loading { font-weight:400; color:#9aa3b5; font-style:italic; }
   .tt-badge {
     font-size:9.5px; font-weight:600; letter-spacing:0.4px; color:#ccc; text-transform:uppercase;
     border:1px solid rgba(255,255,255,0.18); border-radius:3px; padding:1px 5px; flex-shrink:0; white-space:nowrap;
@@ -299,9 +300,14 @@ function showTooltip(html, x, y) {
 }
 
 // ---- estado ----
-let legend = [], legendFina = [], desc = [], total = 0;
-let sortedPoints = [];   // pre-ordenado: categorias maiores primeiro (embaixo), menores por cima
-let baseFiltered = [];   // apos toggles de qualidade (recalculado só quando eles mudam)
+let legend = [], legendFina = [], total = 0;
+// pontos sao indices (Uint32Array) em arrays tipados, nao 765 mil arrays de JS:
+// LAT/LON em graus, CAT[2] = vertente (grossa), CAT[6] = denominacao (fina),
+// FLAGS bit0 = CNPJ ativo no CEP, bit1 = confirmado oficial
+let LAT, LON, FLAGS, NOME_IDX = null, NOMES = null;
+const CAT = {};
+let sortedPoints = new Uint32Array(0);   // ordem de desenho: categorias maiores primeiro (embaixo)
+let baseFiltered = sortedPoints;         // apos filtro de CNPJ (recalculado só quando ele muda)
 let cnpjFilter = 'todos'; // 'todos' | 'com' | 'sem'
 let radiusPx = RADIUS_DEFAULT;
 let lockedCat = null;   // categoria travada por clique
@@ -358,64 +364,83 @@ function activeFocus() { return hoverCat !== null ? hoverCat : lockedCat; }
 function activeLegend() { return granularity === 'fina' ? legendFina : legend; }
 function activeCatField() { return granularity === 'fina' ? 6 : 2; }
 
+function filterIdx(src, pred) {
+  const out = new Uint32Array(src.length);
+  let k = 0;
+  for (let j = 0; j < src.length; j++) { const i = src[j]; if (pred(i)) out[k++] = i; }
+  return out.slice(0, k);
+}
+
 function recomputeBaseFiltered() {
-  if (cnpjFilter === 'com') baseFiltered = sortedPoints.filter(function (p) { return p[3]; });
-  else if (cnpjFilter === 'sem') baseFiltered = sortedPoints.filter(function (p) { return !p[3]; });
+  if (cnpjFilter === 'com') baseFiltered = filterIdx(sortedPoints, function (i) { return FLAGS[i] & 1; });
+  else if (cnpjFilter === 'sem') baseFiltered = filterIdx(sortedPoints, function (i) { return !(FLAGS[i] & 1); });
   else baseFiltered = sortedPoints;
+}
+
+function escHtml(s) {
+  return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+}
+
+let lastHover = null; // pra preencher o nome no tooltip aberto quando os nomes chegarem
+function tooltipHtml(i, lg, catField) {
+  const nomeVisto = NOME_IDX ? (escHtml(NOMES[NOME_IDX[i]]) || '(sem nome anotado)') : '<span class="tt-loading">carregando nome…</span>';
+  const oficial = FLAGS[i] & 2, cnpj = FLAGS[i] & 1;
+  const coarseName = legend[CAT[2][i]].nome;
+  const finaName = legendFina.length ? legendFina[CAT[6][i]].nome : coarseName;
+  const textColor = textColorFor(lg[CAT[catField][i]].cor);
+  return '<div class="tt-head"><span class="tt-name">' + nomeVisto + '</span>' +
+    '<span class="tt-badge' + (oficial ? ' on' : '') + '">' + (oficial ? 'Oficial' : 'Só nome') + '</span></div>' +
+    '<div class="tt-sub">' + coarseName + '</div>' +
+    '<div class="tt-metric" style="color:' + textColor + '">' + finaName + '</div>' +
+    '<div class="tt-metric-label">Denominação · nomenclatura 2010</div>' +
+    '<div class="tt-grid">' +
+      '<div class="tt-cell"><span class="k">Censo</span><span class="v">' + (oficial ? 'Confirmado oficial' : 'Só pelo nome') + '</span></div>' +
+      '<div class="tt-cell"><span class="k">CNPJ</span><span class="v">' + (cnpj ? 'Ativo no CEP' : 'Não encontrado') + '</span></div>' +
+    '</div>';
 }
 
 function render() {
   const focus = activeFocus();
   const catField = activeCatField();
   const lg = activeLegend();
+  const cats = CAT[catField];
   // pontos fora do foco ficam invisiveis (alpha 0) - tira-os do proprio
   // array de dados, nao so da cor, senao o picking do deck.gl ainda os
   // encontra (hit-test nao olha alpha) e o tooltip aponta pra algo que
   // nao esta la
-  const layerData = focus !== null ? baseFiltered.filter(function (p) { return p[catField] === focus; }) : baseFiltered;
+  const layerData = focus !== null ? filterIdx(baseFiltered, function (i) { return cats[i] === focus; }) : baseFiltered;
+  const rgbs = lg.map(function (l) { return hexToRgb(l.cor); });
 
   const layer = new deck.ScatterplotLayer({
     id: 'pontos',
     data: layerData,
-    getPosition: function (d) { return [d[1], d[0]]; },
+    // accessors escrevem no `target` que o deck.gl passa: nada de alocar um
+    // array por ponto (sao ate 765 mil a cada mudanca de filtro)
+    getPosition: function (i, o) { const t = o.target; t[0] = LON[i]; t[1] = LAT[i]; t[2] = 0; return t; },
     getRadius: radiusPx,
     radiusUnits: 'pixels',
-    getFillColor: function (d) {
-      const cat = d[catField], oficial = d[4];
-      const alpha = oficial ? ALPHA_OFICIAL : ALPHA_NAO_OFICIAL;
-      const rgb = hexToRgb(lg[cat].cor);
-      return [rgb[0], rgb[1], rgb[2], alpha];
+    getFillColor: function (i, o) {
+      const t = o.target, rgb = rgbs[cats[i]];
+      t[0] = rgb[0]; t[1] = rgb[1]; t[2] = rgb[2];
+      t[3] = (FLAGS[i] & 2) ? ALPHA_OFICIAL : ALPHA_NAO_OFICIAL;
+      return t;
     },
     updateTriggers: { getFillColor: [catField] },
     pickable: true,
     stroked: false,
     parameters: { depthTest: false },
     onHover: function (info) {
-      if (info.object) {
-        const p = info.object;
-        const nomeVisto = desc[p[5]] || '(sem nome anotado)';
-        const coarseName = legend[p[2]].nome;
-        const finaName = legendFina.length ? legendFina[p[6]].nome : coarseName;
-        const catColor = lg[p[catField]].cor;
-        const textColor = textColorFor(catColor);
-        showTooltip(
-          '<div class="tt-head"><span class="tt-name">' + nomeVisto + '</span>' +
-          '<span class="tt-badge' + (p[4] ? ' on' : '') + '">' + (p[4] ? 'Oficial' : 'Só nome') + '</span></div>' +
-          '<div class="tt-sub">' + coarseName + '</div>' +
-          '<div class="tt-metric" style="color:' + textColor + '">' + finaName + '</div>' +
-          '<div class="tt-metric-label">Denominação · nomenclatura 2010</div>' +
-          '<div class="tt-grid">' +
-            '<div class="tt-cell"><span class="k">Censo</span><span class="v">' + (p[4] ? 'Confirmado oficial' : 'Só pelo nome') + '</span></div>' +
-            '<div class="tt-cell"><span class="k">CNPJ</span><span class="v">' + (p[3] ? 'Ativo no CEP' : 'Não encontrado') + '</span></div>' +
-          '</div>',
-          info.x, info.y
-        );
+      // data e' Uint32Array: info.object e' o indice do ponto, e o indice 0 e' falsy
+      if (info.index >= 0) {
+        const i = layerData[info.index];
+        lastHover = { i: i, x: info.x, y: info.y, lg: lg, catField: catField };
+        showTooltip(tooltipHtml(i, lg, catField), info.x, info.y);
       } else {
+        lastHover = null;
         showTooltip(null);
       }
     }
   });
-
   overlay.setProps({ layers: [layer] });
   updateFilterChips();
 }
@@ -473,25 +498,66 @@ function refreshLegendStates() {
   document.getElementById('clear-focus').hidden = (lockedCat === null);
 }
 
-fetch('data.json')
-  .then(function (r) { return r.json(); })
-  .then(function (json) {
-    legend = json.legend;
-    legendFina = json.legendFina || [];
-    desc = json.desc || [];
-    total = json.points.length;
+// ---- dados binarios (gerados por dados/gerar_data_json.py, formato descrito la) ----
+// arquivos .gz servidos como application/gzip (sem content-encoding): descomprime aqui;
+// se algum proxy ja tiver descomprimido, os bytes nao comecam com 1f 8b e passam direto
+function fetchGz(url) {
+  return fetch(url).then(function (r) {
+    if (!r.ok) throw new Error(url + ': HTTP ' + r.status);
+    return r.arrayBuffer();
+  }).then(function (buf) {
+    const h = new Uint8Array(buf, 0, 2);
+    if (h[0] !== 0x1f || h[1] !== 0x8b) return new Uint8Array(buf);
+    return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip')))
+      .arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  });
+}
+// desfaz o byte-shuffle (4 planos de n bytes) -> uint32
+function unplanes(bytes, off, n) {
+  const out = new Uint32Array(n);
+  const b0 = off, b1 = off + n, b2 = off + 2 * n, b3 = off + 3 * n;
+  for (let i = 0; i < n; i++) {
+    out[i] = (bytes[b0 + i] | (bytes[b1 + i] << 8) | (bytes[b2 + i] << 16) | (bytes[b3 + i] << 24)) >>> 0;
+  }
+  return out;
+}
+// delta zigzag em unidades de 1e-5 grau -> graus
+function undeltaDeg(bytes, off, n) {
+  const out = new Float64Array(n);
+  let acc = 0;
+  for (let i = 0; i < n; i++) {
+    const u = (bytes[off + i] | (bytes[off + n + i] << 8) | (bytes[off + 2 * n + i] << 16) | (bytes[off + 3 * n + i] << 24)) >>> 0;
+    acc += (u >>> 1) ^ -(u & 1);
+    out[i] = acc / 1e5;
+  }
+  return out;
+}
 
-    // ordena por categoria (maior primeiro = desenhada embaixo) uma unica
-    // vez no load, pra filtragem por toggle continuar O(n) preservando a
-    // ordem de empilhamento visual sem precisar re-ordenar depois
-    const rank = {};
-    legend.slice().sort(function (a, b) { return b.n - a.n; })
-      .forEach(function (l, i) { rank[l.idx] = i; });
-    const buckets = legend.map(function () { return []; });
-    for (let i = 0; i < json.points.length; i++) {
-      buckets[rank[json.points[i][2]]].push(json.points[i]);
-    }
-    sortedPoints = [].concat.apply([], buckets);
+fetch('meta.json', { cache: 'no-cache' })
+  .then(function (r) { return r.json(); })
+  .then(function (meta) {
+    return fetchGz('pontos.bin.gz?v=' + meta.v.pontos).then(function (b) { return [meta, b]; });
+  })
+  .then(function (res) {
+    const meta = res[0], b = res[1], n = meta.n;
+    legend = meta.legend;
+    legendFina = meta.legendFina || [];
+    total = n;
+    // ja vem na ordem de desenho (categoria maior primeiro = embaixo)
+    LAT = undeltaDeg(b, 0, n);
+    LON = undeltaDeg(b, 4 * n, n);
+    CAT[2] = b.subarray(8 * n, 9 * n);
+    CAT[6] = b.subarray(9 * n, 10 * n);
+    FLAGS = b.subarray(10 * n, 11 * n);
+    sortedPoints = new Uint32Array(n);
+    for (let i = 0; i < n; i++) sortedPoints[i] = i;
+
+    // nomes anotados em campo: so o tooltip usa, entao vem depois do mapa desenhado
+    fetchGz('nomes.bin.gz?v=' + meta.v.nomes).then(function (c) {
+      NOME_IDX = unplanes(c, 0, n);
+      NOMES = new TextDecoder().decode(c.subarray(4 * n)).split('\n');
+      if (lastHover) showTooltip(tooltipHtml(lastHover.i, lastHover.lg, lastHover.catField), lastHover.x, lastHover.y);
+    }).catch(function (e) { console.warn('[templos] nomes não carregaram', e); });
 
     readUrlState();
     document.getElementById('granularity-select').value = granularity;
@@ -521,7 +587,7 @@ fetch('data.json')
       writeUrlState();
     });
 
-    const comCnaeTotal = json.comCnaeTotal || 0;
+    const comCnaeTotal = meta.comCnaeTotal || 0;
     const semCnaeTotal = total - comCnaeTotal;
     document.getElementById('cnpj-counts').innerHTML =
       '<span>' + fmt.format(comCnaeTotal) + ' · ' + Math.round(comCnaeTotal / total * 100) + '%</span>' +
