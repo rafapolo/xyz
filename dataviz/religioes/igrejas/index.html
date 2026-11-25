@@ -308,6 +308,52 @@ let lockedCat = null;   // categoria travada por clique
 let hoverCat = null;    // categoria em preview por hover
 let granularity = 'coarse'; // 'coarse' (9 vertentes) | 'fina' (denominações, nomenclatura 2010)
 
+// ---- estado na URL: ?vertente=afro-brasileiras&cnpj=sem&nivel=denominacao ----
+// atalhos curtos das 9 vertentes (por id da legenda); as demais usam o slug do nome
+const SLUG_VERTENTE = {
+  '95265': 'pentecostal', '95263': 'catolica', '95264': 'missao',
+  '121096': 'evangelica-nao-determinada', '2826': 'espirita', '2827': 'afro-brasileiras',
+  '2824': 'testemunhas-de-jeova', '-1': 'outras', '0': 'nao-classificado'
+};
+function slugify(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+function slugOf(l, fina) {
+  if (!fina) return SLUG_VERTENTE[String(l.id)] || slugify(l.nome);
+  const s = slugify(l.nome);
+  // "outras" aparece em mais de um ramo na nomenclatura fina
+  return s === 'outras' ? 'outras-' + SLUG_VERTENTE[String(legend[l.coarseIdx].id)] : s;
+}
+function findBySlug(lg, fina, slug) {
+  return lg.find(function (l) { return slugOf(l, fina) === slug || slugify(l.nome) === slug; });
+}
+function readUrlState() {
+  const q = new URLSearchParams(location.search);
+  const c = q.get('cnpj');
+  if (c === 'com' || c === 'sem') cnpjFilter = c;
+  const v = q.get('vertente') ? slugify(q.get('vertente')) : null;
+  const querFina = /^(fina|denominac)/.test(q.get('nivel') || '');
+  if (querFina && legendFina.length) granularity = 'fina';
+  if (!v) return;
+  // no nível pedido primeiro; se não achar, tenta o outro nível
+  const ordem = granularity === 'fina' ? [true, false] : [false, true];
+  for (let i = 0; i < ordem.length; i++) {
+    const fina = ordem[i];
+    const hit = findBySlug(fina ? legendFina : legend, fina, v);
+    if (hit) { granularity = fina ? 'fina' : 'coarse'; lockedCat = hit.idx; return; }
+  }
+}
+function writeUrlState() {
+  const q = new URLSearchParams(location.search);
+  ['vertente', 'cnpj', 'nivel'].forEach(function (k) { q.delete(k); });
+  if (granularity === 'fina') q.set('nivel', 'denominacao');
+  if (lockedCat !== null) q.set('vertente', slugOf(activeLegend()[lockedCat], granularity === 'fina'));
+  if (cnpjFilter !== 'todos') q.set('cnpj', cnpjFilter);
+  const s = q.toString();
+  history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash);
+}
+
 function activeFocus() { return hoverCat !== null ? hoverCat : lockedCat; }
 function activeLegend() { return granularity === 'fina' ? legendFina : legend; }
 function activeCatField() { return granularity === 'fina' ? 6 : 2; }
@@ -409,6 +455,7 @@ function buildLegendItems() {
       lockedCat = (lockedCat === l.idx) ? null : l.idx;
       render();
       refreshLegendStates();
+      writeUrlState();
     });
     legendEl.appendChild(row);
   });
@@ -446,14 +493,22 @@ fetch('data.json')
     }
     sortedPoints = [].concat.apply([], buckets);
 
+    readUrlState();
+    document.getElementById('granularity-select').value = granularity;
+    document.getElementById('legend-title').textContent = granularity === 'fina' ? 'Denominação' : 'Vertente';
+    document.querySelectorAll('#cnpj-filter button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.cnpj === cnpjFilter);
+    });
     recomputeBaseFiltered();
 
     updateContextLine();
     buildLegendItems();
+    writeUrlState(); // normaliza a URL (ex.: slug com acento ou typo de nível vira o canônico)
 
     document.getElementById('clear-focus').addEventListener('click', function () {
       lockedCat = null; hoverCat = null;
       render(); refreshLegendStates();
+      writeUrlState();
     });
 
     document.getElementById('granularity-select').addEventListener('change', function (e) {
@@ -463,6 +518,7 @@ fetch('data.json')
       updateContextLine();
       buildLegendItems();
       render();
+      writeUrlState();
     });
 
     const comCnaeTotal = json.comCnaeTotal || 0;
@@ -478,6 +534,7 @@ fetch('data.json')
         });
         recomputeBaseFiltered();
         render();
+        writeUrlState();
       });
     });
 
