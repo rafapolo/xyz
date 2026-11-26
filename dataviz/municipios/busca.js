@@ -12,7 +12,7 @@
     const inp = document.getElementById('buscaMun'), lista = document.getElementById('buscaLista');
     if (!inp || !lista) return;
     const fecha = () => { lista.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); ativo = -1; };
-    const vai = m => { location.href = (window.BUSCA_PAINEL || '') + '?id=' + m.id; };
+    const vai = m => { location.href = '/dataviz/municipios/' + m.id + '/'; };
     const marca = i => {
       ativo = i;
       [...lista.children].forEach((li, k) => li.setAttribute('aria-selected', k === i ? 'true' : 'false'));

@@ -33,10 +33,13 @@ const FORA = new Set([
   "municipio.html", // redireciona para dataviz/municipios/
   "dataviz/municipio/index.html", // endereço antigo: redireciona para dataviz/municipios/
   "dataviz/municipio/todos/index.html", // endereço antigo do índice: idem
-  "dataviz/municipios/painel.html", // servido em dataviz/municipios/?id=, já está no sitemap-municipios.xml
+  "dataviz/municipios/painel.html", // entra pelas páginas dataviz/municipios/<id>/
 ]);
 const FORA_PREFIXO = ["tasks/", ".claude/", "docs/"];
-const FORA_REGEX = [/^google[0-9a-f]+\.html$/]; // arquivo de verificação do Search Console
+const FORA_REGEX = [
+  /^google[0-9a-f]+\.html$/, // arquivo de verificação do Search Console
+  /^dataviz\/municipios\/\d{7}\/index\.html$/, // os 5.571 municípios: já estão no sitemap-municipios.xml
+];
 
 type Cartao = { titulo?: string; desc: string; img?: string };
 

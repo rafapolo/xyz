@@ -280,7 +280,7 @@ async function init() {
 
   // Page title
   UF_SIGLA = g(D, 'municipio.sigla_uf') || 'UF'; // comparações estaduais usam a UF do município (o ISP de segurança é só do RJ)
-  document.getElementById('pageTitle').textContent = g(D, 'municipio.nome') + ', ' + g(D, 'municipio.sigla_uf') + ' — Dashboard Municipal';
+  document.getElementById('pageTitle').textContent = g(D, 'municipio.nome') + ', ' + g(D, 'municipio.sigla_uf') + ' — Painel municipal — Rodado';
 
   // data-path elements
   renderDataPaths(D);
