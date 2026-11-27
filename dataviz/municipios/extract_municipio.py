@@ -2240,10 +2240,19 @@ def petroleo_royalties(nome, uf):
         SELECT (SELECT count(*) FROM m) recebem, (SELECT 1 + count(*) FROM m WHERE v > (SELECT v FROM m WHERE {alvo})) posicao,
                (SELECT sum(v) FROM m) total_brasil""")
     valor = next(r["valor"] for r in serie if r["ano"] == ano)
-    return {"fonte": "br_anp_dados_abertos.royalties_municipios (nome do município + UF, ano de pagamento)",
-            "ano": int(ano), "valor_ano": valor, "posicao": num(rk["posicao"]), "recebem": num(rk["recebem"]),
+    # participação especial (campos de grande produção), por pagamento, de 2025 em diante
+    tpe = p("br_anp_dados_abertos", "participacao_especial_distribuicao")
+    pe = {int(r["ano"]): r["valor"] for r in q(f"""SELECT ano, sum(valor_brl) valor FROM {tpe}
+        WHERE tipo_beneficiario = 'municipio' AND sigla_uf = '{uf}'
+          AND trim(regexp_replace(lower(strip_accents(beneficiario)), '[^a-z0-9]+', ' ', 'g'))
+              IN (trim(regexp_replace(lower(strip_accents('{nome_sql}')), '[^a-z0-9]+', ' ', 'g')), '{apelido}')
+        GROUP BY 1""")}
+    return {"fonte": "br_anp_dados_abertos.royalties_municipios e participacao_especial_distribuicao (nome do município + UF, ano de pagamento)",
+            "ano": int(ano), "valor_ano": valor, "pe_ano": pe.get(int(ano)),
+            "total_ano": valor + (pe.get(int(ano)) or 0),
+            "posicao": num(rk["posicao"]), "recebem": num(rk["recebem"]),
             "pct_brasil": 100 * valor / rk["total_brasil"] if rk["total_brasil"] else None,
-            "serie": [{"ano": int(r["ano"]), "valor": r["valor"]} for r in serie[-12:]]}
+            "serie": [{"ano": int(r["ano"]), "valor": r["valor"], "pe": pe.get(int(r["ano"]))} for r in serie[-12:]]}
 
 
 @section

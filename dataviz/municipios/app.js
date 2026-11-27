@@ -3105,10 +3105,11 @@ async function init() {
       sub: 'Recolhido no ano; o município fica com 60%',
       barras: { linhas: top(m.substancias, 'substancia', 'valor', 5), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
     const pr = X('secoes.economia.petroleo_royalties');
-    if (pr && pr.valor_ano != null) cartaoExtra('econ', { titulo: 'Royalties do petróleo e gás', vintage: String(pr.ano), valor: fRealC(pr.valor_ano),
-      sub: 'Pagos pela ANP ao município no ano · ' + fNum(pr.posicao) + 'º de ' + fNum(pr.recebem) + ' municípios que recebem diretamente' +
+    if (pr && pr.valor_ano != null) cartaoExtra('econ', { titulo: 'Royalties do petróleo e gás', vintage: String(pr.ano), valor: fRealC(pr.total_ano != null ? pr.total_ano : pr.valor_ano),
+      sub: (pr.pe_ano ? fRealC(pr.valor_ano) + ' em royalties + ' + fRealC(pr.pe_ano) + ' em participação especial' : 'Royalties pagos pela ANP ao município no ano') +
+        ' · ' + fNum(pr.posicao) + 'º de ' + fNum(pr.recebem) + ' municípios que recebem diretamente' +
         (pr.pct_brasil != null ? ' · ' + fNum1(pr.pct_brasil) + '% do total municipal' : ''),
-      barras: { linhas: (pr.serie || []).slice(-8).map(r => ({ k: String(r.ano), v: r.valor })), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
+      barras: { linhas: (pr.serie || []).slice(-8).map(r => ({ k: String(r.ano), v: r.valor + (r.pe || 0) })), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
   }
 
   // Educação
