@@ -3104,6 +3104,11 @@ async function init() {
     if (m) cartaoExtra('econ', { titulo: 'CFEM — royalties da mineração', vintage: String(m.ano), valor: fRealC(m.valor_ano),
       sub: 'Recolhido no ano; o município fica com 60%',
       barras: { linhas: top(m.substancias, 'substancia', 'valor', 5), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
+    const pr = X('secoes.economia.petroleo_royalties');
+    if (pr && pr.valor_ano != null) cartaoExtra('econ', { titulo: 'Royalties do petróleo e gás', vintage: String(pr.ano), valor: fRealC(pr.valor_ano),
+      sub: 'Pagos pela ANP ao município no ano · ' + fNum(pr.posicao) + 'º de ' + fNum(pr.recebem) + ' municípios que recebem diretamente' +
+        (pr.pct_brasil != null ? ' · ' + fNum1(pr.pct_brasil) + '% do total municipal' : ''),
+      barras: { linhas: (pr.serie || []).slice(-8).map(r => ({ k: String(r.ano), v: r.valor })), total: 0, cor: C.s3, opts: { fmtValor: fRealC } } });
   }
 
   // Educação

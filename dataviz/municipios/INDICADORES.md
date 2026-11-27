@@ -84,6 +84,9 @@
 | `mineracao_cfem.valor_ano` | CFEM (royalties da mineração) recolhida no último ano completo |
 | `mineracao_cfem.serie` | CFEM recolhida e número de pagadores por ano |
 | `mineracao_cfem.substancias` | CFEM por substância mineral no ano |
+| `petroleo_royalties.valor_ano` | Royalties de petróleo e gás pagos pela ANP ao município no último ano completo de pagamento |
+| `petroleo_royalties.posicao` / `recebem` | Posição do município entre os que recebem royalties diretamente (995 em 2025) |
+| `petroleo_royalties.serie` | Royalties recebidos por ano de pagamento |
 
 ## Empresas
 

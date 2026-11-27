@@ -2211,6 +2211,41 @@ def mineracao_cfem(mid):
             "substancias": subs}
 
 
+# grafias da ANP que não batem com o nome atual do IBGE (conferido em 2026-11-27; R$ 233 mi em 2025)
+ANP_GRAFIA_ANTIGA = {("RJ", "Paraty"): "parati", ("RJ", "Trajano de Moraes"): "trajano de morais",
+                     ("MG", "Queluzito"): "queluzita", ("SP", "Embu das Artes"): "embu",
+                     ("SP", "Mogi das Cruzes"): "moji das cruzes", ("RN", "Campo Grande"): "augusto severo"}
+
+
+@section
+def petroleo_royalties(nome, uf):
+    """ANP: royalties de petróleo e gás pagos ao município, pelo ano de pagamento (caixa).
+    Sem código de município: casa nome sem acento + sigla da UF; a fonte grafa alguns nomes
+    com '-uf' no fim ('marica-rj'). Ano = último ano completo de pagamento no país."""
+    t = p("br_anp_dados_abertos", "royalties_municipios")
+    nome_sql = nome.replace("'", "''")
+    base = f"""WITH b AS (SELECT year(caixa) ano, upper(estado) uf,
+                    trim(regexp_replace(lower(strip_accents(regexp_replace(municipio, '-[a-z]{{2}}$', ''))), '[^a-z0-9]+', ' ', 'g')) mun,
+                    coalesce(royalties_minimos_brl, 0) + coalesce(royalties_excedentes_brl, 0) valor
+                FROM {t})"""
+    apelido = ANP_GRAFIA_ANTIGA.get((uf, nome), "")
+    alvo = (f"mun IN (trim(regexp_replace(lower(strip_accents('{nome_sql}')), '[^a-z0-9]+', ' ', 'g')), '{apelido}') "
+            f"AND uf = '{uf}'")
+    serie = q(f"""{base} SELECT ano, sum(valor) valor FROM b WHERE {alvo} GROUP BY 1 HAVING sum(valor) > 0 ORDER BY 1""")
+    if not serie:
+        return {"disponivel": False, "motivo": "o município não recebe royalties de petróleo diretamente"}
+    fech = one(f"""SELECT max(a) a FROM (SELECT year(caixa) a FROM {t} GROUP BY 1 HAVING count(DISTINCT month(caixa)) = 12)""")["a"]
+    ano = fech if any(r["ano"] == fech for r in serie) else serie[-1]["ano"]
+    rk = one(f"""{base}, m AS (SELECT mun, uf, sum(valor) v FROM b WHERE ano = {ano} GROUP BY 1, 2 HAVING sum(valor) > 0)
+        SELECT (SELECT count(*) FROM m) recebem, (SELECT 1 + count(*) FROM m WHERE v > (SELECT v FROM m WHERE {alvo})) posicao,
+               (SELECT sum(v) FROM m) total_brasil""")
+    valor = next(r["valor"] for r in serie if r["ano"] == ano)
+    return {"fonte": "br_anp_dados_abertos.royalties_municipios (nome do município + UF, ano de pagamento)",
+            "ano": int(ano), "valor_ano": valor, "posicao": num(rk["posicao"]), "recebem": num(rk["recebem"]),
+            "pct_brasil": 100 * valor / rk["total_brasil"] if rk["total_brasil"] else None,
+            "serie": [{"ano": int(r["ano"]), "valor": r["valor"]} for r in serie[-12:]]}
+
+
 @section
 def desastres_reconhecimentos(mid):
     """Situação de emergência ou calamidade reconhecida pela Defesa Civil nacional e
@@ -2900,6 +2935,7 @@ def monta(prof, S):
                 "pix": S("economia_pix"),
                 "bndes": S("economia_bndes"),
                 "mineracao_cfem": S("mineracao_cfem"),
+                "petroleo_royalties": S("petroleo_royalties"),
             },
             "empresas": S("empresas_cnpj"),
             "educacao": {
